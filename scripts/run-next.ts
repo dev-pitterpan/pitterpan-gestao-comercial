@@ -19,9 +19,9 @@ if (command !== "dev" && command !== "start")
 const env = z
   .object({
     HOST: z.string().min(1).default("127.0.0.1"),
-    PORT: z.coerce.number().int().min(1).max(65535).default(3000),
+    PORT: z.coerce.number().int().min(1).max(65535).default(3001),
   })
-  .parse({ ...process.env, ...localEnv });
+  .parse({ ...localEnv, ...process.env });
 console.log(
   `Fonte do catálogo (.env): ${localEnv.CATALOG_DATA_SOURCE || process.env.CATALOG_DATA_SOURCE || "json"}`,
 );

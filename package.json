@@ -24,7 +24,8 @@
     "sales:webhooks": "node scripts/sales/webhooks.ts",
     "sales:retry": "node scripts/sales/retry.ts",
     "sales:audit": "node scripts/sales/audit.ts",
-    "test:server": "node tests/server.mjs"
+    "test:server": "node tests/server.mjs",
+    "env:import": "node scripts/import-env.ts"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.104.5",
