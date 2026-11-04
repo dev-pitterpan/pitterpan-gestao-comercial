@@ -1,0 +1,10 @@
+node_modules/
+.next/
+.swc/
+.env
+.env.*
+!.env.example
+*.log
+*.tsbuildinfo
+.workflow-data/
+src/app/.well-known/

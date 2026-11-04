@@ -1,0 +1,100 @@
+import { orderCustomerSchema } from "./customers.ts";
+import { destinationSchema } from "./destinations.ts";
+import { z } from "zod";
+const money = z.object({
+  shopMoney: z.object({
+    amount: z.string().regex(/^-?\d{1,16}(\.\d{1,2})?$/),
+    currencyCode: z.string().length(3),
+  }),
+});
+const gid = (kind: string) =>
+  z.string().regex(new RegExp(`^gid://shopify/${kind}/[0-9]+$`));
+export const lineSchema = z.object({
+  id: gid("LineItem"),
+  title: z.string().max(2000),
+  sku: z.string().nullable(),
+  quantity: z.number().int().nonnegative(),
+  currentQuantity: z.number().int().nonnegative(),
+  image: z
+    .object({ url: z.string().max(3000) })
+    .nullable()
+    .optional(),
+  variant: z.object({ id: gid("ProductVariant") }).nullable(),
+  product: z.object({ id: gid("Product") }).nullable(),
+});
+export const orderSchema = z
+  .object({
+    id: gid("Order"),
+    name: z.string().max(100),
+    processedAt: z.iso.datetime({ offset: true }),
+    updatedAt: z.iso.datetime({ offset: true }),
+    cancelledAt: z.iso.datetime({ offset: true }).nullable(),
+    test: z.boolean(),
+    displayFinancialStatus: z.string().nullable(),
+    displayFulfillmentStatus: z.string(),
+    destination: destinationSchema.nullable().optional(),
+    customerInfo: orderCustomerSchema.nullable().optional(),
+    shippingLines: z
+      .object({
+        nodes: z.array(
+          z.object({
+            title: z.string().max(500),
+            code: z.string().nullable(),
+            source: z.string().nullable(),
+            deliveryCategory: z.string().nullable(),
+            isRemoved: z.boolean().optional(),
+            discountedPriceSet: money.optional(),
+          }),
+        ),
+        pageInfo: z.object({
+          hasNextPage: z.boolean(),
+          endCursor: z.string().nullable(),
+        }),
+      })
+      .optional(),
+    totalOutstandingSet: money.optional(),
+    currentTotalPriceSet: money.optional(),
+    totalPriceSet: money,
+    totalReceivedSet: money,
+    totalRefundedSet: money,
+    netPaymentSet: money,
+    lineItems: z.object({
+      nodes: z.array(lineSchema),
+      pageInfo: z.object({
+        hasNextPage: z.boolean(),
+        endCursor: z.string().nullable(),
+      }),
+    }),
+  })
+  .superRefine((order, ctx) => {
+    const currencies = [
+      order.totalPriceSet,
+      order.totalReceivedSet,
+      order.totalRefundedSet,
+      order.netPaymentSet,
+      ...(order.totalOutstandingSet ? [order.totalOutstandingSet] : []),
+      ...(order.currentTotalPriceSet ? [order.currentTotalPriceSet] : []),
+      ...(order.shippingLines?.nodes.flatMap((line) =>
+        line.discountedPriceSet ? [line.discountedPriceSet] : [],
+      ) || []),
+    ].map((m) => m.shopMoney.currencyCode);
+    if (new Set(currencies).size !== 1)
+      ctx.addIssue({
+        code: "custom",
+        message: "Moedas inconsistentes no pedido.",
+      });
+  });
+export type SalesOrder = z.infer<typeof orderSchema>;
+export type SalesLine = z.infer<typeof lineSchema>;
+export const paidStatuses = ["PAID", "PARTIALLY_REFUNDED", "REFUNDED"];
+export const lineFields = `id title sku quantity currentQuantity image { url } variant { id } product { id }`;
+export const shippingFields = `title code source deliveryCategory isRemoved discountedPriceSet { shopMoney { amount currencyCode } }`;
+export const orderFields = `id name processedAt updatedAt cancelledAt test displayFinancialStatus displayFulfillmentStatus
+ shippingLines(first:20) { nodes { ${shippingFields} } pageInfo { hasNextPage endCursor } }
+ totalOutstandingSet { shopMoney { amount currencyCode } }
+ currentTotalPriceSet { shopMoney { amount currencyCode } }
+ totalPriceSet { shopMoney { amount currencyCode } }
+ totalReceivedSet { shopMoney { amount currencyCode } }
+ totalRefundedSet { shopMoney { amount currencyCode } }
+ netPaymentSet { shopMoney { amount currencyCode } }
+ lineItems(first:50) { nodes { ${lineFields} } pageInfo { hasNextPage endCursor } }`;

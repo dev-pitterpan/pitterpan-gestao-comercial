@@ -1,0 +1,795 @@
+"use client";
+import {
+  fulfillmentLabels,
+  fulfillmentFilters,
+  fulfillmentFilterLabels,
+  type FulfillmentFilter,
+} from "../../lib/admin/fulfillment";
+import { salesSectionFromHash } from "../../lib/admin/sales-links";
+import OrderFulfillmentDetails from "./OrderFulfillmentDetails";
+import SalesOperations from "./SalesOperations";
+import SoldProductsHistory from "./SoldProductsHistory";
+import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  ArrowDownLeft,
+  ArrowUpRight,
+  BadgeCheck,
+  CircleDollarSign,
+  Package,
+  RefreshCw,
+  ShoppingCart,
+} from "lucide-react";
+import OrderStatusSearch from "./OrderStatusSearch";
+import SalesStatusSelect from "./SalesStatusSelect";
+import OrderCustomer from "./OrderCustomer";
+import OrderCustomerRefresh from "./OrderCustomerRefresh";
+import ShippingCharge from "./ShippingCharge";
+import DeliveryMark from "./DeliveryMark";
+import DragScroll from "./DragScroll";
+import {
+  deliveryFilterKinds,
+  deliveryLabels,
+  type DeliveryKind,
+} from "../../lib/admin/delivery";
+import PitterSpinner from "./PitterSpinner";
+import type { SalesFilters } from "../../server/sales/filters";
+import AdminSelect from "./AdminSelect";
+import DateRangePicker from "./DateRangePicker";
+import type { readSales } from "../../server/sales/repository";
+type Data = Awaited<ReturnType<typeof readSales>>;
+const count = (n: string | number) =>
+  new Intl.NumberFormat("pt-BR").format(Number(n));
+const money = (value: string, currency: string) =>
+  new Intl.NumberFormat("pt-BR", { style: "currency", currency }).format(
+    Number(value),
+  );
+const status: Record<string, string> = {
+  PAID: "Pago",
+  PENDING: "Pendente",
+  AUTHORIZED: "Autorizado",
+  PARTIALLY_PAID: "Parcialmente pago",
+  PARTIALLY_REFUNDED: "Reembolso parcial",
+  REFUNDED: "Reembolsado",
+  VOIDED: "Anulado",
+  EXPIRED: "Expirado",
+  UNKNOWN: "Não informado",
+};
+export default function SalesDashboard({
+  initialFilters,
+  initialDays = 30,
+  initialOperations = false,
+}: {
+  initialFilters?: SalesFilters;
+  initialDays?: number;
+  initialOperations?: boolean;
+}) {
+  const [filters, setFilters] = useState<SalesFilters>(
+    initialFilters || {
+      status: "all",
+      category: "",
+      delivery: "all",
+    },
+  );
+  const [categoryDraft, setCategoryDraft] = useState(
+    initialFilters?.category || "",
+  );
+  const [moreLoading, setMoreLoading] = useState(false);
+  const [moreError, setMoreError] = useState("");
+  const generation = useRef(0);
+  const expanded = useRef(false);
+  const moreBusy = useRef(false);
+  const [days, setDays] = useState(initialDays),
+    [data, setData] = useState<Data | null>(null),
+    [error, setError] = useState(""),
+    [loading, setLoading] = useState(true),
+    [syncing, setSyncing] = useState(false),
+    [message, setMessage] = useState("");
+  const [revision, setRevision] = useState(0);
+  const entryPositioned = useRef(false);
+  useEffect(() => {
+    if (entryPositioned.current) return;
+    const section = salesSectionFromHash(window.location.hash);
+    if (section) {
+      if (!data) return;
+      const target = document.getElementById(section);
+      if (!target) return;
+      target.scrollIntoView({ block: "start" });
+    } else {
+      window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+    }
+    entryPositioned.current = true;
+  }, [data]);
+  const updateCustomers = useCallback((rows: Record<string, string>[]) => {
+    const byId = new Map(rows.map((row) => [row.id, row]));
+    setData((old) =>
+      old
+        ? {
+            ...old,
+            orders: old.orders.map((order) => ({
+              ...order,
+              ...byId.get(order.id),
+            })),
+          }
+        : old,
+    );
+  }, []);
+  const fetching = useRef(0);
+  const resetList = (preserveData = false) => {
+    generation.current++;
+    expanded.current = false;
+    if (!preserveData) setData(null);
+    setLoading(true);
+    setMoreLoading(false);
+    moreBusy.current = false;
+    setMoreError("");
+    setError("");
+  };
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const category = categoryDraft.trim();
+      if (category !== filters.category) {
+        resetList();
+        setFilters((old) => ({ ...old, category }));
+      }
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [categoryDraft, filters.category]);
+  const load = useCallback(
+    async (signal?: AbortSignal) => {
+      const requestId = ++fetching.current;
+      const epoch = generation.current;
+      try {
+        const params = new URLSearchParams({
+          days: String(days),
+          start: filters.start || "",
+          end: filters.end || "",
+          status: filters.status,
+          fulfillment: filters.fulfillment || "all",
+          category: filters.category,
+          delivery: filters.delivery || "all",
+        });
+        const url = `/api/admin/sales/?${params}`;
+        const response = await fetch(url, {
+          signal: signal
+            ? AbortSignal.any([signal, AbortSignal.timeout(20000)])
+            : AbortSignal.timeout(20000),
+          cache: "no-store",
+        });
+        const body = await response.json();
+        if (
+          signal?.aborted ||
+          requestId !== fetching.current ||
+          epoch !== generation.current
+        )
+          return;
+        if (!response.ok)
+          throw new Error(
+            body.error || "Não foi possível consultar as vendas.",
+          );
+        const next = body as Data;
+        setData(next);
+        setError("");
+      } catch (err) {
+        if (
+          requestId === fetching.current &&
+          epoch === generation.current &&
+          !signal?.aborted &&
+          !(err instanceof Error && err.name === "AbortError")
+        )
+          setError(err instanceof Error ? err.message : "Falha na consulta.");
+      } finally {
+        if (requestId === fetching.current && epoch === generation.current)
+          setLoading(false);
+      }
+    },
+    [days, filters],
+  );
+  useEffect(() => {
+    const controller = new AbortController();
+    setLoading(true);
+    void load(controller.signal);
+    const timer = window.setInterval(() => {
+      if (
+        document.visibilityState === "visible" &&
+        !expanded.current &&
+        !moreBusy.current
+      )
+        void load(controller.signal);
+    }, 30000);
+    return () => {
+      generation.current++;
+      controller.abort();
+      clearInterval(timer);
+    };
+  }, [load, revision]);
+  async function loadMore() {
+    if (loading || !data?.nextCursor || moreBusy.current) return;
+    const epoch = generation.current;
+    moreBusy.current = true;
+    setMoreLoading(true);
+    setMoreError("");
+    // Freeze polling before fetching the next page so it cannot collapse the list.
+    expanded.current = true;
+    fetching.current++;
+    try {
+      const params = new URLSearchParams({
+        view: "orders",
+        days: String(days),
+        start: filters.start || "",
+        end: filters.end || "",
+        status: filters.status,
+        fulfillment: filters.fulfillment || "all",
+        category: filters.category,
+        delivery: filters.delivery || "all",
+        orderCursor: data.nextCursor,
+      });
+      const response = await fetch(`/api/admin/sales/?${params}`, {
+        cache: "no-store",
+        signal: AbortSignal.timeout(20000),
+      });
+      const body = await response.json();
+      if (epoch !== generation.current) return;
+      if (!response.ok)
+        throw new Error(
+          body.error || "Não foi possível carregar mais pedidos.",
+        );
+      const page = body as Pick<Data, "orders" | "hasMore" | "nextCursor">;
+      setData((current) =>
+        current
+          ? {
+              ...current,
+              orders: [
+                ...new Map(
+                  [...current.orders, ...page.orders].map((order) => [
+                    order.id,
+                    order,
+                  ]),
+                ).values(),
+              ],
+              hasMore: page.hasMore,
+              nextCursor: page.nextCursor,
+            }
+          : current,
+      );
+    } catch (error) {
+      if (epoch === generation.current)
+        setMoreError(
+          error instanceof Error
+            ? error.message
+            : "Falha ao carregar mais pedidos.",
+        );
+    } finally {
+      if (epoch === generation.current) {
+        moreBusy.current = false;
+        setMoreLoading(false);
+      }
+    }
+  }
+  async function sync() {
+    setSyncing(true);
+    setMessage("");
+    try {
+      const response = await fetch("/api/admin/sales/", { method: "POST" });
+      const result = await response.json();
+      if (!response.ok)
+        throw new Error(
+          result.error || "Já existe uma atualização em andamento.",
+        );
+      setMessage(
+        result.more
+          ? "Etapa concluída. Há mais pedidos ou eventos; clique novamente para continuar, ou deixe o agendamento processar."
+          : "Atualização concluída.",
+      );
+      resetList();
+      setRevision((n) => n + 1);
+    } catch (err) {
+      setMessage(
+        err instanceof Error ? err.message : "Não foi possível atualizar.",
+      );
+    } finally {
+      setSyncing(false);
+    }
+  }
+  return (
+    <div className="sales-dashboard">
+      <div className="sales-toolbar">
+        <div>
+          <label htmlFor="sales-period">Período dos pedidos</label>
+          <AdminSelect
+            id="sales-period"
+            value={String(days)}
+            label="Período dos pedidos"
+            onValueChange={(value) => {
+              if (Number(value) === days && !filters.start) return;
+              resetList();
+              setDays(Number(value));
+              setFilters((old) => ({ ...old, start: "", end: "" }));
+            }}
+            options={[
+              { value: "1", label: "Hoje" },
+              { value: "7", label: "Últimos 7 dias" },
+              { value: "30", label: "Últimos 30 dias" },
+              { value: "60", label: "Últimos 60 dias" },
+            ]}
+          />
+        </div>
+        <DateRangePicker
+          value={{ start: filters.start || "", end: filters.end || "" }}
+          onChange={(range) => {
+            resetList();
+            setFilters((old) => ({ ...old, ...range }));
+          }}
+        />
+        <div>
+          <label htmlFor="sales-status">Situação do pagamento</label>
+          <SalesStatusSelect
+            id="sales-status"
+            value={filters.status}
+            onChange={(status) => {
+              resetList();
+              setFilters((old) => ({ ...old, status }));
+            }}
+          />
+        </div>
+        <div>
+          <label htmlFor="sales-fulfillment">Situação do atendimento</label>
+          <AdminSelect
+            id="sales-fulfillment"
+            label="Situação do atendimento"
+            value={filters.fulfillment || "all"}
+            options={fulfillmentFilters.map((value) => ({
+              value,
+              label: fulfillmentFilterLabels[value],
+            }))}
+            onValueChange={(fulfillment) => {
+              resetList();
+              setFilters((old) => ({
+                ...old,
+                fulfillment: fulfillment as FulfillmentFilter,
+              }));
+            }}
+          />
+        </div>
+        <div>
+          <label htmlFor="sales-delivery-filter">Modalidade de entrega</label>
+          <AdminSelect
+            id="sales-delivery-filter"
+            label="Modalidade de entrega"
+            value={filters.delivery || "all"}
+            onValueChange={(delivery) => {
+              resetList();
+              setFilters((old) => ({
+                ...old,
+                delivery: delivery as DeliveryKind | "all",
+              }));
+            }}
+            options={[
+              { value: "all", label: "Todas as modalidades" },
+              ...deliveryFilterKinds.map((kind) => ({
+                value: kind,
+                label: deliveryLabels[kind],
+              })),
+            ]}
+          />
+        </div>
+        <div className="sales-category-filter">
+          <label htmlFor="sales-category">Categoria do produto</label>
+          <input
+            id="sales-category"
+            type="search"
+            maxLength={200}
+            value={categoryDraft}
+            onChange={(event) => setCategoryDraft(event.target.value)}
+            placeholder="Buscar qualquer categoria…"
+          />
+        </div>
+        <button
+          type="button"
+          className="admin-button"
+          onClick={sync}
+          disabled={syncing}
+        >
+          <RefreshCw size={16} className={syncing ? "sales-spin" : ""} />
+          {syncing ? "Atualizando…" : "Atualizar uma etapa"}
+        </button>
+      </div>
+      <p className="sales-definition">
+        Pedidos processados no período, com o estado financeiro atual. Estornos
+        são os valores acumulados desses pedidos e podem ter ocorrido depois do
+        período selecionado. Recebimentos incluem frete e impostos; não são uma
+        apuração contábil por data de pagamento. Pedidos de teste são excluídos.
+        {filters.category &&
+          " Os valores são dos pedidos completos que contêm produtos dessa categoria na última importação; o ranking inclui somente os produtos correspondentes."}
+      </p>
+      {error && (
+        <p className="admin-data-notice" role="status">
+          {error}
+          {data &&
+            " Os últimos dados carregados continuam abaixo e podem estar desatualizados."}
+        </p>
+      )}
+      {message && (
+        <p className="admin-inline-note" role="status">
+          {message}
+        </p>
+      )}
+      {loading && !data && (
+        <div className="admin-panel" role="status">
+          <PitterSpinner label="Consultando vendas…" />
+        </div>
+      )}
+      {data && (
+        <>
+          {data.failed > 0 && (
+            <p className="admin-data-notice" role="status">
+              {data.failed} eventos precisam de revisão após dez tentativas. A
+              importação dos demais pedidos continua funcionando.
+            </p>
+          )}
+          <div
+            className="sales-delivery-summary"
+            aria-label="Pedidos por modalidade de entrega"
+          >
+            {data.deliveries.map((item) => (
+              <button
+                key={item.kind}
+                type="button"
+                onClick={() => {
+                  resetList();
+                  setFilters((old) => ({
+                    ...old,
+                    delivery: item.kind as DeliveryKind,
+                  }));
+                }}
+              >
+                <DeliveryMark kind={item.kind} />
+                <strong>{count(item.orders)} pedidos</strong>
+              </button>
+            ))}
+          </div>
+          <p className="sales-definition">
+            Modalidade escolhida no pedido, conforme a Shopify. O ícone não
+            confirma postagem ou entrega. Pedidos com modalidades diferentes
+            aparecem como múltiplos; sem identificação ficam separados.
+          </p>
+          <div className="sales-health">
+            <span>
+              <BadgeCheck size={16} />{" "}
+              {data.state?.completed_at
+                ? `Última conferência: ${new Date(data.state.completed_at).toLocaleString("pt-BR")}`
+                : "Importação inicial ainda não concluída"}
+            </span>
+            <span>{data.pending} eventos aguardando processamento</span>
+          </div>
+          {data.state?.until_at && (
+            <p className="admin-inline-note">
+              Importação em andamento: os indicadores representam apenas os
+              pedidos já processados. Continue a atualização para completar a
+              janela.
+            </p>
+          )}
+          {data.totals.map((t) => (
+            <section
+              key={t.currency}
+              aria-label={`Indicadores em ${t.currency}`}
+            >
+              <div className="sales-currency">MOEDA DA LOJA · {t.currency}</div>
+              <div className="admin-stats sales-stats">
+                {[
+                  {
+                    label: "Líquido após estornos",
+                    value: money(t.net, t.currency),
+                    detail: "Recebido menos reembolsado",
+                    icon: CircleDollarSign,
+                  },
+                  {
+                    label: "Recebido confirmado",
+                    value: money(t.received, t.currency),
+                    detail: "Valores recebidos informados pela Shopify",
+                    icon: CircleDollarSign,
+                  },
+                  {
+                    label: "Pagos não cancelados",
+                    value: count(t.paid),
+                    detail: `${money(t.paid_value, t.currency)} em pedidos pagos e não cancelados`,
+                    icon: ShoppingCart,
+                  },
+                  {
+                    label: "Ticket dos pedidos pagos",
+                    value: money(t.ticket, t.currency),
+                    detail: "Total médio dos pedidos com status pago",
+                    icon: ArrowUpRight,
+                  },
+                  {
+                    label: "Estornos / reembolsos",
+                    value: money(t.refunded, t.currency),
+                    detail: `${count(t.refunded_orders)} pedidos com reembolso total ou parcial`,
+                    icon: ArrowDownLeft,
+                  },
+                ].map(({ label, value, detail, icon: Icon }) => (
+                  <div className="admin-stat admin-stat--blue" key={label}>
+                    <div>
+                      <span className="admin-stat-icon blue">
+                        <Icon size={21} />
+                      </span>
+                    </div>
+                    <span>{label}</span>
+                    <strong>{value}</strong>
+                    <small>{detail}</small>
+                  </div>
+                ))}
+              </div>
+              <div className="sales-status-values">
+                {[
+                  {
+                    label: Number(t.outstanding_estimated)
+                      ? "Saldo não pago (parte calculada)"
+                      : "Saldo não pago · Shopify",
+                    count: t.pending,
+                    value: t.outstanding,
+                    status: "PENDING",
+                  },
+                  {
+                    label: "Expirados",
+                    count: t.expired,
+                    value: t.expired_value,
+                    status: "EXPIRED",
+                  },
+                  {
+                    label: "Anulados",
+                    count: t.voided,
+                    value: t.voided_value,
+                    status: "VOIDED",
+                  },
+                  {
+                    label: "Cancelados",
+                    count: t.cancelled,
+                    value: t.cancelled_value,
+                    status: "CANCELLED",
+                  },
+                ].map((s) => (
+                  <div key={s.label}>
+                    <span>
+                      {s.label} · {count(s.count)}
+                    </span>
+                    <strong>{money(s.value, t.currency)}</strong>
+                  </div>
+                ))}
+              </div>
+              {Number(t.inconsistent) > 0 && (
+                <p className="admin-data-notice">
+                  Há {t.inconsistent} pedidos com divergência entre os campos
+                  financeiros da Shopify. O líquido exibido usa recebido menos
+                  estornado; sincronize para conferir.
+                </p>
+              )}
+              <p className="sales-definition">
+                {count(t.pending)} pedidos aguardando pagamento/conclusão ·{" "}
+                {count(t.cancelled)} cancelados. Expirados e anulados mostram o
+                valor dos pedidos, não dinheiro recebido. Cancelamentos são uma
+                situação independente do pagamento: não some esses quadros.
+              </p>
+            </section>
+          ))}
+          {!data.totals.length && (
+            <div className="admin-panel sales-empty">
+              <Package size={36} />
+              <h2>Seu próximo capítulo de vendas</h2>
+              <p>
+                Nenhum pedido corresponde ao período e aos filtros escolhidos.
+                Experimente outra situação, categoria ou período.
+              </p>
+            </div>
+          )}
+          <div className="admin-overview-grid sales-comparison-grid">
+            <SoldProductsHistory
+              key={JSON.stringify([filters, days])}
+              filters={filters}
+              days={days}
+              revision={revision}
+            />
+            <section
+              id="recent-orders"
+              className="admin-panel sales-orders-panel"
+            >
+              <header>
+                <h2>Pedidos recentes</h2>
+                <ShoppingCart size={22} />
+              </header>
+              <div className="sales-orders-status-filter">
+                <label htmlFor="recent-orders-status">
+                  Buscar pagamento ou cancelamento
+                </label>
+                <OrderStatusSearch
+                  value={filters.status}
+                  onChange={(status) => {
+                    resetList(true);
+                    setFilters((old) => ({ ...old, status }));
+                  }}
+                />
+                <small>
+                  Combina com período, categoria e entrega. Atualiza também os
+                  indicadores desta página.
+                </small>
+                {filters.status === "REFUNDS" && (
+                  <small>
+                    Inclui estornos totais e parciais com valor reembolsado,
+                    mesmo em pedidos cancelados.
+                  </small>
+                )}
+                {filters.status === "CANCELLED" && (
+                  <small>
+                    Inclui pedidos cancelados com ou sem reembolso. Confira as
+                    colunas Recebido e Estornado.
+                  </small>
+                )}
+              </div>
+              <p className="sales-definition">
+                Mostrando {data.orders.length} pedidos nesta seleção, em lotes
+                de 10.
+                {expanded.current &&
+                  " A atualização automática da lista fica pausada durante esta consulta."}
+              </p>
+              <OrderCustomerRefresh
+                orders={data.orders}
+                onUpdate={updateCustomers}
+              />
+              {loading && <small role="status">Atualizando pedidos…</small>}
+              <DragScroll>
+                <table aria-busy={loading} className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Pedido</th>
+                      <th>Cliente</th>
+                      <th>Situação</th>
+                      <th>Entrega escolhida</th>
+                      <th>Total do pedido</th>
+                      <th>Recebido</th>
+                      <th>Estornado</th>
+                      <th>Líquido</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {!data.orders.length && (
+                      <tr>
+                        <td colSpan={8}>
+                          Nenhum pedido corresponde aos filtros escolhidos.
+                        </td>
+                      </tr>
+                    )}
+                    {data.orders.map((o) => (
+                      <tr key={o.id}>
+                        <td>
+                          <strong>{o.name}</strong>
+                          <small>
+                            <time
+                              dateTime={new Date(o.processed_at).toISOString()}
+                              title="Horário do pedido registrado na Shopify · Brasília"
+                            >
+                              {new Date(o.processed_at).toLocaleDateString(
+                                "pt-BR",
+                                { timeZone: "America/Sao_Paulo" },
+                              )}
+                              <br />
+                              {new Date(o.processed_at).toLocaleTimeString(
+                                "pt-BR",
+                                {
+                                  timeZone: "America/Sao_Paulo",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  hour12: false,
+                                },
+                              )}
+                            </time>
+                          </small>
+                        </td>
+                        <td>
+                          <OrderCustomer order={o} />
+                        </td>
+                        <td>
+                          <span
+                            className={`admin-badge ${o.cancelled_at ? "rose" : o.financial_status === "PAID" ? "green" : "blue"}`}
+                          >
+                            {status[o.financial_status] || o.financial_status}
+                          </span>
+                          {o.cancelled_at && (
+                            <small className="admin-badge rose">
+                              Pedido cancelado
+                            </small>
+                          )}
+                        </td>
+                        <td>
+                          <DeliveryMark kind={o.delivery_kind} />
+                          <ShippingCharge order={o} />
+                          {o.delivery_label && o.delivery_kind !== "LOCAL" && (
+                            <small>{o.delivery_label}</small>
+                          )}
+                          <small>
+                            {fulfillmentLabels[o.fulfillment_status] ||
+                              o.fulfillment_status}
+                          </small>
+                          <OrderFulfillmentDetails
+                            id={o.id}
+                            name={o.name}
+                            storedStatus={o.fulfillment_status}
+                          />
+                        </td>
+                        <td>
+                          {money(o.total, o.currency)}
+                          {o.current_total != null &&
+                            Number(o.current_total) !== Number(o.total) && (
+                              <small className="sales-current-total">
+                                Atual: {money(o.current_total, o.currency)}
+                              </small>
+                            )}
+                        </td>
+                        <td>{money(o.received, o.currency)}</td>
+                        <td>{money(o.refunded, o.currency)}</td>
+                        <td>{money(o.net, o.currency)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </DragScroll>
+              <div className="sales-pagination">
+                {moreError && <p role="alert">{moreError}</p>}
+                {data.hasMore && (
+                  <button
+                    type="button"
+                    className="admin-button admin-button-primary"
+                    disabled={moreLoading || loading}
+                    onClick={loadMore}
+                  >
+                    {moreLoading ? (
+                      <PitterSpinner label="Carregando pedidos…" />
+                    ) : (
+                      "Carregar mais 10"
+                    )}
+                  </button>
+                )}
+                {expanded.current && (
+                  <button
+                    type="button"
+                    className="admin-button"
+                    onClick={() => {
+                      resetList();
+                      setRevision((n) => n + 1);
+                    }}
+                  >
+                    Atualizar lista
+                  </button>
+                )}
+                {!data.hasMore && data.orders.length > 0 && (
+                  <span>Todos os pedidos desta seleção foram exibidos.</span>
+                )}
+              </div>
+            </section>
+          </div>
+          {(initialOperations ||
+            filters.status !== "all" ||
+            (filters.fulfillment || "all") !== "all" ||
+            filters.delivery !== "all" ||
+            !!filters.category ||
+            !!filters.start ||
+            days !== 30) && (
+            <SalesOperations
+              params={new URLSearchParams({
+                days: String(days),
+                start: filters.start || "",
+                end: filters.end || "",
+                status: filters.status,
+                fulfillment: filters.fulfillment || "all",
+                delivery: filters.delivery || "all",
+                category: filters.category,
+                revision: String(revision),
+                snapshot: data.state?.completed_at || "",
+                webhook: data.state?.last_webhook_at || "",
+                cursor: data.cursor,
+              }).toString()}
+            />
+          )}
+        </>
+      )}
+    </div>
+  );
+}
