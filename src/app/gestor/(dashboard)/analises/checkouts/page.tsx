@@ -19,6 +19,7 @@ type Checkout = {
 type Detail = Checkout & {
   abandonedCheckoutUrl: string;
   discountCodes: string[];
+  shippingAddress: { city: string | null; provinceCode: string | null } | null;
   subtotalPriceSet: Money;
   totalDiscountSet: Money;
   totalTaxSet: Money | null;
@@ -202,6 +203,7 @@ async function CheckoutDetails({ id }: { id: string }) {
     const { node } = await salesClient().query<{ node: Detail | null }>(
       `query CheckoutDetail($id: ID!) { node(id: $id) { ... on AbandonedCheckout {
           ${baseFields} abandonedCheckoutUrl discountCodes
+          shippingAddress { city provinceCode }
           subtotalPriceSet { ${moneyFields} } totalDiscountSet { ${moneyFields} } totalTaxSet { ${moneyFields} }
           lineItems(first: 50) { nodes { id title sku variantTitle quantity
             originalUnitPriceSet { ${moneyFields} } discountedTotalPriceSet { ${moneyFields} }
@@ -216,6 +218,12 @@ async function CheckoutDetails({ id }: { id: string }) {
     return (
       <p role="status">Checkout indisponível. Tente selecionar novamente.</p>
     );
+  const destination = [
+    item.shippingAddress?.city,
+    item.shippingAddress?.provinceCode,
+  ]
+    .filter(Boolean)
+    .join(" / ");
   const shipping = await salesClient()
     .abandonedCheckoutShipping(id)
     .catch(() => null);
@@ -270,6 +278,10 @@ async function CheckoutDetails({ id }: { id: string }) {
           <dd>{price(item.totalPriceSet)}</dd>
         </div>
       </dl>
+      <p className={styles.destination}>
+        <strong>Destino da entrega</strong>
+        <span>{destination || "Não informado no checkout"}</span>
+      </p>
       {item.discountCodes.length > 0 && (
         <p>Cupons: {item.discountCodes.join(", ")}</p>
       )}

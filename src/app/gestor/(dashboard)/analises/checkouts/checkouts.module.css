@@ -181,12 +181,13 @@
 }
 .amounts {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
-  gap: 0.65rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.45rem;
   margin-block: 1rem;
 }
 .amounts div {
-  padding: 0.85rem;
+  padding: 0.6rem;
+  overflow-wrap: anywhere;
   border-radius: 12px;
   background: #f6f5fb;
 }
@@ -264,4 +265,25 @@
   .hero h1 {
     font-size: 26px;
   }
+}
+
+.columns > .panel {
+  container-type: inline-size;
+}
+@container (min-width: 460px) {
+  .amounts {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 1.4fr) minmax(
+        0,
+        1fr
+      );
+  }
+}
+.destination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.65rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #174078;
 }
