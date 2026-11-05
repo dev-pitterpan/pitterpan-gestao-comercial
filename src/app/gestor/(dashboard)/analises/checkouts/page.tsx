@@ -216,6 +216,9 @@ async function CheckoutDetails({ id }: { id: string }) {
     return (
       <p role="status">Checkout indisponível. Tente selecionar novamente.</p>
     );
+  const shipping = await salesClient()
+    .abandonedCheckoutShipping(id)
+    .catch(() => null);
   const domain = salesConfig().SHOPIFY_SALES_STORE_DOMAIN;
   return (
     <>
@@ -241,6 +244,26 @@ async function CheckoutDetails({ id }: { id: string }) {
         <div>
           <dt>Impostos</dt>
           <dd>{price(item.totalTaxSet)}</dd>
+        </div>
+        <div>
+          <dt>Frete</dt>
+          {shipping?.lines.length ? (
+            shipping.lines.map((line, index) => (
+              <dd key={index}>
+                {price({
+                  shopMoney: {
+                    amount: line.price,
+                    currencyCode: shipping.currency,
+                  },
+                })}
+                {(line.title || line.code) && (
+                  <small> · {line.title || line.code}</small>
+                )}
+              </dd>
+            ))
+          ) : (
+            <dd>{shipping ? "Sem modalidade registrada" : "Indisponível"}</dd>
+          )}
         </div>
         <div>
           <dt>Total</dt>

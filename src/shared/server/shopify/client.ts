@@ -68,6 +68,49 @@ export class ShopifyClient {
     this.expires = Date.now() + result.expires_in * 1000;
     return this.token;
   }
+  async abandonedCheckoutShipping(id: string) {
+    const signal = AbortSignal.timeout(5000);
+    const url = new URL(
+      `https://${this.domain}/admin/api/${this.config.SHOPIFY_API_VERSION}/checkouts.json`,
+    );
+    url.search = new URLSearchParams({
+      since_id: (BigInt(id) - 1n).toString(),
+      limit: "1",
+      status: "any",
+      fields: "id,currency,shipping_lines",
+    }).toString();
+    const response = await fetch(url, {
+      headers: { "X-Shopify-Access-Token": await this.accessToken(signal) },
+      cache: "no-store",
+      redirect: "error",
+      signal,
+    });
+    if (!response.ok) return null;
+    const line = z.object({
+      title: z.string().nullish(),
+      code: z.string().nullish(),
+      price: z.string().regex(/^\d+(?:\.\d+)?$/),
+    });
+    const result = z
+      .object({
+        checkouts: z.array(
+          z.object({
+            id: z.union([z.string(), z.number().int().safe()]),
+            currency: z.string().regex(/^[A-Z]{3}$/),
+            shipping_lines: z.union([line, z.array(line)]).nullish(),
+          }),
+        ),
+      })
+      .safeParse(await response.json());
+    if (!result.success) return null;
+    const checkout = result.data.checkouts.find((row) => String(row.id) === id);
+    if (!checkout) return null;
+    const lines = checkout.shipping_lines ?? [];
+    return {
+      currency: checkout.currency,
+      lines: Array.isArray(lines) ? lines : [lines],
+    };
+  }
   async query<T>(
     query: string,
     variables: Record<string, unknown> = {},
