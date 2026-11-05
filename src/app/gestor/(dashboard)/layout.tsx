@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import DashboardShell from "@shared/components/admin/DashboardShell";
 import { requireSession } from "@shared/server/auth/session";
+import { pendingPasswordRequests } from "@shared/server/auth/password-events";
 import "@shared/styles/admin.css";
 import "@shared/styles/admin/dashboard.css";
 import "@shared/styles/admin/sales.css";
@@ -15,8 +16,11 @@ export default async function DashboardLayout({
   children: ReactNode;
 }) {
   const user = await requireSession();
+  const recoveryPending =
+    user.sub === "bootstrap" && (await pendingPasswordRequests()).length > 0;
   return (
     <DashboardShell
+      recoveryPending={recoveryPending}
       user={{ name: user.name, email: user.email, role: user.role }}
     >
       {children}

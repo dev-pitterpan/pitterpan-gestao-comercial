@@ -1,6 +1,6 @@
 "use client";
 import { useState, type FormEvent } from "react";
-import { ArrowRight, Eye, EyeOff, CircleHelp } from "lucide-react";
+import { ArrowRight, Eye, EyeOff } from "lucide-react";
 export default function LoginForm({
   configured,
   next,
@@ -10,8 +10,7 @@ export default function LoginForm({
 }) {
   const [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
-    [show, setShow] = useState(false),
-    [helpOpen, setHelpOpen] = useState(false);
+    [show, setShow] = useState(false);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true);
@@ -84,29 +83,10 @@ export default function LoginForm({
           />
           <span>Manter conectado</span>
         </label>
-        <button
-          type="button"
-          className="party-login-forgot"
-          aria-expanded={helpOpen}
-          aria-controls="login-recovery-help"
-          onClick={() => setHelpOpen(!helpOpen)}
-        >
+        <a className="party-login-forgot" href="/recuperar-senha/">
           Esqueci minha senha
-        </button>
+        </a>
       </div>
-      {helpOpen && (
-        <div
-          className="party-login-help"
-          id="login-recovery-help"
-          role="status"
-        >
-          <CircleHelp size={18} aria-hidden="true" />
-          <p>
-            Entre em contato com o administrador da sua equipe para recuperar o
-            acesso e redefinir sua senha.
-          </p>
-        </div>
-      )}
       {error && (
         <p role="alert" className="admin-form-error">
           {error}

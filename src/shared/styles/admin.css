@@ -1986,3 +1986,35 @@
     width: calc(50% - 6px);
   }
 }
+
+.admin-password-recovery {
+  width: min(92%, 30rem);
+  margin: 8vh auto;
+  padding: 2rem;
+  border: 1px solid #d6e2f1;
+  border-radius: 18px;
+  background: #f8fbff;
+  color: #294966;
+}
+
+.admin-password-form {
+  display: grid;
+  justify-items: start;
+  gap: 0.85rem;
+  margin-block: 1rem;
+}
+
+.admin-password-form label {
+  display: grid;
+  gap: 0.35rem;
+  width: min(100%, 28rem);
+}
+
+.admin-password-form input {
+  width: 100%;
+  padding: 0.65rem;
+  border: 1px solid #a9bdd4;
+  border-radius: 8px;
+  background: white;
+  color: #203751;
+}
