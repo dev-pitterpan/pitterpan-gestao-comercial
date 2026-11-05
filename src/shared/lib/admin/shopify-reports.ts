@@ -2,6 +2,7 @@ export type ReportColumn = {
   key: string;
   label: string;
   format?: "money" | "number" | "hours" | "percent";
+  calculated?: boolean;
   ratio?: [string, string];
 };
 export type ShopifyReport = {
@@ -425,6 +426,58 @@ export const shopifyReports: ShopifyReport[] = [
       count("campaign_last_non_direct_click_order_count", "Pedidos atribuídos"),
     ],
     note: "Modelo de atribuição: último clique não direto. Depende das UTMs e dos dados registrados pela Shopify.",
+  },
+  {
+    id: "marketing-campaign-sessions",
+    category: "marketing",
+    title: "Sessões por campanha",
+    description: "Visitas à loja online por origem, mídia e campanha UTM.",
+    dataset: "campaign_sessions",
+    dimensions: [
+      dimension("utm_source", "Origem UTM"),
+      dimension("utm_medium", "Mídia UTM"),
+      dimension("utm_campaign", "Campanha UTM"),
+    ],
+    metrics: [count("campaign_sessions", "Sessões")],
+  },
+  {
+    id: "marketing-ad-performance",
+    category: "marketing",
+    title: "Desempenho dos anúncios",
+    description:
+      "Investimento, alcance e retorno informados pelas integrações de marketing.",
+    dataset: "marketing_engagements",
+    dimensions: [dimension("marketing_api_client", "Integração")],
+    metrics: [
+      money("engagements_ad_spend", "Gasto com anúncios"),
+      {
+        ...count("reported_roas", "ROAS (×)"),
+        calculated: true,
+        ratio: ["engagements_total_sales", "engagements_ad_spend"],
+      },
+      {
+        ...money("reported_cpa", "CPA por pedido"),
+        calculated: true,
+        ratio: ["engagements_ad_spend", "engagements_orders"],
+      },
+      {
+        ...money("reported_cac", "CAC"),
+        calculated: true,
+        ratio: ["engagements_ad_spend", "engagements_first_time_customers"],
+      },
+      count("engagements_impressions", "Impressões"),
+      count("engagements_clicks", "Cliques"),
+      {
+        ...rate(
+          "reported_ctr",
+          "CTR",
+          "engagements_clicks",
+          "engagements_impressions",
+        ),
+        calculated: true,
+      },
+    ],
+    note: "ROAS, CPA, CAC e CTR usam os valores reportados pela mesma integração. Campos sem dados ou sem denominador válido aparecem como —.",
   },
   {
     id: "inventory-sellthrough",

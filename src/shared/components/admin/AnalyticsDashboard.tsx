@@ -203,8 +203,21 @@ export default function AnalyticsDashboard({
               campanhas abaixo são agrupadas pelas UTMs registradas.
             </p>
           </div>
-          <ShopifyReportDetail id="marketing-channel" params={params} />
-          <ShopifyReportDetail id="marketing-utm" params={params} />
+          <ShopifyReportDetail id="marketing-channel" params={params} compact />
+          <ShopifyReportDetail
+            id="marketing-ad-performance"
+            params={params}
+            compact
+          />
+          <ShopifyReportDetail
+            id="marketing-campaign-sessions"
+            params={params}
+            compact
+          />
+          <details className="analytics-all-reports">
+            <summary>Detalhar vendas por campanha UTM</summary>
+            <ShopifyReportDetail id="marketing-utm" params={params} compact />
+          </details>
         </div>
       ) : hub === "clientes" ? (
         <div className="analytics-attribution">

@@ -143,3 +143,28 @@ test("overview loads only totals and the sales trend without loading other categ
   assert.ok(result.trend);
   assert.equal(result.totals.rows[0].total_sales, 230);
 });
+
+test("ad performance calculates ratios using channel-reported data and preserves missing values", () => {
+  const id = "marketing-ad-performance";
+  const query = reportQuery(id, range.start, range.end);
+  assert.match(query, /engagements_first_time_customers/);
+  assert.doesNotMatch(
+    query,
+    /reported_roas|reported_ctr|reported_cpa|reported_cac/,
+  );
+  const [row] = prepareReportTable(
+    id,
+    table({
+      engagements_ad_spend: 100,
+      engagements_total_sales: 450,
+      engagements_orders: 4,
+      engagements_first_time_customers: null,
+      engagements_clicks: 20,
+      engagements_impressions: 1000,
+    }),
+  ).rows;
+  assert.equal(row.reported_roas, 4.5);
+  assert.equal(row.reported_cpa, 25);
+  assert.equal(row.reported_cac, null);
+  assert.equal(row.reported_ctr, 2);
+});

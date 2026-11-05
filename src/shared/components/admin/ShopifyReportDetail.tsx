@@ -37,9 +37,11 @@ export function formatReportValue(
 export default function ShopifyReportDetail({
   id,
   params,
+  compact = false,
 }: {
   id: string;
   params: string;
+  compact?: boolean;
 }) {
   const report = reportById(id)!;
   const [query, setQuery] = useState("");
@@ -183,142 +185,153 @@ export default function ShopifyReportDetail({
       )}
       {data && (
         <>
-          <p className="analytics-session-note">
-            Clique em um indicador para mudar o gráfico. As variações comparam
-            períodos de mesma duração.
-          </p>
+          {!compact && (
+            <p className="analytics-session-note">
+              Clique em um indicador para mudar o gráfico. As variações comparam
+              períodos de mesma duração.
+            </p>
+          )}
           <div className="shopify-report-metrics">
-            {report.metrics.map((m) => {
-              const current = numberValue(aggregate?.[m.key]),
-                before = numberValue(previous?.[m.key]);
-              const change =
-                current !== null && before !== null && before !== 0
-                  ? ((current - before) / Math.abs(before)) * 100
-                  : null;
-              return (
-                <button
-                  type="button"
-                  key={m.key}
-                  className={selected.key === m.key ? "is-selected" : ""}
-                  onClick={() => setMetric(m.key)}
-                  aria-pressed={selected.key === m.key}
-                >
-                  <span>{m.label}</span>
-                  <strong>{format(aggregate?.[m.key], m)}</strong>
-                  <small>
-                    {change === null ? (
-                      "Sem comparação disponível"
-                    ) : (
-                      <>
-                        {change < 0 ? (
-                          <ArrowDownRight size={12} />
-                        ) : (
-                          <ArrowUpRight size={12} />
-                        )}{" "}
-                        {change > 0 ? "+" : ""}
-                        {change.toLocaleString("pt-BR", {
-                          maximumFractionDigits: 1,
-                        })}
-                        % vs. anterior
-                      </>
-                    )}
-                  </small>
-                </button>
-              );
-            })}
+            {(compact ? report.metrics.slice(0, 2) : report.metrics).map(
+              (m) => {
+                const current = numberValue(aggregate?.[m.key]),
+                  before = numberValue(previous?.[m.key]);
+                const change =
+                  current !== null && before !== null && before !== 0
+                    ? ((current - before) / Math.abs(before)) * 100
+                    : null;
+                return (
+                  <button
+                    type="button"
+                    key={m.key}
+                    className={selected.key === m.key ? "is-selected" : ""}
+                    disabled={compact}
+                    onClick={() => setMetric(m.key)}
+                    aria-pressed={selected.key === m.key}
+                  >
+                    <span>{m.label}</span>
+                    <strong>{format(aggregate?.[m.key], m)}</strong>
+                    <small>
+                      {change === null ? (
+                        "Sem comparação disponível"
+                      ) : (
+                        <>
+                          {change < 0 ? (
+                            <ArrowDownRight size={12} />
+                          ) : (
+                            <ArrowUpRight size={12} />
+                          )}{" "}
+                          {change > 0 ? "+" : ""}
+                          {change.toLocaleString("pt-BR", {
+                            maximumFractionDigits: 1,
+                          })}
+                          % vs. anterior
+                        </>
+                      )}
+                    </small>
+                  </button>
+                );
+              },
+            )}
           </div>
           {!!data.table.rows.length ? (
             <>
-              <div className="shopify-chart-toolbar">
-                <span>
-                  Visualizando: <strong>{selected.label}</strong>
-                </span>
-                {report.id !== "conversion-funnel" && (
-                  <div
-                    className="pitter-chart-switch"
-                    role="group"
-                    aria-label="Estilo do gráfico"
-                  >
-                    <button
-                      onClick={() => setChartMode("depth")}
-                      aria-pressed={chartMode === "depth"}
-                    >
-                      Colunas 3D
-                    </button>
-                    <button
-                      onClick={() => setChartMode("line")}
-                      aria-pressed={chartMode === "line"}
-                    >
-                      {report.series ? "Evolução" : "Barras"}
-                    </button>
+              {!compact && (
+                <>
+                  <div className="shopify-chart-toolbar">
+                    <span>
+                      Visualizando: <strong>{selected.label}</strong>
+                    </span>
+                    {report.id !== "conversion-funnel" && (
+                      <div
+                        className="pitter-chart-switch"
+                        role="group"
+                        aria-label="Estilo do gráfico"
+                      >
+                        <button
+                          onClick={() => setChartMode("depth")}
+                          aria-pressed={chartMode === "depth"}
+                        >
+                          Colunas 3D
+                        </button>
+                        <button
+                          onClick={() => setChartMode("line")}
+                          aria-pressed={chartMode === "line"}
+                        >
+                          {report.series ? "Evolução" : "Barras"}
+                        </button>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
-              {report.id === "conversion-funnel" ? (
-                <SessionJourney table={data.table} />
-              ) : chartMode === "depth" &&
-                (report.series || report.dimensions?.length) ? (
-                <InteractiveColumns
-                  table={data.table}
-                  metric={selected}
-                  dimensions={report.dimensions}
-                  series={report.series}
-                  format={(v) => format(v)}
-                />
-              ) : report.series ? (
-                <RevenueChart
-                  table={data.table}
-                  money={(v) => format(v)}
-                  currency={data.currency}
-                  showTable={false}
-                  metricKey={selected.key}
-                  metricLabel={selected.label}
-                  axisLabel={
-                    selected.format === "money"
-                      ? `Valores em ${data.currency}`
-                      : selected.label
-                  }
-                />
-              ) : report.dimensions?.length ? (
-                <ol className="analytics-ranking shopify-report-bars">
-                  {data.table.rows.slice(0, limit).map((row, i) => {
-                    const label = report
-                        .dimensions!.map((d) =>
-                          String(row[d.key] ?? "Não informado"),
-                        )
-                        .join(" · "),
-                      n = numberValue(row[selected.key]);
-                    return (
-                      <li key={i}>
-                        <span className="analytics-rank-number">{i + 1}</span>
-                        <div>
-                          <div className="analytics-rank-caption">
-                            <span title={label}>{label}</span>
-                            <strong>{format(n)}</strong>
-                          </div>
-                          <div
-                            className="analytics-bar-track"
-                            aria-hidden="true"
-                          >
-                            <span
-                              className={
-                                n !== null && n < 0 ? "is-negative" : ""
-                              }
-                              style={{
-                                width: `${(Math.abs(n || 0) / max) * 100}%`,
-                              }}
-                            />
-                          </div>
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ol>
-              ) : (
-                <p className="analytics-session-note">
-                  Selecione um indicador acima e confira o detalhamento na
-                  tabela.
-                </p>
+                  {report.id === "conversion-funnel" ? (
+                    <SessionJourney table={data.table} />
+                  ) : chartMode === "depth" &&
+                    (report.series || report.dimensions?.length) ? (
+                    <InteractiveColumns
+                      table={data.table}
+                      metric={selected}
+                      dimensions={report.dimensions}
+                      series={report.series}
+                      format={(v) => format(v)}
+                    />
+                  ) : report.series ? (
+                    <RevenueChart
+                      table={data.table}
+                      money={(v) => format(v)}
+                      currency={data.currency}
+                      showTable={false}
+                      metricKey={selected.key}
+                      metricLabel={selected.label}
+                      axisLabel={
+                        selected.format === "money"
+                          ? `Valores em ${data.currency}`
+                          : selected.label
+                      }
+                    />
+                  ) : report.dimensions?.length ? (
+                    <ol className="analytics-ranking shopify-report-bars">
+                      {data.table.rows.slice(0, limit).map((row, i) => {
+                        const label = report
+                            .dimensions!.map((d) =>
+                              String(row[d.key] ?? "Não informado"),
+                            )
+                            .join(" · "),
+                          n = numberValue(row[selected.key]);
+                        return (
+                          <li key={i}>
+                            <span className="analytics-rank-number">
+                              {i + 1}
+                            </span>
+                            <div>
+                              <div className="analytics-rank-caption">
+                                <span title={label}>{label}</span>
+                                <strong>{format(n)}</strong>
+                              </div>
+                              <div
+                                className="analytics-bar-track"
+                                aria-hidden="true"
+                              >
+                                <span
+                                  className={
+                                    n !== null && n < 0 ? "is-negative" : ""
+                                  }
+                                  style={{
+                                    width: `${(Math.abs(n || 0) / max) * 100}%`,
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          </li>
+                        );
+                      })}
+                    </ol>
+                  ) : (
+                    <p className="analytics-session-note">
+                      Selecione um indicador acima e confira o detalhamento na
+                      tabela.
+                    </p>
+                  )}
+                </>
               )}
               <section
                 className="analytics-data-explorer"
@@ -439,7 +452,7 @@ export default function ShopifyReportDetail({
             <div className="analytics-empty">Sem dados para este período.</div>
           )}
           {report.note && <p className="shopify-report-note">{report.note}</p>}
-          {report.metrics.some((m) => m.ratio) && (
+          {report.metrics.some((m) => m.ratio && !m.calculated) && (
             <p className="analytics-session-note">
               As taxas exibidas usam as contagens retornadas pela Shopify e as
               fórmulas dos indicadores; não são médias das taxas diárias.

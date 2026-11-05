@@ -13,7 +13,7 @@ function fields(report: ShopifyReport) {
   return [
     ...new Set(
       report.metrics.flatMap((m) => [
-        m.key,
+        ...(m.calculated ? [] : [m.key]),
         ...(m.ratio || []).filter((k) => k !== "available_units"),
       ]),
     ),
@@ -81,7 +81,7 @@ export function prepareReportTable(
               : numeric(row[m.ratio[1]]);
           result[m.key] =
             numerator !== null && denominator !== null && denominator > 0
-              ? (100 * numerator) / denominator
+              ? ((m.format === "percent" ? 100 : 1) * numerator) / denominator
               : null;
         }
       return result;
