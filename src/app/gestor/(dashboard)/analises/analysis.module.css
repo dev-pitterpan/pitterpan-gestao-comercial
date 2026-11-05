@@ -46,17 +46,26 @@
 }
 .banner span {
   color: var(--accent);
-  font-size: 0.75rem;
+  font-size: 10px;
   font-weight: 750;
   letter-spacing: 0.12em;
 }
 .banner h1 {
   color: inherit;
   margin: 0.4rem 0;
-  font-size: clamp(1.65rem, 3vw, 2.6rem);
+  font-size: 29px;
 }
 .banner p {
   color: #ecf1fb;
   margin: 0;
   max-width: 65ch;
+}
+
+.banner p {
+  font-size: 12px;
+}
+@media (max-width: 760px) {
+  .banner h1 {
+    font-size: 26px;
+  }
 }
