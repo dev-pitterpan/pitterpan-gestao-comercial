@@ -113,11 +113,7 @@ function NavigationPending() {
     </span>
   ) : null;
 }
-import {
-  reportCategories,
-  reportById,
-  shopifyReports,
-} from "../../lib/admin/shopify-reports";
+import { reportById } from "../../lib/admin/shopify-reports";
 
 const analyticsPath = "/gestor/analises/";
 
@@ -141,7 +137,7 @@ function AnalyticsNavigation({ close }: { close: () => void }) {
           href: analyticsPath + "?secao=relatorios",
           label: "Relatórios",
           icon: BarChart3,
-          active: reports && !selected,
+          active: reports || Boolean(selected),
         },
         {
           href: analyticsPath + "?secao=atribuicao",
@@ -175,32 +171,6 @@ function AnalyticsNavigation({ close }: { close: () => void }) {
           <NavigationPending />
           {active && <span className="admin-nav-marker" />}
         </Link>
-      ))}
-      {reportCategories.map((category) => (
-        <details
-          className="analytics-nav-category"
-          key={category.id}
-          open={selected?.category === category.id || undefined}
-        >
-          <summary>{category.title}</summary>
-          {shopifyReports
-            .filter((report) => report.category === category.id)
-            .map((report) => (
-              <Link
-                key={report.id}
-                href={
-                  analyticsPath + "?secao=relatorios&relatorio=" + report.id
-                }
-                prefetch={false}
-                onClick={close}
-                aria-current={selected?.id === report.id ? "page" : undefined}
-                className={selected?.id === report.id ? "active" : ""}
-              >
-                <span>{report.title}</span>
-                <NavigationPending />
-              </Link>
-            ))}
-        </details>
       ))}
     </section>
   );
