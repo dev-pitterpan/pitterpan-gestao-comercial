@@ -120,6 +120,7 @@ const analyticsPath = "/gestor/analises/";
 function AnalyticsNavigation({ close }: { close: () => void }) {
   const params = useSearchParams();
   const selected = reportById(params.get("relatorio") ?? "");
+  const sales = !selected && params.get("secao") === "vendas";
   const customers = !selected && params.get("secao") === "clientes";
   const attribution = !selected && params.get("secao") === "atribuicao";
   const reports = params.get("secao") === "relatorios";
@@ -131,7 +132,13 @@ function AnalyticsNavigation({ close }: { close: () => void }) {
           href: analyticsPath,
           label: "Visão geral",
           icon: LayoutDashboard,
-          active: !reports && !attribution && !customers && !selected,
+          active: !reports && !attribution && !customers && !selected && !sales,
+        },
+        {
+          href: analyticsPath + "?secao=vendas",
+          label: "Vendas",
+          icon: ShoppingCart,
+          active: sales,
         },
         {
           href: analyticsPath + "?secao=relatorios",

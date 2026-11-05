@@ -12,9 +12,13 @@ export default async function AnalyticsPage({
   const params = await searchParams;
   const report = reportById(params.relatorio ?? "");
   const hub =
-    !report && (params.secao === "atribuicao" || params.secao === "clientes")
+    !report &&
+    (params.secao === "atribuicao" ||
+      params.secao === "clientes" ||
+      params.secao === "vendas")
       ? params.secao
       : undefined;
+  const sales = hub === "vendas";
   const attribution = hub === "atribuicao";
   const reports = Boolean(report) || params.secao === "relatorios";
   return (
@@ -23,22 +27,26 @@ export default async function AnalyticsPage({
         eyebrow="DADOS REAIS DA SHOPIFY"
         title={
           report?.title ??
-          (attribution
-            ? "Atribuição de marketing"
-            : hub === "clientes"
-              ? "Análise de clientes"
-              : reports
-                ? "Relatórios da Shopify"
-                : "Visão geral da loja")
+          (sales
+            ? "Análise de vendas"
+            : attribution
+              ? "Atribuição de marketing"
+              : hub === "clientes"
+                ? "Análise de clientes"
+                : reports
+                  ? "Relatórios da Shopify"
+                  : "Visão geral da loja")
         }
         description={
-          attribution
-            ? "Compare as vendas e os pedidos atribuídos a canais e campanhas no mesmo período."
-            : hub === "clientes"
-              ? "Acompanhe novos compradores e clientes recorrentes no período."
-              : reports
-                ? "Explore vendas, clientes, tráfego e estoque por relatório."
-                : "Acompanhe pagamentos, reembolsos e a evolução das vendas no período."
+          sales
+            ? "Compare os recebimentos e os resultados comerciais da loja."
+            : attribution
+              ? "Compare as vendas e os pedidos atribuídos a canais e campanhas no mesmo período."
+              : hub === "clientes"
+                ? "Acompanhe novos compradores e clientes recorrentes no período."
+                : reports
+                  ? "Explore vendas, clientes, tráfego e estoque por relatório."
+                  : "Acompanhe pagamentos, reembolsos e a evolução das vendas no período."
         }
       />
       <AnalyticsDashboard

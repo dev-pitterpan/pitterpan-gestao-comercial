@@ -2589,3 +2589,14 @@
 .analytics-attribution-context p {
   margin: 0.35rem 0 0;
 }
+
+.analytics-executive-kpi {
+  color: inherit;
+  text-decoration: none;
+}
+
+.analytics-executive-kpi:hover,
+.analytics-executive-kpi:focus-visible {
+  outline: 2px solid #658bc0;
+  outline-offset: 2px;
+}

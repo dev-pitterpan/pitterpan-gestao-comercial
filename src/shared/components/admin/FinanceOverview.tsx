@@ -5,6 +5,8 @@ import type { readSalesFinance } from "../../server/sales/repository";
 import { RevenueChart, numberValue } from "./AnalyticsCharts";
 import AdminSelect from "./AdminSelect";
 import PitterSpinner from "./PitterSpinner";
+import { salesLink } from "../../lib/admin/sales-links";
+import Link from "next/link";
 import { shiftDate } from "../../lib/admin/date-range";
 type Data = Awaited<ReturnType<typeof readSalesFinance>>;
 const labels: Record<string, string> = {
@@ -29,7 +31,13 @@ const colors: Record<string, string> = {
   VOIDED: "#626d82",
   UNKNOWN: "#bac7d6",
 };
-export default function FinanceOverview({ params }: { params: string }) {
+export default function FinanceOverview({
+  params,
+  executive = false,
+}: {
+  params: string;
+  executive?: boolean;
+}) {
   const [data, setData] = useState<Data | null>(null),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(true),
@@ -124,12 +132,149 @@ export default function FinanceOverview({ params }: { params: string }) {
         day,
         currency,
         orders: "0",
+        paid: "0",
         received: "0",
         refunded: "0",
         net: "0",
       },
     );
   const table = { columns: [], rows };
+  if (executive) {
+    const filters = new URLSearchParams(params);
+    const count = (value: number | null) =>
+      value === null ? "—" : value.toLocaleString("pt-BR");
+    const previous = data.previousTotals?.find(
+      (row) => row.currency === currency,
+    );
+    const cards = [
+      {
+        label: "Líquido após reembolsos",
+        key: "net",
+        value: money(totals.net),
+        hint: "Recebido menos reembolsado",
+        href: "?secao=vendas",
+      },
+      {
+        label: "Pedidos pagos",
+        key: "paid",
+        value: count(numberValue(totals.paid)),
+        hint: "Status pago, sem cancelados",
+        href: salesLink(filters, { status: "PAID" }, "recent-orders"),
+      },
+      {
+        label: "Ticket médio",
+        key: "ticket",
+        value: Number(totals.paid) ? money(totals.ticket) : "—",
+        hint: "Valor médio dos pedidos pagos",
+        href: "?secao=vendas",
+      },
+      {
+        label: "Reembolsos",
+        key: "refunded",
+        value: money(totals.refunded),
+        hint: "Total devolvido nos pedidos do período",
+        href: salesLink(filters, { status: "REFUNDS" }, "recent-orders"),
+      },
+    ];
+    const paid = metric === "paid";
+    return (
+      <section className="finance-overview" aria-label="Resumo de vendas">
+        <div className="finance-heading">
+          <p>
+            {data.state?.completed_at
+              ? `Última sincronização: ${new Date(data.state.completed_at).toLocaleString("pt-BR", { timeZone: data.timezone })}`
+              : "Sincronização inicial pendente"}
+            {data.state?.until_at && " · Dados parciais"}
+          </p>
+          {data.totals.length > 1 && (
+            <AdminSelect
+              label="Moeda"
+              value={currency}
+              onValueChange={setCurrency}
+              options={data.totals.map((t) => ({
+                value: t.currency,
+                label: t.currency,
+              }))}
+            />
+          )}
+        </div>
+        <div className="finance-kpis">
+          {cards.map((card) => (
+            <Link
+              key={card.label}
+              href={card.href}
+              className="finance-kpi finance-kpi--blue analytics-executive-kpi"
+            >
+              <span>
+                {card.label}
+                <ArrowUpRight size={15} aria-hidden="true" />
+              </span>
+              <strong>{card.value}</strong>
+              <small>{card.hint}</small>
+              {previous && Number(previous[card.key]) > 0 && (
+                <small>
+                  {new Intl.NumberFormat("pt-BR", {
+                    style: "percent",
+                    signDisplay: "exceptZero",
+                    maximumFractionDigits: 1,
+                  }).format(
+                    (Number(totals[card.key]) - Number(previous[card.key])) /
+                      Number(previous[card.key]),
+                  )}{" "}
+                  vs. período anterior
+                </small>
+              )}
+            </Link>
+          ))}
+        </div>
+        <div className="finance-chart-grid">
+          <section className="admin-panel finance-line-panel">
+            <header>
+              <h2>Evolução diária</h2>
+              <AdminSelect
+                label="Indicador"
+                value={paid ? "paid" : "net"}
+                onValueChange={setMetric}
+                options={[
+                  { value: "net", label: "Líquido recebido" },
+                  { value: "paid", label: "Pedidos pagos" },
+                ]}
+              />
+            </header>
+            <RevenueChart
+              key={String(paid)}
+              table={table}
+              currency={currency}
+              money={paid ? count : money}
+              metricKey={paid ? "paid" : "net"}
+              metricLabel={paid ? "Pedidos pagos" : "Líquido recebido"}
+              showTable={false}
+            />
+            <p className="finance-chart-caption">
+              Valores agrupados pela data do pedido.
+            </p>
+          </section>
+          <aside className="admin-panel finance-donut-panel">
+            <h2>Acompanhar agora</h2>
+            <p>
+              <strong>{count(numberValue(totals.awaiting))}</strong> pedidos
+              aguardando atendimento no período.
+            </p>
+            <Link
+              className="admin-button"
+              href={salesLink(
+                filters,
+                { fulfillment: "AWAITING" },
+                "recent-orders",
+              )}
+            >
+              Conferir pedidos
+            </Link>
+          </aside>
+        </div>
+      </section>
+    );
+  }
   const metricName =
     metric === "net"
       ? "Líquido após estornos"

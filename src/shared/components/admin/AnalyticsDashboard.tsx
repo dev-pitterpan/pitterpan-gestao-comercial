@@ -82,7 +82,7 @@ export default function AnalyticsDashboard({
   hub,
 }: {
   reports: boolean;
-  hub?: "atribuicao" | "clientes";
+  hub?: "atribuicao" | "clientes" | "vendas";
   reportId: string;
 }) {
   const router = useRouter();
@@ -108,7 +108,7 @@ export default function AnalyticsDashboard({
     refresh: String(revision),
   }).toString();
   useEffect(() => {
-    if (reports || hub) return;
+    if (reports || hub !== "vendas") return;
     const controller = new AbortController();
     setData(null);
     setError("");
@@ -147,7 +147,7 @@ export default function AnalyticsDashboard({
           <strong>
             {range.start && range.end
               ? `${shortDate(range.start)} a ${shortDate(range.end)}`
-              : data && !reports
+              : data && hub === "vendas"
                 ? `${shortDate(data.window.start)} a ${shortDate(data.window.end)}`
                 : days === "1"
                   ? "Hoje"
@@ -225,7 +225,9 @@ export default function AnalyticsDashboard({
           <ShopifyReportDetail id="customer-returning" params={params} />
           <ShopifyReportDetail id="customer-new" params={params} />
         </div>
-      ) : !reports ? (
+      ) : !reports && !hub ? (
+        <FinanceOverview params={params} executive />
+      ) : hub === "vendas" ? (
         <>
           <div className="analytics-guide-intro">
             <span className="analytics-eyebrow">

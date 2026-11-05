@@ -329,6 +329,7 @@ async function financialTotals(
   return db.query<Record<string, string>>(
     `SELECT currency,count(*)::text AS orders,
  count(*) FILTER(WHERE financial_status='PAID' AND cancelled_at IS NULL)::text AS paid,
+ count(*) FILTER(WHERE ${awaitingFulfillmentSql})::text AS awaiting,
  count(*) FILTER(WHERE financial_status IN ('PENDING','AUTHORIZED','PARTIALLY_PAID') AND cancelled_at IS NULL)::text AS pending,
  count(*) FILTER(WHERE cancelled_at IS NOT NULL)::text AS cancelled,
  count(*) FILTER(WHERE financial_status='EXPIRED')::text AS expired,
@@ -361,9 +362,23 @@ export async function readSalesFinance(
   const values = filterValues(store, period, filters),
     where = selection(filters);
   const totals = await financialTotals(db, values, where);
+  const length =
+    Math.round((Date.parse(end) - Date.parse(start)) / 86_400_000) + 1;
+  const previous =
+    end < todayDate()
+      ? await financialTotals(
+          db,
+          filterValues(store, period, {
+            ...filters,
+            start: shiftDate(start, -length),
+            end: shiftDate(start, -1),
+          }),
+          where,
+        )
+      : null;
   const daily = await db.query<Record<string, string>>(
     `SELECT currency,(o.processed_at AT TIME ZONE 'America/Sao_Paulo')::date::text AS day,
- count(*)::text AS orders,COALESCE(sum(received),0)::text AS received,COALESCE(sum(refunded),0)::text AS refunded,COALESCE(sum(received-refunded),0)::text AS net
+ count(*)::text AS orders,count(*) FILTER(WHERE financial_status='PAID' AND cancelled_at IS NULL)::text AS paid,COALESCE(sum(received),0)::text AS received,COALESCE(sum(refunded),0)::text AS refunded,COALESCE(sum(received-refunded),0)::text AS net
  FROM pitterpan_sales_orders o WHERE ${where} GROUP BY currency,day ORDER BY day`,
     values,
   );
@@ -385,6 +400,7 @@ export async function readSalesFinance(
   );
   return {
     totals: totals.rows,
+    previousTotals: previous?.rows ?? [],
     daily: daily.rows,
     statuses: statuses.rows,
     state: state.rows[0] || null,
