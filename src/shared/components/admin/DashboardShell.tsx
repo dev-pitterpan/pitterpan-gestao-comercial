@@ -120,6 +120,7 @@ const analyticsPath = "/gestor/analises/";
 function AnalyticsNavigation({ close }: { close: () => void }) {
   const params = useSearchParams();
   const selected = reportById(params.get("relatorio") ?? "");
+  const checkouts = usePathname()?.startsWith(analyticsPath + "checkouts");
   const sales = !selected && params.get("secao") === "vendas";
   const customers = !selected && params.get("secao") === "clientes";
   const attribution = !selected && params.get("secao") === "atribuicao";
@@ -132,13 +133,25 @@ function AnalyticsNavigation({ close }: { close: () => void }) {
           href: analyticsPath,
           label: "Visão geral",
           icon: LayoutDashboard,
-          active: !reports && !attribution && !customers && !selected && !sales,
+          active:
+            !reports &&
+            !attribution &&
+            !customers &&
+            !selected &&
+            !sales &&
+            !checkouts,
         },
         {
           href: analyticsPath + "?secao=vendas",
           label: "Vendas",
           icon: ShoppingCart,
           active: sales,
+        },
+        {
+          href: analyticsPath + "checkouts/",
+          label: "Checkouts abandonados",
+          icon: ShoppingCart,
+          active: Boolean(checkouts),
         },
         {
           href: analyticsPath + "?secao=relatorios",
@@ -259,7 +272,7 @@ export default function DashboardShell({
       setLeaving(false);
     }
   }
-  const analytics = pathname === analyticsPath;
+  const analytics = pathname.startsWith(analyticsPath);
   const title =
     links.find((l) => l.href === pathname)?.label || "Central de gestão";
   return (
