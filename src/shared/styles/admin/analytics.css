@@ -2571,3 +2571,21 @@
   padding: 0.35rem 0;
   cursor: pointer;
 }
+
+.analytics-attribution {
+  display: grid;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.analytics-attribution-context {
+  border: 1px solid #cbdcee;
+  border-radius: 16px;
+  padding: 1rem 1.25rem;
+  color: #294966;
+  background: linear-gradient(110deg, #e7f0fd, #f8fbff);
+}
+
+.analytics-attribution-context p {
+  margin: 0.35rem 0 0;
+}

@@ -79,8 +79,10 @@ const normalize = (s: string) =>
 export default function AnalyticsDashboard({
   reports,
   reportId,
+  hub,
 }: {
   reports: boolean;
+  hub?: "atribuicao" | "clientes";
   reportId: string;
 }) {
   const router = useRouter();
@@ -106,7 +108,7 @@ export default function AnalyticsDashboard({
     refresh: String(revision),
   }).toString();
   useEffect(() => {
-    if (reports) return;
+    if (reports || hub) return;
     const controller = new AbortController();
     setData(null);
     setError("");
@@ -128,7 +130,7 @@ export default function AnalyticsDashboard({
         if (!controller.signal.aborted) setBusy(false);
       });
     return () => controller.abort();
-  }, [params, reports]);
+  }, [params, reports, hub]);
   useEffect(() => {
     if (reportId) heading.current?.focus();
   }, [reportId]);
@@ -191,6 +193,25 @@ export default function AnalyticsDashboard({
           </h2>
           <ShopifyReportDetail key={reportId} id={reportId} params={params} />
         </>
+      ) : hub === "atribuicao" ? (
+        <div className="analytics-attribution">
+          <div className="analytics-attribution-context">
+            <strong>Último clique não direto</strong>
+            <p>
+              Vendas e pedidos atribuídos pela Shopify ao último canal antes da
+              compra, excluindo visitas diretas quando há outra origem. As
+              campanhas abaixo são agrupadas pelas UTMs registradas.
+            </p>
+          </div>
+          <ShopifyReportDetail id="marketing-channel" params={params} />
+          <ShopifyReportDetail id="marketing-utm" params={params} />
+        </div>
+      ) : hub === "clientes" ? (
+        <div className="analytics-attribution">
+          <ShopifyReportDetail id="customer-type" params={params} />
+          <ShopifyReportDetail id="customer-returning" params={params} />
+          <ShopifyReportDetail id="customer-new" params={params} />
+        </div>
       ) : !reports ? (
         <>
           <div className="analytics-guide-intro">

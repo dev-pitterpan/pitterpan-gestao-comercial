@@ -124,6 +124,8 @@ const analyticsPath = "/gestor/analises/";
 function AnalyticsNavigation({ close }: { close: () => void }) {
   const params = useSearchParams();
   const selected = reportById(params.get("relatorio") ?? "");
+  const customers = !selected && params.get("secao") === "clientes";
+  const attribution = !selected && params.get("secao") === "atribuicao";
   const reports = params.get("secao") === "relatorios";
   return (
     <section className="admin-nav-group">
@@ -133,13 +135,25 @@ function AnalyticsNavigation({ close }: { close: () => void }) {
           href: analyticsPath,
           label: "Visão geral",
           icon: LayoutDashboard,
-          active: !reports,
+          active: !reports && !attribution && !customers && !selected,
         },
         {
           href: analyticsPath + "?secao=relatorios",
           label: "Relatórios",
           icon: BarChart3,
           active: reports && !selected,
+        },
+        {
+          href: analyticsPath + "?secao=atribuicao",
+          label: "Atribuição",
+          icon: ChartNoAxesCombined,
+          active: attribution,
+        },
+        {
+          href: analyticsPath + "?secao=clientes",
+          label: "Visão de clientes",
+          icon: Users,
+          active: customers,
         },
         {
           href: "/gestor/",
