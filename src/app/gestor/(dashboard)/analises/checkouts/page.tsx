@@ -1,7 +1,9 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { requireSession } from "@shared/server/auth/session";
 import { salesClient, salesConfig } from "@shared/server/sales/config";
-import { PageHeading } from "@shared/components/admin/Primitives";
+import styles from "./checkouts.module.css";
+import { CheckoutList } from "./CheckoutList";
 import { shiftDate, todayDate } from "@shared/lib/admin/date-range";
 
 const path = "/gestor/analises/checkouts/";
@@ -59,29 +61,18 @@ export default async function CheckoutsPage({
   const params = await searchParams;
   const days = params.days === "7" ? "7" : "30";
   const listHref = `${path}?days=${days}`;
+  const cursor =
+    typeof params.after === "string" && params.after.length <= 1024
+      ? params.after
+      : null;
+  const returnHref = cursor
+    ? listHref + "&after=" + encodeURIComponent(cursor)
+    : listHref;
   const id =
     typeof params.id === "string" && /^\d{1,20}$/.test(params.id)
       ? params.id
       : null;
   async function load() {
-    const domain = salesConfig().SHOPIFY_SALES_STORE_DOMAIN;
-    const admin = (item: Checkout) => {
-      const number = numericId(item.id);
-      return `https://${domain}/admin/checkouts${number ? "/" + number : ""}`;
-    };
-    if (id) {
-      const { node } = await salesClient().query<{ node: Detail | null }>(
-        `query CheckoutDetail($id: ID!) { node(id: $id) { ... on AbandonedCheckout {
-          ${baseFields} abandonedCheckoutUrl discountCodes
-          subtotalPriceSet { ${moneyFields} } totalDiscountSet { ${moneyFields} } totalTaxSet { ${moneyFields} }
-          lineItems(first: 50) { nodes { id title sku variantTitle quantity
-            originalUnitPriceSet { ${moneyFields} } discountedTotalPriceSet { ${moneyFields} }
-          } pageInfo { hasNextPage } }
-        } } }`,
-        { id: `gid://shopify/AbandonedCheckout/${id}` },
-      );
-      return { detail: node, admin, rows: [], next: null };
-    }
     const start = shiftDate(todayDate(), 1 - Number(days));
     const { abandonedCheckouts } = await salesClient().query<{
       abandonedCheckouts: {
@@ -103,8 +94,6 @@ export default async function CheckoutsPage({
       },
     );
     return {
-      detail: null,
-      admin,
       rows: abandonedCheckouts.nodes,
       next: abandonedCheckouts.pageInfo.hasNextPage
         ? abandonedCheckouts.pageInfo.endCursor
@@ -112,184 +101,209 @@ export default async function CheckoutsPage({
     };
   }
   const data = await load().catch(() => null);
-  const item = data?.detail;
+
   return (
-    <>
-      <PageHeading
-        eyebrow="PEDIDOS · SHOPIFY"
-        title="Checkouts abandonados"
-        description="Acompanhe compras iniciadas e acesse os dados de recuperação na Shopify."
-      />
-      <section className="admin-panel analytics-panel">
-        <div className="analytics-table-toolbar">
-          {id ? (
-            <Link className="admin-button" href={listHref}>
-              Voltar à lista
-            </Link>
-          ) : (
-            <nav
-              aria-label="Período dos checkouts"
-              className="analytics-table-pages"
-            >
+    <div className={styles.workspace}>
+      <header className={styles.hero}>
+        <span className={styles.eyebrow}>SHOPIFY / RECUPERAÇÃO</span>
+        <h1>Checkouts abandonados</h1>
+        <p>
+          Acompanhe compras interrompidas e confira os detalhes de cada
+          checkout.
+        </p>
+      </header>
+      <div className={styles.columns}>
+        <section className={styles.panel}>
+          <div className={styles.toolbar}>
+            <nav aria-label="Período dos checkouts" className={styles.period}>
               <Link
-                className="admin-button"
+                className={styles.button}
                 aria-current={days === "7" ? "true" : undefined}
                 href={path + "?days=7"}
               >
                 Últimos 7 dias
               </Link>
               <Link
-                className="admin-button"
+                className={styles.button}
                 aria-current={days === "30" ? "true" : undefined}
                 href={path + "?days=30"}
               >
                 Últimos 30 dias
               </Link>
             </nav>
+          </div>
+          {!data ? (
+            <p role="alert">
+              Não foi possível consultar os checkouts. Confira as permissões da
+              integração de vendas da Shopify.
+            </p>
+          ) : (
+            <>
+              <CheckoutList
+                key={returnHref}
+                selectedId={id}
+                rows={data.rows.map((row) => {
+                  const number = numericId(row.id);
+                  return {
+                    id: row.id,
+                    name: row.name,
+                    date: date.format(new Date(row.createdAt)),
+                    complete: Boolean(row.completedAt),
+                    total: price(row.totalPriceSet),
+                    href: number
+                      ? returnHref + "&id=" + number + "#checkout-detail"
+                      : null,
+                  };
+                })}
+              />
+              <div className={styles.toolbar}>
+                {params.after && (
+                  <Link className={styles.button} href={listHref}>
+                    Primeira página
+                  </Link>
+                )}
+                {data.next && (
+                  <Link
+                    className={styles.button}
+                    href={listHref + "&after=" + encodeURIComponent(data.next)}
+                  >
+                    Próxima página
+                  </Link>
+                )}
+              </div>
+            </>
           )}
-          {item && data && (
+        </section>
+        <section
+          className={styles.panel}
+          id="checkout-detail"
+          aria-label="Detalhes do checkout"
+        >
+          <Suspense
+            key={id}
+            fallback={<p role="status">Carregando detalhes…</p>}
+          >
+            {id ? (
+              <CheckoutDetails id={id} />
+            ) : (
+              <p className={styles.empty}>
+                Selecione um checkout para conferir os itens e os valores.
+              </p>
+            )}
+          </Suspense>
+        </section>
+      </div>
+    </div>
+  );
+}
+
+async function CheckoutDetails({ id }: { id: string }) {
+  const item = await (async () => {
+    const { node } = await salesClient().query<{ node: Detail | null }>(
+      `query CheckoutDetail($id: ID!) { node(id: $id) { ... on AbandonedCheckout {
+          ${baseFields} abandonedCheckoutUrl discountCodes
+          subtotalPriceSet { ${moneyFields} } totalDiscountSet { ${moneyFields} } totalTaxSet { ${moneyFields} }
+          lineItems(first: 50) { nodes { id title sku variantTitle quantity
+            originalUnitPriceSet { ${moneyFields} } discountedTotalPriceSet { ${moneyFields} }
+          } pageInfo { hasNextPage } }
+        } } }`,
+      { id: `gid://shopify/AbandonedCheckout/${id}` },
+    );
+    return node;
+  })().catch(() => null);
+
+  if (!item)
+    return (
+      <p role="status">Checkout indisponível. Tente selecionar novamente.</p>
+    );
+  const domain = salesConfig().SHOPIFY_SALES_STORE_DOMAIN;
+  return (
+    <>
+      <div className={styles.detail}>
+        <div>
+          <span className={styles.eyebrow}>CHECKOUT SELECIONADO</span>
+          <h2>{item.name}</h2>
+          <p>{date.format(new Date(item.createdAt))}</p>
+        </div>
+        <span className={item.completedAt ? styles.complete : styles.open}>
+          {item.completedAt ? "Concluído" : "Em aberto"}
+        </span>
+      </div>
+      <dl className={styles.amounts}>
+        <div>
+          <dt>Subtotal</dt>
+          <dd>{price(item.subtotalPriceSet)}</dd>
+        </div>
+        <div>
+          <dt>Descontos</dt>
+          <dd>{price(item.totalDiscountSet)}</dd>
+        </div>
+        <div>
+          <dt>Impostos</dt>
+          <dd>{price(item.totalTaxSet)}</dd>
+        </div>
+        <div>
+          <dt>Total</dt>
+          <dd>{price(item.totalPriceSet)}</dd>
+        </div>
+      </dl>
+      {item.discountCodes.length > 0 && (
+        <p>Cupons: {item.discountCodes.join(", ")}</p>
+      )}
+      {!item.completedAt &&
+        item.abandonedCheckoutUrl.startsWith("https://") && (
+          <p>
             <a
-              className="admin-button"
-              href={data.admin(item)}
+              href={item.abandonedCheckoutUrl}
               target="_blank"
               rel="noopener noreferrer"
             >
-              Abrir na Shopify
+              Abrir link de recuperação
             </a>
-          )}
-        </div>
-        {!data ? (
-          <p role="alert">
-            Não foi possível consultar os checkouts. Confira as permissões da
-            integração de vendas da Shopify.
           </p>
-        ) : id ? (
-          item ? (
-            <>
-              <h2>{item.name}</h2>
-              <p>
-                {date.format(new Date(item.createdAt))} ·{" "}
-                {item.completedAt ? "Concluído" : "Em aberto"}
-              </p>
-              <p>
-                Subtotal {price(item.subtotalPriceSet)} · Descontos{" "}
-                {price(item.totalDiscountSet)} · Impostos{" "}
-                {price(item.totalTaxSet)} · Total {price(item.totalPriceSet)}
-              </p>
-              {item.discountCodes.length > 0 && (
-                <p>Cupons: {item.discountCodes.join(", ")}</p>
-              )}
-              {!item.completedAt &&
-                item.abandonedCheckoutUrl.startsWith("https://") && (
-                  <p>
-                    <a
-                      href={item.abandonedCheckoutUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      Abrir link de recuperação
-                    </a>
-                  </p>
-                )}
-              <div className="analytics-table-scroll">
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Produto</th>
-                      <th>SKU</th>
-                      <th>Quantidade</th>
-                      <th>Preço unitário original</th>
-                      <th>Total com desconto</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {item.lineItems.nodes.map((line) => (
-                      <tr key={line.id}>
-                        <td>
-                          {line.title || "Produto"}
-                          {line.variantTitle && ` · ${line.variantTitle}`}
-                        </td>
-                        <td>{line.sku || "—"}</td>
-                        <td>{line.quantity}</td>
-                        <td>{price(line.originalUnitPriceSet)}</td>
-                        <td>{price(line.discountedTotalPriceSet)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              {item.lineItems.pageInfo.hasNextPage && (
-                <p>
-                  Exibindo os primeiros 50 itens. Abra na Shopify para consultar
-                  os demais.
-                </p>
-              )}
-            </>
-          ) : (
-            <p>Checkout indisponível.</p>
-          )
-        ) : (
-          <>
-            {!data.rows.length ? (
-              <p>Nenhum checkout encontrado neste período.</p>
-            ) : (
-              <div className="analytics-table-scroll">
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>Checkout</th>
-                      <th>Criado em</th>
-                      <th>Situação</th>
-                      <th>Total</th>
-                      <th>Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {data.rows.map((row) => (
-                      <tr key={row.id}>
-                        <td>{row.name}</td>
-                        <td>{date.format(new Date(row.createdAt))}</td>
-                        <td>{row.completedAt ? "Concluído" : "Em aberto"}</td>
-                        <td>{price(row.totalPriceSet)}</td>
-                        <td>
-                          {numericId(row.id) && (
-                            <Link href={listHref + "&id=" + numericId(row.id)}>
-                              Detalhes
-                            </Link>
-                          )}
-                          {" · "}
-                          <a
-                            href={data.admin(row)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            Abrir na Shopify
-                          </a>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-            <div className="analytics-table-toolbar">
-              {params.after && (
-                <Link className="admin-button" href={listHref}>
-                  Primeira página
-                </Link>
-              )}
-              {data.next && (
-                <Link
-                  className="admin-button"
-                  href={listHref + "&after=" + encodeURIComponent(data.next)}
-                >
-                  Próxima página
-                </Link>
-              )}
-            </div>
-          </>
         )}
-      </section>
+      <h3>Itens do checkout</h3>
+      <div className={styles.scroll}>
+        <table className={styles.table}>
+          <thead>
+            <tr>
+              <th>Produto</th>
+              <th>SKU</th>
+              <th>Quantidade</th>
+              <th>Preço unitário original</th>
+              <th>Total com desconto</th>
+            </tr>
+          </thead>
+          <tbody>
+            {item.lineItems.nodes.map((line) => (
+              <tr key={line.id}>
+                <td>
+                  {line.title || "Produto"}
+                  {line.variantTitle && ` · ${line.variantTitle}`}
+                </td>
+                <td>{line.sku || "—"}</td>
+                <td>{line.quantity}</td>
+                <td>{price(line.originalUnitPriceSet)}</td>
+                <td>{price(line.discountedTotalPriceSet)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {item.lineItems.pageInfo.hasNextPage && (
+        <p>
+          Exibindo os primeiros 50 itens. Abra na Shopify para consultar os
+          demais.
+        </p>
+      )}
+      <a
+        className={styles.button}
+        href={`https://${domain}/admin/checkouts/${id}`}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Abrir na Shopify ↗
+      </a>
     </>
   );
 }

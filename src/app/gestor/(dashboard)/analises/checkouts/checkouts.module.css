@@ -1,0 +1,248 @@
+.workspace {
+  color: #202647;
+  min-width: 0;
+}
+.hero {
+  padding: clamp(1.5rem, 4vw, 3.25rem);
+  border-radius: 24px;
+  color: #f8f7ff;
+  background:
+    radial-gradient(ellipse at 95% 0%, #6355ad, transparent 65%),
+    linear-gradient(120deg, #1c2346, #323365);
+}
+.hero h1 {
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  margin: 0.45rem 0;
+  color: inherit;
+}
+.hero p {
+  margin: 0;
+  color: #e0def7;
+}
+.eyebrow {
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  color: #ded4ff;
+  font-weight: 700;
+}
+.panel {
+  margin-top: 1rem;
+  padding: clamp(0.85rem, 2vw, 1.65rem);
+  background: #fff;
+  border: 1px solid #e7e6f2;
+  border-radius: 20px;
+  box-shadow: 0 14px 36px #2624530e;
+}
+.toolbar,
+.controls,
+.detail,
+.period {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+.toolbar {
+  justify-content: space-between;
+}
+.toolbar:not(:empty) {
+  margin-block: 0.35rem 1rem;
+}
+.controls,
+.detail {
+  justify-content: space-between;
+}
+.controls {
+  border-top: 1px solid #eeedf5;
+  padding-top: 1rem;
+}
+.button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid #e2def1;
+  border-radius: 10px;
+  background: #fff;
+  color: #403568;
+  font: inherit;
+  font-weight: 650;
+  text-decoration: none;
+  cursor: pointer;
+}
+.button:hover,
+.button[aria-current],
+.button[aria-pressed="true"] {
+  background: #eee9ff;
+  border-color: #c8b8f7;
+  color: #41248e;
+}
+.search {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.8rem;
+  color: #494665;
+}
+.search input {
+  font: inherit;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid #d9d4e9;
+  border-radius: 10px;
+  color: #202647;
+  background: #fbfaff;
+  max-width: 100%;
+}
+.workspace :is(a, button, input):focus-visible {
+  outline: 2px solid #6442bd;
+  outline-offset: 3px;
+}
+.count {
+  color: #575573;
+  font-size: 0.8rem;
+  margin: 0.8rem 0;
+}
+.scroll {
+  overflow: auto;
+  border: 1px solid #e7e6f2;
+  border-radius: 14px;
+  margin-block: 0.8rem;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+.table :is(th, td) {
+  padding: 0.8rem 1rem;
+}
+.table th {
+  background: #f3f1fa;
+  color: #4f4672;
+  font-weight: 700;
+}
+.table td {
+  border-top: 1px solid #eeedf5;
+}
+.table tbody tr:hover,
+.table tbody tr:focus-within {
+  background: #faf8ff;
+}
+.table :is(th, td):last-child {
+  text-align: right;
+}
+.table td:last-child {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.checkoutLink {
+  color: #513399;
+  font-weight: 700;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.checkoutLink:hover {
+  text-decoration: underline;
+}
+.checkoutLink span {
+  margin-left: 0.25rem;
+}
+.open,
+.complete {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border-radius: 999px;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.open {
+  background: #fff0d8;
+  color: #854500;
+}
+.complete {
+  background: #def6ea;
+  color: #176342;
+}
+.open::before,
+.complete::before {
+  content: "";
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+.detail h2,
+.detail p {
+  margin: 0.2rem 0;
+}
+.amounts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.65rem;
+  margin-block: 1rem;
+}
+.amounts div {
+  padding: 0.85rem;
+  border-radius: 12px;
+  background: #f6f5fb;
+}
+.amounts div:last-child {
+  background: #eee8ff;
+  color: #41248e;
+}
+.amounts dd {
+  margin: 0.35rem 0 0;
+  font-weight: 750;
+}
+.empty {
+  padding: 1.25rem;
+  border-radius: 12px;
+  background: #f6f5fb;
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 1rem;
+}
+.columns > .panel {
+  min-width: 0;
+  scroll-margin-top: 1rem;
+}
+.detail {
+  background: #152744;
+  color: #fff;
+  border-radius: 13px;
+  padding: 1rem;
+  overflow-wrap: anywhere;
+}
+.detail .eyebrow {
+  color: #b8d5ff;
+}
+.detail h2 {
+  color: inherit;
+}
+.table tbody tr[data-selected="true"] {
+  background: #e0efff;
+}
+.table tr[data-selected="true"] td:first-child {
+  box-shadow: inset 4px 0 #1559cb;
+}
+.amounts div:last-child {
+  background: #dcecff;
+  color: #123d89;
+}
+.checkoutLink {
+  color: #174eaa;
+}
+
+@media (max-width: 1100px) {
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
