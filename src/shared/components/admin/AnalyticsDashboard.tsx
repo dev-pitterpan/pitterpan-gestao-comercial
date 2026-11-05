@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -75,16 +76,18 @@ const normalize = (s: string) =>
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();
-export default function AnalyticsDashboard() {
+export default function AnalyticsDashboard({ reports }: { reports: boolean }) {
   const router = useRouter();
   const [days, setDays] = useState("30"),
     [range, setRange] = useState<DateRange>({ start: "", end: "" }),
     [revision, setRevision] = useState(0),
-    [reportId, setReportId] = useState(""),
+    [selection, setSelection] = useState({ id: "", reports }),
     [search, setSearch] = useState(""),
     [data, setData] = useState<Overview | null>(null),
     [busy, setBusy] = useState(true),
     [error, setError] = useState("");
+  const reportId = selection.reports === reports ? selection.id : "";
+  const setReportId = (id: string) => setSelection({ id, reports });
   const [homeChart, setHomeChart] = useState("line");
   const heading = useRef<HTMLHeadingElement>(null);
   const params = new URLSearchParams({
@@ -94,6 +97,7 @@ export default function AnalyticsDashboard() {
     refresh: String(revision),
   }).toString();
   useEffect(() => {
+    if (reports) return;
     const controller = new AbortController();
     setData(null);
     setError("");
@@ -115,9 +119,9 @@ export default function AnalyticsDashboard() {
         if (!controller.signal.aborted) setBusy(false);
       });
     return () => controller.abort();
-  }, [params]);
+  }, [params, reports]);
   useEffect(() => {
-    heading.current?.focus();
+    if (reportId) heading.current?.focus();
   }, [reportId]);
   const money = (n: number) =>
     new Intl.NumberFormat("pt-BR", {
@@ -130,9 +134,13 @@ export default function AnalyticsDashboard() {
         <div className="analytics-period">
           <span className="analytics-eyebrow">RESULTADOS DA SUA LOJA</span>
           <strong>
-            {data
-              ? `${shortDate(data.window.start)} a ${shortDate(data.window.end)}`
-              : "Escolha o período"}
+            {range.start && range.end
+              ? `${shortDate(range.start)} a ${shortDate(range.end)}`
+              : data && !reports
+                ? `${shortDate(data.window.start)} a ${shortDate(data.window.end)}`
+                : days === "1"
+                  ? "Hoje"
+                  : `Últimos ${days} dias`}
           </strong>
         </div>
         <div className="insights-filters">
@@ -166,14 +174,15 @@ export default function AnalyticsDashboard() {
             className="admin-button analytics-back"
             onClick={() => setReportId("")}
           >
-            <ArrowLeft size={16} /> Voltar ao resumo
+            <ArrowLeft size={16} />{" "}
+            {reports ? "Voltar aos relatórios" : "Voltar à visão geral"}
           </button>
           <h2 ref={heading} tabIndex={-1} className="admin-sr-only">
             Detalhes do relatório
           </h2>
           <ShopifyReportDetail key={reportId} id={reportId} params={params} />
         </>
-      ) : (
+      ) : !reports ? (
         <>
           <div className="analytics-guide-intro">
             <span className="analytics-eyebrow">
@@ -182,10 +191,7 @@ export default function AnalyticsDashboard() {
             <h2 ref={heading} tabIndex={-1}>
               Como está a sua loja?
             </h2>
-            <p>
-              Comece pelos números principais. Depois, escolha o que quer
-              entender melhor.
-            </p>
+            <p>Confira os valores recebidos e devolvidos no período.</p>
           </div>
           {busy && (
             <div className="admin-panel analytics-loading">
@@ -194,11 +200,11 @@ export default function AnalyticsDashboard() {
           )}
           {error && (
             <p className="admin-data-notice" role="alert">
-              {error} Você ainda pode abrir os relatórios abaixo.
+              {error}
             </p>
           )}
           <FinanceOverview params={params} />
-          <details className="analytics-shopify-comparison">
+          <details className="analytics-shopify-comparison" open>
             <summary>Comparar com o Shopify Analytics</summary>
             <p className="finance-definition">
               Os relatórios de vendas da Shopify incluem pedidos pendentes, não
@@ -348,6 +354,15 @@ export default function AnalyticsDashboard() {
               </section>
             )}
           </details>
+          <Link
+            className="admin-button"
+            href="/gestor/analises/?secao=relatorios"
+          >
+            Explorar relatórios <ChevronRight size={16} />
+          </Link>
+        </>
+      ) : (
+        <>
           <div className="analytics-guide-intro">
             <h2>O que você quer descobrir?</h2>
             <p>Clique em uma pergunta para explorar o gráfico e os dados.</p>
@@ -378,7 +393,7 @@ export default function AnalyticsDashboard() {
               </button>
             ))}
           </div>
-          <details className="analytics-all-reports">
+          <details className="analytics-all-reports" open>
             <summary>
               Todos os relatórios · vendas, clientes, estoque e mais
             </summary>

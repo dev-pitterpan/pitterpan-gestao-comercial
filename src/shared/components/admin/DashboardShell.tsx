@@ -2,9 +2,10 @@
 import AutoFilterForm from "./AutoFilterForm";
 import PartyExperience, { PartySectionScene } from "./PartyExperience";
 import Link, { useLinkStatus } from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState, Suspense, type ReactNode } from "react";
 import {
+  ArrowLeft,
   CalendarDays,
   ShieldCheck,
   LoaderCircle,
@@ -112,6 +113,51 @@ function NavigationPending() {
     </span>
   ) : null;
 }
+const analyticsPath = "/gestor/analises/";
+
+function AnalyticsNavigation({ close }: { close: () => void }) {
+  const reports = useSearchParams().get("secao") === "relatorios";
+  return (
+    <section className="admin-nav-group">
+      <h2>Análises Shopify</h2>
+      {[
+        {
+          href: analyticsPath,
+          label: "Visão geral",
+          icon: LayoutDashboard,
+          active: !reports,
+        },
+        {
+          href: analyticsPath + "?secao=relatorios",
+          label: "Relatórios",
+          icon: BarChart3,
+          active: reports,
+        },
+        {
+          href: "/gestor/",
+          label: "Voltar à gestão",
+          icon: ArrowLeft,
+          active: false,
+        },
+      ].map(({ href, label, icon: Icon, active }) => (
+        <Link
+          key={href}
+          href={href}
+          prefetch={false}
+          onClick={close}
+          aria-current={active ? "page" : undefined}
+          className={active ? "active" : ""}
+        >
+          <Icon size={19} strokeWidth={1.7} aria-hidden="true" />
+          <span>{label}</span>
+          <NavigationPending />
+          {active && <span className="admin-nav-marker" />}
+        </Link>
+      ))}
+    </section>
+  );
+}
+
 const roleLabels = {
   admin: "Administrador",
   gerente_compras: "Gerente de Compras",
@@ -186,6 +232,7 @@ export default function DashboardShell({
       setLeaving(false);
     }
   }
+  const analytics = pathname === analyticsPath;
   const title =
     links.find((l) => l.href === pathname)?.label || "Central de gestão";
   return (
@@ -211,7 +258,10 @@ export default function DashboardShell({
             alt="Pitter Pan Festas"
           />
           <span>
-            Pitter Pan<strong>Central de gestão</strong>
+            Pitter Pan
+            <strong>
+              {analytics ? "Análises Shopify" : "Central de gestão"}
+            </strong>
           </span>
         </Link>
         <button
@@ -227,7 +277,11 @@ export default function DashboardShell({
           </span>
           <div>
             <strong>Pitter Pan Festas</strong>
-            <small>Seu espaço de trabalho</small>
+            <small>
+              {analytics
+                ? "Indicadores e relatórios"
+                : "Seu espaço de trabalho"}
+            </small>
           </div>
           <ShieldCheck
             className="admin-workspace-shield"
@@ -235,38 +289,51 @@ export default function DashboardShell({
             aria-hidden="true"
           />
         </div>
-        <nav className="admin-navigation" aria-label="Seções da central">
-          {navigationGroups.map((group) => {
-            const items = links.filter(
-              (link) =>
-                group.paths.includes(link.href) &&
-                (!link.admin ||
-                  user.role === "admin" ||
-                  user.role === "gerente_compras") &&
-                (!link.financial || user.role !== "atendimento"),
-            );
-            if (!items.length) return null;
-            return (
-              <section className="admin-nav-group" key={group.label}>
-                <h2>{group.label}</h2>
-                {items.map(({ href, label, icon: Icon }) => (
-                  <Link
-                    key={href}
-                    href={href}
-                    prefetch={false}
-                    aria-current={pathname === href ? "page" : undefined}
-                    className={pathname === href ? "active" : ""}
-                    onClick={() => setOpen(false)}
-                  >
-                    <Icon size={19} strokeWidth={1.7} aria-hidden="true" />
-                    <span>{label}</span>
-                    <NavigationPending />
-                    {pathname === href && <span className="admin-nav-marker" />}
-                  </Link>
-                ))}
-              </section>
-            );
-          })}
+        <nav
+          className="admin-navigation"
+          aria-label={
+            analytics ? "Seções de Análises Shopify" : "Seções da central"
+          }
+        >
+          {analytics ? (
+            <Suspense>
+              <AnalyticsNavigation close={() => setOpen(false)} />
+            </Suspense>
+          ) : (
+            navigationGroups.map((group) => {
+              const items = links.filter(
+                (link) =>
+                  group.paths.includes(link.href) &&
+                  (!link.admin ||
+                    user.role === "admin" ||
+                    user.role === "gerente_compras") &&
+                  (!link.financial || user.role !== "atendimento"),
+              );
+              if (!items.length) return null;
+              return (
+                <section className="admin-nav-group" key={group.label}>
+                  <h2>{group.label}</h2>
+                  {items.map(({ href, label, icon: Icon }) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      prefetch={false}
+                      aria-current={pathname === href ? "page" : undefined}
+                      className={pathname === href ? "active" : ""}
+                      onClick={() => setOpen(false)}
+                    >
+                      <Icon size={19} strokeWidth={1.7} aria-hidden="true" />
+                      <span>{label}</span>
+                      <NavigationPending />
+                      {pathname === href && (
+                        <span className="admin-nav-marker" />
+                      )}
+                    </Link>
+                  ))}
+                </section>
+              );
+            })
+          )}
         </nav>
         <div className="admin-sidebar-note">
           <span>
