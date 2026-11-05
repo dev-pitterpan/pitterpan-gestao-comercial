@@ -2521,3 +2521,53 @@
 .admin-app .sales-status-search-field input::placeholder {
   color: #7e97b3;
 }
+
+.admin-app .analytics-nav-category {
+  margin-block: 0.45rem;
+  border-radius: 12px;
+  background: #eaf1f9;
+}
+
+.admin-app .analytics-nav-category summary {
+  cursor: pointer;
+  padding: 0.65rem 0.75rem;
+  font-weight: 700;
+}
+
+.admin-app .analytics-nav-category a {
+  height: auto;
+  min-height: 36px;
+  font-size: 0.83rem;
+  line-height: 1.35;
+}
+
+.analytics-data-explorer {
+  margin-block: 1.5rem;
+  padding: 1rem;
+  border: 1px solid #d6e2f1;
+  border-radius: 16px;
+  background: linear-gradient(145deg, #f1f6ff, #fff);
+}
+
+.analytics-table-toolbar,
+.analytics-table-pages {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.analytics-table-toolbar {
+  margin-block: 0.75rem;
+}
+
+.analytics-data-explorer th button {
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  padding: 0.35rem 0;
+  cursor: pointer;
+}

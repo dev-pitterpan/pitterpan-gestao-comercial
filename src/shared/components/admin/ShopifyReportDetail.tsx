@@ -42,6 +42,9 @@ export default function ShopifyReportDetail({
   params: string;
 }) {
   const report = reportById(id)!;
+  const [query, setQuery] = useState("");
+  const [page, setPage] = useState(0);
+  const [sort, setSort] = useState<{ key: string; descending: boolean }>();
   const [chartMode, setChartMode] = useState("line");
   const [data, setData] = useState<Data | null>(null),
     [error, setError] = useState(""),
@@ -54,6 +57,7 @@ export default function ShopifyReportDetail({
     setError("");
     setBusy(true);
     setLimit(10);
+    setPage(0);
     void fetch(`/api/admin/analytics/?${params}&report=${id}`, {
       cache: "no-store",
       signal: AbortSignal.any([controller.signal, AbortSignal.timeout(55000)]),
@@ -85,6 +89,29 @@ export default function ShopifyReportDetail({
   ];
   const format = (v: unknown, c: ReportColumn = selected) =>
     formatReportValue(v, c, data?.currency || "BRL");
+  const normalizedQuery = query.trim().toLocaleLowerCase("pt-BR");
+  const rows = (data?.table.rows ?? []).filter((row) =>
+    columns.some((column) =>
+      format(row[column.key], column)
+        .toLocaleLowerCase("pt-BR")
+        .includes(normalizedQuery),
+    ),
+  );
+  if (sort) {
+    const column = columns.find((item) => item.key === sort.key)!;
+    rows.sort((a, b) => {
+      const left = a[column.key],
+        right = b[column.key];
+      if (left == null || right == null)
+        return Number(left == null) - Number(right == null);
+      const result = column.format
+        ? (numberValue(left) ?? 0) - (numberValue(right) ?? 0)
+        : String(left).localeCompare(String(right), "pt-BR", { numeric: true });
+      return sort.descending ? -result : result;
+    });
+  }
+  const pageCount = Math.max(1, Math.ceil(rows.length / 10));
+  const visiblePage = Math.min(page, pageCount - 1);
   function download() {
     if (!data) return;
     const rows: unknown[][] = [
@@ -293,8 +320,24 @@ export default function ShopifyReportDetail({
                   tabela.
                 </p>
               )}
-              <details className="analytics-daily-values">
-                <summary>Conferir os dados do relatório</summary>
+              <section
+                className="analytics-data-explorer"
+                aria-label="Dados do relatório"
+              >
+                <div className="analytics-table-toolbar">
+                  <h3>Dados do relatório</h3>
+                  <label className="shopify-report-search">
+                    Buscar na tabela
+                    <input
+                      type="search"
+                      value={query}
+                      onChange={(event) => {
+                        setQuery(event.target.value);
+                        setPage(0);
+                      }}
+                    />
+                  </label>
+                </div>
                 <div
                   className="analytics-table-scroll finance-table-viewport"
                   role="region"
@@ -305,32 +348,86 @@ export default function ShopifyReportDetail({
                     <thead>
                       <tr>
                         {columns.map((c) => (
-                          <th key={c.key}>{c.label}</th>
+                          <th
+                            key={c.key}
+                            scope="col"
+                            aria-sort={
+                              sort?.key === c.key
+                                ? sort.descending
+                                  ? "descending"
+                                  : "ascending"
+                                : undefined
+                            }
+                          >
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSort({
+                                  key: c.key,
+                                  descending:
+                                    sort?.key === c.key
+                                      ? !sort.descending
+                                      : Boolean(c.format),
+                                });
+                                setPage(0);
+                              }}
+                            >
+                              {c.label}{" "}
+                              {sort?.key === c.key &&
+                                (sort.descending ? "↓" : "↑")}
+                            </button>
+                          </th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
-                      {data.table.rows.slice(0, limit).map((r, i) => (
-                        <tr key={i}>
-                          {columns.map((c) => (
-                            <td key={c.key}>{format(r[c.key], c)}</td>
-                          ))}
-                        </tr>
-                      ))}
+                      {rows
+                        .slice(visiblePage * 10, (visiblePage + 1) * 10)
+                        .map((r, i) => (
+                          <tr key={i}>
+                            {columns.map((c) => (
+                              <td key={c.key}>{format(r[c.key], c)}</td>
+                            ))}
+                          </tr>
+                        ))}
                     </tbody>
                   </table>
                 </div>
-              </details>
-              {limit < data.table.rows.length && (
-                <button
-                  className="analytics-expand"
-                  onClick={() => setLimit((n) => n + 10)}
-                >
-                  Carregar mais 10 resultados ·{" "}
-                  {Math.min(limit, data.table.rows.length)} de{" "}
-                  {data.table.rows.length}
-                </button>
-              )}
+                {!rows.length && <p>Nenhuma linha corresponde à busca.</p>}
+                <div className="analytics-table-toolbar">
+                  <span aria-live="polite">
+                    {rows.length} linhas · Página {visiblePage + 1} de{" "}
+                    {pageCount}
+                  </span>
+                  <div className="analytics-table-pages">
+                    <button
+                      className="admin-button"
+                      disabled={visiblePage === 0}
+                      onClick={() => setPage(visiblePage - 1)}
+                    >
+                      Anterior
+                    </button>
+                    <button
+                      className="admin-button"
+                      disabled={visiblePage + 1 >= pageCount}
+                      onClick={() => setPage(visiblePage + 1)}
+                    >
+                      Próxima
+                    </button>
+                  </div>
+                </div>
+              </section>
+              {limit < data.table.rows.length &&
+                Boolean(report.dimensions?.length) && (
+                  <button
+                    className="analytics-expand"
+                    onClick={() => setLimit((n) => n + 10)}
+                  >
+                    Carregar mais 10 resultados ·{" "}
+                    {Math.min(limit, data.table.rows.length)} de{" "}
+                    {data.table.rows.length}
+                  </button>
+                )}
               {report.dimensions?.length && data.table.rows.length === 50 && (
                 <p className="analytics-session-note">
                   Exibindo os 50 primeiros grupos. Os indicadores do período são

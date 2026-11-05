@@ -76,18 +76,27 @@ const normalize = (s: string) =>
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();
-export default function AnalyticsDashboard({ reports }: { reports: boolean }) {
+export default function AnalyticsDashboard({
+  reports,
+  reportId,
+}: {
+  reports: boolean;
+  reportId: string;
+}) {
   const router = useRouter();
   const [days, setDays] = useState("30"),
     [range, setRange] = useState<DateRange>({ start: "", end: "" }),
     [revision, setRevision] = useState(0),
-    [selection, setSelection] = useState({ id: "", reports }),
     [search, setSearch] = useState(""),
     [data, setData] = useState<Overview | null>(null),
     [busy, setBusy] = useState(true),
     [error, setError] = useState("");
-  const reportId = selection.reports === reports ? selection.id : "";
-  const setReportId = (id: string) => setSelection({ id, reports });
+  const setReportId = (id: string) =>
+    router.push(
+      id
+        ? `?secao=relatorios&relatorio=${encodeURIComponent(id)}`
+        : "?secao=relatorios",
+    );
   const [homeChart, setHomeChart] = useState("line");
   const heading = useRef<HTMLHeadingElement>(null);
   const params = new URLSearchParams({
