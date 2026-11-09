@@ -68,59 +68,51 @@ export default function DeliveryMark({
         </svg>
       ) : safe === "PICKUP" ? (
         <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
-          <ellipse cx="32" cy="59" rx="21" ry="3" fill="#dce6f3" />
-          <path
-            d="M23 42L21 56M35 43L38 56"
-            stroke="#344c90"
-            strokeWidth="6"
-            strokeLinecap="round"
-          />
-          <path
-            d="M20 58H26M36 58H43"
+          <ellipse cx="32" cy="58" rx="25" ry="3" fill="#dce6f3" />
+          <rect
+            x="12"
+            y="25"
+            width="40"
+            height="31"
+            rx="4"
+            fill="#eef5ff"
             stroke="#263b77"
-            strokeWidth="4"
-            strokeLinecap="round"
+            strokeWidth="3"
           />
-          <path d="M19 29Q19 24 26 23H32Q39 24 39 30V43H20Z" fill="#4c74b9" />
           <path
-            d="M21 28L15 39L23 43M37 28L43 38"
-            stroke="#e7b692"
-            strokeWidth="5"
-            strokeLinecap="round"
+            d="M18 12h28l9 14v5a6 6 0 0 1-12 0 5.5 5.5 0 0 1-11 0 5.5 5.5 0 0 1-11 0 6 6 0 0 1-12 0v-5l9-14Z"
+            fill="#ffd75e"
+            stroke="#263b77"
+            strokeWidth="3"
             strokeLinejoin="round"
           />
-          <circle cx="29" cy="14" r="9" fill="#f1c7a4" />
           <path
-            d="M20 14Q18 2 29 3Q40 3 38 13L33 8Q28 13 20 10Z"
-            fill="#34466d"
+            d="m25 14-4 12v4a5.5 5.5 0 0 0 11 0V14h-7Zm14 0 4 12v4a6 6 0 0 0 12 0v-3l-8-13h-8Z"
+            fill="#fff3c6"
           />
-          <path
-            d="M27 17Q29 19 32 17"
-            stroke="#ab7968"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-          />
+          <path d="M9 26h46" stroke="#263b77" strokeWidth="2" />
           <rect
-            x="32"
-            y="32"
-            width="21"
-            height="18"
-            rx="3"
-            fill="#ffd75e"
-            stroke="#d6a62e"
-            strokeWidth="1.5"
-          />
-          <path d="M39 32V39H45V32" fill="#fff2ba" />
-          <path
-            d="M37 43H43"
-            stroke="#bc8c26"
-            strokeWidth="1.5"
-            strokeLinecap="round"
+            x="18"
+            y="40"
+            width="13"
+            height="9"
+            rx="2"
+            fill="#a7cdf4"
+            stroke="#263b77"
+            strokeWidth="2"
           />
           <path
-            d="M25 36L32 40"
-            stroke="#f1c7a4"
-            strokeWidth="5"
+            d="M38 56V43a3 3 0 0 1 3-3h5v16"
+            fill="#4c74b9"
+            stroke="#263b77"
+            strokeWidth="2"
+            strokeLinejoin="round"
+          />
+          <circle cx="41" cy="49" r="1.2" fill="#fff3c6" />
+          <path
+            d="M9 56h46"
+            stroke="#263b77"
+            strokeWidth="3"
             strokeLinecap="round"
           />
         </svg>
