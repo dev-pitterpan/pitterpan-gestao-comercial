@@ -115,6 +115,16 @@
 .admin-nav-section {
   margin: 5px 0;
 }
+.admin-nav-section:not([open]) > summary {
+  position: relative;
+}
+.admin-nav-section:not([open]) > summary::after {
+  content: "";
+  position: absolute;
+  inset: auto 13px -3px;
+  border-bottom: 1px solid #dce7f2;
+  pointer-events: none;
+}
 .admin-nav-section > summary {
   display: flex;
   align-items: center;
