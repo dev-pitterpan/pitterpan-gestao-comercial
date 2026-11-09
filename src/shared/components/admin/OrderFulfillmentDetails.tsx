@@ -35,19 +35,26 @@ const OpenDetails = createContext<(order: Order) => void>(() => {});
 export function FulfillmentWindows({ children }: { children: ReactNode }) {
   const [windows, setWindows] = useState<WindowState[]>([]);
   const layer = useRef(100);
-  const [dockWidth, setDockWidth] = useState(36);
-  const resizeDock = (width: number) =>
-    setDockWidth(Math.round(Math.max(28, Math.min(width, 46))));
+  const [widths, setWidths] = useState({ left: 36, right: 36 });
+  const dualDock =
+    windows.some(({ dock }) => dock === "left") &&
+    windows.some(({ dock }) => dock === "right");
+  const minWidth = dualDock ? 20 : 28;
+  const maxWidth = dualDock ? 25 : 46;
+  const clampWidth = (width: number) =>
+    Math.round(Math.max(minWidth, Math.min(width, maxWidth)));
+  const leftWidth = clampWidth(widths.left);
+  const rightWidth = clampWidth(widths.right);
 
   useEffect(() => {
-    document.body.style.setProperty(
-      "--fulfillment-user-width",
-      `${dockWidth}vw`,
-    );
+    const style = document.body.style;
+    style.setProperty("--fulfillment-left-width", `${leftWidth}vw`);
+    style.setProperty("--fulfillment-right-width", `${rightWidth}vw`);
     return () => {
-      document.body.style.removeProperty("--fulfillment-user-width");
+      style.removeProperty("--fulfillment-left-width");
+      style.removeProperty("--fulfillment-right-width");
     };
-  }, [dockWidth]);
+  }, [leftWidth, rightWidth]);
   function activate(id: string) {
     const next = ++layer.current;
     setWindows((current) =>
@@ -70,7 +77,7 @@ export function FulfillmentWindows({ children }: { children: ReactNode }) {
     setWindows((current) =>
       current.map((entry) => {
         if (entry.id === id) return { ...entry, dock: side };
-        return side && entry.dock ? { ...entry, dock: null } : entry;
+        return side && entry.dock === side ? { ...entry, dock: null } : entry;
       }),
     );
   }
@@ -84,8 +91,17 @@ export function FulfillmentWindows({ children }: { children: ReactNode }) {
               key={entry.id}
               order={entry}
               layer={entry.layer}
-              dockWidth={dockWidth}
-              resizeDock={resizeDock}
+              dockWidth={entry.dock === "left" ? leftWidth : rightWidth}
+              minDockWidth={minWidth}
+              maxDockWidth={maxWidth}
+              resizeDock={(width) => {
+                const side = entry.dock;
+                if (side)
+                  setWidths((current) => ({
+                    ...current,
+                    [side]: clampWidth(width),
+                  }));
+              }}
               activate={() => activate(entry.id)}
               dock={(side) => dock(entry.id, side)}
               close={() =>
@@ -120,6 +136,8 @@ function FulfillmentWindow({
   layer,
   activate,
   dockWidth,
+  minDockWidth,
+  maxDockWidth,
   resizeDock,
   dock,
   close,
@@ -127,6 +145,8 @@ function FulfillmentWindow({
   order: WindowState;
   layer: number;
   dockWidth: number;
+  minDockWidth: number;
+  maxDockWidth: number;
   resizeDock: (width: number) => void;
   activate: () => void;
   dock: (side: Dock | null) => void;
@@ -234,8 +254,8 @@ function FulfillmentWindow({
           role="separator"
           aria-label="Largura da conferência"
           aria-orientation="vertical"
-          aria-valuemin={28}
-          aria-valuemax={46}
+          aria-valuemin={minDockWidth}
+          aria-valuemax={maxDockWidth}
           aria-valuenow={dockWidth}
           aria-valuetext={`${dockWidth}% da tela`}
           tabIndex={0}
@@ -260,9 +280,9 @@ function FulfillmentWindow({
             const direction = order.dock === "left" ? 1 : -1;
             resizeDock(
               event.key === "Home"
-                ? 28
+                ? minDockWidth
                 : event.key === "End"
-                  ? 46
+                  ? maxDockWidth
                   : dockWidth +
                     direction * (event.key === "ArrowRight" ? 2 : -2),
             );

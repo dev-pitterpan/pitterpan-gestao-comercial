@@ -783,8 +783,17 @@
 }
 
 @media (min-width: 1100px) {
-  body {
-    --fulfillment-dock-width: var(--fulfillment-user-width, 36vw);
+  :is(
+    .fulfillment-window[data-dock="left"],
+    .fulfillment-snap-preview[data-side="left"]
+  ) {
+    --fulfillment-dock-width: var(--fulfillment-left-width, 36vw);
+  }
+  :is(
+    .fulfillment-window[data-dock="right"],
+    .fulfillment-snap-preview[data-side="right"]
+  ) {
+    --fulfillment-dock-width: var(--fulfillment-right-width, 36vw);
   }
   .fulfillment-dock-action {
     display: inline-flex !important;
@@ -817,13 +826,13 @@
     inset-inline: auto 0;
   }
   body:has(.fulfillment-window[data-dock="left"]) .admin-app {
-    margin-left: var(--fulfillment-dock-width);
+    margin-left: var(--fulfillment-left-width);
   }
   body:has(.fulfillment-window[data-dock="left"]) .admin-sidebar {
-    left: var(--fulfillment-dock-width);
+    left: var(--fulfillment-left-width);
   }
   body:has(.fulfillment-window[data-dock="right"]) .admin-app {
-    margin-right: var(--fulfillment-dock-width);
+    margin-right: var(--fulfillment-right-width);
   }
   body:has(.fulfillment-window[data-dock]) .admin-content {
     padding-inline: 16px;
@@ -935,10 +944,10 @@
     outline-offset: -2px;
   }
   .fulfillment-resize[data-side="right"] {
-    right: calc(var(--fulfillment-dock-width) - 7px);
+    right: calc(var(--fulfillment-right-width) - 7px);
   }
   .fulfillment-resize[data-side="left"] {
-    left: calc(var(--fulfillment-dock-width) - 7px);
+    left: calc(var(--fulfillment-left-width) - 7px);
   }
   .fulfillment-resize::before {
     content: "";
@@ -1026,8 +1035,8 @@
 }
 .fulfillment-corner-resize {
   position: absolute;
-  right: 3px;
-  bottom: 3px;
+  right: 7px;
+  bottom: 7px;
   z-index: 3;
   display: grid;
   place-items: center;
