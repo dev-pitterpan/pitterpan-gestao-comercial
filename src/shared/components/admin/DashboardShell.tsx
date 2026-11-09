@@ -99,7 +99,11 @@ const links = [
     financial: true,
   },
   { href: "/gestor/produtos/", label: "Todos os produtos", icon: Package },
-  { href: "/gestor/estoque/", label: "Estoque do catálogo", icon: Boxes },
+  {
+    href: "/gestor/estoque/",
+    label: "Estoque da Shopify",
+    icon: ShopifyNavMark,
+  },
   {
     href: "/gestor/winthor/balcao/",
     label: "Vendas na loja",
