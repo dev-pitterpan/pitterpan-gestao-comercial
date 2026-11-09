@@ -173,7 +173,7 @@ export async function readSalesOrders(
     boundary = ` AND (o.processed_at,o.id)<($${values.length - 1}::timestamptz,$${values.length}::text)`;
   }
   const { rows } = await db.query<Record<string, string>>(
-    `SELECT o.id,o.name,o.processed_at::text,o.financial_status,o.fulfillment_status,o.cancelled_at::text,o.currency,o.total::text,${currentTotalSql}::text AS current_total,${officialOutstandingSql}::text AS outstanding,o.received::text,o.refunded::text,(o.received-o.refunded)::text AS net,${orderDeliverySql} AS delivery_kind,to_jsonb(o)->>'shipping_charge' AS shipping_charge,COALESCE(to_jsonb(o)->>'shipping_charge_checked','false') AS shipping_charge_checked,COALESCE(to_jsonb(o)->>'delivery_label','') AS delivery_label,${customerColumns}
+    `SELECT o.id,o.name,o.processed_at::text,o.financial_status,o.fulfillment_status,o.cancelled_at::text,o.currency,o.total::text,${currentTotalSql}::text AS current_total,${officialOutstandingSql}::text AS outstanding,o.received::text,o.refunded::text,(o.received-o.refunded)::text AS net,${orderDeliverySql} AS delivery_kind,to_jsonb(o)->>'shipping_charge' AS shipping_charge,COALESCE(to_jsonb(o)->>'shipping_charge_checked','false') AS shipping_charge_checked,COALESCE(to_jsonb(o)->>'delivery_label','') AS delivery_label,to_jsonb(o)->'destination'->>'city' AS destination_city,to_jsonb(o)->'destination'->>'state' AS destination_state,${customerColumns}
      FROM pitterpan_sales_orders o ${customerJoin}
      WHERE ${selection(filters)}${boundary}
      ORDER BY o.processed_at DESC,o.id DESC LIMIT ${SALES_PAGE_SIZE + 1}`,
@@ -280,8 +280,12 @@ export async function readSales(
   const where = selection(filters);
   const totals = await financialTotals(db, values, where);
   const items = await readSoldProducts(db, store, period, filters);
-  const deliveries = await db.query<{ kind: string; orders: string }>(
-    `SELECT ${orderDeliverySql} AS kind,count(*)::text AS orders FROM pitterpan_sales_orders o WHERE ${where} GROUP BY 1 ORDER BY 1`,
+  const deliveries = await db.query<{
+    kind: string;
+    orders: string;
+    units: string;
+  }>(
+    `SELECT ${orderDeliverySql} AS kind,count(*)::text AS orders,COALESCE(sum((SELECT sum(i.current_quantity) FROM pitterpan_sales_items i WHERE i.store=o.store AND i.order_id=o.id)),0)::text AS units FROM pitterpan_sales_orders o WHERE ${where} GROUP BY 1 ORDER BY 1`,
     values,
   );
   const ordersPage = await readSalesOrders(db, store, period, filters);

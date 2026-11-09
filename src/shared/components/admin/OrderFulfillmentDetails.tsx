@@ -10,6 +10,7 @@ import {
 import type { CSSProperties, PointerEvent, ReactNode } from "react";
 import { createPortal } from "react-dom";
 import {
+  ArrowUpRight,
   ClipboardList,
   MoveDiagonal,
   PanelLeft,
@@ -23,11 +24,21 @@ import {
   fulfillmentDescriptions,
 } from "../../lib/admin/fulfillment";
 import type { readFulfillmentDetails } from "../../server/sales/fulfillment-details";
+import DeliveryMark from "./DeliveryMark";
+import ShippingCharge from "./ShippingCharge";
 import ProductThumbnail from "./ProductThumbnail";
 import PitterSpinner from "./PitterSpinner";
-type Data = Awaited<ReturnType<typeof readFulfillmentDetails>>;
+type Data = Awaited<ReturnType<typeof readFulfillmentDetails>> & {
+  adminOrderUrl?: string;
+};
 const number = (n: number) => n.toLocaleString("pt-BR");
-type Order = { id: string; name: string; storedStatus?: string };
+type Order = {
+  id: string;
+  name: string;
+  storedStatus?: string;
+  summary?: Record<string, string>;
+  paymentLabel?: string;
+};
 type Dock = "left" | "right";
 type WindowState = Order & { dock: Dock | null; layer: number };
 const OpenDetails = createContext<(order: Order) => void>(() => {});
@@ -68,9 +79,21 @@ export function FulfillmentWindows({ children }: { children: ReactNode }) {
     setWindows((current) =>
       current.some((entry) => entry.id === order.id)
         ? current.map((entry) =>
-            entry.id === order.id ? { ...entry, layer: next } : entry,
+            entry.id === order.id ? { ...entry, ...order, layer: next } : entry,
           )
-        : [...current, { ...order, dock: null, layer: next }],
+        : [
+            ...current
+              .filter(
+                (entry) =>
+                  !(order.summary && entry.summary && entry.dock === "right"),
+              )
+              .map((entry) =>
+                order.summary && entry.dock === "right"
+                  ? { ...entry, dock: null }
+                  : entry,
+              ),
+            { ...order, dock: order.summary ? "right" : null, layer: next },
+          ],
     );
   }
   function dock(id: string, side: Dock | null) {
@@ -122,11 +145,21 @@ export default function OrderFulfillmentDetails(order: Order) {
   return (
     <button
       type="button"
-      className="admin-button fulfillment-details-trigger"
+      className={
+        order.summary
+          ? "sales-order-link"
+          : "admin-button fulfillment-details-trigger"
+      }
       onClick={() => open(order)}
-      aria-label={`Conferir itens de atendimento do pedido ${order.name}`}
+      aria-label={`Ver detalhes do pedido ${order.name}`}
     >
-      <ClipboardList size={14} /> Conferir itens
+      {order.summary ? (
+        order.name
+      ) : (
+        <>
+          <ClipboardList size={14} /> Conferir itens
+        </>
+      )}
     </button>
   );
 }
@@ -152,7 +185,18 @@ function FulfillmentWindow({
   dock: (side: Dock | null) => void;
   close: () => void;
 }) {
-  const { id, name, storedStatus } = order;
+  const { id, name, storedStatus, summary, paymentLabel } = order;
+  const destination =
+    summary &&
+    [summary.destination_city, summary.destination_state]
+      .filter(Boolean)
+      .join(" / ");
+  const amounts =
+    summary &&
+    new Intl.NumberFormat("pt-BR", {
+      style: "currency",
+      currency: summary.currency,
+    });
   const panel = useRef<HTMLElement>(null);
   const drag = useRef<{ x: number; y: number } | null>(null);
   const resizeStart = useRef<{
@@ -371,6 +415,59 @@ function FulfillmentWindow({
               </button>
             </div>
           </header>
+          {summary && amounts && (
+            <div className="sales-order-detail-summary">
+              <strong>
+                Cliente: {summary.customer_name || "Nome não disponibilizado"}
+              </strong>
+              <div>
+                <span
+                  className={`admin-badge ${summary.financial_status === "PAID" ? "green" : "blue"}`}
+                >
+                  {paymentLabel}
+                </span>
+                <span className="admin-badge blue">
+                  {fulfillmentLabels[
+                    data?.status || summary.fulfillment_status
+                  ] ||
+                    data?.status ||
+                    summary.fulfillment_status}
+                </span>
+              </div>
+              <DeliveryMark kind={summary.delivery_kind} />
+              {destination && <small>{destination}</small>}
+              <ShippingCharge order={summary} />
+              <strong>
+                Total do pedido: {amounts.format(Number(summary.total))}
+              </strong>
+              {summary.current_total != null &&
+                Number(summary.current_total) !== Number(summary.total) && (
+                  <small>
+                    Total atual: {amounts.format(Number(summary.current_total))}
+                  </small>
+                )}
+              <small>
+                Recebido: {amounts.format(Number(summary.received))}
+              </small>
+              <small>
+                Estornado: {amounts.format(Number(summary.refunded))}
+              </small>
+              <small>Líquido: {amounts.format(Number(summary.net))}</small>
+              {summary.cancelled_at && (
+                <span className="admin-badge rose">Pedido cancelado</span>
+              )}
+              {data?.adminOrderUrl && (
+                <a
+                  className="admin-button"
+                  href={data.adminOrderUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Abrir na Shopify <ArrowUpRight size={15} aria-hidden="true" />
+                </a>
+              )}
+            </div>
+          )}
           <p id={noteId} className="fulfillment-dialog-note">
             Quantidades consultadas na Shopify. Atendimento é independente do
             pagamento e não comprova entrega ao cliente.
