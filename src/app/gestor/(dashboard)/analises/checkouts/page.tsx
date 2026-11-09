@@ -14,12 +14,12 @@ type Checkout = {
   name: string;
   createdAt: string;
   completedAt: string | null;
+  shippingAddress: { city: string | null; provinceCode: string | null } | null;
   totalPriceSet: Money;
 };
 type Detail = Checkout & {
   abandonedCheckoutUrl: string;
   discountCodes: string[];
-  shippingAddress: { city: string | null; provinceCode: string | null } | null;
   subtotalPriceSet: Money;
   totalDiscountSet: Money;
   totalTaxSet: Money | null;
@@ -83,7 +83,7 @@ export default async function CheckoutsPage({
     }>(
       `query Checkouts($after: String, $filter: String!) {
       abandonedCheckouts(first: 25, after: $after, query: $filter, sortKey: CREATED_AT, reverse: true) {
-        nodes { ${baseFields} } pageInfo { hasNextPage endCursor }
+        nodes { ${baseFields} shippingAddress { city provinceCode } } pageInfo { hasNextPage endCursor }
       }
     }`,
       {
@@ -94,8 +94,15 @@ export default async function CheckoutsPage({
         filter: `created_at:>='${start}T00:00:00-03:00'`,
       },
     );
+    const ids = abandonedCheckouts.nodes.flatMap(
+      ({ id }) => numericId(id) ?? [],
+    );
+    const shipping = await salesClient()
+      .abandonedCheckoutShippingBatch(ids)
+      .catch(() => null);
     return {
       rows: abandonedCheckouts.nodes,
+      shipping,
       next: abandonedCheckouts.pageInfo.hasNextPage
         ? abandonedCheckouts.pageInfo.endCursor
         : null,
@@ -145,7 +152,43 @@ export default async function CheckoutsPage({
                 selectedId={id}
                 rows={data.rows.map((row) => {
                   const number = numericId(row.id);
+                  const shipping = number ? data.shipping?.get(number) : null;
+                  const shippingAmount = shipping?.lines.length
+                    ? shipping.lines.reduce(
+                        (sum, line) => sum + Number(line.price),
+                        0,
+                      )
+                    : null;
                   return {
+                    timestamp: Date.parse(row.createdAt),
+                    city: [
+                      row.shippingAddress?.city,
+                      row.shippingAddress?.provinceCode,
+                    ]
+                      .filter(Boolean)
+                      .join(" / "),
+                    methods: [
+                      ...new Set(
+                        shipping?.lines
+                          .map((line) => line.title || line.code || "")
+                          .filter(Boolean),
+                      ),
+                    ],
+                    shippingAmount,
+                    shippingCurrency: shipping?.currency ?? "",
+                    shippingPrice:
+                      shipping && shippingAmount !== null
+                        ? price({
+                            shopMoney: {
+                              amount: String(shippingAmount),
+                              currencyCode: shipping.currency,
+                            },
+                          })
+                        : shipping
+                          ? "Sem modalidade"
+                          : "Indisponível",
+                    totalAmount: Number(row.totalPriceSet.shopMoney.amount),
+                    currency: row.totalPriceSet.shopMoney.currencyCode,
                     id: row.id,
                     name: row.name,
                     date: date.format(new Date(row.createdAt)),

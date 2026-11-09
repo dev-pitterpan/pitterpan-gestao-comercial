@@ -11,6 +11,14 @@ type Row = {
   complete: boolean;
   total: string;
   href: string | null;
+  timestamp: number;
+  city: string;
+  methods: string[];
+  shippingPrice: string;
+  shippingAmount: number | null;
+  shippingCurrency: string;
+  totalAmount: number;
+  currency: string;
 };
 
 const filters = [
@@ -29,10 +37,69 @@ export function CheckoutList({
   const [query, setQuery] = useState("");
   const [status, setStatus] =
     useState<(typeof filters)[number]["value"]>("all");
-  const visible = rows.filter(
-    (row) =>
-      row.name.toLowerCase().includes(query.trim().toLowerCase()) &&
-      (status === "all" || row.complete === (status === "complete")),
+  const [city, setCity] = useState("");
+  const [method, setMethod] = useState("");
+  const [minimum, setMinimum] = useState("");
+  const [sort, setSort] = useState<{
+    key: "timestamp" | "shippingAmount" | "totalAmount";
+    ascending: boolean;
+  }>({ key: "timestamp", ascending: false });
+  const cities = [
+    ...new Set(rows.map((row) => row.city).filter(Boolean)),
+  ].sort();
+  const methods = [...new Set(rows.flatMap((row) => row.methods))].sort();
+  const visible = rows
+    .filter(
+      (row) =>
+        row.name
+          .toLowerCase()
+          .replace(/^#/, "")
+          .includes(query.trim().toLowerCase().replace(/^#/, "")) &&
+        (status === "all" || row.complete === (status === "complete")) &&
+        (!city || row.city === city) &&
+        (!method || row.methods.includes(method)) &&
+        (!minimum ||
+          (row.shippingCurrency === "BRL" &&
+            row.shippingAmount !== null &&
+            row.shippingAmount >= Number(minimum))),
+    )
+    .sort((a, b) => {
+      const left = a[sort.key];
+      const right = b[sort.key];
+      if (left === null || right === null)
+        return Number(left === null) - Number(right === null);
+      const currency =
+        sort.key === "shippingAmount"
+          ? a.shippingCurrency.localeCompare(b.shippingCurrency)
+          : sort.key === "totalAmount"
+            ? a.currency.localeCompare(b.currency)
+            : 0;
+      return currency || (left - right) * (sort.ascending ? 1 : -1);
+    });
+  const sortable = (key: typeof sort.key, label: string) => (
+    <th
+      scope="col"
+      aria-sort={
+        sort.key === key
+          ? sort.ascending
+            ? "ascending"
+            : "descending"
+          : undefined
+      }
+    >
+      <button
+        type="button"
+        className={styles.sortButton}
+        onClick={() =>
+          setSort({ key, ascending: sort.key === key && !sort.ascending })
+        }
+      >
+        {label}{" "}
+        <span aria-hidden="true">
+          {sort.key === key ? (sort.ascending ? "↑" : "↓") : "↕"}
+        </span>
+      </button>
+    </th>
   );
 
   return (
@@ -65,18 +132,62 @@ export function CheckoutList({
           />
         </label>
       </div>
+      <div className={styles.filters}>
+        <label className={styles.search}>
+          Destino
+          <select
+            value={city}
+            onChange={(event) => setCity(event.target.value)}
+          >
+            <option value="">Todos os destinos</option>
+            {cities.map((value) => (
+              <option key={value}>{value}</option>
+            ))}
+          </select>
+        </label>
+        <label className={styles.search}>
+          Modalidade
+          <select
+            value={method}
+            onChange={(event) => setMethod(event.target.value)}
+          >
+            <option value="">Todas as modalidades</option>
+            {methods.map((value) => (
+              <option key={value}>{value}</option>
+            ))}
+          </select>
+        </label>
+        <label className={styles.search}>
+          Frete mínimo (R$)
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            placeholder="0,00"
+            value={minimum}
+            onChange={(event) => setMinimum(event.target.value)}
+          />
+        </label>
+      </div>
       <p className={styles.count} role="status">
         {visible.length} de {rows.length} checkouts nesta página
       </p>
       {visible.length ? (
-        <div className={styles.scroll}>
+        <div
+          className={`${styles.scroll} ${styles.sheet}`}
+          role="region"
+          aria-label="Tabela de checkouts"
+          tabIndex={0}
+        >
           <table className={styles.table}>
             <thead>
               <tr>
                 <th>Checkout</th>
-                <th>Criado em</th>
+                {sortable("timestamp", "Criado em")}
                 <th>Situação</th>
-                <th>Total</th>
+                <th>Destino</th>
+                {sortable("shippingAmount", "Frete")}
+                {sortable("totalAmount", "Total")}
               </tr>
             </thead>
             <tbody>
@@ -114,6 +225,15 @@ export function CheckoutList({
                       {row.complete ? "Concluído" : "Em aberto"}
                     </span>
                   </td>
+                  <td>{row.city || "—"}</td>
+                  <td>
+                    <strong>{row.shippingPrice}</strong>
+                    {row.methods.length > 0 && (
+                      <small className={styles.method}>
+                        {row.methods.join(" · ")}
+                      </small>
+                    )}
+                  </td>
                   <td>{row.total}</td>
                 </tr>
               ))}
@@ -123,7 +243,7 @@ export function CheckoutList({
       ) : (
         <p className={styles.empty}>
           {rows.length
-            ? "Nenhum checkout corresponde à busca e à situação selecionada."
+            ? "Nenhum checkout corresponde aos filtros selecionados."
             : "Nenhum checkout encontrado neste período."}
         </p>
       )}

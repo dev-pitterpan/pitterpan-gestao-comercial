@@ -69,13 +69,26 @@ export class ShopifyClient {
     return this.token;
   }
   async abandonedCheckoutShipping(id: string) {
+    return (await this.abandonedCheckoutShippingBatch([id])).get(id) ?? null;
+  }
+  async abandonedCheckoutShippingBatch(ids: string[]): Promise<
+    Map<
+      string,
+      {
+        currency: string;
+        lines: { title?: string | null; code?: string | null; price: string }[];
+      }
+    >
+  > {
+    const sorted = ids.map(BigInt).sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
+    if (!sorted.length) return new Map();
     const signal = AbortSignal.timeout(5000);
     const url = new URL(
       `https://${this.domain}/admin/api/${this.config.SHOPIFY_API_VERSION}/checkouts.json`,
     );
     url.search = new URLSearchParams({
-      since_id: (BigInt(id) - 1n).toString(),
-      limit: "1",
+      since_id: (sorted[0] - 1n).toString(),
+      limit: ids.length === 1 ? "1" : "250",
       status: "any",
       fields: "id,currency,shipping_lines",
     }).toString();
@@ -85,7 +98,7 @@ export class ShopifyClient {
       redirect: "error",
       signal,
     });
-    if (!response.ok) return null;
+    if (!response.ok) return new Map();
     const line = z.object({
       title: z.string().nullish(),
       code: z.string().nullish(),
@@ -102,14 +115,22 @@ export class ShopifyClient {
         ),
       })
       .safeParse(await response.json());
-    if (!result.success) return null;
-    const checkout = result.data.checkouts.find((row) => String(row.id) === id);
-    if (!checkout) return null;
-    const lines = checkout.shipping_lines ?? [];
-    return {
-      currency: checkout.currency,
-      lines: Array.isArray(lines) ? lines : [lines],
-    };
+    if (!result.success) return new Map();
+    const wanted = new Set(ids);
+    return new Map(
+      result.data.checkouts
+        .filter((row) => wanted.has(String(row.id)))
+        .map((row) => {
+          const lines = row.shipping_lines ?? [];
+          return [
+            String(row.id),
+            {
+              currency: row.currency,
+              lines: Array.isArray(lines) ? lines : [lines],
+            },
+          ] as const;
+        }),
+    );
   }
   async query<T>(
     query: string,
