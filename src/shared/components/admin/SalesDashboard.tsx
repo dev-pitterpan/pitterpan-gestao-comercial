@@ -386,6 +386,17 @@ export default function SalesDashboard({
               ...deliveryFilterKinds.map((kind) => ({
                 value: kind,
                 label: deliveryLabels[kind],
+                icon: (
+                  <span aria-hidden="true">
+                    <DeliveryMark kind={kind} label={false} />
+                  </span>
+                ),
+                count: data
+                  ? count(
+                      data.deliveries.find((item) => item.kind === kind)
+                        ?.orders ?? 0,
+                    )
+                  : undefined,
               })),
             ]}
           />
@@ -445,36 +456,6 @@ export default function SalesDashboard({
               importação dos demais pedidos continua funcionando.
             </p>
           )}
-          <div
-            className="sales-delivery-summary"
-            aria-label="Pedidos por modalidade de entrega"
-          >
-            {data.deliveries.map((item) => (
-              <button
-                key={item.kind}
-                type="button"
-                aria-pressed={filters.delivery === item.kind}
-                onClick={() => {
-                  resetList();
-                  setFilters((old) => ({
-                    ...old,
-                    delivery:
-                      old.delivery === item.kind
-                        ? "all"
-                        : (item.kind as DeliveryKind),
-                  }));
-                }}
-              >
-                <DeliveryMark kind={item.kind} />
-                <strong>{count(item.orders)}</strong>
-              </button>
-            ))}
-          </div>
-          <p className="sales-definition">
-            Modalidade escolhida no pedido, conforme a Shopify. O ícone não
-            confirma postagem ou entrega. Pedidos com modalidades diferentes
-            aparecem como múltiplos; sem identificação ficam separados.
-          </p>
           <div className="sales-health">
             <span>
               <BadgeCheck size={16} />{" "}

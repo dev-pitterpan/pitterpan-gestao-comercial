@@ -614,6 +614,14 @@ test("vendas preservam fotos, agrupam modalidades por produto e filtram entregas
     });
     assert.equal(sedex.orders.length, 1);
     assert.equal(sedex.orders[0].delivery_kind, "SEDEX");
+    assert.equal(
+      sedex.deliveries.find(({ kind }) => kind === "SEDEX")?.orders,
+      "1",
+    );
+    assert.equal(
+      sedex.deliveries.find(({ kind }) => kind === "PICKUP")?.orders,
+      "1",
+    );
     assert.equal(sedex.top[0].units, "3");
     assert.equal(sedex.totals[0].orders, "1");
     await db.exec(

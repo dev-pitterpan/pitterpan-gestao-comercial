@@ -280,9 +280,11 @@ export async function readSales(
   const where = selection(filters);
   const totals = await financialTotals(db, values, where);
   const items = await readSoldProducts(db, store, period, filters);
+  // Offer counts for every delivery mode while keeping the other filters.
+  const deliverySelection = { ...filters, delivery: "all" as const };
   const deliveries = await db.query<{ kind: string; orders: string }>(
-    `SELECT ${orderDeliverySql} AS kind,count(*)::text AS orders FROM pitterpan_sales_orders o WHERE ${where} GROUP BY 1 ORDER BY 1`,
-    values,
+    `SELECT ${orderDeliverySql} AS kind,count(*)::text AS orders FROM pitterpan_sales_orders o WHERE ${selection(deliverySelection)} GROUP BY 1 ORDER BY 1`,
+    filterValues(store, period, deliverySelection),
   );
   const ordersPage = await readSalesOrders(db, store, period, filters);
   const state = await db.query<Record<string, string | null>>(

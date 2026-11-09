@@ -1,8 +1,13 @@
 "use client";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Check, ChevronDown } from "lucide-react";
 import { useAutoFilter } from "./AutoFilterForm";
-type Option = { value: string; label: string };
+type Option = {
+  value: string;
+  label: string;
+  icon?: ReactNode;
+  count?: string;
+};
 export default function AdminSelect({
   value,
   onValueChange,
@@ -101,7 +106,14 @@ export default function AdminSelect({
         }}
         aria-activedescendant={open ? `${listId}-${active}` : undefined}
       >
-        <span>{options[selected]?.label || label}</span>
+        <span
+          className={
+            options[selected]?.icon ? "admin-select-option-label" : undefined
+          }
+        >
+          {options[selected]?.icon}
+          {options[selected]?.label || label}
+        </span>
         <ChevronDown size={15} aria-hidden="true" />
       </button>
       {open && !disabled && (
@@ -122,7 +134,20 @@ export default function AdminSelect({
               onMouseDown={(event) => event.preventDefault()}
               onClick={() => choose(index)}
             >
-              <span>{option.label}</span>
+              <span
+                className={
+                  option.icon ? "admin-select-option-label" : undefined
+                }
+              >
+                {option.icon}
+                {option.label}
+              </span>
+              {option.count !== undefined && (
+                <span className="admin-select-option-count">
+                  {option.count}
+                  <span className="admin-sr-only"> pedidos</span>
+                </span>
+              )}
               {option.value === value && <Check size={15} aria-hidden="true" />}
             </div>
           ))}
