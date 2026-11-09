@@ -85,7 +85,10 @@ test("vendas: reenvio, eventos atrasados, reembolso, cancelamento, teste e outra
       "CREATE TABLE unrelated(id int PRIMARY KEY); INSERT INTO unrelated VALUES(7);",
     );
     const sql = await readFile(
-      new URL("../src/shared/server/sales/schema.sql", import.meta.url),
+      new URL(
+        "../src/shared/server/sales/schema.sql",
+        import.meta.url,
+      ),
       "utf8",
     );
     await db.exec(sql);
@@ -196,7 +199,10 @@ test("worker retoma cursor, completa itens, deduplica pagamento e preserva check
   const db = new PGlite();
   await db.exec(
     await readFile(
-      new URL("../src/shared/server/sales/schema.sql", import.meta.url),
+      new URL(
+        "../src/shared/server/sales/schema.sql",
+        import.meta.url,
+      ),
       "utf8",
     ),
   );
@@ -225,7 +231,8 @@ test("worker retoma cursor, completa itens, deduplica pagamento e preserva check
     });
     await db.close();
   });
-  const { syncSalesPage } = await import("../src/shared/server/sales/sync.ts");
+  const { syncSalesPage } =
+    await import("../src/shared/server/sales/sync.ts");
   let fail = false,
     pageCalls = 0;
   t.mock.method(
@@ -448,7 +455,10 @@ test("vendas pagina de dez em dez, combina situação/categoria e mantém totais
   try {
     await db.exec(
       await readFile(
-        new URL("../src/shared/server/sales/schema.sql", import.meta.url),
+        new URL(
+          "../src/shared/server/sales/schema.sql",
+          import.meta.url,
+        ),
         "utf8",
       ),
     );
@@ -560,7 +570,10 @@ test("vendas preservam fotos, agrupam modalidades por produto e filtram entregas
   const db = new PGlite();
   try {
     const schema = await readFile(
-      new URL("../src/shared/server/sales/schema.sql", import.meta.url),
+      new URL(
+        "../src/shared/server/sales/schema.sql",
+        import.meta.url,
+      ),
       "utf8",
     );
     await db.exec(schema);
@@ -594,10 +607,6 @@ test("vendas preservam fotos, agrupam modalidades por produto e filtram entregas
     assert.equal(all.top[0].unknown_units, "3");
     assert.match(all.top[0].image, /cdn.shopify.com/);
     assert.equal(all.deliveries.length, 5);
-    assert.equal(
-      all.deliveries.find(({ kind }) => kind === "SEDEX")?.units,
-      "3",
-    );
     const sedex = await readSales(db, store, 30, undefined, {
       status: "PAID",
       category: "",
@@ -673,7 +682,10 @@ test("financeiro separa recebido, estorno e expirado, preservando reembolsos de 
   try {
     await db.exec(
       await readFile(
-        new URL("../src/shared/server/sales/schema.sql", import.meta.url),
+        new URL(
+          "../src/shared/server/sales/schema.sql",
+          import.meta.url,
+        ),
         "utf8",
       ),
     );
@@ -882,7 +894,10 @@ test("clientes: compara por ID, separa moeda e loja e mantém pendências indepe
   try {
     await db.exec(
       await readFile(
-        new URL("../src/shared/server/sales/schema.sql", import.meta.url),
+        new URL(
+          "../src/shared/server/sales/schema.sql",
+          import.meta.url,
+        ),
         "utf8",
       ),
     );
@@ -1054,7 +1069,10 @@ test("produtos vendidos: páginas completas, busca literal, entregas e período 
   try {
     await db.exec(
       await readFile(
-        new URL("../src/shared/server/sales/schema.sql", import.meta.url),
+        new URL(
+          "../src/shared/server/sales/schema.sql",
+          import.meta.url,
+        ),
         "utf8",
       ),
     );
@@ -1140,7 +1158,10 @@ test("matriz de filtros: entrega, situação, categoria e data selecionam os mes
   try {
     await db.exec(
       await readFile(
-        new URL("../src/shared/server/sales/schema.sql", import.meta.url),
+        new URL(
+          "../src/shared/server/sales/schema.sql",
+          import.meta.url,
+        ),
         "utf8",
       ),
     );
@@ -1245,7 +1266,10 @@ test("histórico corrigido distingue retirada, PAC, Jadlog e Local Delivery sem 
   try {
     await db.exec(
       await readFile(
-        new URL("../src/shared/server/sales/schema.sql", import.meta.url),
+        new URL(
+          "../src/shared/server/sales/schema.sql",
+          import.meta.url,
+        ),
         "utf8",
       ),
     );

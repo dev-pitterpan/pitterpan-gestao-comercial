@@ -73,7 +73,6 @@ export default function SalesDashboard({
   const [categoryDraft, setCategoryDraft] = useState(
     initialFilters?.category || "",
   );
-  const [orderSearch, setOrderSearch] = useState("");
   const [moreLoading, setMoreLoading] = useState(false);
   const [moreError, setMoreError] = useState("");
   const generation = useRef(0);
@@ -86,12 +85,6 @@ export default function SalesDashboard({
     [syncing, setSyncing] = useState(false),
     [message, setMessage] = useState("");
   const [revision, setRevision] = useState(0);
-  const visibleOrders =
-    data?.orders.filter((order) =>
-      order.name
-        .toLowerCase()
-        .includes(orderSearch.trim().replace(/^#/, "").toLowerCase()),
-    ) ?? [];
   const entryPositioned = useRef(false);
   useEffect(() => {
     if (entryPositioned.current) return;
@@ -498,222 +491,6 @@ export default function SalesDashboard({
               janela.
             </p>
           )}
-          <section
-            id="recent-orders"
-            className="admin-panel sales-orders-panel"
-          >
-            <header>
-              <h2>Pedidos Shopify</h2>
-              <ShoppingCart size={22} />
-            </header>
-            <div className="sales-orders-status-filter">
-              <label htmlFor="recent-orders-status">
-                Buscar pagamento ou cancelamento
-              </label>
-              <OrderStatusSearch
-                value={filters.status}
-                onChange={(status) => {
-                  resetList(true);
-                  setFilters((old) => ({ ...old, status }));
-                }}
-              />
-              <small>
-                Combina com período, categoria e entrega. Atualiza também os
-                indicadores desta página.
-              </small>
-              {filters.status === "REFUNDS" && (
-                <small>
-                  Inclui estornos totais e parciais com valor reembolsado, mesmo
-                  em pedidos cancelados.
-                </small>
-              )}
-              {filters.status === "CANCELLED" && (
-                <small>
-                  Inclui pedidos cancelados com ou sem reembolso. Confira as
-                  valores de recebimento e estorno nos detalhes do pedido.
-                </small>
-              )}
-            </div>
-            <p className="sales-definition">
-              Mostrando {data.orders.length} pedidos nesta seleção, em lotes de
-              10.
-              {expanded.current &&
-                " A atualização automática da lista fica pausada durante esta consulta."}
-            </p>
-            <label className="sales-order-search">
-              Buscar número nos pedidos carregados
-              <input
-                type="search"
-                value={orderSearch}
-                onChange={(event) => setOrderSearch(event.target.value)}
-              />
-            </label>
-            <OrderCustomerRefresh
-              orders={data.orders}
-              onUpdate={updateCustomers}
-            />
-            {loading && <small role="status">Atualizando pedidos…</small>}
-            <DragScroll>
-              <table aria-busy={loading} className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Pedido / Cliente</th>
-                    <th>Data</th>
-                    <th>Pagamento</th>
-                    <th>Atendimento</th>
-                    <th>Entrega escolhida</th>
-                    <th>Total do pedido</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {!visibleOrders.length && (
-                    <tr>
-                      <td colSpan={6}>
-                        Nenhum pedido carregado corresponde à seleção.
-                      </td>
-                    </tr>
-                  )}
-                  {visibleOrders.map((o) => (
-                    <tr key={o.id}>
-                      <td>
-                        <OrderFulfillmentDetails
-                          id={o.id}
-                          name={o.name}
-                          storedStatus={o.fulfillment_status}
-                          summary={o}
-                          paymentLabel={
-                            status[o.financial_status] || o.financial_status
-                          }
-                        />
-                        <OrderCustomer order={o} />
-                      </td>
-                      <td>
-                        <small>
-                          <time
-                            dateTime={new Date(o.processed_at).toISOString()}
-                            title="Horário do pedido registrado na Shopify · Brasília"
-                          >
-                            {new Date(o.processed_at).toLocaleDateString(
-                              "pt-BR",
-                              { timeZone: "America/Sao_Paulo" },
-                            )}
-                            <br />
-                            {new Date(o.processed_at).toLocaleTimeString(
-                              "pt-BR",
-                              {
-                                timeZone: "America/Sao_Paulo",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                                hour12: false,
-                              },
-                            )}
-                          </time>
-                        </small>
-                      </td>
-                      <td>
-                        <span
-                          className={`admin-badge ${o.cancelled_at ? "rose" : o.financial_status === "PAID" ? "green" : "blue"}`}
-                        >
-                          {status[o.financial_status] || o.financial_status}
-                        </span>
-                        {o.cancelled_at && (
-                          <small className="admin-badge rose">
-                            Pedido cancelado
-                          </small>
-                        )}
-                      </td>
-                      <td>
-                        <span
-                          className={`admin-badge ${o.fulfillment_status === "FULFILLED" ? "green" : "blue"}`}
-                        >
-                          {fulfillmentLabels[o.fulfillment_status] ||
-                            o.fulfillment_status}
-                        </span>
-                      </td>
-                      <td>
-                        <DeliveryMark kind={o.delivery_kind} />
-                        <ShippingCharge order={o} />
-                        {o.delivery_label && o.delivery_kind !== "LOCAL" && (
-                          <small>{o.delivery_label}</small>
-                        )}
-                      </td>
-                      <td>
-                        {money(o.total, o.currency)}
-                        {o.current_total != null &&
-                          Number(o.current_total) !== Number(o.total) && (
-                            <small className="sales-current-total">
-                              Atual: {money(o.current_total, o.currency)}
-                            </small>
-                          )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </DragScroll>
-            <div className="sales-pagination">
-              {moreError && <p role="alert">{moreError}</p>}
-              {data.hasMore && (
-                <button
-                  type="button"
-                  className="admin-button admin-button-primary"
-                  disabled={moreLoading || loading}
-                  onClick={loadMore}
-                >
-                  {moreLoading ? (
-                    <PitterSpinner label="Carregando pedidos…" />
-                  ) : (
-                    "Carregar mais 10"
-                  )}
-                </button>
-              )}
-              {expanded.current && (
-                <button
-                  type="button"
-                  className="admin-button"
-                  onClick={() => {
-                    resetList();
-                    setRevision((n) => n + 1);
-                  }}
-                >
-                  Atualizar lista
-                </button>
-              )}
-              {!data.hasMore && data.orders.length > 0 && (
-                <span>Todos os pedidos desta seleção foram exibidos.</span>
-              )}
-            </div>
-            {data.deliveries.length > 0 && (
-              <section
-                className="sales-units-summary"
-                aria-label="Unidades por modalidade"
-              >
-                <header>
-                  <h3>Unidades por modalidade</h3>
-                  <strong>
-                    {count(
-                      data.deliveries.reduce(
-                        (total, delivery) => total + Number(delivery.units),
-                        0,
-                      ),
-                    )}{" "}
-                    un.
-                  </strong>
-                </header>
-                <p className="sales-definition">
-                  Itens dos pedidos no período e nos filtros selecionados.
-                </p>
-                <ul>
-                  {data.deliveries.map((delivery) => (
-                    <li key={delivery.kind}>
-                      <DeliveryMark kind={delivery.kind} />
-                      <strong>{count(delivery.units)} un.</strong>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
-          </section>
           {data.totals.map((t) => (
             <section
               key={t.currency}
@@ -824,13 +601,189 @@ export default function SalesDashboard({
               </p>
             </div>
           )}
-          <div className="sales-products-section">
+          <div className="admin-overview-grid sales-comparison-grid">
             <SoldProductsHistory
               key={JSON.stringify([filters, days])}
               filters={filters}
               days={days}
               revision={revision}
             />
+            <section
+              id="recent-orders"
+              className="admin-panel sales-orders-panel"
+            >
+              <header>
+                <h2>Pedidos recentes</h2>
+                <ShoppingCart size={22} />
+              </header>
+              <div className="sales-orders-status-filter">
+                <label htmlFor="recent-orders-status">
+                  Buscar pagamento ou cancelamento
+                </label>
+                <OrderStatusSearch
+                  value={filters.status}
+                  onChange={(status) => {
+                    resetList(true);
+                    setFilters((old) => ({ ...old, status }));
+                  }}
+                />
+                <small>
+                  Combina com período, categoria e entrega. Atualiza também os
+                  indicadores desta página.
+                </small>
+                {filters.status === "REFUNDS" && (
+                  <small>
+                    Inclui estornos totais e parciais com valor reembolsado,
+                    mesmo em pedidos cancelados.
+                  </small>
+                )}
+                {filters.status === "CANCELLED" && (
+                  <small>
+                    Inclui pedidos cancelados com ou sem reembolso. Confira as
+                    colunas Recebido e Estornado.
+                  </small>
+                )}
+              </div>
+              <p className="sales-definition">
+                Mostrando {data.orders.length} pedidos nesta seleção, em lotes
+                de 10.
+                {expanded.current &&
+                  " A atualização automática da lista fica pausada durante esta consulta."}
+              </p>
+              <OrderCustomerRefresh
+                orders={data.orders}
+                onUpdate={updateCustomers}
+              />
+              {loading && <small role="status">Atualizando pedidos…</small>}
+              <DragScroll>
+                <table aria-busy={loading} className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Pedido</th>
+                      <th>Cliente</th>
+                      <th>Situação</th>
+                      <th>Entrega escolhida</th>
+                      <th>Total do pedido</th>
+                      <th>Recebido</th>
+                      <th>Estornado</th>
+                      <th>Líquido</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {!data.orders.length && (
+                      <tr>
+                        <td colSpan={8}>
+                          Nenhum pedido corresponde aos filtros escolhidos.
+                        </td>
+                      </tr>
+                    )}
+                    {data.orders.map((o) => (
+                      <tr key={o.id}>
+                        <td>
+                          <strong>{o.name}</strong>
+                          <small>
+                            <time
+                              dateTime={new Date(o.processed_at).toISOString()}
+                              title="Horário do pedido registrado na Shopify · Brasília"
+                            >
+                              {new Date(o.processed_at).toLocaleDateString(
+                                "pt-BR",
+                                { timeZone: "America/Sao_Paulo" },
+                              )}
+                              <br />
+                              {new Date(o.processed_at).toLocaleTimeString(
+                                "pt-BR",
+                                {
+                                  timeZone: "America/Sao_Paulo",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  hour12: false,
+                                },
+                              )}
+                            </time>
+                          </small>
+                        </td>
+                        <td>
+                          <OrderCustomer order={o} />
+                        </td>
+                        <td>
+                          <span
+                            className={`admin-badge ${o.cancelled_at ? "rose" : o.financial_status === "PAID" ? "green" : "blue"}`}
+                          >
+                            {status[o.financial_status] || o.financial_status}
+                          </span>
+                          {o.cancelled_at && (
+                            <small className="admin-badge rose">
+                              Pedido cancelado
+                            </small>
+                          )}
+                        </td>
+                        <td>
+                          <DeliveryMark kind={o.delivery_kind} />
+                          <ShippingCharge order={o} />
+                          {o.delivery_label && o.delivery_kind !== "LOCAL" && (
+                            <small>{o.delivery_label}</small>
+                          )}
+                          <small>
+                            {fulfillmentLabels[o.fulfillment_status] ||
+                              o.fulfillment_status}
+                          </small>
+                          <OrderFulfillmentDetails
+                            id={o.id}
+                            name={o.name}
+                            storedStatus={o.fulfillment_status}
+                          />
+                        </td>
+                        <td>
+                          {money(o.total, o.currency)}
+                          {o.current_total != null &&
+                            Number(o.current_total) !== Number(o.total) && (
+                              <small className="sales-current-total">
+                                Atual: {money(o.current_total, o.currency)}
+                              </small>
+                            )}
+                        </td>
+                        <td>{money(o.received, o.currency)}</td>
+                        <td>{money(o.refunded, o.currency)}</td>
+                        <td>{money(o.net, o.currency)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </DragScroll>
+              <div className="sales-pagination">
+                {moreError && <p role="alert">{moreError}</p>}
+                {data.hasMore && (
+                  <button
+                    type="button"
+                    className="admin-button admin-button-primary"
+                    disabled={moreLoading || loading}
+                    onClick={loadMore}
+                  >
+                    {moreLoading ? (
+                      <PitterSpinner label="Carregando pedidos…" />
+                    ) : (
+                      "Carregar mais 10"
+                    )}
+                  </button>
+                )}
+                {expanded.current && (
+                  <button
+                    type="button"
+                    className="admin-button"
+                    onClick={() => {
+                      resetList();
+                      setRevision((n) => n + 1);
+                    }}
+                  >
+                    Atualizar lista
+                  </button>
+                )}
+                {!data.hasMore && data.orders.length > 0 && (
+                  <span>Todos os pedidos desta seleção foram exibidos.</span>
+                )}
+              </div>
+            </section>
           </div>
           {!initialOperations &&
             (filters.status !== "all" ||

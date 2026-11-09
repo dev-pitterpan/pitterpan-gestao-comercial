@@ -37,15 +37,9 @@ export async function GET(request: Request) {
         { error: "Pedido não encontrado no histórico sincronizado." },
         { status: 404, headers },
       );
-    const details = await readFulfillmentDetails(salesClient(), id.data);
-    const store = salesConfig().SHOPIFY_SALES_STORE_DOMAIN;
-    return Response.json(
-      {
-        ...details,
-        adminOrderUrl: `https://${store}/admin/orders/${id.data.split("/").at(-1)}`,
-      },
-      { headers },
-    );
+    return Response.json(await readFulfillmentDetails(salesClient(), id.data), {
+      headers,
+    });
   } catch {
     return Response.json(
       {
