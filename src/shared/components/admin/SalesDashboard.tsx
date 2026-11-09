@@ -9,7 +9,6 @@ import { salesSectionFromHash } from "../../lib/admin/sales-links";
 import OrderFulfillmentDetails from "./OrderFulfillmentDetails";
 import SalesOperations from "./SalesOperations";
 import SoldProductsHistory from "./SoldProductsHistory";
-import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowDownLeft,
@@ -439,23 +438,7 @@ export default function SalesDashboard({
       )}
       {data && (
         <>
-          {initialOperations ? (
-            operations
-          ) : (
-            <Link
-              className="admin-button admin-button-primary"
-              href={`/gestor/vendas/?${new URLSearchParams({
-                focus: "operations",
-                days: String(days),
-                start: filters.start || "",
-                end: filters.end || "",
-                delivery: filters.delivery || "all",
-                category: filters.category,
-              })}`}
-            >
-              <Package size={16} /> Abrir fila de expedição
-            </Link>
-          )}
+          {initialOperations && operations}
           {data.failed > 0 && (
             <p className="admin-data-notice" role="status">
               {data.failed} eventos precisam de revisão após dez tentativas. A
