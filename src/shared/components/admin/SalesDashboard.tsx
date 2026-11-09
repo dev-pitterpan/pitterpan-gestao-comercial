@@ -744,9 +744,13 @@ export default function SalesDashboard({
                         <td>
                           <DeliveryMark kind={o.delivery_kind} />
                           <ShippingCharge order={o} />
-                          {o.delivery_label && o.delivery_kind !== "LOCAL" && (
-                            <small>{o.delivery_label}</small>
-                          )}
+                          {o.delivery_label &&
+                            o.delivery_kind !== "LOCAL" &&
+                            !(
+                              o.delivery_kind === "PAC" &&
+                              o.delivery_label.trim().toLowerCase() ===
+                                "envio normal (pac)"
+                            ) && <small>{o.delivery_label}</small>}
                           <small>
                             {fulfillmentLabels[o.fulfillment_status] ||
                               o.fulfillment_status}
