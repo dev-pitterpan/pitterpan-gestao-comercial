@@ -4,7 +4,14 @@ import AutoFilterForm from "./AutoFilterForm";
 import PartyExperience, { PartySectionScene } from "./PartyExperience";
 import Link, { useLinkStatus } from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState, Suspense, type ReactNode } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  Suspense,
+  type ReactNode,
+} from "react";
 import {
   ArrowLeft,
   CalendarDays,
@@ -51,29 +58,27 @@ function ShopifyNavMark({ size, "aria-hidden": hidden }: NavMarkProps) {
   );
 }
 
-function PitterPanNavMark({
-  size,
-  strokeWidth,
-  "aria-hidden": hidden,
-}: NavMarkProps) {
+function PitterPanNavMark({ size, "aria-hidden": hidden }: NavMarkProps) {
+  const filter = useId();
   return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={strokeWidth}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden={hidden}
-    >
-      <circle cx="12" cy="10.5" r="8" />
-      <path d="m10.5 18.5-.8 2h4.6l-.8-2M12 20.5v1.2" />
-      <path
-        d="m12 6 1.2 2.5 2.8.4-2 2 .5 2.8-2.5-1.3-2.5 1.3.5-2.8-2-2 2.8-.4L12 6Z"
-        fill="currentColor"
-        stroke="none"
+    <svg width={size} height={size} viewBox="0 0 24 24" aria-hidden={hidden}>
+      <defs>
+        <filter id={filter} colorInterpolationFilters="sRGB">
+          <feColorMatrix
+            type="matrix"
+            values="
+            .16 .54 .05 0 .25
+            .13 .43 .04 0 .40
+            .09 .32 .04 0 .55
+            0 0 0 1 0"
+          />
+        </filter>
+      </defs>
+      <image
+        href="/assets/images/brand/pitter-pan-logo.svg"
+        width="24"
+        height="24"
+        filter={`url(#${filter})`}
       />
     </svg>
   );
@@ -97,7 +102,7 @@ const links = [
   { href: "/gestor/estoque/", label: "Estoque do catálogo", icon: Boxes },
   {
     href: "/gestor/winthor/balcao/",
-    label: "Vendas de balcão",
+    label: "Vendas na loja",
     icon: PitterPanNavMark,
     financial: true,
     planned: true,

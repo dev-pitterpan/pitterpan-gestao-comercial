@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { ArrowRight, Package, ShoppingCart, Store, Wallet } from "lucide-react";
+import {
+  ArrowRight,
+  BellRing,
+  Package,
+  ShoppingCart,
+  Store,
+  Wallet,
+} from "lucide-react";
 import { database } from "../../server/database/client";
 import { salesConfig, salesReady } from "../../server/sales/config";
 import { readCommercialOverview } from "../../server/sales/repository";
@@ -7,9 +14,15 @@ import { fulfillmentLabels } from "../../lib/admin/fulfillment";
 import { salesLink } from "../../lib/admin/sales-links";
 import { number, dateTime } from "./Primitives";
 import CommercialTrend from "./CommercialTrend";
+import CommercialPeriod from "./CommercialPeriod";
+import {
+  shiftDate,
+  todayDate,
+  type DateRange,
+} from "../../lib/admin/date-range";
 import OrderFulfillmentDetails from "./OrderFulfillmentDetails";
 
-async function loadOverview(days: number) {
+export async function loadOverview(range: DateRange) {
   if (!salesReady()) return null;
   const db = await database().connect();
   try {
@@ -17,7 +30,8 @@ async function loadOverview(days: number) {
     const data = await readCommercialOverview(
       db,
       salesConfig().SHOPIFY_SALES_STORE_DOMAIN,
-      days,
+      7,
+      range,
     );
     await db.query("COMMIT");
     return data;
@@ -29,17 +43,16 @@ async function loadOverview(days: number) {
   }
 }
 
-export default async function CommercialOverview({
-  days,
-  lowStock,
+export default function CommercialOverview({
+  range,
+  data,
 }: {
-  days: number;
-  lowStock: number;
+  range: DateRange;
+  data: Awaited<ReturnType<typeof loadOverview>>;
 }) {
-  const data = await loadOverview(days).catch(() => null);
   const syncedAt = data?.sales.state?.completed_at;
   const stale = syncedAt && Date.now() - Date.parse(syncedAt) > 86_400_000;
-  const filters = new URLSearchParams({ days: String(days) });
+  const filters = new URLSearchParams(range);
   const salesHref = salesLink(filters);
   const cards = data
     ? [
@@ -109,26 +122,7 @@ export default async function CommercialOverview({
             {data?.sales.state?.until_at && " · Sincronização em andamento"}
           </p>
         </div>
-        <nav
-          className="commercial-overview-controls"
-          aria-label="Período de vendas"
-        >
-          {[
-            [1, "Hoje"],
-            [7, "7 dias"],
-            [30, "30 dias"],
-          ].map(([period, label]) => (
-            <Link
-              key={period}
-              href={`/gestor/?periodo=${period}`}
-              scroll={false}
-              className="admin-button"
-              aria-current={period === days ? "true" : undefined}
-            >
-              {label}
-            </Link>
-          ))}
-        </nav>
+        <CommercialPeriod range={range} />
       </header>
       {!data ? (
         <p className="admin-data-notice" role="status">
@@ -140,6 +134,12 @@ export default async function CommercialOverview({
           {(!data.sales.state?.completed_at || data.sales.state.until_at) && (
             <p className="admin-inline-note">
               Os dados importados podem estar incompletos.
+            </p>
+          )}
+          {range.start < shiftDate(todayDate(), -59) && (
+            <p className="admin-inline-note">
+              O início do período está fora da janela automática de 60 dias. Os
+              indicadores usam o histórico disponível.
             </p>
           )}
           {stale && (
@@ -166,16 +166,31 @@ export default async function CommercialOverview({
             ))}
           </div>
           <div className="commercial-overview-grid">
-            <section className="admin-panel" id="overview-pending">
+            <section
+              className="admin-panel commercial-overview-alert"
+              id="overview-pending"
+            >
               <header>
-                <h2>Atenção agora</h2>
+                <h2>
+                  <BellRing size={19} aria-hidden="true" /> Atenção agora
+                </h2>
+                <span className="commercial-overview-alert-count">
+                  {number(
+                    Number(data.queue.preparing) + Number(data.queue.ready),
+                  )}{" "}
+                  em aberto
+                </span>
               </header>
               <p className="admin-inline-note">
                 Até cinco pendências mais antigas do histórico importado,
                 independentemente do período de vendas.
               </p>
               {data.pending.length ? (
-                <ul className="sales-operations-orders">
+                <ul
+                  className="sales-operations-orders"
+                  tabIndex={0}
+                  aria-label="Lista de pendências de atendimento"
+                >
                   {data.pending.map((order) => (
                     <li key={order.id}>
                       <div>
@@ -191,12 +206,12 @@ export default async function CommercialOverview({
                           {fulfillmentLabels[order.fulfillment_status] ??
                             order.fulfillment_status}
                         </small>
-                        <OrderFulfillmentDetails
-                          id={order.id}
-                          name={order.name}
-                          storedStatus={order.fulfillment_status}
-                        />
                       </div>
+                      <OrderFulfillmentDetails
+                        id={order.id}
+                        name={order.name}
+                        storedStatus={order.fulfillment_status}
+                      />
                     </li>
                   ))}
                 </ul>
@@ -214,61 +229,12 @@ export default async function CommercialOverview({
                 <h2>Evolução das vendas</h2>
               </header>
               <CommercialTrend
-                key={days}
+                key={`${range.start}-${range.end}`}
                 sales={data.sales}
                 previousDaily={data.previousDaily}
               />
             </section>
           </div>
-          <section className="admin-panel">
-            <header>
-              <h2>Produtos mais vendidos</h2>
-              <span className="admin-subtle">Unidades no período</span>
-            </header>
-            {data.ranking.length ? (
-              <ol className="analytics-ranking">
-                {data.ranking.map((item, index) => (
-                  <li key={item.id}>
-                    <span className="analytics-rank-number">{index + 1}</span>
-                    <div>
-                      <div className="analytics-rank-caption">
-                        <span title={item.title}>{item.title}</span>
-                        <strong>{number(Number(item.units))}</strong>
-                      </div>
-                      {item.stock !== null && (
-                        <small>
-                          {item.stock <= 0
-                            ? "Sem estoque"
-                            : item.stock <= lowStock
-                              ? "Estoque baixo"
-                              : "Estoque agregado"}
-                          {" · "}
-                          {number(item.stock)} un.
-                        </small>
-                      )}
-                      <div className="analytics-bar-track" aria-hidden="true">
-                        <span
-                          style={{
-                            width: `${(Number(item.units) * 100) / Number(data.ranking[0].units)}%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-            ) : (
-              <p className="admin-inline-note">
-                Nenhum produto vendido nos pedidos importados deste período.
-              </p>
-            )}
-            <Link
-              href={salesLink(filters, {}, "sold-products")}
-              className="admin-text-link"
-            >
-              Ver produtos vendidos <ArrowRight size={15} />
-            </Link>
-          </section>
         </>
       )}
     </section>

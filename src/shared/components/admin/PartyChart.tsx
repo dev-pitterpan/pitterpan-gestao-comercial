@@ -5,7 +5,7 @@ import Link from "next/link";
 import AdminSelect from "./AdminSelect";
 import { Pause, Play, RotateCcw, Sparkles } from "lucide-react";
 
-type Category = { name: string; count: number };
+type Category = { id?: string; name: string; count: number; detail?: string };
 const colors = [
   "#354ba7",
   "#efbd37",
@@ -50,12 +50,23 @@ export function PartyHelper() {
   );
 }
 
-export default function PartyChart({ categories }: { categories: Category[] }) {
+export default function PartyChart({
+  categories,
+  soldProducts,
+  soldHref,
+}: {
+  categories: Category[];
+  soldProducts?: Category[];
+  soldHref?: string;
+}) {
+  const [products, setProducts] = useState(false);
+  const showSold = products && soldProducts !== undefined;
+  const dataset = showSold ? soldProducts : categories;
   const [sort, setSort] = useState("largest");
   const [paused, setPaused] = useState(false);
   const [scene, setScene] = useState(0);
   const [running, setRunning] = useState(true);
-  const signature = JSON.stringify(categories);
+  const signature = JSON.stringify(dataset);
   const previous = useRef(signature);
   // Only animate on arrival, explicit replay, sorting or actual data changes.
   useEffect(() => {
@@ -70,7 +81,7 @@ export default function PartyChart({ categories }: { categories: Category[] }) {
     const timer = window.setTimeout(() => setRunning(false), 2800);
     return () => window.clearTimeout(timer);
   }, [scene, running, paused]);
-  const rows = [...categories].sort((a, b) =>
+  const rows = [...dataset].sort((a, b) =>
     sort === "name" ? a.name.localeCompare(b.name, "pt-BR") : b.count - a.count,
   );
   const max = Math.max(1, ...rows.map((c) => c.count));
@@ -82,19 +93,48 @@ export default function PartyChart({ categories }: { categories: Category[] }) {
     <div
       className={`party-chart${paused ? " is-paused" : ""}${running ? " is-running" : ""}`}
     >
+      {soldProducts && (
+        <div
+          className="commercial-overview-controls"
+          role="group"
+          aria-label="Visão de produtos"
+        >
+          <button
+            type="button"
+            className="admin-button"
+            aria-pressed={!showSold}
+            onClick={() => setProducts(false)}
+          >
+            Por categoria
+          </button>
+          <button
+            type="button"
+            className="admin-button"
+            aria-pressed={showSold}
+            onClick={() => setProducts(true)}
+          >
+            Mais vendidos
+          </button>
+        </div>
+      )}
       <div className="party-chart-toolbar">
         <label>
           Organizar por{" "}
           <AdminSelect
             value={sort}
-            label="Organizar categorias"
+            label={
+              showSold ? "Organizar produtos vendidos" : "Organizar categorias"
+            }
             onValueChange={(value) => {
               setSort(value);
               replay();
             }}
             options={[
               { value: "largest", label: "Maior quantidade" },
-              { value: "name", label: "Nome da categoria" },
+              {
+                value: "name",
+                label: showSold ? "Nome do produto" : "Nome da categoria",
+              },
             ]}
           />
         </label>
@@ -127,13 +167,17 @@ export default function PartyChart({ categories }: { categories: Category[] }) {
           key={scene}
           className="party-chart-rows"
           role="list"
-          aria-label="Quantidade de variantes por categoria"
+          aria-label={
+            showSold
+              ? "Unidades vendidas por produto"
+              : "Quantidade de variantes por categoria"
+          }
         >
           {rows.map((c, i) => (
             <div
               className="party-chart-row"
               role="listitem"
-              key={c.name}
+              key={c.id ?? c.name}
               style={
                 {
                   "--bar-size": `${(c.count / max) * 100}%`,
@@ -143,14 +187,19 @@ export default function PartyChart({ categories }: { categories: Category[] }) {
               }
             >
               <div className="party-chart-label">
-                <Link
-                  href={`/gestor/produtos/?${new URLSearchParams({ category: c.name })}`}
-                  className="admin-text-link"
-                >
-                  {c.name}
-                </Link>
+                {showSold ? (
+                  <span>{c.name}</span>
+                ) : (
+                  <Link
+                    href={`/gestor/produtos/?${new URLSearchParams({ category: c.name })}`}
+                    className="admin-text-link"
+                  >
+                    {c.name}
+                  </Link>
+                )}
                 <strong>{number(c.count)}</strong>
               </div>
+              {c.detail && <small className="admin-subtle">{c.detail}</small>}
               <div className="party-chart-mechanism">
                 <div className="party-chart-track">
                   <div className="party-chart-bar" />
@@ -168,14 +217,33 @@ export default function PartyChart({ categories }: { categories: Category[] }) {
       ) : (
         <div className="party-chart-empty">
           <PartyHelper />
-          <strong>Preparando o palco para seus produtos</strong>
-          <p>As categorias aparecem após a primeira importação publicada.</p>
+          <strong>
+            {showSold
+              ? "Sem produtos vendidos no período"
+              : "Preparando o palco para seus produtos"}
+          </strong>
+          <p>
+            {showSold
+              ? "Escolha outro período no calendário."
+              : "As categorias aparecem após a primeira importação publicada."}
+          </p>
         </div>
       )}
-      <p className="party-chart-caption">
-        <Sparkles size={14} />
-        Selecione uma das seis maiores categorias para abrir seus produtos.
-      </p>
+      {!showSold && (
+        <p className="party-chart-caption">
+          <Sparkles size={14} />
+          Selecione uma das seis maiores categorias para abrir seus produtos.
+        </p>
+      )}
+      {showSold && soldHref ? (
+        <Link className="admin-text-link" href={soldHref}>
+          Ver produtos vendidos
+        </Link>
+      ) : (
+        <Link className="admin-text-link" href="/gestor/produtos/">
+          Explorar todos os produtos
+        </Link>
+      )}
     </div>
   );
 }

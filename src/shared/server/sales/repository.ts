@@ -485,9 +485,21 @@ export async function readCommercialOverview(
   db: SqlClient,
   store: string,
   days: number,
+  range?: { start: string; end: string },
 ) {
-  const sales = await readSalesFinance(db, store, days);
-  const previousStart = shiftDate(sales.window.start, -days);
+  const filters = {
+    status: "all",
+    category: "",
+    delivery: "all",
+    ...range,
+  } as const;
+  const sales = await readSalesFinance(db, store, days, filters);
+  const length =
+    Math.round(
+      (Date.parse(sales.window.end) - Date.parse(sales.window.start)) /
+        86_400_000,
+    ) + 1;
+  const previousStart = shiftDate(sales.window.start, -length);
   const previousEnd = shiftDate(sales.window.start, -1);
   const coverage = await db.query<{ covered: boolean }>(
     `SELECT COALESCE((to_jsonb(s)->>'backfill_version')::integer,0) > 0

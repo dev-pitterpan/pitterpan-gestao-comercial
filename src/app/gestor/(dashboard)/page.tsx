@@ -1,5 +1,12 @@
+import {
+  dateRangeSchema,
+  shiftDate,
+  todayDate,
+} from "@shared/lib/admin/date-range";
 import { allowed } from "@shared/server/auth/crypto";
-import CommercialOverview from "@shared/components/admin/CommercialOverview";
+import CommercialOverview, {
+  loadOverview,
+} from "@shared/components/admin/CommercialOverview";
 import "./commercial-overview.css";
 import StockOverview from "@shared/components/admin/StockOverview";
 import PartyChart from "@shared/components/admin/PartyChart";
@@ -27,11 +34,27 @@ import {
 export default async function Overview({
   searchParams,
 }: {
-  searchParams: Promise<{ periodo?: string | string[] }>;
+  searchParams: Promise<{
+    periodo?: string | string[];
+    start?: string | string[];
+    end?: string | string[];
+  }>;
 }) {
-  const period = (await searchParams).periodo;
+  const { periodo: period, start, end } = await searchParams;
   const days = period === "1" ? 1 : period === "30" ? 30 : 7;
+  const today = todayDate();
+  const parsed = dateRangeSchema.safeParse({ start, end });
+  const range =
+    parsed.success &&
+    parsed.data.start >= "2000-01-01" &&
+    parsed.data.end <= today
+      ? parsed.data
+      : { start: shiftDate(today, 1 - days), end: today };
   const [context, user] = await Promise.all([adminContext(), requireSession()]);
+  const canViewSales = allowed(user.role, ["admin", "gestor"]);
+  const sales = canViewSales
+    ? await loadOverview(range).catch(() => null)
+    : null;
   const s = context.summary;
   const last = context.runs.find((r) => r.id === context.active);
   const stats = [
@@ -91,9 +114,7 @@ export default async function Overview({
         </span>
       </header>
       <DataNotice context={context} />
-      {allowed(user.role, ["admin", "gestor"]) && (
-        <CommercialOverview days={days} lowStock={context.settings.low} />
-      )}
+      {canViewSales && <CommercialOverview range={range} data={sales} />}
       <section className="admin-stats" aria-label="Indicadores do catálogo">
         {stats.map(({ label, value, detail, icon: Icon, tone, href }) => (
           <Link
@@ -120,14 +141,23 @@ export default async function Overview({
           <header>
             <div>
               <span className="admin-eyebrow">MIX DA LOJA</span>
-              <h2>Produtos por categoria</h2>
+              <h2>{sales ? "Produtos" : "Produtos por categoria"}</h2>
             </div>
-            <span className="admin-subtle">Variantes</span>
+            {!sales && <span className="admin-subtle">Variantes</span>}
           </header>
-          <PartyChart categories={context.categories} />
-          <Link className="admin-text-link" href="/gestor/produtos/">
-            Explorar todos os produtos <ArrowRight size={16} />
-          </Link>
+          <PartyChart
+            categories={context.categories}
+            soldProducts={sales?.ranking.map((item) => ({
+              id: item.id,
+              name: item.title,
+              count: Number(item.units),
+              detail:
+                item.stock === null
+                  ? undefined
+                  : `${item.stock <= 0 ? "Sem estoque" : item.stock <= context.settings.low ? "Estoque baixo" : "Estoque agregado"} · ${number(item.stock)} un.`,
+            }))}
+            soldHref={`/gestor/vendas/?${new URLSearchParams(range)}#sold-products`}
+          />
         </section>
         <div className="overview-insights-stack">
           <section className="admin-panel admin-changes-panel">

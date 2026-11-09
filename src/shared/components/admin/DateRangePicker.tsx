@@ -12,9 +12,11 @@ const display = (day: string) =>
 export default function DateRangePicker({
   value,
   onChange,
+  resetLabel = "Usar período rápido",
 }: {
   value: DateRange;
   onChange: (range: DateRange) => void;
+  resetLabel?: string;
 }) {
   const id = useId(),
     root = useRef<HTMLDivElement>(null),
@@ -264,7 +266,7 @@ export default function DateRangePicker({
                 close();
               }}
             >
-              Usar período rápido
+              {resetLabel}
             </button>
             <div>
               <button className="admin-button" type="button" onClick={close}>

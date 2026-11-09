@@ -40,3 +40,55 @@
     grid-template-areas: "pending" "trend";
   }
 }
+
+.commercial-overview-grid {
+  align-items: start;
+}
+.admin-app .admin-panel.commercial-overview-alert {
+  border-color: #e7b75a;
+  border-left: 4px solid #ce850c;
+  background: #fffaf0;
+}
+.commercial-overview-alert header h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.commercial-overview-alert header svg,
+.commercial-overview-alert-count {
+  color: #895304;
+}
+.commercial-overview-alert-count {
+  border-radius: 999px;
+  background: #ffedc5;
+  padding: 5px 9px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.commercial-overview-alert .sales-operations-orders {
+  max-height: 12rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #bd924c transparent;
+  padding-right: 6px;
+  margin: 10px 0;
+}
+.commercial-overview-alert .sales-operations-orders li {
+  align-items: center;
+  flex-wrap: wrap;
+  padding: 8px 0;
+  border-color: #efdfbd;
+}
+.commercial-overview-alert .sales-operations-orders li > div:first-child {
+  align-items: flex-start;
+  text-align: left;
+  gap: 2px;
+}
+.commercial-overview-trend .analytics-revenue-chart {
+  max-height: 250px;
+}
+.party-chart > .commercial-overview-controls {
+  margin-bottom: 12px;
+}
