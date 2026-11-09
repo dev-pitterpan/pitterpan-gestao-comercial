@@ -46,15 +46,6 @@ export async function readOrderCustomer(
   }
   return null;
 }
-export async function ensureOrderCustomers(db: SqlClient) {
-  const { rows } = await db.query<{ present: boolean }>(
-    "SELECT EXISTS (SELECT 1 FROM pg_attribute WHERE attrelid = to_regclass('pitterpan_sales_orders') AND attname = 'customer' AND NOT attisdropped) AS present",
-  );
-  if (rows[0]?.present) return;
-  await db.query(
-    "ALTER TABLE pitterpan_sales_orders ADD COLUMN IF NOT EXISTS customer jsonb",
-  );
-}
 export const customerColumns = `COALESCE(to_jsonb(o)->'customer'->>'checkedAt','') AS customer_checked_at,COALESCE(to_jsonb(o)->'customer'->>'id','') AS customer_id,COALESCE(to_jsonb(o)->'customer'->>'name','') AS customer_name,
  peers.paid_orders::text AS customer_paid_orders,peers.pending_orders::text AS customer_pending_orders,peers.pending_value::text AS customer_pending_value`;
 export const customerJoin = `LEFT JOIN LATERAL (SELECT count(*) FILTER(WHERE p.financial_status='PAID' AND p.cancelled_at IS NULL) AS paid_orders, count(*) FILTER(WHERE p.financial_status IN ('PENDING','AUTHORIZED','PARTIALLY_PAID') AND p.cancelled_at IS NULL) AS pending_orders, COALESCE(sum(GREATEST(${outstandingBalanceSql("p")},0)) FILTER(WHERE p.financial_status IN ('PENDING','AUTHORIZED','PARTIALLY_PAID') AND p.cancelled_at IS NULL),0) AS pending_value

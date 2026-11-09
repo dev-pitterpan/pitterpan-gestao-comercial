@@ -19,29 +19,25 @@ const user = {
 };
 const cookie = `__Host-pitterpan-session=${signSession(user, secret)}`;
 for (const [application, port] of [["gestao-comercial", "3189"]]) {
-  const child = spawn(
-    process.execPath,
-    ["scripts/run-next.ts", "start"],
-    {
-      env: {
-        ...process.env,
-        PORT: port,
-        CATALOG_DATA_SOURCE: "json",
-        DATABASE_URL: "",
-        NEXT_TELEMETRY_DISABLED: "1",
-        NEXT_PUBLIC_CATALOG_URL: "http://127.0.0.1:3000",
-        ADMIN_EMAIL: user.email,
-        ADMIN_NAME: user.name,
-        ADMIN_PASSWORD_HASH: passwordHash,
-        ADMIN_SESSION_SECRET: secret,
-        SHOPIFY_SALES_STORE_DOMAIN: "fixture.myshopify.com",
-        SHOPIFY_SALES_CLIENT_ID: "fixture",
-        SHOPIFY_SALES_CLIENT_SECRET: "fixture-secret",
-        JITSI_BASE_URL: "",
-      },
-      stdio: ["ignore", "pipe", "pipe"],
+  const child = spawn(process.execPath, ["scripts/run-next.ts", "start"], {
+    env: {
+      ...process.env,
+      PORT: port,
+      CATALOG_DATA_SOURCE: "json",
+      DATABASE_URL: "",
+      NEXT_TELEMETRY_DISABLED: "1",
+      NEXT_PUBLIC_CATALOG_URL: "http://127.0.0.1:3000",
+      ADMIN_EMAIL: user.email,
+      ADMIN_NAME: user.name,
+      ADMIN_PASSWORD_HASH: passwordHash,
+      ADMIN_SESSION_SECRET: secret,
+      SHOPIFY_SALES_STORE_DOMAIN: "fixture.myshopify.com",
+      SHOPIFY_SALES_CLIENT_ID: "fixture",
+      SHOPIFY_SALES_CLIENT_SECRET: "fixture-secret",
+      JITSI_BASE_URL: "",
     },
-  );
+    stdio: ["ignore", "pipe", "pipe"],
+  });
   let logs = "";
   child.stderr.on("data", (chunk) => {
     logs += chunk;
@@ -71,7 +67,13 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
     const get = (path, options = {}) =>
       fetch(base + path, { redirect: "manual", ...options });
     assert.equal((await get("/api/health/")).status, 200);
-    assert.equal((await get("/api/catalogs/natal/")).status, 200);
+    const catalogResponse = await get("/api/catalogs/natal/");
+    assert.equal(catalogResponse.status, 200);
+    const { catalog } = await catalogResponse.json();
+    assert.ok(catalog.products.length);
+    assert.ok(
+      catalog.products.every((product) => !("inventoryQuantity" in product)),
+    );
     assert.equal(
       (await get("/assets/images/brand/pitter-pan-logo.svg")).status,
       200,
@@ -120,6 +122,11 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
         );
         assert.match(response.headers.get("cache-control"), /no-store/);
         assert.match(response.headers.get("x-robots-tag"), /noindex/);
+        if (path === "/gestor/")
+          assert.match(
+            await response.text(),
+            /href="http:\/\/127\.0\.0\.1:3000\/"/,
+          );
       }
     }
     console.log(

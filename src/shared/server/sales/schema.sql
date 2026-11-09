@@ -50,3 +50,6 @@ ALTER TABLE pitterpan_sales_orders ADD COLUMN IF NOT EXISTS current_total numeri
 -- A confirmed zero charge is distinct from an older snapshot without freight metadata.
 ALTER TABLE pitterpan_sales_orders ADD COLUMN IF NOT EXISTS shipping_charge numeric(18,2);
 ALTER TABLE pitterpan_sales_orders ADD COLUMN IF NOT EXISTS shipping_charge_checked boolean NOT NULL DEFAULT false;
+
+-- Record completed metadata backfills independently from nullable Shopify fields.
+ALTER TABLE pitterpan_sales_sync ADD COLUMN IF NOT EXISTS backfill_version integer NOT NULL DEFAULT 0;

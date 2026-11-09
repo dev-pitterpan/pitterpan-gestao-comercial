@@ -273,13 +273,16 @@ export async function readSales(
   days: number,
   after?: string,
   input: SalesFilters = { status: "all", category: "", delivery: "all" },
+  { includeRanking = true }: { includeRanking?: boolean } = {},
 ) {
   const period = Math.max(1, Math.min(60, Math.floor(days) || 30));
   const filters = salesFilterSchema.parse(input);
   const values = filterValues(store, period, filters);
   const where = selection(filters);
   const totals = await financialTotals(db, values, where);
-  const items = await readSoldProducts(db, store, period, filters);
+  const items = includeRanking
+    ? (await readSoldProducts(db, store, period, filters)).items
+    : [];
   // Offer counts for every delivery mode while keeping the other filters.
   const deliverySelection = { ...filters, delivery: "all" as const };
   const deliveries = await db.query<{ kind: string; orders: string }>(
@@ -291,8 +294,12 @@ export async function readSales(
     "SELECT completed_at::text,until_at::text,last_webhook_at::text FROM pitterpan_sales_sync WHERE store=$1",
     [store],
   );
-  const queue = await db.query<{ count: string; failed: string }>(
-    "SELECT count(*)::text AS count,count(*) FILTER(WHERE attempts>=10)::text AS failed FROM pitterpan_sales_inbox WHERE store=$1 AND done_at IS NULL",
+  const queue = await db.query<{
+    count: string;
+    failed: string;
+    oldest_pending_at: string | null;
+  }>(
+    "SELECT count(*)::text AS count,count(*) FILTER(WHERE attempts>=10)::text AS failed,min(received_at)::text AS oldest_pending_at FROM pitterpan_sales_inbox WHERE store=$1 AND done_at IS NULL",
     [store],
   );
   const cursor = await db.query<{ id: string }>(
@@ -311,13 +318,14 @@ export async function readSales(
   return {
     days: period,
     totals: totals.rows,
-    top: items.items,
+    top: items,
     ...ordersPage,
     filters,
     deliveries: deliveries.rows,
     state: state.rows[0] || null,
     pending: Number(queue.rows[0].count),
     failed: Number(queue.rows[0].failed),
+    oldestPendingAt: queue.rows[0].oldest_pending_at,
     cursor: cursor.rows[0].id,
     events: events.rows,
   };

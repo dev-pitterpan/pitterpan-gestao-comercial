@@ -1,5 +1,6 @@
 import SyncControl from "@shared/components/admin/SyncControl";
 import { requireSession } from "@shared/server/auth/session";
+import { allowed, operationalRoles } from "@shared/server/auth/crypto";
 import { adminContext } from "@shared/server/admin/repository";
 import {
   PageHeading,
@@ -24,9 +25,7 @@ export default async function Sync() {
         description="Atualize os dados da Shopify e acompanhe o andamento por aqui."
       />
       <DataNotice context={context} />
-      {(user.role === "admin" || user.role === "gerente_compras") && (
-        <SyncControl />
-      )}
+      {allowed(user.role, operationalRoles) && <SyncControl />}
       <section className="admin-panel">
         <header>
           <div>

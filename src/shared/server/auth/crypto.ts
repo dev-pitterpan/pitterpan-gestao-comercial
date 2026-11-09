@@ -1,3 +1,5 @@
+import { roles, type Role } from "./permissions.ts";
+export { allowed, operationalRoles, roles, type Role } from "./permissions.ts";
 import {
   createHmac,
   randomBytes,
@@ -15,13 +17,6 @@ const scrypt = (password: string, salt: string) =>
       (error, key) => (error ? reject(error) : resolve(key)),
     );
   });
-export const roles = [
-  "admin",
-  "gerente_compras",
-  "gestor",
-  "atendimento",
-] as const;
-export type Role = (typeof roles)[number];
 export const SESSION_SECONDS = 8 * 60 * 60;
 export const COOKIE_NAME =
   process.env.NODE_ENV === "production"
@@ -152,10 +147,4 @@ export function safeDestination(value: unknown) {
   } catch {
     return "/gestor/";
   }
-}
-export function allowed(role: Role, permitted: readonly Role[]) {
-  return (
-    permitted.includes(role) ||
-    (role === "gerente_compras" && permitted.includes("gestor"))
-  );
 }

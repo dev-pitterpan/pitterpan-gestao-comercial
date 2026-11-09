@@ -1,4 +1,4 @@
-import { getPageData } from "../../../../catalogs";
+import { getPageData, publicProduct } from "../../../../catalogs";
 import { catalogQuerySchema } from "../../../../../lib/catalog/query";
 export const runtime = "nodejs";
 export async function GET(
@@ -18,12 +18,21 @@ export async function GET(
         { error: "Coleção não encontrada." },
         { status: 404 },
       );
-    return Response.json(result, {
-      headers: {
-        "Cache-Control": "no-store",
-        "Server-Timing": `catalog;dur=${(performance.now() - started).toFixed(1)}`,
+    return Response.json(
+      {
+        ...result,
+        catalog: {
+          ...result.catalog,
+          products: result.catalog.products.map(publicProduct),
+        },
       },
-    });
+      {
+        headers: {
+          "Cache-Control": "no-store",
+          "Server-Timing": `catalog;dur=${(performance.now() - started).toFixed(1)}`,
+        },
+      },
+    );
   } catch {
     console.error("catalog_query_failed", {
       elapsedMs: Math.round(performance.now() - started),

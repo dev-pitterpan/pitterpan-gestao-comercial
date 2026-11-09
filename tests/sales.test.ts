@@ -349,6 +349,14 @@ test("worker retoma cursor, completa itens, deduplica pagamento e preserva check
   fail = false;
   assert.equal((await syncSalesPage()).more, false);
   assert.equal(pageCalls, 2);
+  assert.equal(
+    (
+      await db.query<{ backfill_version: number }>(
+        "SELECT backfill_version FROM pitterpan_sales_sync",
+      )
+    ).rows[0].backfill_version,
+    1,
+  );
   await db.query(
     "INSERT INTO pitterpan_sales_inbox(store,delivery_id,topic,order_id) VALUES($1,'delivery-1','orders/paid','gid://shopify/Order/20'),($1,'delivery-2','orders/paid','gid://shopify/Order/20')",
     [store],

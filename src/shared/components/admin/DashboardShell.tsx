@@ -1,4 +1,5 @@
 "use client";
+import { allowed, operationalRoles } from "../../server/auth/permissions";
 import AutoFilterForm from "./AutoFilterForm";
 import PartyExperience, { PartySectionScene } from "./PartyExperience";
 import Link, { useLinkStatus } from "next/link";
@@ -236,9 +237,11 @@ export default function DashboardShell({
   children,
   user,
   accountLabel,
+  catalogUrl,
 }: {
   children: ReactNode;
   accountLabel: ReactNode;
+  catalogUrl: string;
   user: { name: string; email: string; role: Role };
 }) {
   const pathname = (usePathname() || "/gestor/").replace(/\/+$/, "") + "/";
@@ -278,7 +281,7 @@ export default function DashboardShell({
       }
     }
     function resize() {
-      if (innerWidth >= 980) setOpen(false);
+      if (window.matchMedia("(min-width: 981px)").matches) setOpen(false);
     }
     document.addEventListener("keydown", keydown);
     window.addEventListener("resize", resize);
@@ -314,12 +317,14 @@ export default function DashboardShell({
         <button
           className="admin-nav-shade"
           aria-label="Fechar navegação"
+          tabIndex={-1}
           onClick={() => setOpen(false)}
         />
       )}
       <aside
         ref={sidebarRef}
         className={`admin-sidebar ${open ? "is-open" : ""}`}
+        id="admin-sidebar"
         aria-label="Navegação administrativa"
       >
         <Link className="admin-brand" href="/gestor/">
@@ -463,6 +468,7 @@ export default function DashboardShell({
               className="admin-menu-button"
               onClick={() => setOpen(!open)}
               aria-label="Abrir menu"
+              aria-controls="admin-sidebar"
               aria-expanded={open}
             >
               <Menu size={22} />
@@ -484,7 +490,7 @@ export default function DashboardShell({
               placeholder="Buscar produto ou SKU…"
             />
           </AutoFilterForm>
-          {(user.role === "admin" || user.role === "gerente_compras") && (
+          {allowed(user.role, operationalRoles) && (
             <Link
               className="admin-button admin-sync-shortcut"
               href="/gestor/sincronizacoes/"
@@ -501,14 +507,14 @@ export default function DashboardShell({
           </span>
           <Link
             className="admin-public-link"
-            href="/"
+            href={catalogUrl}
             target="_blank"
             rel="noopener noreferrer"
           >
             Ver catálogo <ArrowUpRight size={16} />
           </Link>
         </header>
-        <main className="admin-content" id="admin-main">
+        <main className="admin-content" id="admin-main" tabIndex={-1}>
           <PartySectionScene />
           {children}
         </main>
