@@ -37,7 +37,7 @@ Mapa funcional e técnico do painel da Floresta, América e Iririú. A versão e
 | Minha conta | `/gestor/minha-conta/` | Informações da sessão e ações disponíveis para a própria conta. |
 | Equipe | `/gestor/usuarios/` | Gestão das contas da equipe e perfis. Acesso Admin. |
 | Configurações | `/gestor/configuracoes/` | Limites de estoque e informações de acesso e integração. Acesso Admin. |
-| Versões e atualizações | `/gestor/versoes/` | Versão em execução, data de registro, commit quando disponível, mapa do sistema e até 20 eventos recentes de equipe e configuração. Acesso Admin. |
+| Versões e atualizações | `/gestor/versoes/` | Versão em execução, data de registro, commit quando disponível, mapa do sistema e até 20 eventos recentes de equipe e configuração. Acesso Admin. Os históricos usam linhas que se empilham em telas estreitas. |
 
 ## 3. Acesso e responsabilidades
 

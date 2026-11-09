@@ -1,5 +1,13 @@
 [
   {
+    "version": "2026.11.09.8",
+    "recordedAt": "2026-11-09T19:27:28.815Z",
+    "title": "Responsividade da administração de versões",
+    "changes": [
+      "Mais espaço entre os painéis e históricos legíveis em telas estreitas, com linhas que se reorganizam sem rolagem horizontal."
+    ]
+  },
+  {
     "version": "2026.11.09.7",
     "recordedAt": "2026-11-09T19:23:10.451Z",
     "title": "Posicionamento do calendário de pedidos",
