@@ -53,3 +53,7 @@ Execute `npm run sales:migrate` com a conexão do ambiente de destino para habil
 A Vercel tem uma execução diária de contingência na janela das 09h UTC (06h em Joinville) em `/api/cron/sales/`. Configure `CRON_SECRET` no ambiente de produção com pelo menos 32 caracteres. Cada chamada processa uma etapa. Para atualização frequente durante o expediente, use o agendamento já existente ou configure um agendador para chamar o mesmo endpoint com o cabeçalho `Authorization: Bearer <CRON_SECRET>`. Acompanhe o horário do último ciclo concluído, a idade do evento mais antigo e as falhas da fila no painel de Vendas. Para importar o volume inicial, execute `npm run sales:sync` e retome se o comando indicar lotes pendentes.
 
 A importação automática consulta pedidos criados na janela móvel de 60 dias. O filtro aceita datas anteriores para consultar pedidos já armazenados. Antes de usar um período mais longo para fechamento, confira a cobertura no banco e reconcilie uma amostra com a Shopify.
+
+## Mapa do sistema e versões
+
+Consulte [a documentação funcional e técnica](docs/SISTEMA.md). No painel, **Administração → Versões e atualizações** mostra o histórico e a versão em execução. Atualize o mapa e o registro de versões junto com cada mudança funcional.

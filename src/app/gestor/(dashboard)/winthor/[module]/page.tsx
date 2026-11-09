@@ -93,6 +93,14 @@ export default async function WinThorModule({
         </ul>
         <h3>O que falta confirmar</h3>
         <p>{checks}</p>
+        {module === "transferencias" && (
+          <p>
+            Se as transferências são feitas pela rotina 1124 do WinThor, use a
+            aba Relatório e selecione origem, destino e período. Uma amostra com
+            os códigos de filial e as linhas dos produtos permite conferir a
+            origem antes da integração.
+          </p>
+        )}
         <Link className="admin-text-link" href={link.href}>
           {link.label} <ArrowUpRight size={16} aria-hidden="true" />
         </Link>

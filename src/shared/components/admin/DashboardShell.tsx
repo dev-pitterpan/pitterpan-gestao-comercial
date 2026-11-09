@@ -26,6 +26,7 @@ import {
   BadgePercent,
   ShoppingCart,
   BookOpen,
+  History,
   ArrowLeftRight,
   RefreshCw,
   Settings2,
@@ -148,6 +149,12 @@ const links = [
   { href: "/gestor/relatorios/", label: "Relatórios", icon: BarChart3 },
   { href: "/gestor/usuarios/", label: "Equipe", icon: Users, admin: true },
   {
+    href: "/gestor/versoes/",
+    label: "Versões e atualizações",
+    icon: History,
+    admin: true,
+  },
+  {
     href: "/gestor/configuracoes/",
     label: "Configurações",
     icon: Settings2,
@@ -188,7 +195,7 @@ const navigationGroups = [
   },
   {
     label: "Administração",
-    paths: ["/gestor/usuarios/", "/gestor/configuracoes/"],
+    paths: ["/gestor/usuarios/", "/gestor/configuracoes/", "/gestor/versoes/"],
   },
 ];
 function NavigationPending() {

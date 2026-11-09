@@ -113,7 +113,13 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
       assert.match(guarded.headers.get("location"), /^\/login/);
       assert.equal((await get("/api/admin/sales/")).status, 401);
       assert.equal((await get("/login/")).status, 200);
-      for (const path of ["/gestor/", "/gestor/vendas/", "/gestor/natal/"]) {
+      assert.equal((await get("/gestor/versoes/")).status, 307);
+      for (const path of [
+        "/gestor/",
+        "/gestor/vendas/",
+        "/gestor/natal/",
+        "/gestor/versoes/",
+      ]) {
         const response = await get(path, { headers: { cookie } });
         assert.equal(
           response.status,
@@ -122,6 +128,11 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
         );
         assert.match(response.headers.get("cache-control"), /no-store/);
         assert.match(response.headers.get("x-robots-tag"), /noindex/);
+        if (path === "/gestor/versoes/") {
+          const html = await response.text();
+          assert.match(html, /Versões e atualizações/);
+          assert.match(html, /docs\/SISTEMA\.md/);
+        }
         if (path === "/gestor/")
           assert.match(
             await response.text(),

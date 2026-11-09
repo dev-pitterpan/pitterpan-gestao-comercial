@@ -1,0 +1,51 @@
+[
+  {
+    "version": "2026.11.09.6",
+    "recordedAt": "2026-11-09T19:17:38.747Z",
+    "title": "Documentação e controle de versões",
+    "changes": [
+      "Nova tela de administração com versão em execução e ações recentes de equipe e configurações.",
+      "Mapa técnico e operacional do sistema com verificação de atualização no CI.",
+      "Orientações para levantar o histórico de transferências do WinThor."
+    ]
+  },
+  {
+    "version": "2026.11.09.5",
+    "recordedAt": "2026-11-09T16:07:37-03:00",
+    "title": "Identificação do estoque da Shopify",
+    "changes": ["Atalho Estoque da Shopify com a sacola da plataforma."]
+  },
+  {
+    "version": "2026.11.09.4",
+    "recordedAt": "2026-11-09T16:02:13-03:00",
+    "title": "Indicadores e alterações da Shopify",
+    "changes": [
+      "Destaque para o valor líquido e seção de situações dos pedidos.",
+      "Histórico com campos alterados e distinção entre data da Shopify e detecção na sincronização."
+    ]
+  },
+  {
+    "version": "2026.11.09.3",
+    "recordedAt": "2026-11-09T15:57:20-03:00",
+    "title": "Calendário e fila de atendimento",
+    "changes": [
+      "Filtro de datas na Visão geral, gráfico de produtos com duas visões e fila de atenção com rolagem."
+    ]
+  },
+  {
+    "version": "2026.11.09.2",
+    "recordedAt": "2026-11-09T15:45:22-03:00",
+    "title": "Nova Visão geral",
+    "changes": [
+      "Evolução de vendas, ranking e pendências independentes do período de vendas."
+    ]
+  },
+  {
+    "version": "2026.11.09.1",
+    "recordedAt": "2026-11-09T14:54:21-03:00",
+    "title": "Melhorias da auditoria",
+    "changes": [
+      "Acessos operacionais, tabelas, navegação, sincronização de vendas e verificações no GitHub Actions."
+    ]
+  }
+]
