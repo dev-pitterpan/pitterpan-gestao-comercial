@@ -7,10 +7,11 @@ import {
   useRef,
   useState,
 } from "react";
-import type { PointerEvent, ReactNode } from "react";
+import type { CSSProperties, PointerEvent, ReactNode } from "react";
 import { createPortal } from "react-dom";
 import {
   ClipboardList,
+  MoveDiagonal,
   PanelLeft,
   PanelRight,
   RefreshCw,
@@ -134,6 +135,15 @@ function FulfillmentWindow({
   const { id, name, storedStatus } = order;
   const panel = useRef<HTMLElement>(null);
   const drag = useRef<{ x: number; y: number } | null>(null);
+  const resizeStart = useRef<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null>(null);
+  const [size, setSize] = useState<{ width: number; height: number } | null>(
+    null,
+  );
   const titleId = useId();
   const noteId = useId();
   const [position, setPosition] = useState<{ x: number; y: number } | null>(
@@ -147,6 +157,13 @@ function FulfillmentWindow({
   useEffect(() => {
     panel.current?.focus();
   }, []);
+
+  function resize(width: number, height: number) {
+    setSize({
+      width: Math.min(window.innerWidth - 16, Math.max(360, width)),
+      height: Math.min(window.innerHeight - 16, Math.max(260, height)),
+    });
+  }
 
   function edge(x: number): Dock | null {
     if (window.innerWidth < 1100) return null;
@@ -262,211 +279,289 @@ function FulfillmentWindow({
         aria-describedby={noteId}
         onPointerDown={activate}
         onFocus={activate}
-        style={{
-          zIndex: layer,
-          ...(position && !order.dock
-            ? {
-                left: `clamp(8px, ${position.x}px, calc(100vw - var(--window-width) - 8px))`,
-                top: `clamp(8px, ${position.y}px, calc(100dvh - var(--window-height) - 8px))`,
-              }
-            : {}),
-        }}
+        style={
+          {
+            zIndex: layer,
+            ...(size
+              ? {
+                  "--window-requested-width": `${size.width}px`,
+                  "--window-requested-height": `${size.height}px`,
+                }
+              : {}),
+            ...(position && !order.dock
+              ? {
+                  left: `clamp(8px, ${position.x}px, calc(100vw - var(--window-width) - 8px))`,
+                  top: `clamp(8px, ${position.y}px, calc(100dvh - var(--window-height) - 8px))`,
+                }
+              : {}),
+          } as CSSProperties
+        }
       >
-        <header className="fulfillment-dialog-heading">
-          <div
-            className="fulfillment-window-grip"
-            title="Arraste para mover ou encaixar"
-            onPointerDown={start}
-            onPointerMove={move}
-            onPointerUp={end}
-            onPointerCancel={end}
-            onLostPointerCapture={end}
-          >
-            <span className="admin-eyebrow">ATENDIMENTO DO PEDIDO</span>
-            <h2 id={titleId}>{data?.name || name}</h2>
-          </div>
-          <div className="fulfillment-window-actions">
-            <button
-              type="button"
-              className="admin-button fulfillment-dock-action"
-              aria-label="Encaixar à esquerda"
-              onClick={() => dock("left")}
+        <div className="fulfillment-window-content">
+          <header className="fulfillment-dialog-heading">
+            <div
+              className="fulfillment-window-grip"
+              title="Arraste para mover ou encaixar"
+              onPointerDown={start}
+              onPointerMove={move}
+              onPointerUp={end}
+              onPointerCancel={end}
+              onLostPointerCapture={end}
             >
-              <PanelLeft size={16} />
-            </button>
-            <button
-              type="button"
-              className="admin-button fulfillment-dock-action"
-              aria-label="Encaixar à direita"
-              onClick={() => dock("right")}
-            >
-              <PanelRight size={16} />
-            </button>
-            {order.dock && (
+              <span className="admin-eyebrow">ATENDIMENTO DO PEDIDO</span>
+              <h2 id={titleId}>{data?.name || name}</h2>
+            </div>
+            <div className="fulfillment-window-actions">
               <button
                 type="button"
                 className="admin-button fulfillment-dock-action"
-                aria-label="Voltar para janela flutuante"
-                onClick={() => {
-                  setPosition(null);
-                  dock(null);
-                }}
+                aria-label="Encaixar à esquerda"
+                onClick={() => dock("left")}
               >
-                <Square size={15} />
+                <PanelLeft size={16} />
               </button>
-            )}
-            <button
-              type="button"
-              className="admin-button"
-              aria-label="Fechar conferência de itens"
-              onClick={close}
-            >
-              <X size={18} />
-            </button>
-          </div>
-        </header>
-        <p id={noteId} className="fulfillment-dialog-note">
-          Quantidades consultadas na Shopify. Atendimento é independente do
-          pagamento e não comprova entrega ao cliente.
-        </p>
-        {error ? (
-          <div className="admin-data-notice" role="alert">
-            {error}
-            <button
-              className="admin-button"
-              type="button"
-              onClick={() => setRevision((r) => r + 1)}
-            >
-              Tentar novamente
-            </button>
-          </div>
-        ) : !data ? (
-          <PitterSpinner label="Conferindo produtos e quantidades na Shopify…" />
-        ) : (
-          <>
-            {storedStatus && data.status !== storedStatus && (
-              <p className="admin-data-notice">
-                O atendimento foi atualizado na Shopify. Esta conferência mostra
-                o estado atual; sincronize a lista para atualizar o resumo.
-              </p>
-            )}
-            <div className="fulfillment-dialog-state">
-              <strong>
-                {data.cancelledAt
-                  ? "Pedido cancelado"
-                  : fulfillmentLabels[data.status] || data.status}
-              </strong>
-              <p>
-                {data.cancelledAt
-                  ? "Os dados abaixo mostram o histórico de atendimento do pedido cancelado."
-                  : fulfillmentDescriptions[data.status] ||
-                    "Confira os registros de atendimento por produto."}
-              </p>
-            </div>
-            <div className="fulfillment-dialog-totals">
-              {[
-                ["Unidades no pedido original", data.totals.ordered],
-                ["Unidades atendidas", data.totals.fulfilled],
-                ["Unidades a atender", data.totals.pending],
-              ].map(([label, value]) => (
-                <div key={String(label)}>
-                  <span>{label}</span>
-                  <strong>{number(Number(value))}</strong>
-                </div>
-              ))}
-            </div>
-            <div
-              className="fulfillment-dialog-table"
-              role="region"
-              aria-label="Produtos e quantidades do atendimento"
-              tabIndex={0}
-            >
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Produto</th>
-                    <th>Pedido original</th>
-                    <th>Atendido</th>
-                    <th>A atender</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {data.items.map((item) => (
-                    <tr key={item.id}>
-                      <td>
-                        <div className="fulfillment-product">
-                          <ProductThumbnail src={item.imageUrl} />
-                          <div>
-                            <strong>{item.name}</strong>
-                            <small>SKU {item.sku || "não informado"}</small>
-                            {item.current !== item.ordered && (
-                              <small>
-                                Quantidade atual do pedido:{" "}
-                                {number(item.current)}
-                              </small>
-                            )}
-                            {item.nonFulfillable > 0 && (
-                              <small>
-                                {number(item.nonFulfillable)} un. fora do saldo
-                                de atendimento
-                              </small>
-                            )}
-                            <span
-                              className={`admin-badge ${item.pending > 0 ? "blue" : item.fulfilled > 0 ? "green" : ""}`}
-                            >
-                              {item.pending > 0
-                                ? item.fulfilled > 0
-                                  ? "Parcialmente atendido"
-                                  : "A atender"
-                                : item.fulfilled > 0
-                                  ? "Atendido"
-                                  : "Sem saldo a atender"}
-                            </span>
-                          </div>
-                        </div>
-                      </td>
-                      <td>{number(item.ordered)}</td>
-                      <td>
-                        <strong>{number(item.fulfilled)}</strong>
-                      </td>
-                      <td>{number(item.pending)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {!data.items.length && (
-                <p className="fulfillment-dialog-note">
-                  Nenhum produto informado neste pedido.
-                </p>
+              <button
+                type="button"
+                className="admin-button fulfillment-dock-action"
+                aria-label="Encaixar à direita"
+                onClick={() => dock("right")}
+              >
+                <PanelRight size={16} />
+              </button>
+              {order.dock && (
+                <button
+                  type="button"
+                  className="admin-button fulfillment-dock-action"
+                  aria-label="Voltar para janela flutuante"
+                  onClick={() => {
+                    setPosition(null);
+                    dock(null);
+                  }}
+                >
+                  <Square size={15} />
+                </button>
               )}
-            </div>
-            <p className="fulfillment-dialog-note">
-              “Atendido” conta somente registros concluídos com sucesso.
-              Cancelamentos ou falhas de atendimento não entram nessa
-              quantidade. Unidades atendidas e depois reembolsadas podem
-              permanecer no histórico; o saldo a atender vem diretamente da
-              Shopify.
-            </p>
-            <footer className="fulfillment-dialog-footer">
-              <small>
-                Consultado em{" "}
-                {new Intl.DateTimeFormat("pt-BR", {
-                  dateStyle: "short",
-                  timeStyle: "short",
-                  timeZone: "America/Sao_Paulo",
-                }).format(new Date(data.checkedAt))}{" "}
-                · Brasília
-              </small>
               <button
                 type="button"
                 className="admin-button"
+                aria-label="Fechar conferência de itens"
+                onClick={close}
+              >
+                <X size={18} />
+              </button>
+            </div>
+          </header>
+          <p id={noteId} className="fulfillment-dialog-note">
+            Quantidades consultadas na Shopify. Atendimento é independente do
+            pagamento e não comprova entrega ao cliente.
+          </p>
+          {error ? (
+            <div className="admin-data-notice" role="alert">
+              {error}
+              <button
+                className="admin-button"
+                type="button"
                 onClick={() => setRevision((r) => r + 1)}
               >
-                <RefreshCw size={14} /> Atualizar conferência
+                Tentar novamente
               </button>
-            </footer>
-          </>
-        )}
+            </div>
+          ) : !data ? (
+            <PitterSpinner label="Conferindo produtos e quantidades na Shopify…" />
+          ) : (
+            <>
+              {storedStatus && data.status !== storedStatus && (
+                <p className="admin-data-notice">
+                  O atendimento foi atualizado na Shopify. Esta conferência
+                  mostra o estado atual; sincronize a lista para atualizar o
+                  resumo.
+                </p>
+              )}
+              <div className="fulfillment-dialog-state">
+                <strong>
+                  {data.cancelledAt
+                    ? "Pedido cancelado"
+                    : fulfillmentLabels[data.status] || data.status}
+                </strong>
+                <p>
+                  {data.cancelledAt
+                    ? "Os dados abaixo mostram o histórico de atendimento do pedido cancelado."
+                    : fulfillmentDescriptions[data.status] ||
+                      "Confira os registros de atendimento por produto."}
+                </p>
+              </div>
+              <div className="fulfillment-dialog-totals">
+                {[
+                  ["Unidades no pedido original", data.totals.ordered],
+                  ["Unidades atendidas", data.totals.fulfilled],
+                  ["Unidades a atender", data.totals.pending],
+                ].map(([label, value]) => (
+                  <div key={String(label)}>
+                    <span>{label}</span>
+                    <strong>{number(Number(value))}</strong>
+                  </div>
+                ))}
+              </div>
+              <div
+                className="fulfillment-dialog-table"
+                role="region"
+                aria-label="Produtos e quantidades do atendimento"
+                tabIndex={0}
+              >
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>Produto</th>
+                      <th>Pedido original</th>
+                      <th>Atendido</th>
+                      <th>A atender</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.items.map((item) => (
+                      <tr key={item.id}>
+                        <td>
+                          <div className="fulfillment-product">
+                            <ProductThumbnail src={item.imageUrl} />
+                            <div>
+                              <strong>{item.name}</strong>
+                              <small>SKU {item.sku || "não informado"}</small>
+                              {item.current !== item.ordered && (
+                                <small>
+                                  Quantidade atual do pedido:{" "}
+                                  {number(item.current)}
+                                </small>
+                              )}
+                              {item.nonFulfillable > 0 && (
+                                <small>
+                                  {number(item.nonFulfillable)} un. fora do
+                                  saldo de atendimento
+                                </small>
+                              )}
+                              <span
+                                className={`admin-badge ${item.pending > 0 ? "blue" : item.fulfilled > 0 ? "green" : ""}`}
+                              >
+                                {item.pending > 0
+                                  ? item.fulfilled > 0
+                                    ? "Parcialmente atendido"
+                                    : "A atender"
+                                  : item.fulfilled > 0
+                                    ? "Atendido"
+                                    : "Sem saldo a atender"}
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+                        <td>{number(item.ordered)}</td>
+                        <td>{number(item.fulfilled)}</td>
+                        <td>
+                          {item.pending > 0 ? (
+                            <strong>{number(item.pending)}</strong>
+                          ) : (
+                            number(item.pending)
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {!data.items.length && (
+                  <p className="fulfillment-dialog-note">
+                    Nenhum produto informado neste pedido.
+                  </p>
+                )}
+              </div>
+              <p className="fulfillment-dialog-note">
+                “Atendido” conta somente registros concluídos com sucesso.
+                Cancelamentos ou falhas de atendimento não entram nessa
+                quantidade. Unidades atendidas e depois reembolsadas podem
+                permanecer no histórico; o saldo a atender vem diretamente da
+                Shopify.
+              </p>
+              <footer className="fulfillment-dialog-footer">
+                <small>
+                  Consultado em{" "}
+                  {new Intl.DateTimeFormat("pt-BR", {
+                    dateStyle: "short",
+                    timeStyle: "short",
+                    timeZone: "America/Sao_Paulo",
+                  }).format(new Date(data.checkedAt))}{" "}
+                  · Brasília
+                </small>
+                <button
+                  type="button"
+                  className="admin-button"
+                  onClick={() => setRevision((r) => r + 1)}
+                >
+                  <RefreshCw size={14} /> Atualizar conferência
+                </button>
+              </footer>
+            </>
+          )}
+        </div>
+        <button
+          type="button"
+          className="fulfillment-corner-resize"
+          aria-label="Redimensionar janela. Use as setas para ajustar largura e altura."
+          title="Arraste para ajustar a largura e a altura"
+          onPointerDown={(event) => {
+            if (event.button !== 0 || !panel.current) return;
+            const { left, top, width, height } =
+              panel.current.getBoundingClientRect();
+            resizeStart.current = {
+              x: event.clientX,
+              y: event.clientY,
+              width,
+              height,
+            };
+            setPosition({ x: left, y: top });
+            event.currentTarget.setPointerCapture(event.pointerId);
+          }}
+          onPointerMove={(event) => {
+            const start = resizeStart.current;
+            if (
+              !start ||
+              !event.currentTarget.hasPointerCapture(event.pointerId)
+            )
+              return;
+            resize(
+              start.width + event.clientX - start.x,
+              start.height + event.clientY - start.y,
+            );
+          }}
+          onLostPointerCapture={() => {
+            resizeStart.current = null;
+          }}
+          onKeyDown={(event) => {
+            if (
+              !panel.current ||
+              !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(
+                event.key,
+              )
+            )
+              return;
+            event.preventDefault();
+            const { left, top, width, height } =
+              panel.current.getBoundingClientRect();
+            setPosition({ x: left, y: top });
+            resize(
+              width +
+                (event.key === "ArrowRight"
+                  ? 20
+                  : event.key === "ArrowLeft"
+                    ? -20
+                    : 0),
+              height +
+                (event.key === "ArrowDown"
+                  ? 20
+                  : event.key === "ArrowUp"
+                    ? -20
+                    : 0),
+            );
+          }}
+        >
+          <MoveDiagonal size={16} aria-hidden="true" />
+        </button>
       </section>
     </>
   );

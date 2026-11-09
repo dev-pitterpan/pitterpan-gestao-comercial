@@ -994,3 +994,65 @@
 .fulfillment-window .fulfillment-dialog-table tbody tr:nth-child(even) {
   background: #f4f8fc;
 }
+
+.fulfillment-window {
+  --window-width: min(var(--window-requested-width, 760px), calc(100vw - 16px));
+  --window-height: min(
+    var(--window-requested-height, 680px),
+    calc(100dvh - 16px)
+  );
+  max-height: none;
+  padding: 0;
+  overflow: hidden;
+}
+.fulfillment-window-content {
+  box-sizing: border-box;
+  height: 100%;
+  overflow: auto;
+  padding: 16px 20px 30px;
+}
+.fulfillment-window .fulfillment-dialog-heading h2 {
+  font-weight: 700;
+}
+.fulfillment-window .fulfillment-product strong {
+  font-weight: 650;
+}
+.fulfillment-window .fulfillment-product small,
+.fulfillment-window .fulfillment-dialog-note {
+  font-weight: 400;
+}
+.fulfillment-window .fulfillment-dialog-table th {
+  font-weight: 650;
+}
+.fulfillment-corner-resize {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid #a5bcd5;
+  border-radius: 7px;
+  background: #e1ecf7;
+  color: #274765;
+  cursor: nwse-resize;
+  touch-action: none;
+}
+.fulfillment-corner-resize:hover {
+  background: #c8def5;
+}
+@media (min-width: 1100px) {
+  .fulfillment-window[data-dock] .fulfillment-corner-resize {
+    display: none;
+  }
+}
+@media (max-width: 679px) {
+  .fulfillment-corner-resize {
+    display: none;
+  }
+  .fulfillment-window-content {
+    padding: 12px;
+  }
+}
