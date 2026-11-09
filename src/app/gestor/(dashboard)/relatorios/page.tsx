@@ -36,7 +36,7 @@ export default async function Reports() {
             : []),
           {
             title: "Produtos e ofertas",
-            text: "Filtre o mix da loja e exporte os produtos da página consultada.",
+            text: "Filtre o mix da loja e exporte todos os produtos da seleção filtrada.",
             href: "/gestor/produtos/",
             icon: BarChart3,
           },

@@ -26,9 +26,11 @@ const date = (value: string) =>
 export default function SalesOperations({
   params,
   overview = false,
+  queue = false,
 }: {
   params: string;
   overview?: boolean;
+  queue?: boolean;
 }) {
   const [data, setData] = useState<Data | null>(null),
     [error, setError] = useState(""),
@@ -75,7 +77,11 @@ export default function SalesOperations({
       id="sales-operations"
       className="sales-operations"
       aria-label={
-        overview ? "Resumo da operação de vendas" : "Atendimentos e reembolsos"
+        overview
+          ? "Resumo da operação de vendas"
+          : queue
+            ? "Fila de expedição"
+            : "Atendimentos e reembolsos"
       }
     >
       <header className="sales-operations-heading">
@@ -88,7 +94,9 @@ export default function SalesOperations({
           <h2>
             {overview
               ? "Vendas e pontos de atenção"
-              : "Atendimentos e reembolsos"}
+              : queue
+                ? "Fila de expedição"
+                : "Atendimentos e reembolsos"}
           </h2>
           <p>
             {overview
@@ -178,12 +186,12 @@ export default function SalesOperations({
               Confira a sincronização antes de concluir que não houve vendas.
             </p>
           ) : (
-            <div className="sales-operations-grid">
+            <div className={queue ? undefined : "sales-operations-grid"}>
               <section className="admin-panel">
                 <header>
                   <div>
                     <span className="admin-eyebrow">PAGAMENTO CONFIRMADO</span>
-                    <h3>Atendimentos em aberto</h3>
+                    <h3>Pedidos a preparar ou retirar</h3>
                   </div>
                   <Clock3 size={19} />
                 </header>
@@ -236,76 +244,80 @@ export default function SalesOperations({
                   </Link>
                 )}
               </section>
-              <section className="admin-panel">
-                <header>
-                  <div>
-                    <span className="admin-eyebrow">DINHEIRO DEVOLVIDO</span>
-                    <h3>Pedidos com reembolso</h3>
-                  </div>
-                  <Undo2 size={19} />
-                </header>
-                <p className="sales-operations-note">
-                  Até {overview ? 3 : 10} pedidos mais recentes. Valores
-                  acumulados por pedido; a data abaixo é a da compra, não a do
-                  estorno.
-                </p>
-                {!data.refunds.length ? (
-                  <p className="admin-inline-note">
-                    Nenhum pedido com valor reembolsado nesta seleção.
+              {!queue && (
+                <section className="admin-panel">
+                  <header>
+                    <div>
+                      <span className="admin-eyebrow">DINHEIRO DEVOLVIDO</span>
+                      <h3>Pedidos com reembolso</h3>
+                    </div>
+                    <Undo2 size={19} />
+                  </header>
+                  <p className="sales-operations-note">
+                    Até {overview ? 3 : 10} pedidos mais recentes. Valores
+                    acumulados por pedido; a data abaixo é a da compra, não a do
+                    estorno.
                   </p>
-                ) : (
-                  <DragScroll label="Conferência de reembolsos">
-                    <table className="admin-table sales-refunds-table">
-                      <thead>
-                        <tr>
-                          <th>Pedido / compra</th>
-                          <th>Recebido</th>
-                          <th>Reembolsado</th>
-                          <th>Líquido</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {data.refunds.slice(0, overview ? 3 : 10).map((o) => (
-                          <tr key={o.id}>
-                            <td>
-                              <a
-                                href={orderHref(o.id)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                {o.name}
-                                <span className="admin-sr-only">
-                                  {" "}
-                                  · Abrir na Shopify em nova aba
-                                </span>
-                              </a>
-                              <small>{date(o.processed_at)}</small>
-                              <OrderFulfillmentDetails
-                                id={o.id}
-                                name={o.name}
-                              />
-                              <small>
-                                {o.financial_status === "REFUNDED"
-                                  ? "Reembolso total"
-                                  : o.financial_status === "PARTIALLY_REFUNDED"
-                                    ? "Reembolso parcial"
-                                    : "Com reembolso"}
-                                {o.cancelled_at ? " · Cancelado" : ""}
-                              </small>
-                            </td>
-                            <td>{money(o.received, o.currency)}</td>
-                            <td>{money(o.refunded, o.currency)}</td>
-                            <td>{money(o.net, o.currency)}</td>
+                  {!data.refunds.length ? (
+                    <p className="admin-inline-note">
+                      Nenhum pedido com valor reembolsado nesta seleção.
+                    </p>
+                  ) : (
+                    <DragScroll label="Conferência de reembolsos">
+                      <table className="admin-table sales-refunds-table">
+                        <thead>
+                          <tr>
+                            <th>Pedido / compra</th>
+                            <th>Recebido</th>
+                            <th>Reembolsado</th>
+                            <th>Líquido</th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </DragScroll>
-                )}
-                <Link className="admin-text-link" href={refundsHref}>
-                  Ver todos os pedidos com reembolso <ArrowUpRight size={14} />
-                </Link>
-              </section>
+                        </thead>
+                        <tbody>
+                          {data.refunds.slice(0, overview ? 3 : 10).map((o) => (
+                            <tr key={o.id}>
+                              <td>
+                                <a
+                                  href={orderHref(o.id)}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  {o.name}
+                                  <span className="admin-sr-only">
+                                    {" "}
+                                    · Abrir na Shopify em nova aba
+                                  </span>
+                                </a>
+                                <small>{date(o.processed_at)}</small>
+                                <OrderFulfillmentDetails
+                                  id={o.id}
+                                  name={o.name}
+                                />
+                                <small>
+                                  {o.financial_status === "REFUNDED"
+                                    ? "Reembolso total"
+                                    : o.financial_status ===
+                                        "PARTIALLY_REFUNDED"
+                                      ? "Reembolso parcial"
+                                      : "Com reembolso"}
+                                  {o.cancelled_at ? " · Cancelado" : ""}
+                                </small>
+                              </td>
+                              <td>{money(o.received, o.currency)}</td>
+                              <td>{money(o.refunded, o.currency)}</td>
+                              <td>{money(o.net, o.currency)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </DragScroll>
+                  )}
+                  <Link className="admin-text-link" href={refundsHref}>
+                    Ver todos os pedidos com reembolso{" "}
+                    <ArrowUpRight size={14} />
+                  </Link>
+                </section>
+              )}
             </div>
           )}
           <p className="sales-operations-note">

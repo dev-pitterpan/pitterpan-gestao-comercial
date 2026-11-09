@@ -9,6 +9,7 @@ import { salesSectionFromHash } from "../../lib/admin/sales-links";
 import OrderFulfillmentDetails from "./OrderFulfillmentDetails";
 import SalesOperations from "./SalesOperations";
 import SoldProductsHistory from "./SoldProductsHistory";
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowDownLeft,
@@ -290,6 +291,24 @@ export default function SalesDashboard({
       setSyncing(false);
     }
   }
+  const operations = data ? (
+    <SalesOperations
+      queue={initialOperations}
+      params={new URLSearchParams({
+        days: String(days),
+        start: filters.start || "",
+        end: filters.end || "",
+        status: filters.status,
+        fulfillment: filters.fulfillment || "all",
+        delivery: filters.delivery || "all",
+        category: filters.category,
+        revision: String(revision),
+        snapshot: data.state?.completed_at || "",
+        webhook: data.state?.last_webhook_at || "",
+        cursor: data.cursor,
+      }).toString()}
+    />
+  ) : null;
   return (
     <div className="sales-dashboard">
       <div className="sales-toolbar">
@@ -420,6 +439,23 @@ export default function SalesDashboard({
       )}
       {data && (
         <>
+          {initialOperations ? (
+            operations
+          ) : (
+            <Link
+              className="admin-button admin-button-primary"
+              href={`/gestor/vendas/?${new URLSearchParams({
+                focus: "operations",
+                days: String(days),
+                start: filters.start || "",
+                end: filters.end || "",
+                delivery: filters.delivery || "all",
+                category: filters.category,
+              })}`}
+            >
+              <Package size={16} /> Abrir fila de expedição
+            </Link>
+          )}
           {data.failed > 0 && (
             <p className="admin-data-notice" role="status">
               {data.failed} eventos precisam de revisão após dez tentativas. A
@@ -765,29 +801,14 @@ export default function SalesDashboard({
               </div>
             </section>
           </div>
-          {(initialOperations ||
-            filters.status !== "all" ||
-            (filters.fulfillment || "all") !== "all" ||
-            filters.delivery !== "all" ||
-            !!filters.category ||
-            !!filters.start ||
-            days !== 30) && (
-            <SalesOperations
-              params={new URLSearchParams({
-                days: String(days),
-                start: filters.start || "",
-                end: filters.end || "",
-                status: filters.status,
-                fulfillment: filters.fulfillment || "all",
-                delivery: filters.delivery || "all",
-                category: filters.category,
-                revision: String(revision),
-                snapshot: data.state?.completed_at || "",
-                webhook: data.state?.last_webhook_at || "",
-                cursor: data.cursor,
-              }).toString()}
-            />
-          )}
+          {!initialOperations &&
+            (filters.status !== "all" ||
+              (filters.fulfillment || "all") !== "all" ||
+              filters.delivery !== "all" ||
+              !!filters.category ||
+              !!filters.start ||
+              days !== 30) &&
+            operations}
         </>
       )}
     </div>

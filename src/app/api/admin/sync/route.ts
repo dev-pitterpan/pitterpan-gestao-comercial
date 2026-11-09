@@ -13,7 +13,7 @@ import { shopifySync } from "@shared/workflows/shopify-sync";
 export const maxDuration = 60;
 const headers = { "Cache-Control": "no-store" };
 export async function GET() {
-  const auth = await apiSession(["admin"]);
+  const auth = await apiSession(["admin", "gerente_compras"]);
   if (auth.error) return auth.error;
   try {
     await ensureJobs();
@@ -54,7 +54,7 @@ export async function GET() {
   }
 }
 export async function POST(request: Request) {
-  const auth = await apiSession(["admin"]);
+  const auth = await apiSession(["admin", "gerente_compras"]);
   if (auth.error) return auth.error;
   if (!sameOrigin(request))
     return Response.json(

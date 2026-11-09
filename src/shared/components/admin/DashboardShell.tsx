@@ -344,9 +344,7 @@ export default function DashboardShell({
               const items = links.filter(
                 (link) =>
                   group.paths.includes(link.href) &&
-                  (!link.admin ||
-                    user.role === "admin" ||
-                    user.role === "gerente_compras") &&
+                  (!link.admin || user.role === "admin") &&
                   (!link.financial || user.role !== "atendimento"),
               );
               if (!items.length) return null;

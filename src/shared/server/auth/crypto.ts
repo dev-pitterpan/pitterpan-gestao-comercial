@@ -156,6 +156,6 @@ export function safeDestination(value: unknown) {
 export function allowed(role: Role, permitted: readonly Role[]) {
   return (
     permitted.includes(role) ||
-    (role === "gerente_compras" && permitted.includes("admin"))
+    (role === "gerente_compras" && permitted.includes("gestor"))
   );
 }

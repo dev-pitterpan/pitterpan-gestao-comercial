@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import AutoFilterForm from "./AutoFilterForm";
 import AdminSelect from "./AdminSelect";
-import { csvCell } from "../../lib/admin/csv";
 import { Download, Search, ArrowUpRight, Package } from "lucide-react";
 import type { AdminProduct, AdminQuery } from "../../server/admin/repository";
 import { formatMoney } from "../../lib/money";
@@ -32,30 +31,10 @@ export default function ProductList({
 }) {
   const [stock, setStock] = useState(query.stock);
   useEffect(() => setStock(query.stock), [query.stock]);
-  function download() {
-    const rows = [
-      ["SKU", "Produto", "Categoria", "Marca", "Preço", "Estoque"],
-      ...products.map((p) => [
-        p.sku || p.id,
-        p.name,
-        p.category,
-        p.vendor,
-        p.price,
-        p.inventoryQuantity,
-      ]),
-    ];
-    const url = URL.createObjectURL(
-      new Blob(
-        ["\ufeff" + rows.map((row) => row.map(csvCell).join(";")).join("\r\n")],
-        { type: "text/csv;charset=utf-8" },
-      ),
-    );
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "pitterpan-produtos-pagina.csv";
-    a.click();
-    URL.revokeObjectURL(url);
-  }
+  const { page: _page, ...filters } = query;
+  const exportHref =
+    "/api/admin/products/?" +
+    new URLSearchParams({ ...filters, format: "csv" });
   return (
     <section className="admin-panel admin-product-panel">
       <AutoFilterForm action={base} className="admin-filter-bar">
@@ -106,15 +85,11 @@ export default function ProductList({
         <button type="submit" className="admin-button admin-button-primary">
           Aplicar agora
         </button>
-        <button
-          type="button"
-          className="admin-button"
-          disabled={!products.length}
-          onClick={download}
-        >
-          <Download size={16} />
-          Exportar página
-        </button>
+        {products.length > 0 && (
+          <a className="admin-button" href={exportHref} download>
+            <Download size={16} /> Exportar resultados filtrados
+          </a>
+        )}
       </AutoFilterForm>
       {products.length ? (
         <div className="admin-table-scroll">

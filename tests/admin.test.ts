@@ -84,8 +84,9 @@ test("destino do login e permissões recusam desvios", () => {
   assert.equal(allowed("atendimento", ["admin"]), false);
   assert.equal(allowed("gestor", ["admin"]), false);
   assert.equal(allowed("admin", ["admin"]), true);
-  assert.equal(allowed("gerente_compras", ["admin"]), true);
+  assert.equal(allowed("gerente_compras", ["admin"]), false);
   assert.equal(allowed("gerente_compras", ["admin", "gestor"]), true);
+  assert.equal(allowed("gerente_compras", ["admin", "gerente_compras"]), true);
   assert.equal(allowed("gerente_compras", []), false);
 });
 test("dashboard distingue variantes, ofertas, estoque desconhecido e histórico real de snapshots", async () => {
@@ -93,10 +94,7 @@ test("dashboard distingue variantes, ofertas, estoque desconhecido e histórico 
   try {
     await db.exec(
       await readFile(
-        new URL(
-          "../src/shared/server/database/schema.sql",
-          import.meta.url,
-        ),
+        new URL("../src/shared/server/database/schema.sql", import.meta.url),
         "utf8",
       ),
     );
@@ -196,10 +194,7 @@ test("limite de login é compartilhado no banco e renova a janela", async () => 
   try {
     await db.exec(
       await readFile(
-        new URL(
-          "../src/shared/server/database/schema.sql",
-          import.meta.url,
-        ),
+        new URL("../src/shared/server/database/schema.sql", import.meta.url),
         "utf8",
       ),
     );
@@ -219,10 +214,7 @@ test("migração admite Gerente de Compras sem alterar contas existentes e sess�
       "CREATE TABLE pitterpan_admin_users(id uuid PRIMARY KEY,email text NOT NULL UNIQUE,name text NOT NULL,role text NOT NULL CHECK(role IN ('admin','gestor','atendimento')),password_hash text NOT NULL,disabled boolean NOT NULL DEFAULT false,created_at timestamptz NOT NULL DEFAULT now()); INSERT INTO pitterpan_admin_users(id,email,name,role,password_hash) VALUES('11111111-1111-4111-8111-111111111111','existing@example.test','Equipe','gestor','fixture');",
     );
     const schema = await readFile(
-      new URL(
-        "../src/shared/server/database/schema.sql",
-        import.meta.url,
-      ),
+      new URL("../src/shared/server/database/schema.sql", import.meta.url),
       "utf8",
     );
     await db.exec(schema);
