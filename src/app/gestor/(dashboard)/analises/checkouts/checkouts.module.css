@@ -294,7 +294,7 @@
   gap: 0.55rem;
   margin-top: 0.75rem;
 }
-.filters :is(select, input) {
+.filters input {
   width: 100%;
   min-width: 0;
   border: 1px solid #d9d4e9;

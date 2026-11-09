@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import AdminSelect from "@shared/components/admin/AdminSelect";
 import { useState } from "react";
 import styles from "./checkouts.module.css";
 
@@ -44,9 +45,17 @@ export function CheckoutList({
     key: "timestamp" | "shippingAmount" | "totalAmount";
     ascending: boolean;
   }>({ key: "timestamp", ascending: false });
-  const cities = [
-    ...new Set(rows.map((row) => row.city).filter(Boolean)),
-  ].sort();
+  const cities = new Map<string, string>();
+  for (const { city } of rows) {
+    if (!city) continue;
+    const value = city.toLocaleLowerCase("pt-BR");
+    if (!cities.has(value) || city !== city.toLocaleUpperCase("pt-BR")) {
+      cities.set(value, city);
+    }
+  }
+  const destinations = [...cities].sort(([, a], [, b]) =>
+    a.localeCompare(b, "pt-BR"),
+  );
   const methods = [...new Set(rows.flatMap((row) => row.methods))].sort();
   const visible = rows
     .filter(
@@ -56,7 +65,7 @@ export function CheckoutList({
           .replace(/^#/, "")
           .includes(query.trim().toLowerCase().replace(/^#/, "")) &&
         (status === "all" || row.complete === (status === "complete")) &&
-        (!city || row.city === city) &&
+        (!city || row.city.toLocaleLowerCase("pt-BR") === city) &&
         (!method || row.methods.includes(method)) &&
         (!minimum ||
           (row.shippingCurrency === "BRL" &&
@@ -133,30 +142,30 @@ export function CheckoutList({
         </label>
       </div>
       <div className={styles.filters}>
-        <label className={styles.search}>
-          Destino
-          <select
+        <div className={styles.search}>
+          <span>Destino</span>
+          <AdminSelect
+            label="Destino"
             value={city}
-            onChange={(event) => setCity(event.target.value)}
-          >
-            <option value="">Todos os destinos</option>
-            {cities.map((value) => (
-              <option key={value}>{value}</option>
-            ))}
-          </select>
-        </label>
-        <label className={styles.search}>
-          Modalidade
-          <select
+            onValueChange={setCity}
+            options={[
+              { value: "", label: "Todos os destinos" },
+              ...destinations.map(([value, label]) => ({ value, label })),
+            ]}
+          />
+        </div>
+        <div className={styles.search}>
+          <span>Modalidade</span>
+          <AdminSelect
+            label="Modalidade"
             value={method}
-            onChange={(event) => setMethod(event.target.value)}
-          >
-            <option value="">Todas as modalidades</option>
-            {methods.map((value) => (
-              <option key={value}>{value}</option>
-            ))}
-          </select>
-        </label>
+            onValueChange={setMethod}
+            options={[
+              { value: "", label: "Todas as modalidades" },
+              ...methods.map((value) => ({ value, label: value })),
+            ]}
+          />
+        </div>
         <label className={styles.search}>
           Frete mínimo (R$)
           <input
