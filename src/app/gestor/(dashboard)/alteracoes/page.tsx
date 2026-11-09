@@ -9,6 +9,7 @@ import {
   EmptyState,
   Pagination,
   number,
+  dateTime,
 } from "@shared/components/admin/Primitives";
 import { formatMoney } from "@shared/lib/money";
 export default async function Changes({
@@ -43,8 +44,8 @@ export default async function Changes({
     <>
       <PageHeading
         eyebrow="SHOPIFY → CATÁLOGO"
-        title="Histórico de alterações"
-        description="Veja o que mudou em cada publicação do catálogo. A data indica quando a sincronização foi publicada, não o horário exato da edição na Shopify. Cada versão é comparada com a publicação anterior."
+        title="Alterações na Shopify"
+        description="Veja quais dados dos produtos mudaram na Shopify entre as sincronizações do catálogo. O filtro usa a data em que a diferença foi detectada. A última atualização do produto na Shopify aparece quando disponível."
       />
       <DataNotice context={context} />
       <ChangeHistoryFilters range={range} kind={kind} />
@@ -84,13 +85,18 @@ export default async function Changes({
             description="Não há diferenças registradas nas publicações deste período. Tente outro intervalo ou escolha a última publicação."
           />
         ) : (
-          <div className="admin-table-scroll">
+          <div
+            className="admin-table-scroll"
+            tabIndex={0}
+            role="region"
+            aria-label="Alterações de produtos na Shopify"
+          >
             <table className="admin-table">
               <thead>
                 <tr>
-                  <th>Publicado em</th>
+                  <th>Detectado na sincronização</th>
                   <th>Produto / SKU</th>
-                  <th>Alteração</th>
+                  <th>O que mudou</th>
                   <th>Preço anterior</th>
                   <th>Preço atual</th>
                   <th>Estoque anterior</th>
@@ -98,72 +104,143 @@ export default async function Changes({
                 </tr>
               </thead>
               <tbody>
-                {data.items.map((item) => (
-                  <tr key={`${item.version}-${item.id}`}>
-                    <td>
-                      {new Intl.DateTimeFormat("pt-BR", {
-                        dateStyle: "short",
-                        timeStyle: "short",
-                        timeZone: "America/Sao_Paulo",
-                      }).format(new Date(item.recorded_at))}
-                      <small>Horário de Brasília</small>
-                    </td>
-                    <td>
-                      <div className="admin-product-name admin-change-product">
-                        <ProductThumbnail src={item.image} />
-                        <div>
-                          <strong>{item.name}</strong>
-                          <small>SKU {item.sku || "não informado"}</small>
+                {data.items.map((item) => {
+                  const product = item.product_id?.match(
+                    /^gid:\/\/shopify\/Product\/(\d+)$/,
+                  )?.[1];
+                  const shopifyUrl =
+                    product &&
+                    /^[a-z0-9][a-z0-9-]*\.myshopify\.com$/.test(
+                      item.store_domain,
+                    )
+                      ? `https://${item.store_domain}/admin/products/${product}`
+                      : null;
+                  const shopifyUpdated =
+                    item.shopify_updated_at &&
+                    Number.isFinite(Date.parse(item.shopify_updated_at))
+                      ? dateTime(item.shopify_updated_at)
+                      : null;
+                  const differences = [
+                    ["Nome", item.old_name, item.name],
+                    ["SKU", item.old_sku, item.current_sku],
+                    ["Marca", item.old_vendor, item.vendor],
+                    ["Categoria", item.old_category, item.category],
+                    [
+                      "Preço de comparação",
+                      item.old_compare_at_price === null
+                        ? null
+                        : formatMoney(
+                            item.old_compare_at_price,
+                            item.old_currency || "BRL",
+                          ),
+                      item.compare_at_price === null
+                        ? null
+                        : formatMoney(
+                            item.compare_at_price,
+                            item.currency || "BRL",
+                          ),
+                    ],
+                  ].filter(([label]) => label && item.fields.includes(label));
+                  return (
+                    <tr key={`${item.version}-${item.id}`}>
+                      <td>
+                        {dateTime(item.recorded_at)}
+                        {shopifyUpdated && (
+                          <small>
+                            Última atualização do produto na Shopify:{" "}
+                            {shopifyUpdated}
+                          </small>
+                        )}
+                      </td>
+                      <td>
+                        <div className="admin-product-name admin-change-product">
+                          <ProductThumbnail src={item.image} />
+                          <div>
+                            {shopifyUrl ? (
+                              <a
+                                className="admin-text-link"
+                                href={shopifyUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                {item.name}
+                              </a>
+                            ) : (
+                              <strong>{item.name}</strong>
+                            )}
+                            <small>SKU {item.sku || "não informado"}</small>
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td>
-                      <span
-                        className={`admin-badge ${item.kind === "added" ? "green" : item.kind === "removed" ? "rose" : "blue"}`}
-                      >
-                        {labels[item.kind]}
-                      </span>
-                      <small>
+                      </td>
+                      <td>
+                        <span
+                          className={`admin-badge ${item.kind === "added" ? "green" : item.kind === "removed" ? "rose" : "blue"}`}
+                        >
+                          {labels[item.kind]}
+                        </span>
+                        <small>
+                          {item.kind === "added"
+                            ? "Produto novo nesta versão"
+                            : item.kind === "removed"
+                              ? "Produto ausente nesta versão; não indica venda"
+                              : item.fields.join(", ")}
+                        </small>
+                        {item.kind === "changed" &&
+                          differences.map(([label, oldValue, newValue]) => (
+                            <small className="history-field-change" key={label}>
+                              <b>{label}</b> {oldValue || "Não informado"} →{" "}
+                              {newValue || "Não informado"}
+                            </small>
+                          ))}
+                        {item.kind === "changed" &&
+                          item.fields.includes("Descrição") && (
+                            <details className="history-field-change">
+                              <summary>Ver trechos da descrição</summary>
+                              <small>
+                                <b>Antes:</b>{" "}
+                                {item.old_description || "Não informado"}
+                              </small>
+                              <small>
+                                <b>Depois:</b>{" "}
+                                {item.description || "Não informado"}
+                              </small>
+                            </details>
+                          )}
+                      </td>
+                      <td>
                         {item.kind === "added"
-                          ? "Produto novo nesta versão"
-                          : item.kind === "removed"
-                            ? "Produto ausente nesta versão; não indica venda"
-                            : item.fields.join(", ")}
-                      </small>
-                    </td>
-                    <td>
-                      {item.kind === "added"
-                        ? "Não existia no catálogo"
-                        : item.old_price !== null
-                          ? formatMoney(
-                              item.old_price,
-                              item.old_currency || "BRL",
-                            )
-                          : "Não informado"}
-                    </td>
-                    <td>
-                      {item.kind === "removed"
-                        ? "Fora do catálogo"
-                        : item.price !== null
-                          ? formatMoney(item.price, item.currency || "BRL")
-                          : "Não informado"}
-                    </td>
-                    <td>
-                      {item.kind === "added"
-                        ? "Não existia no catálogo"
-                        : item.old_stock === null
-                          ? "Não informado"
-                          : `${number(item.old_stock)} un.`}
-                    </td>
-                    <td>
-                      {item.kind === "removed"
-                        ? "Fora do catálogo"
-                        : item.stock === null
-                          ? "Não informado"
-                          : `${number(item.stock)} un.`}
-                    </td>
-                  </tr>
-                ))}
+                          ? "Não existia no catálogo"
+                          : item.old_price !== null
+                            ? formatMoney(
+                                item.old_price,
+                                item.old_currency || "BRL",
+                              )
+                            : "Não informado"}
+                      </td>
+                      <td>
+                        {item.kind === "removed"
+                          ? "Fora do catálogo"
+                          : item.price !== null
+                            ? formatMoney(item.price, item.currency || "BRL")
+                            : "Não informado"}
+                      </td>
+                      <td>
+                        {item.kind === "added"
+                          ? "Não existia no catálogo"
+                          : item.old_stock === null
+                            ? "Não informado"
+                            : `${number(item.old_stock)} un.`}
+                      </td>
+                      <td>
+                        {item.kind === "removed"
+                          ? "Fora do catálogo"
+                          : item.stock === null
+                            ? "Não informado"
+                            : `${number(item.stock)} un.`}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

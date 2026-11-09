@@ -131,7 +131,7 @@ const links = [
   },
   {
     href: "/gestor/alteracoes/",
-    label: "Histórico de alterações",
+    label: "Alterações na Shopify",
     icon: ArrowLeftRight,
   },
   { href: "/gestor/sincronizacoes/", label: "Sincronizações", icon: RefreshCw },

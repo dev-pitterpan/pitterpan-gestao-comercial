@@ -3026,3 +3026,9 @@
   outline: 2px solid #537eae;
   outline-offset: 1px;
 }
+
+.history-field-change {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  max-width: 27ch;
+}

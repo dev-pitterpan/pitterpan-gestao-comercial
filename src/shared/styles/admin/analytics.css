@@ -2030,32 +2030,6 @@
   padding: 9px 0;
   z-index: 2;
 }
-.sales-status-values {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-  margin: 15px 0;
-}
-.sales-status-values > div {
-  background: #f4f7fb;
-  border: 1px solid #e4ebf3;
-  padding: 13px;
-  border-radius: 10px;
-}
-.sales-status-values span {
-  display: block;
-  font-size: 11px;
-  color: #8291a3;
-}
-.sales-status-values strong {
-  display: block;
-  font-size: 18px;
-  margin-top: 7px;
-  color: #425f7f;
-}
-.sales-stats {
-  grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)) !important;
-}
 .analytics-shopify-comparison .analytics-kpis {
   margin-top: 16px;
 }
@@ -2097,9 +2071,6 @@
   }
   .finance-chart-grid .analytics-revenue-chart {
     height: 220px !important;
-  }
-  .sales-status-values {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 @media (max-width: 520px) {

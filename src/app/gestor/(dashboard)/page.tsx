@@ -168,7 +168,10 @@ export default async function Overview({
               </div>
               <RefreshCw size={19} />
             </header>
-            <p>Comparação entre as duas últimas versões publicadas.</p>
+            <p>
+              Mudanças nos produtos da Shopify detectadas entre as duas últimas
+              sincronizações.
+            </p>
             <div className="admin-change-metrics">
               <div>
                 <span className="green">
@@ -196,7 +199,7 @@ export default async function Overview({
               </p>
             )}
             <Link className="admin-text-link" href="/gestor/alteracoes/">
-              Conferir alterações <ArrowRight size={16} />
+              Ver alterações na Shopify <ArrowRight size={16} />
             </Link>
           </section>
           <section className="admin-panel overview-stock-panel">

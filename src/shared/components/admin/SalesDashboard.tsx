@@ -520,39 +520,48 @@ export default function SalesDashboard({
             >
               <div className="sales-currency">MOEDA DA LOJA · {t.currency}</div>
               <div className="sales-stats">
+                <div className="sales-metric sales-metric--hero">
+                  <span>
+                    <CircleDollarSign size={19} aria-hidden="true" /> Líquido
+                    após estornos
+                  </span>
+                  <strong>{money(t.net, t.currency)}</strong>
+                  <small>Recebido menos reembolsado</small>
+                </div>
                 {[
                   {
-                    label: "Líquido após estornos",
-                    value: money(t.net, t.currency),
-                    detail: "Recebido menos reembolsado",
-                    icon: CircleDollarSign,
-                  },
-                  {
                     label: "Recebido confirmado",
+                    tone: "received",
                     value: money(t.received, t.currency),
                     detail: "Valores recebidos informados pela Shopify",
                     icon: CircleDollarSign,
                   },
                   {
                     label: "Pagos não cancelados",
+                    tone: "paid",
                     value: count(t.paid),
                     detail: `${money(t.paid_value, t.currency)} em pedidos pagos e não cancelados`,
                     icon: ShoppingCart,
                   },
                   {
                     label: "Ticket dos pedidos pagos",
+                    tone: "ticket",
                     value: money(t.ticket, t.currency),
                     detail: "Total médio dos pedidos com status pago",
                     icon: ArrowUpRight,
                   },
                   {
                     label: "Estornos / reembolsos",
+                    tone: "refunds",
                     value: money(t.refunded, t.currency),
                     detail: `${count(t.refunded_orders)} pedidos com reembolso total ou parcial`,
                     icon: ArrowDownLeft,
                   },
-                ].map(({ label, value, detail, icon: Icon }) => (
-                  <div className="sales-metric" key={label}>
+                ].map(({ label, value, detail, icon: Icon, tone }) => (
+                  <div
+                    className={`sales-metric sales-metric--${tone}`}
+                    key={label}
+                  >
                     <span>
                       <Icon size={16} aria-hidden="true" /> {label}
                     </span>
@@ -561,6 +570,7 @@ export default function SalesDashboard({
                   </div>
                 ))}
               </div>
+              <h3 className="sales-status-heading">Situação dos pedidos</h3>
               <div className="sales-status-values">
                 {[
                   {
@@ -590,7 +600,7 @@ export default function SalesDashboard({
                     status: "CANCELLED",
                   },
                 ].map((s) => (
-                  <div key={s.label}>
+                  <div key={s.status} data-status={s.status}>
                     <span>
                       {s.label} · {count(s.count)}
                     </span>

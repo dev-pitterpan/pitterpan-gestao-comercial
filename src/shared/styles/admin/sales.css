@@ -54,12 +54,8 @@
 }
 .sales-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 155px), 1fr));
-  border: 1px solid #dce7f2;
-  border-radius: 15px;
-  gap: 1px;
-  overflow: hidden;
-  background: #dce7f2;
+  grid-template-columns: minmax(0, 1.35fr) repeat(2, minmax(0, 1fr));
+  gap: 10px;
 }
 .sales-metric {
   display: grid;
@@ -67,10 +63,18 @@
   gap: 6px;
   min-width: 0;
   padding: 12px 14px;
+  border: 1px solid #dce7f2;
+  border-radius: 12px;
   background: #f8fbfe;
+  --sales-accent: #426e9e;
 }
-.sales-metric:first-child {
-  background: #edf5fc;
+.sales-metric--hero {
+  grid-row: span 2;
+  align-content: center;
+  gap: 11px;
+  padding: clamp(16px, 2vw, 26px);
+  background: #234c78;
+  border-color: #234c78;
 }
 .sales-metric > span {
   display: flex;
@@ -82,7 +86,7 @@
 }
 .sales-metric > span svg {
   flex-shrink: 0;
-  color: #426e9e;
+  color: var(--sales-accent);
 }
 .sales-metric > strong {
   color: #244b76;
@@ -93,6 +97,78 @@
 .sales-metric > small {
   color: #546981;
   font-size: 11px;
+}
+.sales-metric--hero > :is(span, strong, small),
+.sales-metric--hero > span svg {
+  color: #fff;
+}
+.sales-metric--hero > strong {
+  font-size: clamp(25px, 3vw, 38px);
+}
+.sales-metric--received {
+  --sales-accent: #287967;
+}
+.sales-metric--paid {
+  --sales-accent: #34699f;
+}
+.sales-metric--ticket {
+  --sales-accent: #6748a4;
+}
+.sales-metric--refunds {
+  --sales-accent: #9e4458;
+  background: #fff6f7;
+  border-color: #eed7dd;
+}
+.sales-status-heading {
+  margin: 17px 0 7px;
+  color: #365674;
+  font-size: 12px;
+}
+.sales-status-values {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.sales-status-values > div {
+  display: grid;
+  gap: 5px;
+  padding: 10px 12px;
+  border: 1px solid #e4ebf3;
+  border-left: 3px solid #8ca4bb;
+  border-radius: 9px;
+  background: #f4f7fb;
+  overflow-wrap: anywhere;
+}
+.sales-status-values > [data-status="PENDING"] {
+  border-left-color: #c58a2b;
+}
+.sales-status-values > [data-status="CANCELLED"] {
+  border-left-color: #bd6877;
+}
+.sales-status-values span {
+  font-size: 11px;
+  color: #566e84;
+}
+.sales-status-values strong {
+  font-size: 16px;
+  color: #344f6b;
+  font-variant-numeric: tabular-nums;
+}
+@media (max-width: 1100px) {
+  .sales-stats,
+  .sales-status-values {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .sales-metric--hero {
+    grid-row: auto;
+    grid-column: 1 / -1;
+  }
+}
+@media (max-width: 420px) {
+  .sales-stats,
+  .sales-status-values {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 .sales-empty {
   text-align: center;
