@@ -92,7 +92,12 @@ export default function ProductList({
         )}
       </AutoFilterForm>
       {products.length ? (
-        <div className="admin-table-scroll">
+        <div
+          className="admin-table-scroll"
+          role="region"
+          aria-label="Resultados de produtos com rolagem horizontal"
+          tabIndex={0}
+        >
           <table className="admin-table">
             <thead>
               <tr>

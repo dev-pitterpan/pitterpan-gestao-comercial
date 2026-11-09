@@ -3,10 +3,7 @@ import { z } from "zod";
 import { apiSession, sameOrigin } from "@shared/server/auth/session";
 import { database } from "@shared/server/database/client";
 import { salesReady, salesClient } from "@shared/server/sales/config";
-import {
-  ensureOrderCustomers,
-  refreshOrderCustomers,
-} from "@shared/server/sales/customers";
+import { refreshOrderCustomers } from "@shared/server/sales/customers";
 export const maxDuration = 300;
 export async function POST(request: Request) {
   const auth = await apiSession(["admin", "gestor"]);
@@ -33,7 +30,6 @@ export async function POST(request: Request) {
   try {
     const db = await database().connect();
     try {
-      await ensureOrderCustomers(db);
       const api = salesClient();
       return Response.json(
         await refreshOrderCustomers(db, api, api.domain, [

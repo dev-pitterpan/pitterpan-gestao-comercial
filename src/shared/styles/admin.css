@@ -984,11 +984,15 @@
   margin-left: auto;
 }
 .admin-product-panel {
+  min-width: 0;
   padding-bottom: 8px;
 }
 .admin-table-scroll {
+  position: relative;
   overflow-x: auto;
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
 }
 .admin-table {
   width: 100%;
@@ -1640,11 +1644,13 @@
 }
 @media (max-width: 980px) {
   .admin-sidebar {
+    visibility: hidden;
     transform: translateX(-100%);
     transition: transform 0.2s;
     width: 250px;
   }
   .admin-sidebar.is-open {
+    visibility: visible;
     transform: translateX(0);
   }
   .admin-main {

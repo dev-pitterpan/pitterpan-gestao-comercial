@@ -25,10 +25,7 @@ test("13.518 registros: paginação, separação de coleções, busca, checkout 
   try {
     await db.exec(
       await readFile(
-        new URL(
-          "../src/shared/server/database/schema.sql",
-          import.meta.url,
-        ),
+        new URL("../src/shared/server/database/schema.sql", import.meta.url),
         "utf8",
       ),
     );

@@ -19,6 +19,7 @@ export default function DateRangePicker({
   const id = useId(),
     root = useRef<HTMLDivElement>(null),
     trigger = useRef<HTMLButtonElement>(null),
+    startInput = useRef<HTMLInputElement>(null),
     today = todayDate();
   const [open, setOpen] = useState(false),
     [draft, setDraft] = useState<DateRange>(value),
@@ -69,6 +70,9 @@ export default function DateRangePicker({
     document.addEventListener("pointerdown", dismiss);
     return () => document.removeEventListener("pointerdown", dismiss);
   }, [open]);
+  useEffect(() => {
+    if (open) startInput.current?.focus({ preventScroll: true });
+  }, [open]);
   const changeMonth = (amount: number) => {
     const d = new Date(`${month}T12:00:00Z`);
     d.setUTCMonth(d.getUTCMonth() + amount);
@@ -84,6 +88,9 @@ export default function DateRangePicker({
     <div
       className="admin-date-range"
       ref={root}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
+      }}
       onKeyDown={(e) => {
         if (e.key === "Escape") {
           e.stopPropagation();
@@ -143,6 +150,7 @@ export default function DateRangePicker({
               Data inicial
               <input
                 type="date"
+                ref={startInput}
                 value={draft.start}
                 max={today}
                 onChange={(e) =>

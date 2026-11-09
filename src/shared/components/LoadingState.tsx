@@ -60,7 +60,7 @@ export default function Loading({
     };
   }, [ready, onComplete]);
   return (
-    <main
+    <div
       className={`catalog-loader${finishing ? " catalog-loader--ready" : ""}`}
       role="status"
       aria-live="polite"
@@ -99,12 +99,12 @@ export default function Loading({
         </svg>
       </div>
       <p className="catalog-loader__brand">Pitter Pan Festas</p>
-      <h1 className="catalog-loader__title">
+      <p className="catalog-loader__title">
         Montando seu catálogo<span aria-hidden="true">…</span>
-      </h1>
+      </p>
       <p className="catalog-loader__message">
         Estamos organizando os produtos para você.
       </p>
-    </main>
+    </div>
   );
 }

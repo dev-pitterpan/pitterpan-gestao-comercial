@@ -19,7 +19,7 @@ import {
   uniqueVariants,
 } from "../lib/catalog/departments";
 import { catalogSchema, configSchema, summarySchema } from "../schemas/catalog";
-import type { CatalogPageData } from "../types/catalog";
+import type { CatalogPageData, Product } from "../types/catalog";
 import {
   getShopifyCatalog,
   getShopifyCollections,
@@ -293,4 +293,17 @@ export async function getSelectedProducts(ids: string[]) {
   return catalogs.flatMap((catalog) =>
     catalog.products.filter((product) => ids.includes(product.id)),
   );
+}
+
+/** Public shoppers need availability, while quantities belong to the management view. */
+export function publicProduct({
+  inventoryQuantity,
+  ...product
+}: Product): Omit<Product, "inventoryQuantity"> {
+  return {
+    ...product,
+    availableForSale:
+      product.availableForSale ??
+      (inventoryQuantity == null ? undefined : inventoryQuantity > 0),
+  };
 }

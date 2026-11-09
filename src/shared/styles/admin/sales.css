@@ -1069,3 +1069,51 @@
     padding: 12px;
   }
 }
+
+.admin-app .admin-overview-grid.sales-comparison-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 1100px) {
+  .admin-app .admin-overview-grid.sales-comparison-grid {
+    grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr);
+  }
+}
+/* Both cards stretch together; an empty ranking must not collapse orders. */
+.admin-app .sales-comparison-grid > #sold-products {
+  min-height: 400px;
+}
+.admin-app .sales-comparison-grid > .sales-orders-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+.admin-app .sales-orders-panel > header,
+.admin-app .sales-orders-panel > .sales-definition,
+.admin-app .sales-orders-panel > .sales-pagination {
+  flex: 0 0 auto;
+}
+.admin-app .sales-orders-panel > .finance-table-viewport {
+  flex: 1 1 360px;
+  height: 360px;
+  min-height: 280px;
+  max-height: none;
+  overflow: auto !important;
+}
+@media (max-width: 700px) {
+  .admin-app .sales-comparison-grid > #sold-products {
+    min-height: 0;
+  }
+  .admin-app .sales-comparison-grid > .sales-orders-panel {
+    contain: none;
+  }
+  .admin-app .sales-orders-panel > .finance-table-viewport {
+    flex: 0 1 auto;
+    height: 360px;
+    min-height: 240px;
+    max-height: 420px;
+  }
+}
+.admin-app .sales-orders-panel .admin-table tr > :not(:last-child) {
+  border-right: 1px solid #e6eef7;
+}

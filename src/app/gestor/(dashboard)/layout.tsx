@@ -2,13 +2,13 @@ import { Suspense, type ReactNode } from "react";
 import { FulfillmentWindows } from "@shared/components/admin/OrderFulfillmentDetails";
 import DashboardShell from "@shared/components/admin/DashboardShell";
 import { requireSession } from "@shared/server/auth/session";
+import { getConfig } from "@shared/server/catalogs";
+import { publicCatalogUrl } from "@shared/lib/routes";
 import { pendingPasswordRequests } from "@shared/server/auth/password-events";
 import "@shared/styles/admin.css";
 import "@shared/styles/admin/dashboard.css";
 import "@shared/styles/admin/sales.css";
 import "@shared/styles/admin/analytics.css";
-import "leaflet/dist/leaflet.css";
-import "@shared/styles/admin/delivery-map.css";
 import "@shared/styles/admin/date-range.css";
 export const metadata = { title: "Central de gestão" };
 async function RecoveryLabel() {
@@ -24,6 +24,10 @@ export default async function DashboardLayout({
   const user = await requireSession();
   return (
     <DashboardShell
+      catalogUrl={publicCatalogUrl(
+        "",
+        (await getConfig()).catalog.publicBaseUrl,
+      )}
       accountLabel={
         user.sub === "bootstrap" ? (
           <Suspense fallback="Minha conta">

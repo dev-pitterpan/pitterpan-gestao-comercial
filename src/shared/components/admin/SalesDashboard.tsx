@@ -32,6 +32,7 @@ import {
   type DeliveryKind,
 } from "../../lib/admin/delivery";
 import PitterSpinner from "./PitterSpinner";
+import { shiftDate, todayDate } from "../../lib/admin/date-range";
 import type { SalesFilters } from "../../server/sales/filters";
 import AdminSelect from "./AdminSelect";
 import DateRangePicker from "./DateRangePicker";
@@ -134,6 +135,27 @@ export default function SalesDashboard({
     }, 400);
     return () => clearTimeout(timer);
   }, [categoryDraft, filters.category]);
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const values = {
+      days: days === 30 ? "" : String(days),
+      start: filters.start,
+      end: filters.end,
+      status: filters.status === "all" ? "" : filters.status,
+      fulfillment:
+        filters.fulfillment === "all" && !initialOperations
+          ? ""
+          : filters.fulfillment,
+      category: filters.category,
+      delivery: filters.delivery === "all" ? "" : filters.delivery,
+    };
+    for (const [key, value] of Object.entries(values)) {
+      if (value) url.searchParams.set(key, value);
+      else url.searchParams.delete(key);
+    }
+    if (url.href !== window.location.href)
+      window.history.replaceState(null, "", url);
+  }, [days, filters, initialOperations]);
   const load = useCallback(
     async (signal?: AbortSignal) => {
       const requestId = ++fetching.current;
@@ -141,6 +163,7 @@ export default function SalesDashboard({
       try {
         const params = new URLSearchParams({
           days: String(days),
+          ranking: "0",
           start: filters.start || "",
           end: filters.end || "",
           status: filters.status,
@@ -308,6 +331,9 @@ export default function SalesDashboard({
       }).toString()}
     />
   ) : null;
+  const automaticStart = shiftDate(todayDate(), -59);
+  const outsideAutomaticWindow =
+    !!filters.start && filters.start < automaticStart;
   return (
     <div className="sales-dashboard">
       <div className="sales-toolbar">
@@ -430,6 +456,13 @@ export default function SalesDashboard({
         {filters.category &&
           " Os valores são dos pedidos completos que contêm produtos dessa categoria na última importação; o ranking inclui somente os produtos correspondentes."}
       </p>
+      {outsideAutomaticWindow && (
+        <p className="admin-data-notice" role="status">
+          Este período inclui datas anteriores à janela automática de 60 dias.
+          Os totais consideram somente pedidos já importados e podem estar
+          incompletos.
+        </p>
+      )}
       {error && (
         <p className="admin-data-notice" role="status">
           {error}
@@ -464,6 +497,14 @@ export default function SalesDashboard({
                 : "Importação inicial ainda não concluída"}
             </span>
             <span>{data.pending} eventos aguardando processamento</span>
+            {data.oldestPendingAt && (
+              <span>
+                Evento mais antigo na fila:{" "}
+                {new Date(data.oldestPendingAt).toLocaleString("pt-BR", {
+                  timeZone: "America/Sao_Paulo",
+                })}
+              </span>
+            )}
           </div>
           {data.state?.until_at && (
             <p className="admin-inline-note">
@@ -577,8 +618,8 @@ export default function SalesDashboard({
               <Package size={36} />
               <h2>Seu próximo capítulo de vendas</h2>
               <p>
-                Nenhum pedido corresponde ao período e aos filtros escolhidos.
-                Experimente outra situação, categoria ou período.
+                Nenhum pedido importado corresponde ao período e aos filtros
+                escolhidos. Experimente outra situação, categoria ou período.
               </p>
             </div>
           )}
@@ -654,7 +695,8 @@ export default function SalesDashboard({
                     {!data.orders.length && (
                       <tr>
                         <td colSpan={8}>
-                          Nenhum pedido corresponde aos filtros escolhidos.
+                          Nenhum pedido importado corresponde aos filtros
+                          escolhidos.
                         </td>
                       </tr>
                     )}

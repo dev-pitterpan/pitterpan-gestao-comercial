@@ -41,10 +41,7 @@ test("PostgreSQL preserva SKU compartilhado/vazio, união de coleções e carrin
   const db = new PGlite();
   try {
     const schema = await readFile(
-      new URL(
-        "../src/shared/server/database/schema.sql",
-        import.meta.url,
-      ),
+      new URL("../src/shared/server/database/schema.sql", import.meta.url),
       "utf8",
     );
     await db.exec(schema);

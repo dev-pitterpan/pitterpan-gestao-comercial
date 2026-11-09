@@ -1,5 +1,6 @@
 import { start, getRun } from "workflow/api";
 import { apiSession, sameOrigin } from "@shared/server/auth/session";
+import { operationalRoles } from "@shared/server/auth/crypto";
 import { database } from "@shared/server/database/client";
 import { ShopifyClient } from "@shared/server/shopify/client";
 import { salesReady } from "@shared/server/sales/config";
@@ -13,7 +14,7 @@ import { shopifySync } from "@shared/workflows/shopify-sync";
 export const maxDuration = 60;
 const headers = { "Cache-Control": "no-store" };
 export async function GET() {
-  const auth = await apiSession(["admin", "gerente_compras"]);
+  const auth = await apiSession(operationalRoles);
   if (auth.error) return auth.error;
   try {
     await ensureJobs();
@@ -54,7 +55,7 @@ export async function GET() {
   }
 }
 export async function POST(request: Request) {
-  const auth = await apiSession(["admin", "gerente_compras"]);
+  const auth = await apiSession(operationalRoles);
   if (auth.error) return auth.error;
   if (!sameOrigin(request))
     return Response.json(

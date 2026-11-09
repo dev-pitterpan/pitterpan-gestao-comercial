@@ -1,3 +1,5 @@
+import "leaflet/dist/leaflet.css";
+import "@shared/styles/admin/delivery-map.css";
 import { requireSession } from "@shared/server/auth/session";
 import { PageHeading } from "@shared/components/admin/Primitives";
 import DestinationsDashboard from "@shared/components/admin/DestinationsDashboard";

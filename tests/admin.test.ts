@@ -11,6 +11,7 @@ import {
   credentialVersion,
   safeDestination,
   allowed,
+  operationalRoles,
   SESSION_SECONDS,
 } from "../src/shared/server/auth/crypto.ts";
 import { readAnalytics } from "../src/shared/server/admin/analytics.ts";
@@ -85,7 +86,9 @@ test("destino do login e permissões recusam desvios", () => {
   assert.equal(allowed("gestor", ["admin"]), false);
   assert.equal(allowed("admin", ["admin"]), true);
   assert.equal(allowed("gerente_compras", ["admin"]), false);
-  assert.equal(allowed("gerente_compras", ["admin", "gestor"]), true);
+  for (const role of ["admin", "gestor", "gerente_compras"] as const)
+    assert.equal(allowed(role, operationalRoles), true);
+  assert.equal(allowed("atendimento", operationalRoles), false);
   assert.equal(allowed("gerente_compras", ["admin", "gerente_compras"]), true);
   assert.equal(allowed("gerente_compras", []), false);
 });

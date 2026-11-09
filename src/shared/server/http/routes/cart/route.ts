@@ -1,6 +1,6 @@
 import { readJsonBody } from "../../body";
 import { z } from "zod";
-import { getSelectedProducts } from "../../../catalogs";
+import { getSelectedProducts, publicProduct } from "../../../catalogs";
 const schema = z.object({ ids: z.array(z.string().min(1).max(100)).max(100) });
 export async function POST(request: Request) {
   try {
@@ -10,7 +10,11 @@ export async function POST(request: Request) {
     if (!parsed.success)
       return Response.json({ error: "Seleção inválida" }, { status: 400 });
     return Response.json(
-      { products: await getSelectedProducts(parsed.data.ids) },
+      {
+        products: (await getSelectedProducts(parsed.data.ids)).map(
+          publicProduct,
+        ),
+      },
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch {
