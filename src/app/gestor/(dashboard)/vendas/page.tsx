@@ -29,8 +29,8 @@ export default async function SalesPage({
     <>
       <PageHeading
         eyebrow="VENDAS DA SUA LOJA"
-        title="Cada venda, uma nova celebração."
-        description="Pedidos reais da Shopify. Pagamentos, reembolsos e produtos vendidos em um só lugar."
+        title="Vendas e pedidos"
+        description="Consulte os pedidos da Shopify e acompanhe a expedição."
       />
       <SalesDashboard
         key={JSON.stringify([filters, days, value("focus")])}
