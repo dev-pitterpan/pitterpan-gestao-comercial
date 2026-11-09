@@ -35,7 +35,7 @@ const links = [
   { href: "/gestor/", label: "Visão geral", icon: LayoutDashboard },
   {
     href: "/gestor/vendas/",
-    label: "Vendas e pedidos",
+    label: "Pedidos Shopify",
     icon: ShoppingCart,
     financial: true,
   },
@@ -46,7 +46,28 @@ const links = [
     financial: true,
   },
   { href: "/gestor/produtos/", label: "Todos os produtos", icon: Package },
-  { href: "/gestor/estoque/", label: "Estoque", icon: Boxes },
+  { href: "/gestor/estoque/", label: "Estoque do catálogo", icon: Boxes },
+  {
+    href: "/gestor/winthor/balcao/",
+    label: "Vendas de balcão",
+    icon: ShoppingCart,
+    financial: true,
+    planned: true,
+  },
+  {
+    href: "/gestor/winthor/estoque-por-loja/",
+    label: "Estoque por loja",
+    icon: Boxes,
+    financial: true,
+    planned: true,
+  },
+  {
+    href: "/gestor/winthor/transferencias/",
+    label: "Transferências",
+    icon: ArrowLeftRight,
+    financial: true,
+    planned: true,
+  },
   { href: "/gestor/ofertas/", label: "Ofertas", icon: BadgePercent },
   { href: "/gestor/catalogos/", label: "Catálogos", icon: BookOpen },
   {
@@ -79,19 +100,27 @@ const links = [
 const navigationGroups = [
   { label: "Início", paths: ["/gestor/"] },
   {
-    label: "Operação",
-    paths: ["/gestor/vendas/", "/gestor/mapa/", "/gestor/agenda/"],
+    label: "Vendas e pedidos",
+    paths: ["/gestor/vendas/", "/gestor/winthor/balcao/", "/gestor/mapa/"],
   },
   {
     label: "Produtos",
     paths: [
       "/gestor/produtos/",
-      "/gestor/estoque/",
       "/gestor/ofertas/",
       "/gestor/catalogos/",
       "/gestor/alteracoes/",
     ],
   },
+  {
+    label: "Estoque e transferências",
+    paths: [
+      "/gestor/estoque/",
+      "/gestor/winthor/estoque-por-loja/",
+      "/gestor/winthor/transferencias/",
+    ],
+  },
+  { label: "Planejamento", paths: ["/gestor/agenda/"] },
   {
     label: "Análises",
     paths: ["/gestor/analises/", "/gestor/relatorios/"],
@@ -353,7 +382,7 @@ export default function DashboardShell({
               const entries = group.paths.flatMap((path) => {
                 const item = items.find(({ href }) => href === path);
                 if (!item) return [];
-                const { href, label, icon: Icon } = item;
+                const { href, label, icon: Icon, planned } = item;
                 return (
                   <Link
                     key={href}
@@ -365,6 +394,9 @@ export default function DashboardShell({
                   >
                     <Icon size={19} strokeWidth={1.7} aria-hidden="true" />
                     <span>{label}</span>
+                    {planned && (
+                      <small className="admin-nav-planned">Pendente</small>
+                    )}
                     <NavigationPending />
                     {pathname === href && <span className="admin-nav-marker" />}
                   </Link>

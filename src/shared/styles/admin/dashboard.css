@@ -154,6 +154,16 @@
   padding-left: 6px;
   border-left: 1px solid #dce7f2;
 }
+.admin-nav-planned {
+  flex-shrink: 0;
+  margin-inline-start: auto;
+  padding: 2px 5px;
+  border-radius: 5px;
+  background: #f6ead1;
+  color: #634819;
+  font-size: 9px;
+  font-weight: 650;
+}
 .admin-nav-direct {
   margin: 5px 0;
 }
