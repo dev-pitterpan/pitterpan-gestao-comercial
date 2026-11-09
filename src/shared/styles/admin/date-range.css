@@ -1,6 +1,5 @@
 .admin-date-range {
   position: relative;
-  z-index: 8;
   min-width: 0;
 }
 .admin-date-trigger {
@@ -13,10 +12,11 @@
   color: #335e92;
 }
 .admin-date-popover {
-  position: absolute;
-  top: calc(100% + 12px);
-  left: 0;
-  width: min(650px, calc(100vw - 52px));
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  overflow-y: auto;
+  width: min(560px, calc(100vw - 24px));
   border: 1px solid #dce6f0;
   border-radius: 19px;
   background: #fff;
@@ -48,6 +48,7 @@
 }
 .admin-date-inputs label {
   flex: 1;
+  min-width: 0;
   display: grid;
   gap: 5px;
   font-size: 10px;
@@ -164,10 +165,6 @@
 .admin-date-error {
   font-size: 11px;
   color: #b85b70;
-}
-.analytics-toolbar .admin-date-popover {
-  left: auto;
-  right: 0;
 }
 @media (max-width: 600px) {
   .admin-date-popover {

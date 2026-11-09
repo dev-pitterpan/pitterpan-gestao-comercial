@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight, Check } from "lucide-react";
 import {
   dateRangeSchema,
@@ -22,46 +22,62 @@ export default function DateRangePicker({
     root = useRef<HTMLDivElement>(null),
     trigger = useRef<HTMLButtonElement>(null),
     startInput = useRef<HTMLInputElement>(null),
+    panelRef = useRef<HTMLDivElement>(null),
+    heading = useRef<HTMLDivElement>(null),
     today = todayDate();
   const [open, setOpen] = useState(false),
     [draft, setDraft] = useState<DateRange>(value),
     [choosingEnd, setChoosingEnd] = useState(false),
     [month, setMonth] = useState(today.slice(0, 7) + "-01");
-  const [position, setPosition] = useState({
-    left: 16,
-    top: 80,
-    maxHeight: 480,
-  });
-  useEffect(() => {
-    if (!open) return;
+  useLayoutEffect(() => {
+    const panel = panelRef.current;
+    const button = trigger.current;
+    if (!open || !panel || !button) return;
+    panel.showPopover?.();
+    const viewport = window.visualViewport;
     function place() {
-      const rect = trigger.current?.getBoundingClientRect();
-      if (!rect) return;
-      const width = Math.min(560, window.innerWidth - 32);
-      const height = Math.min(490, window.innerHeight - 32);
-      const below = window.innerHeight - rect.bottom - 24;
-      const top =
-        below >= height
-          ? rect.bottom + 8
-          : Math.max(
-              16,
-              Math.min(rect.top - height - 8, window.innerHeight - height - 16),
-            );
-      setPosition({
-        left: Math.max(
-          16,
-          Math.min(rect.right - width, window.innerWidth - width - 16),
-        ),
-        top,
-        maxHeight: window.innerHeight - top - 16,
-      });
+      if (!panel || !button) return;
+      const inset = 12;
+      const gap = 8;
+      const rect = button.getBoundingClientRect();
+      const viewportLeft = viewport?.offsetLeft ?? 0;
+      const viewportTop = viewport?.offsetTop ?? 0;
+      const viewportWidth = viewport?.width ?? window.innerWidth;
+      const viewportHeight = viewport?.height ?? window.innerHeight;
+      const main = button.closest("main")?.getBoundingClientRect();
+      const leftEdge =
+        Math.max(
+          viewportLeft,
+          viewportWidth > 980 ? (main?.left ?? viewportLeft) : viewportLeft,
+        ) + inset;
+      const rightEdge = viewportLeft + viewportWidth - inset;
+      const topEdge = viewportTop + inset;
+      const bottomEdge = viewportTop + viewportHeight - inset;
+      const width = Math.min(560, Math.max(0, rightEdge - leftEdge));
+      panel.style.width = `${width}px`;
+      panel.style.maxHeight = `${Math.max(0, bottomEdge - topEdge)}px`;
+      const height = panel.offsetHeight;
+      const below = rect.bottom + gap;
+      const above = rect.top - gap - height;
+      const preferredTop =
+        below + height <= bottomEdge ? below : above >= topEdge ? above : below;
+      panel.style.left = `${Math.max(leftEdge, Math.min(rect.left, rightEdge - width))}px`;
+      panel.style.top = `${Math.max(topEdge, Math.min(preferredTop, bottomEdge - height))}px`;
     }
     place();
+    const size = new ResizeObserver(place);
+    size.observe(panel);
     window.addEventListener("resize", place);
     window.addEventListener("scroll", place, true);
+    viewport?.addEventListener("resize", place);
+    viewport?.addEventListener("scroll", place);
     return () => {
+      size.disconnect();
       window.removeEventListener("resize", place);
       window.removeEventListener("scroll", place, true);
+      viewport?.removeEventListener("resize", place);
+      viewport?.removeEventListener("scroll", place);
+      panel.hidePopover?.();
     };
   }, [open]);
   useEffect(() => {
@@ -73,7 +89,11 @@ export default function DateRangePicker({
     return () => document.removeEventListener("pointerdown", dismiss);
   }, [open]);
   useEffect(() => {
-    if (open) startInput.current?.focus({ preventScroll: true });
+    if (!open) return;
+    const initialFocus = window.matchMedia("(max-width: 600px)").matches
+      ? heading
+      : startInput;
+    initialFocus.current?.focus({ preventScroll: true });
   }, [open]);
   const changeMonth = (amount: number) => {
     const d = new Date(`${month}T12:00:00Z`);
@@ -126,20 +146,13 @@ export default function DateRangePicker({
       {open && (
         <div
           className="admin-date-popover"
-          style={{
-            position: "fixed",
-            left: position.left,
-            top: position.top,
-            right: "auto",
-            width: "min(560px, calc(100vw - 32px))",
-            maxHeight: position.maxHeight,
-            overflowY: "auto",
-          }}
+          ref={panelRef}
+          popover="manual"
           id={id}
           role="dialog"
           aria-label="Selecionar intervalo de datas"
         >
-          <div className="admin-date-heading">
+          <div className="admin-date-heading" ref={heading} tabIndex={-1}>
             <strong>
               {choosingEnd
                 ? "Selecione a data final"

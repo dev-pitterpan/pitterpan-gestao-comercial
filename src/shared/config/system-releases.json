@@ -1,5 +1,13 @@
 [
   {
+    "version": "2026.11.09.7",
+    "recordedAt": "2026-11-09T19:23:10.451Z",
+    "title": "Posicionamento do calendário de pedidos",
+    "changes": [
+      "O calendário abre acima do cabeçalho e da sidebar, se ajusta ao espaço da tela e mantém o foco ao selecionar as datas."
+    ]
+  },
+  {
     "version": "2026.11.09.6",
     "recordedAt": "2026-11-09T19:17:38.747Z",
     "title": "Documentação e controle de versões",

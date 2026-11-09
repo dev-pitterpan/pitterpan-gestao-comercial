@@ -19,7 +19,7 @@ Mapa funcional e técnico do painel da Floresta, América e Iririú. A versão e
 | --- | --- | --- |
 | Login e recuperação | `/login/`, `/recuperar-senha/` | Entrada da equipe e solicitação de recuperação. O master usa credenciais configuradas. As contas da equipe ficam no banco. |
 | Visão geral | `/gestor/` | Indicadores, evolução de vendas e ranking por data. A fila Atenção agora considera as pendências do histórico importado. Também reúne categorias, estoque e mudanças de catálogo. |
-| Pedidos Shopify | `/gestor/vendas/` | Lista paginada, filtros, situação de pagamento e atendimento, conferência de itens, frete, estornos e indicadores. Usa o histórico de vendas sincronizado. |
+| Pedidos Shopify | `/gestor/vendas/` | Lista paginada, filtros, situação de pagamento e atendimento, conferência de itens, frete, estornos e indicadores. O calendário ajusta a posição ao espaço disponível e abre acima da navegação; em telas estreitas mostra um mês por vez. Usa o histórico de vendas sincronizado. |
 | Produtos vendidos | `/gestor/produtos-vendidos/` | Consulta de produtos e variantes vendidos, com busca e filtros. |
 | Mapa de entregas | `/gestor/mapa/` | Agrupa destinos dos pedidos online por município e UF quando identificados. |
 | Vendas na loja | `/gestor/winthor/balcao/` | Área reservada para vendas de caixa por filial. A integração está pendente. |
