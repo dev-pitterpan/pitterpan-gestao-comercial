@@ -13,7 +13,7 @@ import styles from "./history.module.css";
 import { ChevronDown, Database } from "lucide-react";
 export default async function Sync() {
   const user = await requireSession();
-  const context = await adminContext();
+  const context = await adminContext("history");
   const published = context.runs.find((run) => run.id === context.active);
   const lastAttempt = context.runs[0];
   return (

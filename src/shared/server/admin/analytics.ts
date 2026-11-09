@@ -25,12 +25,22 @@ export async function readSettings(db: SqlClient) {
     : settingsDefaults;
 }
 
-export async function readAnalytics(db: SqlClient): Promise<AdminContext> {
-  const active = await activeSnapshot(db);
-  const settings = await readSettings(db);
-  const [totals, categoryResult, history] = await Promise.all([
-    db.query<Record<string, string>>(
-      `SELECT count(DISTINCT product_id)::text AS products,count(*)::text AS variants,count(DISTINCT category)::text AS categories,count(DISTINCT NULLIF(vendor,''))::text AS brands,
+export type CatalogView =
+  "overview" | "basic" | "stock" | "history" | "changes";
+
+export async function readAnalytics(
+  db: SqlClient,
+  view: CatalogView = "overview",
+): Promise<AdminContext> {
+  const [active, settings] = await Promise.all([
+    activeSnapshot(db),
+    readSettings(db),
+  ]);
+  const overview = view === "overview";
+  const [totals, categoryResult, history, previousResult] = await Promise.all([
+    (overview || view === "stock") &&
+      db.query<Record<string, string>>(
+        `SELECT count(DISTINCT product_id)::text AS products,count(*)::text AS variants,count(DISTINCT category)::text AS categories,count(DISTINCT NULLIF(vendor,''))::text AS brands,
      count(*) FILTER(WHERE compare_at_price>price)::text AS offers,
      count(*) FILTER(WHERE inventory_quantity>0 AND inventory_quantity<=$2)::text AS low,
      count(*) FILTER(WHERE inventory_quantity>=$3)::text AS high,
@@ -38,23 +48,34 @@ export async function readAnalytics(db: SqlClient): Promise<AdminContext> {
      count(*) FILTER(WHERE inventory_quantity IS NULL)::text AS unknown,
      COALESCE(sum(GREATEST(inventory_quantity,0)),0)::text AS units
      FROM catalog_items WHERE import_id=$1`,
-      [active, settings.low, settings.high],
-    ),
-    db.query<{ name: string; count: string }>(
-      "SELECT category AS name,count(*)::text AS count FROM catalog_items WHERE import_id=$1 GROUP BY category ORDER BY count(*) DESC,category LIMIT 6",
-      [active],
-    ),
-    db.query<ImportRun>(
-      "SELECT id,status,started_at::text,completed_at::text,report FROM catalog_imports ORDER BY started_at DESC LIMIT 20",
-    ),
+        [active, settings.low, settings.high],
+      ),
+    overview &&
+      db.query<{ name: string; count: string }>(
+        "SELECT category AS name,count(*)::text AS count FROM catalog_items WHERE import_id=$1 GROUP BY category ORDER BY count(*) DESC,category LIMIT 6",
+        [active],
+      ),
+    (overview || view === "history") &&
+      db.query<ImportRun>(
+        `WITH recent AS (SELECT id,status,started_at,completed_at,report FROM catalog_imports ORDER BY started_at DESC LIMIT 20),
+        visible AS (
+          SELECT * FROM recent
+          UNION ALL
+          SELECT id,status,started_at,completed_at,report FROM catalog_imports
+          WHERE id=$1 AND NOT EXISTS (SELECT 1 FROM recent WHERE id=$1)
+        )
+        SELECT id,status,started_at::text,completed_at::text,report FROM visible ORDER BY visible.started_at DESC`,
+        [active],
+      ),
+    (overview || view === "changes") &&
+      db.query<{ id: string }>(
+        "SELECT id FROM catalog_imports WHERE status='retired' AND store_domain=(SELECT store_domain FROM catalog_imports WHERE id=$1) ORDER BY completed_at DESC NULLS LAST,started_at DESC LIMIT 1",
+        [active],
+      ),
   ]);
-  const previousResult = await db.query<{ id: string }>(
-    "SELECT id FROM catalog_imports WHERE status='retired' AND id<>$1 ORDER BY completed_at DESC NULLS LAST,started_at DESC LIMIT 1",
-    [active],
-  );
-  const previous = previousResult.rows[0]?.id || null;
+  const previous = (previousResult && previousResult.rows[0]?.id) || null;
   let changes: AdminContext["changes"] = null;
-  if (previous) {
+  if (overview && previous) {
     const { rows } = await db.query<{
       added: string;
       removed: string;
@@ -77,14 +98,18 @@ export async function readAnalytics(db: SqlClient): Promise<AdminContext> {
     active,
     previous,
     settings,
-    summary: Object.fromEntries(
-      Object.keys(summaryEmpty).map((k) => [k, Number(totals.rows[0][k])]),
-    ) as AdminSummary,
-    categories: categoryResult.rows.map((c) => ({
-      ...c,
-      count: Number(c.count),
-    })),
-    runs: history.rows,
+    summary: totals
+      ? (Object.fromEntries(
+          Object.keys(summaryEmpty).map((k) => [k, Number(totals.rows[0][k])]),
+        ) as AdminSummary)
+      : null,
+    categories: categoryResult
+      ? categoryResult.rows.map((c) => ({
+          ...c,
+          count: Number(c.count),
+        }))
+      : [],
+    runs: history ? history.rows : [],
     changes,
   };
 }

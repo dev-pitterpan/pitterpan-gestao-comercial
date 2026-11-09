@@ -32,7 +32,7 @@ export default async function Changes({
   });
   const range = parsed.success ? parsed.data : { start: "", end: "" };
   const page = Math.max(1, Math.min(10000, Number(raw) || 1));
-  const context = await adminContext();
+  const context = await adminContext("changes");
   const data = await adminChanges(Math.floor(page), range, kind);
   const labels: Record<string, string> = {
     added: "Entrou no catálogo",

@@ -5,7 +5,7 @@ import SettingsForm from "@shared/components/admin/SettingsForm";
 import { ShieldCheck, Boxes, Link as LinkIcon } from "lucide-react";
 export default async function Settings() {
   await requireSession(["admin"]);
-  const context = await adminContext();
+  const context = await adminContext("basic");
   return (
     <>
       <PageHeading

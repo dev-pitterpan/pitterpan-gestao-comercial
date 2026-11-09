@@ -178,6 +178,10 @@ export function CheckoutList({
           />
         </label>
       </div>
+      <p className={styles.count}>
+        Busca, destino, modalidade e frete filtram os checkouts da página
+        aberta. Use a paginação para consultar os demais registros do período.
+      </p>
       <p className={styles.count} role="status">
         {visible.length} de {rows.length} checkouts nesta página
       </p>

@@ -1,17 +1,14 @@
 import { allowed } from "@shared/server/auth/crypto";
 import SalesOperations from "@shared/components/admin/SalesOperations";
 import StockOverview from "@shared/components/admin/StockOverview";
-import Image from "next/image";
 import PartyChart from "@shared/components/admin/PartyChart";
 import Link from "next/link";
 import {
   Package,
-  Layers3,
   BadgePercent,
   Boxes,
   ArrowUpRight,
   ArrowDownRight,
-  Sparkles,
   ArrowRight,
   BookOpen,
   CircleCheck,
@@ -58,12 +55,12 @@ export default async function Overview() {
       href: "/gestor/estoque/?stock=low",
     },
     {
-      label: "Estoque alto",
-      value: s?.high,
-      detail: `A partir de ${context.settings.high} unidades`,
-      icon: Layers3,
-      tone: "green",
-      href: "/gestor/estoque/?stock=high",
+      label: "Sem estoque",
+      value: s?.out,
+      detail: "Variantes com quantidade igual ou menor que zero",
+      icon: Boxes,
+      tone: "rose",
+      href: "/gestor/estoque/?stock=out",
     },
   ];
   return (
@@ -92,49 +89,6 @@ export default async function Overview() {
       {allowed(user.role, ["admin", "gestor"]) && (
         <SalesOperations overview params="days=30" />
       )}
-      <section className="admin-hero">
-        <div>
-          <span className="admin-hero-tag">
-            <span /> CENTRAL PITTER PAN
-          </span>
-          <h2>
-            Cada detalhe conectado.
-            <br />
-            <em>Mais espaço para celebrar.</em>
-          </h2>
-          <p>
-            Uma gestão tão especial quanto as festas que você ajuda a criar.
-            <br />
-            Organize sua operação e compartilhe as melhores seleções.
-          </p>
-          <Link
-            href="/gestor/catalogos/"
-            className="admin-button admin-button-light"
-          >
-            Escolher um catálogo <ArrowUpRight size={17} />
-          </Link>
-        </div>
-        <div className="admin-hero-art" aria-hidden="true">
-          <div className="admin-party-scene">
-            <Image
-              src="/assets/images/admin/login-party.webp"
-              alt=""
-              width={1536}
-              height={1024}
-              sizes="(max-width: 700px) 280px, 400px"
-              className="admin-party-illustration"
-            />
-          </div>
-          <div className="admin-art-label">
-            <Sparkles size={16} />
-            <span>
-              Organização que
-              <br />
-              <strong>vira festa.</strong>
-            </span>
-          </div>
-        </div>
-      </section>
       <section className="admin-stats" aria-label="Indicadores do catálogo">
         {stats.map(({ label, value, detail, icon: Icon, tone, href }) => (
           <Link
@@ -223,35 +177,6 @@ export default async function Overview() {
         </div>
       </div>
       <div className="admin-overview-bottom">
-        <section className="admin-panel">
-          <header>
-            <div>
-              <span className="admin-eyebrow">ATENÇÃO AOS DETALHES</span>
-              <h2>Seu estoque, de perto</h2>
-            </div>
-            <Boxes size={19} />
-          </header>
-          <div className="admin-stock-rows">
-            <Link href="/gestor/estoque/?stock=out">
-              <span className="admin-stock-dot rose" />
-              <div>
-                <strong>Sem estoque</strong>
-                <small>Quantidade cadastrada igual ou menor que zero</small>
-              </div>
-              <b>{number(s?.out)}</b>
-              <ArrowUpRight size={16} />
-            </Link>
-            <Link href="/gestor/estoque/?stock=unknown">
-              <span className="admin-stock-dot amber" />
-              <div>
-                <strong>Estoque não informado</strong>
-                <small>Variantes que precisam de conferência</small>
-              </div>
-              <b>{number(s?.unknown)}</b>
-              <ArrowUpRight size={16} />
-            </Link>
-          </div>
-        </section>
         <section className="admin-panel admin-sync-card">
           <div className={`admin-sync-icon${last ? "" : " is-pending"}`}>
             {last ? <CircleCheck size={25} /> : <Clock3 size={25} />}

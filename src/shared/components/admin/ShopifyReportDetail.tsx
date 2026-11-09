@@ -114,26 +114,38 @@ export default function ShopifyReportDetail({
   }
   const pageCount = Math.max(1, Math.ceil(rows.length / 10));
   const visiblePage = Math.min(page, pageCount - 1);
-  function download() {
+  function download(selection: boolean) {
     if (!data) return;
-    const rows: unknown[][] = [
+    const exportRows: unknown[][] = [
       ["Relatório", report.title],
       ["Fonte", "Shopify Analytics"],
       ["Período", data.window.start, data.window.end],
       ["Fuso", data.timezone],
+      [
+        "Escopo",
+        selection ? "Linhas da tabela filtrada" : "Todas as linhas retornadas",
+      ],
+      ...(report.dimensions?.length && data.table.rows.length === 50
+        ? [["Limite", "Até 50 grupos retornados pela consulta"]]
+        : []),
       [],
       columns.map((c) => c.label),
-      ...data.table.rows.map((r) => columns.map((c) => r[c.key])),
+      ...(selection ? rows : data.table.rows).map((r) =>
+        columns.map((c) => r[c.key]),
+      ),
     ];
     const url = URL.createObjectURL(
       new Blob(
-        ["\ufeff" + rows.map((r) => r.map(csvCell).join(";")).join("\r\n")],
+        [
+          "\ufeff" +
+            exportRows.map((r) => r.map(csvCell).join(";")).join("\r\n"),
+        ],
         { type: "text/csv;charset=utf-8" },
       ),
     );
     const a = document.createElement("a");
     a.href = url;
-    a.download = `shopify-${id}-${data.window.start}-${data.window.end}.csv`;
+    a.download = `shopify-${id}-${data.window.start}-${data.window.end}${selection ? "-selecao" : ""}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -158,10 +170,10 @@ export default function ShopifyReportDetail({
         </div>
         <button
           className="admin-button"
-          onClick={download}
+          onClick={() => download(false)}
           disabled={!data || busy}
         >
-          <Download size={15} /> Exportar
+          <Download size={15} /> Exportar relatório (CSV)
         </button>
       </header>
       {["sales", "campaign_sales"].includes(report.dataset) && (
@@ -170,7 +182,7 @@ export default function ShopifyReportDetail({
           pagos e cancelados. Valores de vendas e ajustes não equivalem a
           dinheiro recebido ou estornado. Para conferir pagamentos, volte ao
           resumo financeiro ou acesse{" "}
-          <a href="/gestor/vendas/">Vendas e vendidos</a>.
+          <a href="/gestor/vendas/">Vendas e pedidos</a>.
         </p>
       )}
       {busy && (
@@ -350,6 +362,14 @@ export default function ShopifyReportDetail({
                       }}
                     />
                   </label>
+                  <button
+                    type="button"
+                    className="admin-button"
+                    onClick={() => download(true)}
+                    disabled={busy || rows.length === 0}
+                  >
+                    <Download size={15} /> Exportar tabela (CSV)
+                  </button>
                 </div>
                 <div
                   className="analytics-table-scroll finance-table-viewport"

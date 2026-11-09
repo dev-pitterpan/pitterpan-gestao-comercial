@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
+import Link from "next/link";
 import AdminSelect from "./AdminSelect";
 import { Pause, Play, RotateCcw, Sparkles } from "lucide-react";
 
@@ -142,7 +143,12 @@ export default function PartyChart({ categories }: { categories: Category[] }) {
               }
             >
               <div className="party-chart-label">
-                <span>{c.name}</span>
+                <Link
+                  href={`/gestor/produtos/?${new URLSearchParams({ category: c.name })}`}
+                  className="admin-text-link"
+                >
+                  {c.name}
+                </Link>
                 <strong>{number(c.count)}</strong>
               </div>
               <div className="party-chart-mechanism">
@@ -168,7 +174,7 @@ export default function PartyChart({ categories }: { categories: Category[] }) {
       )}
       <p className="party-chart-caption">
         <Sparkles size={14} />
-        Cada categoria faz parte da festa. Quantidades em variantes.
+        Selecione uma das seis maiores categorias para abrir seus produtos.
       </p>
     </div>
   );

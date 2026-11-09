@@ -172,6 +172,25 @@ test("dashboard distingue variantes, ofertas, estoque desconhecido e histórico 
     context = await readAnalytics(db);
     assert.equal(context.summary?.low, 2);
     assert.equal(context.summary?.high, 1);
+
+    const basic = await readAnalytics(db, "basic");
+    assert.equal(basic.active, second);
+    assert.deepEqual(basic.settings, context.settings);
+    assert.equal(basic.summary, null);
+    assert.deepEqual(basic.runs, []);
+    assert.equal(basic.changes, null);
+
+    const stock = await readAnalytics(db, "stock");
+    assert.deepEqual(stock.summary, context.summary);
+    assert.equal(stock.changes, null);
+
+    const history = await readAnalytics(db, "history");
+    assert.deepEqual(history.runs, context.runs);
+    assert.equal(history.summary, null);
+
+    const changes = await readAnalytics(db, "changes");
+    assert.equal(changes.previous, first);
+    assert.equal(changes.changes, null);
   } finally {
     await db.close();
   }

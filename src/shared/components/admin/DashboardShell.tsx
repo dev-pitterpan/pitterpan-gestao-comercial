@@ -7,6 +7,7 @@ import { useEffect, useRef, useState, Suspense, type ReactNode } from "react";
 import {
   ArrowLeft,
   CalendarDays,
+  ChevronDown,
   ShieldCheck,
   LoaderCircle,
   MapPinned,
@@ -44,6 +45,7 @@ const links = [
     icon: MapPinned,
     financial: true,
   },
+  { href: "/gestor/produtos/", label: "Todos os produtos", icon: Package },
   { href: "/gestor/estoque/", label: "Estoque", icon: Boxes },
   { href: "/gestor/ofertas/", label: "Ofertas", icon: BadgePercent },
   { href: "/gestor/catalogos/", label: "Catálogos", icon: BookOpen },
@@ -75,33 +77,32 @@ const links = [
   },
 ];
 const navigationGroups = [
+  { label: "Início", paths: ["/gestor/"] },
   {
-    label: "Sua operação",
+    label: "Operação",
+    paths: ["/gestor/vendas/", "/gestor/mapa/", "/gestor/agenda/"],
+  },
+  {
+    label: "Produtos",
     paths: [
-      "/gestor/",
-      "/gestor/vendas/",
-      "/gestor/mapa/",
+      "/gestor/produtos/",
       "/gestor/estoque/",
       "/gestor/ofertas/",
+      "/gestor/catalogos/",
       "/gestor/alteracoes/",
     ],
   },
   {
-    label: "Planejar e compartilhar",
-    paths: [
-      "/gestor/agenda/",
-      "/gestor/catalogos/",
-      "/gestor/analises/",
-      "/gestor/relatorios/",
-    ],
+    label: "Análises",
+    paths: ["/gestor/analises/", "/gestor/relatorios/"],
   },
   {
-    label: "Gestão da equipe",
-    paths: [
-      "/gestor/sincronizacoes/",
-      "/gestor/usuarios/",
-      "/gestor/configuracoes/",
-    ],
+    label: "Dados da loja",
+    paths: ["/gestor/sincronizacoes/"],
+  },
+  {
+    label: "Administração",
+    paths: ["/gestor/usuarios/", "/gestor/configuracoes/"],
   },
 ];
 function NavigationPending() {
@@ -348,27 +349,45 @@ export default function DashboardShell({
                   (!link.financial || user.role !== "atendimento"),
               );
               if (!items.length) return null;
+              const active = items.some(({ href }) => pathname === href);
+              const entries = group.paths.flatMap((path) => {
+                const item = items.find(({ href }) => href === path);
+                if (!item) return [];
+                const { href, label, icon: Icon } = item;
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    prefetch={false}
+                    aria-current={pathname === href ? "page" : undefined}
+                    className={pathname === href ? "active" : ""}
+                    onClick={() => setOpen(false)}
+                  >
+                    <Icon size={19} strokeWidth={1.7} aria-hidden="true" />
+                    <span>{label}</span>
+                    <NavigationPending />
+                    {pathname === href && <span className="admin-nav-marker" />}
+                  </Link>
+                );
+              });
+              if (items.length === 1)
+                return (
+                  <div className="admin-nav-direct" key={group.label}>
+                    {entries}
+                  </div>
+                );
               return (
-                <section className="admin-nav-group" key={group.label}>
-                  <h2>{group.label}</h2>
-                  {items.map(({ href, label, icon: Icon }) => (
-                    <Link
-                      key={href}
-                      href={href}
-                      prefetch={false}
-                      aria-current={pathname === href ? "page" : undefined}
-                      className={pathname === href ? "active" : ""}
-                      onClick={() => setOpen(false)}
-                    >
-                      <Icon size={19} strokeWidth={1.7} aria-hidden="true" />
-                      <span>{label}</span>
-                      <NavigationPending />
-                      {pathname === href && (
-                        <span className="admin-nav-marker" />
-                      )}
-                    </Link>
-                  ))}
-                </section>
+                <details
+                  className="admin-nav-section"
+                  key={`${group.label}-${pathname}`}
+                  open={active}
+                >
+                  <summary>
+                    <span>{group.label}</span>
+                    <ChevronDown size={15} aria-hidden="true" />
+                  </summary>
+                  <div className="admin-nav-section-links">{entries}</div>
+                </details>
               );
             })
           )}

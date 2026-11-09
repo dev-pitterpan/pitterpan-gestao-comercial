@@ -112,6 +112,41 @@
   scrollbar-width: thin;
   scrollbar-color: #c6d6e5 transparent;
 }
+.admin-nav-section {
+  margin: 5px 0;
+}
+.admin-nav-section > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 42px;
+  padding: 8px 13px;
+  border-radius: 10px;
+  list-style: none;
+  cursor: pointer;
+  color: #345e88;
+  font-size: 12px;
+  font-weight: 650;
+}
+.admin-nav-section > summary::-webkit-details-marker {
+  display: none;
+}
+.admin-nav-section > summary:hover,
+.admin-nav-section[open] > summary {
+  background: #eaf2f9;
+}
+.admin-nav-section[open] > summary svg {
+  rotate: 180deg;
+}
+.admin-nav-section-links {
+  margin: 5px 0 7px 8px;
+  padding-left: 6px;
+  border-left: 1px solid #dce7f2;
+}
+.admin-nav-direct {
+  margin: 5px 0;
+}
 .admin-nav-group + .admin-nav-group {
   margin-top: 21px;
 }
@@ -570,6 +605,10 @@
   background: #eaf4f0;
   color: #6a9e8d !important;
 }
+.admin-app .admin-stat-icon.rose {
+  background: #f8eaf0;
+  color: #9b4564 !important;
+}
 .admin-app .admin-stat > span {
   font-size: 12px;
   color: var(--admin-muted);
@@ -696,7 +735,7 @@
 }
 .admin-app .admin-overview-bottom {
   gap: 21px;
-  grid-template-columns: 1.2fr 1fr 0.85fr;
+  grid-template-columns: 1fr 1fr;
 }
 .admin-app .admin-stock-rows > a {
   padding: 13px 0;
@@ -1370,7 +1409,6 @@
     grid-template-columns: 1fr 1fr;
   }
   .admin-app .admin-share-card {
-    grid-column: 1/-1;
     flex-direction: row;
     align-items: center;
     gap: 23px;

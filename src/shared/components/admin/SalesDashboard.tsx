@@ -453,16 +453,20 @@ export default function SalesDashboard({
               <button
                 key={item.kind}
                 type="button"
+                aria-pressed={filters.delivery === item.kind}
                 onClick={() => {
                   resetList();
                   setFilters((old) => ({
                     ...old,
-                    delivery: item.kind as DeliveryKind,
+                    delivery:
+                      old.delivery === item.kind
+                        ? "all"
+                        : (item.kind as DeliveryKind),
                   }));
                 }}
               >
                 <DeliveryMark kind={item.kind} />
-                <strong>{count(item.orders)} pedidos</strong>
+                <strong>{count(item.orders)}</strong>
               </button>
             ))}
           </div>
@@ -493,7 +497,7 @@ export default function SalesDashboard({
               aria-label={`Indicadores em ${t.currency}`}
             >
               <div className="sales-currency">MOEDA DA LOJA · {t.currency}</div>
-              <div className="admin-stats sales-stats">
+              <div className="sales-stats">
                 {[
                   {
                     label: "Líquido após estornos",
@@ -526,13 +530,10 @@ export default function SalesDashboard({
                     icon: ArrowDownLeft,
                   },
                 ].map(({ label, value, detail, icon: Icon }) => (
-                  <div className="admin-stat admin-stat--blue" key={label}>
-                    <div>
-                      <span className="admin-stat-icon blue">
-                        <Icon size={21} />
-                      </span>
-                    </div>
-                    <span>{label}</span>
+                  <div className="sales-metric" key={label}>
+                    <span>
+                      <Icon size={16} aria-hidden="true" /> {label}
+                    </span>
                     <strong>{value}</strong>
                     <small>{detail}</small>
                   </div>

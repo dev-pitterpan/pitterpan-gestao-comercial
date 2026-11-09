@@ -20,8 +20,11 @@ export default async function ProductsPage({
   const query = parsed.success
     ? parsed.data
     : adminQuerySchema.parse({ offers: mode === "offers" ? "1" : "0" });
-  const context = await adminContext(),
-    result = await adminProducts(query);
+  const view = mode === "stock" ? "stock" : "basic";
+  const [context, result] = await Promise.all([
+    adminContext(view),
+    adminProducts(query, { view }),
+  ]);
   const base =
     mode === "stock"
       ? "/gestor/estoque/"

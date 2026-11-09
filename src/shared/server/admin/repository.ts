@@ -1,7 +1,7 @@
 import { stockFilters, matchesStock } from "../../lib/admin/stock.ts";
 import { stockSelectionSql } from "./stock.ts";
 import { containsPattern, matchesFilter } from "../../lib/admin/filters.ts";
-import { readAnalytics } from "./analytics";
+import { readAnalytics, type CatalogView } from "./analytics";
 import { requireSession } from "../auth/session";
 import { cache } from "react";
 import { readFile } from "node:fs/promises";
@@ -125,63 +125,67 @@ export function summarize(
   };
 }
 /** Cada indicador usa a mesma versão publicada; não consulta 13 mil itens na Shopify. */
-export const adminContext = cache(async (): Promise<AdminContext> => {
-  await requireSession();
-  if (process.env.DATABASE_URL) {
-    try {
-      return await readAnalytics(database());
-    } catch {
+export const adminContext = cache(
+  async (view: CatalogView = "overview"): Promise<AdminContext> => {
+    await requireSession();
+    if (process.env.DATABASE_URL) {
+      try {
+        return await readAnalytics(database(), view);
+      } catch {
+        return {
+          source: "pending",
+          notice:
+            "O painel aguarda uma importação publicada e a preparação do banco. Nenhum indicador é estimado.",
+          active: null,
+          previous: null,
+          settings: settingsDefaults,
+          summary: null,
+          categories: [],
+          runs: [],
+          changes: null,
+        };
+      }
+    }
+    if ((process.env.CATALOG_DATA_SOURCE || "json") === "json") {
+      const products =
+        view === "overview" || view === "stock" ? await localProducts() : [];
+      const counts = new Map<string, number>();
+      for (const p of products)
+        counts.set(
+          p.category || "Sem categoria",
+          (counts.get(p.category || "Sem categoria") || 0) + 1,
+        );
       return {
-        source: "pending",
+        source: "json",
         notice:
-          "O painel aguarda uma importação publicada e a preparação do banco. Nenhum indicador é estimado.",
+          "Dados dos arquivos locais. Estoque e histórico só aparecem quando informados pela integração.",
         active: null,
         previous: null,
         settings: settingsDefaults,
-        summary: null,
-        categories: [],
+        summary:
+          view === "overview" || view === "stock" ? summarize(products) : null,
+        categories: [...counts]
+          .map(([name, count]) => ({ name, count }))
+          .sort((a, b) => b.count - a.count)
+          .slice(0, 6),
         runs: [],
         changes: null,
       };
     }
-  }
-  if ((process.env.CATALOG_DATA_SOURCE || "json") === "json") {
-    const products = await localProducts();
-    const counts = new Map<string, number>();
-    for (const p of products)
-      counts.set(
-        p.category || "Sem categoria",
-        (counts.get(p.category || "Sem categoria") || 0) + 1,
-      );
     return {
-      source: "json",
+      source: "pending",
       notice:
-        "Dados dos arquivos locais. Estoque e histórico só aparecem quando informados pela integração.",
+        "Conecte o banco e publique a primeira importação para acompanhar a loja completa. Os catálogos públicos continuam na fonte atual.",
       active: null,
       previous: null,
       settings: settingsDefaults,
-      summary: summarize(products),
-      categories: [...counts]
-        .map(([name, count]) => ({ name, count }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 6),
+      summary: null,
+      categories: [],
       runs: [],
       changes: null,
     };
-  }
-  return {
-    source: "pending",
-    notice:
-      "Conecte o banco e publique a primeira importação para acompanhar a loja completa. Os catálogos públicos continuam na fonte atual.",
-    active: null,
-    previous: null,
-    settings: settingsDefaults,
-    summary: null,
-    categories: [],
-    runs: [],
-    changes: null,
-  };
-});
+  },
+);
 export const adminQuerySchema = z.object({
   q: z.string().trim().max(120).default(""),
   category: z.string().max(200).default(""),
@@ -193,8 +197,14 @@ export const adminQuerySchema = z.object({
 export type AdminQuery = z.infer<typeof adminQuerySchema>;
 const selectProduct =
   '\'shopify-\'||variant_id AS id,COALESCE(sku,id) AS sku,name,description,category,vendor,price::text,compare_at_price::text AS "compareAtPrice",currency,image_url AS image,inventory_quantity AS "inventoryQuantity",variant_id AS "shopifyVariantId",site_url AS "siteUrl"';
-export async function adminProducts(input: AdminQuery, { all = false } = {}) {
-  const context = await adminContext();
+export async function adminProducts(
+  input: AdminQuery,
+  {
+    all = false,
+    view = "basic",
+  }: { all?: boolean; view?: "basic" | "stock" } = {},
+) {
+  const context = await adminContext(view);
   if (context.source === "pending")
     return { products: [] as AdminProduct[], total: 0, pages: 1, page: 1 };
   if (context.source === "json") {
@@ -264,7 +274,7 @@ export async function adminChanges(
   range = { start: "", end: "" },
   kind = "all",
 ) {
-  const context = await adminContext();
+  const context = await adminContext("changes");
   const empty = {
     items: [] as ChangeRow[],
     total: 0,
@@ -341,8 +351,7 @@ type ChangeRow = {
   fields: string[];
 };
 export async function adminCatalogs() {
-  await requireSession();
-  const context = await adminContext();
+  const context = await adminContext("basic");
   const manifest = await getManifest();
   const summaries =
     context.source === "json" ? manifest : storefrontNavigation(manifest);
