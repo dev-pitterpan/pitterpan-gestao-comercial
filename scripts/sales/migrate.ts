@@ -6,10 +6,7 @@ const pool = database();
 try {
   await pool.query(
     await readFile(
-      new URL(
-        "../../src/shared/server/sales/schema.sql",
-        import.meta.url,
-      ),
+      new URL("../../src/shared/server/sales/schema.sql", import.meta.url),
       "utf8",
     ),
   );

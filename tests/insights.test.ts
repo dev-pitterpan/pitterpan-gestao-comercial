@@ -85,10 +85,7 @@ test("mapa contabiliza cidade, unidades, retirada, internacional e destino ausen
   try {
     await db.exec(
       await readFile(
-        new URL(
-          "../src/shared/server/sales/schema.sql",
-          import.meta.url,
-        ),
+        new URL("../src/shared/server/sales/schema.sql", import.meta.url),
         "utf8",
       ),
     );

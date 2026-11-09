@@ -7,10 +7,7 @@ const db = database();
 try {
   await db.query(
     await readFile(
-      new URL(
-        "../../src/shared/server/database/schema.sql",
-        import.meta.url,
-      ),
+      new URL("../../src/shared/server/database/schema.sql", import.meta.url),
       "utf8",
     ),
   );

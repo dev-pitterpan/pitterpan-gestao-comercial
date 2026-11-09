@@ -102,10 +102,7 @@ test("pedido preserva modalidade e preço cobrado antes dos reembolsos, sem soma
   try {
     await db.exec(
       await readFile(
-        new URL(
-          "../src/shared/server/sales/schema.sql",
-          import.meta.url,
-        ),
+        new URL("../src/shared/server/sales/schema.sql", import.meta.url),
         "utf8",
       ),
     );

@@ -7,10 +7,7 @@ import {
   salesSectionFromHash,
 } from "../src/shared/lib/admin/sales-links.ts";
 import { salesFilterSchema } from "../src/shared/server/sales/filters.ts";
-import {
-  stockFilters,
-  matchesStock,
-} from "../src/shared/lib/admin/stock.ts";
+import { stockFilters, matchesStock } from "../src/shared/lib/admin/stock.ts";
 import { stockSelectionSql } from "../src/shared/server/admin/stock.ts";
 test("atalhos de vendas aplicam o filtro anunciado e preservam só o contexto comercial", () => {
   const source = new URLSearchParams({

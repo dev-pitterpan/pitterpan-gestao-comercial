@@ -21,7 +21,10 @@ export function prepareEnvironment(
       "NEXT_TELEMETRY_DISABLED",
     ].includes(key);
     values[key] =
-      existing[key] || (!localOnly ? inherited[key] : "") || defaults[key] || "";
+      existing[key] ||
+      (!localOnly ? inherited[key] : "") ||
+      defaults[key] ||
+      "";
   }
   if (!existing.PORT) values.PORT = management ? "3001" : "3000";
   if (!existing.NEXT_PUBLIC_CATALOG_URL)

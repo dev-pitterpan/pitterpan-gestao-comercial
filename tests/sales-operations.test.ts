@@ -53,10 +53,7 @@ test("saldos oficiais preservam centavos, distinguem estimativa e rejeitam moeda
   try {
     await db.exec(
       await readFile(
-        new URL(
-          "../src/shared/server/sales/schema.sql",
-          import.meta.url,
-        ),
+        new URL("../src/shared/server/sales/schema.sql", import.meta.url),
         "utf8",
       ),
     );
@@ -133,10 +130,7 @@ test("operação separa reembolso de cancelamento e pagamento de atendimento, re
   try {
     await db.exec(
       await readFile(
-        new URL(
-          "../src/shared/server/sales/schema.sql",
-          import.meta.url,
-        ),
+        new URL("../src/shared/server/sales/schema.sql", import.meta.url),
         "utf8",
       ),
     );
@@ -245,10 +239,7 @@ test("auditoria somente leitura identifica pedidos ausentes, desatualizados e va
   try {
     await db.exec(
       await readFile(
-        new URL(
-          "../src/shared/server/sales/schema.sql",
-          import.meta.url,
-        ),
+        new URL("../src/shared/server/sales/schema.sql", import.meta.url),
         "utf8",
       ),
     );
@@ -332,18 +323,14 @@ test("auditoria somente leitura identifica pedidos ausentes, desatualizados e va
 test("link aguardando atendimento: contador, lista completa, paginação, financeiro e produtos obedecem ao mesmo filtro", async () => {
   const { readSoldProducts } =
     await import("../src/shared/server/sales/repository.ts");
-  const { salesLink } =
-    await import("../src/shared/lib/admin/sales-links.ts");
+  const { salesLink } = await import("../src/shared/lib/admin/sales-links.ts");
   const { salesFilterSchema } =
     await import("../src/shared/server/sales/filters.ts");
   const db = new PGlite();
   try {
     await db.exec(
       await readFile(
-        new URL(
-          "../src/shared/server/sales/schema.sql",
-          import.meta.url,
-        ),
+        new URL("../src/shared/server/sales/schema.sql", import.meta.url),
         "utf8",
       ),
     );

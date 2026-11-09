@@ -33,10 +33,7 @@ test("sincronização mantém exclusividade, retoma lotes e publica somente a ve
   try {
     await db.exec(
       await readFile(
-        new URL(
-          "../src/shared/server/database/schema.sql",
-          import.meta.url,
-        ),
+        new URL("../src/shared/server/database/schema.sql", import.meta.url),
         "utf8",
       ),
     );
