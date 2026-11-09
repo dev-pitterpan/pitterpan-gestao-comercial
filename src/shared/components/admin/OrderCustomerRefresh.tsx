@@ -14,7 +14,10 @@ export default function OrderCustomerRefresh({
     [message, setMessage] = useState("");
   const attempted = useRef(new Set<string>()),
     active = useRef(false);
-  const signature = orders.map((o) => o.id).join("|");
+  const signature = orders
+    .filter((order) => !order.customer_id && !order.customer_checked_at)
+    .map((order) => order.id)
+    .join("|");
   const refresh = useCallback(
     async (ids: string[]) => {
       if (!ids.length || active.current) return;

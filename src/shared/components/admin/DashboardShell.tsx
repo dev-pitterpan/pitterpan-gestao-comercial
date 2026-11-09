@@ -205,10 +205,10 @@ const roleLabels = {
 export default function DashboardShell({
   children,
   user,
-  recoveryPending,
+  accountLabel,
 }: {
   children: ReactNode;
-  recoveryPending: boolean;
+  accountLabel: ReactNode;
   user: { name: string; email: string; role: Role };
 }) {
   const pathname = (usePathname() || "/gestor/").replace(/\/+$/, "") + "/";
@@ -442,7 +442,7 @@ export default function DashboardShell({
             </Link>
           )}
           <Link className="admin-button" href="/gestor/minha-conta/">
-            {recoveryPending ? "Recuperação pendente" : "Minha conta"}
+            {accountLabel}
           </Link>
           <span className="admin-secure-label">
             <ShieldCheck size={15} aria-hidden="true" />
