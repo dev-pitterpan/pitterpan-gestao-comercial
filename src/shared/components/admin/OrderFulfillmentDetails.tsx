@@ -34,6 +34,19 @@ const OpenDetails = createContext<(order: Order) => void>(() => {});
 export function FulfillmentWindows({ children }: { children: ReactNode }) {
   const [windows, setWindows] = useState<WindowState[]>([]);
   const layer = useRef(100);
+  const [dockWidth, setDockWidth] = useState(36);
+  const resizeDock = (width: number) =>
+    setDockWidth(Math.round(Math.max(28, Math.min(width, 46))));
+
+  useEffect(() => {
+    document.body.style.setProperty(
+      "--fulfillment-user-width",
+      `${dockWidth}vw`,
+    );
+    return () => {
+      document.body.style.removeProperty("--fulfillment-user-width");
+    };
+  }, [dockWidth]);
   function activate(id: string) {
     const next = ++layer.current;
     setWindows((current) =>
@@ -70,6 +83,8 @@ export function FulfillmentWindows({ children }: { children: ReactNode }) {
               key={entry.id}
               order={entry}
               layer={entry.layer}
+              dockWidth={dockWidth}
+              resizeDock={resizeDock}
               activate={() => activate(entry.id)}
               dock={(side) => dock(entry.id, side)}
               close={() =>
@@ -103,11 +118,15 @@ function FulfillmentWindow({
   order,
   layer,
   activate,
+  dockWidth,
+  resizeDock,
   dock,
   close,
 }: {
   order: WindowState;
   layer: number;
+  dockWidth: number;
+  resizeDock: (width: number) => void;
   activate: () => void;
   dock: (side: Dock | null) => void;
   close: () => void;
@@ -189,6 +208,48 @@ function FulfillmentWindow({
           className="fulfillment-snap-preview"
           data-side={preview}
           aria-hidden="true"
+        />
+      )}
+      {order.dock && (
+        <div
+          className="fulfillment-resize"
+          data-side={order.dock}
+          role="separator"
+          aria-label="Largura da conferência"
+          aria-orientation="vertical"
+          aria-valuemin={28}
+          aria-valuemax={46}
+          aria-valuenow={dockWidth}
+          aria-valuetext={`${dockWidth}% da tela`}
+          tabIndex={0}
+          style={{ zIndex: layer + 1 }}
+          onPointerDown={(event) => {
+            if (event.button !== 0) return;
+            activate();
+            event.currentTarget.setPointerCapture(event.pointerId);
+          }}
+          onPointerMove={(event) => {
+            if (!event.currentTarget.hasPointerCapture(event.pointerId)) return;
+            const width =
+              order.dock === "left"
+                ? event.clientX
+                : window.innerWidth - event.clientX;
+            resizeDock((width / window.innerWidth) * 100);
+          }}
+          onKeyDown={(event) => {
+            if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key))
+              return;
+            event.preventDefault();
+            const direction = order.dock === "left" ? 1 : -1;
+            resizeDock(
+              event.key === "Home"
+                ? 28
+                : event.key === "End"
+                  ? 46
+                  : dockWidth +
+                    direction * (event.key === "ArrowRight" ? 2 : -2),
+            );
+          }}
         />
       )}
       <section
