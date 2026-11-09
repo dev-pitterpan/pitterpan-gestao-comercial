@@ -115,39 +115,21 @@
 .admin-nav-section {
   margin: 5px 0;
 }
-.admin-nav-section:not([open]) > summary {
-  position: relative;
-}
-.admin-nav-section:not([open]) > summary::after {
-  content: "";
-  position: absolute;
-  inset: auto 13px -3px;
-  border-bottom: 1px solid #dce7f2;
-  pointer-events: none;
-}
-.admin-nav-section > summary {
+.admin-nav-section > h2 {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
   min-height: 42px;
+  margin: 0;
   padding: 8px 13px;
   border-radius: 10px;
-  list-style: none;
-  cursor: pointer;
+  background: #eaf2f9;
   color: #345e88;
   font-size: 12px;
-  font-weight: 650;
+  font-weight: 700;
 }
-.admin-nav-section > summary::-webkit-details-marker {
-  display: none;
-}
-.admin-nav-section > summary:hover,
-.admin-nav-section[open] > summary {
-  background: #eaf2f9;
-}
-.admin-nav-section[open] > summary svg {
-  rotate: 180deg;
+.admin-nav-section.is-active > h2 {
+  background: #dceaf6;
+  color: #294f78;
 }
 .admin-nav-section-links {
   margin: 5px 0 7px 8px;

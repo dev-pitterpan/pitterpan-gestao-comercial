@@ -8,7 +8,6 @@ import { useEffect, useRef, useState, Suspense, type ReactNode } from "react";
 import {
   ArrowLeft,
   CalendarDays,
-  ChevronDown,
   ShieldCheck,
   LoaderCircle,
   MapPinned,
@@ -262,7 +261,7 @@ export default function DashboardShell({
     const controls = () =>
       [
         ...(sidebarRef.current?.querySelectorAll<HTMLElement>(
-          "a[href],button:not(:disabled),summary",
+          "a[href],button:not(:disabled)",
         ) || []),
       ].filter((node) => node.getClientRects().length);
     controls()[0]?.focus();
@@ -414,17 +413,13 @@ export default function DashboardShell({
                   </div>
                 );
               return (
-                <details
-                  className="admin-nav-section"
-                  key={`${group.label}-${pathname}`}
-                  open={active}
+                <section
+                  className={`admin-nav-section${active ? " is-active" : ""}`}
+                  key={group.label}
                 >
-                  <summary>
-                    <span>{group.label}</span>
-                    <ChevronDown size={15} aria-hidden="true" />
-                  </summary>
+                  <h2>{group.label}</h2>
                   <div className="admin-nav-section-links">{entries}</div>
-                </details>
+                </section>
               );
             })
           )}
