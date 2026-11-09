@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { FulfillmentWindows } from "@shared/components/admin/OrderFulfillmentDetails";
 import DashboardShell from "@shared/components/admin/DashboardShell";
 import { requireSession } from "@shared/server/auth/session";
 import { pendingPasswordRequests } from "@shared/server/auth/password-events";
@@ -23,7 +24,7 @@ export default async function DashboardLayout({
       recoveryPending={recoveryPending}
       user={{ name: user.name, email: user.email, role: user.role }}
     >
-      {children}
+      <FulfillmentWindows>{children}</FulfillmentWindows>
     </DashboardShell>
   );
 }

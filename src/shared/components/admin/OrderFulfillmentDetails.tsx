@@ -1,6 +1,22 @@
 "use client";
-import { useEffect, useId, useRef, useState } from "react";
-import { ClipboardList, RefreshCw, X } from "lucide-react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+} from "react";
+import type { PointerEvent, ReactNode } from "react";
+import { createPortal } from "react-dom";
+import {
+  ClipboardList,
+  PanelLeft,
+  PanelRight,
+  RefreshCw,
+  Square,
+  X,
+} from "lucide-react";
 import {
   fulfillmentLabels,
   fulfillmentDescriptions,
@@ -9,24 +25,143 @@ import type { readFulfillmentDetails } from "../../server/sales/fulfillment-deta
 import PitterSpinner from "./PitterSpinner";
 type Data = Awaited<ReturnType<typeof readFulfillmentDetails>>;
 const number = (n: number) => n.toLocaleString("pt-BR");
-export default function OrderFulfillmentDetails({
-  id,
-  name,
-  storedStatus,
+type Order = { id: string; name: string; storedStatus?: string };
+type Dock = "left" | "right";
+type WindowState = Order & { dock: Dock | null; layer: number };
+const OpenDetails = createContext<(order: Order) => void>(() => {});
+
+export function FulfillmentWindows({ children }: { children: ReactNode }) {
+  const [windows, setWindows] = useState<WindowState[]>([]);
+  const layer = useRef(100);
+  function activate(id: string) {
+    const next = ++layer.current;
+    setWindows((current) =>
+      current.map((entry) =>
+        entry.id === id ? { ...entry, layer: next } : entry,
+      ),
+    );
+  }
+  function open(order: Order) {
+    const next = ++layer.current;
+    setWindows((current) =>
+      current.some((entry) => entry.id === order.id)
+        ? current.map((entry) =>
+            entry.id === order.id ? { ...entry, layer: next } : entry,
+          )
+        : [...current, { ...order, dock: null, layer: next }],
+    );
+  }
+  function dock(id: string, side: Dock | null) {
+    setWindows((current) =>
+      current.map((entry) => {
+        if (entry.id === id) return { ...entry, dock: side };
+        return side && entry.dock ? { ...entry, dock: null } : entry;
+      }),
+    );
+  }
+  return (
+    <OpenDetails.Provider value={open}>
+      {children}
+      {windows.length > 0 &&
+        createPortal(
+          windows.map((entry) => (
+            <FulfillmentWindow
+              key={entry.id}
+              order={entry}
+              layer={entry.layer}
+              activate={() => activate(entry.id)}
+              dock={(side) => dock(entry.id, side)}
+              close={() =>
+                setWindows((current) =>
+                  current.filter((window) => window.id !== entry.id),
+                )
+              }
+            />
+          )),
+          document.body,
+        )}
+    </OpenDetails.Provider>
+  );
+}
+
+export default function OrderFulfillmentDetails(order: Order) {
+  const open = useContext(OpenDetails);
+  return (
+    <button
+      type="button"
+      className="admin-button fulfillment-details-trigger"
+      onClick={() => open(order)}
+      aria-label={`Conferir itens de atendimento do pedido ${order.name}`}
+    >
+      <ClipboardList size={14} /> Conferir itens
+    </button>
+  );
+}
+
+function FulfillmentWindow({
+  order,
+  layer,
+  activate,
+  dock,
+  close,
 }: {
-  id: string;
-  name: string;
-  storedStatus?: string;
+  order: WindowState;
+  layer: number;
+  activate: () => void;
+  dock: (side: Dock | null) => void;
+  close: () => void;
 }) {
-  const dialog = useRef<HTMLDialogElement>(null),
-    titleId = useId(),
-    noteId = useId();
-  const [open, setOpen] = useState(false),
-    [revision, setRevision] = useState(0),
-    [data, setData] = useState<Data | null>(null),
-    [error, setError] = useState("");
+  const { id, name, storedStatus } = order;
+  const panel = useRef<HTMLElement>(null);
+  const drag = useRef<{ x: number; y: number } | null>(null);
+  const titleId = useId();
+  const noteId = useId();
+  const [position, setPosition] = useState<{ x: number; y: number } | null>(
+    null,
+  );
+  const [preview, setPreview] = useState<Dock | null>(null);
+  const [revision, setRevision] = useState(0);
+  const [data, setData] = useState<Data | null>(null);
+  const [error, setError] = useState("");
+
   useEffect(() => {
-    if (!open) return;
+    panel.current?.focus();
+  }, []);
+
+  function edge(x: number): Dock | null {
+    if (window.innerWidth < 1100) return null;
+    if (x <= 32) return "left";
+    return x >= window.innerWidth - 32 ? "right" : null;
+  }
+  function start(event: PointerEvent<HTMLDivElement>) {
+    if (event.button !== 0 || !panel.current || window.innerWidth < 680) return;
+    const rect = panel.current.getBoundingClientRect();
+    drag.current = {
+      x: order.dock
+        ? Math.min(event.clientX - rect.left, 200)
+        : event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  }
+  function move(event: PointerEvent<HTMLDivElement>) {
+    if (!drag.current) return;
+    if (order.dock) dock(null);
+    setPosition({
+      x: event.clientX - drag.current.x,
+      y: event.clientY - drag.current.y,
+    });
+    setPreview(edge(event.clientX));
+  }
+  function end(event: PointerEvent<HTMLDivElement>) {
+    if (drag.current && event.type === "pointerup") {
+      const side = edge(event.clientX);
+      if (side) dock(side);
+    }
+    drag.current = null;
+    setPreview(null);
+  }
+  useEffect(() => {
     const controller = new AbortController();
     setData(null);
     setError("");
@@ -45,42 +180,88 @@ export default function OrderFulfillmentDetails({
           setError(e instanceof Error ? e.message : "Consulta indisponível.");
       });
     return () => controller.abort();
-  }, [id, open, revision]);
-  const close = () => dialog.current?.close();
+  }, [id, revision]);
   return (
     <>
-      <button
-        type="button"
-        className="admin-button fulfillment-details-trigger"
-        onClick={() => {
-          dialog.current?.showModal();
-          setOpen(true);
-        }}
-        aria-label={`Conferir itens de atendimento do pedido ${name}`}
-      >
-        <ClipboardList size={14} /> Conferir itens
-      </button>
-      <dialog
-        ref={dialog}
-        className="fulfillment-dialog"
+      {preview && (
+        <div
+          className="fulfillment-snap-preview"
+          data-side={preview}
+          aria-hidden="true"
+        />
+      )}
+      <section
+        ref={panel}
+        tabIndex={-1}
+        role="dialog"
+        className="fulfillment-dialog fulfillment-window"
+        data-dock={order.dock ?? undefined}
         aria-labelledby={titleId}
         aria-describedby={noteId}
-        onClose={() => setOpen(false)}
-        onPointerDown={(event) => event.stopPropagation()}
+        onPointerDown={activate}
+        onFocus={activate}
+        style={{
+          zIndex: layer,
+          ...(position && !order.dock
+            ? {
+                left: `clamp(8px, ${position.x}px, calc(100vw - var(--window-width) - 8px))`,
+                top: `clamp(8px, ${position.y}px, calc(100dvh - var(--window-height) - 8px))`,
+              }
+            : {}),
+        }}
       >
         <header className="fulfillment-dialog-heading">
-          <div>
+          <div
+            className="fulfillment-window-grip"
+            title="Arraste para mover ou encaixar"
+            onPointerDown={start}
+            onPointerMove={move}
+            onPointerUp={end}
+            onPointerCancel={end}
+            onLostPointerCapture={end}
+          >
             <span className="admin-eyebrow">ATENDIMENTO DO PEDIDO</span>
             <h2 id={titleId}>{data?.name || name}</h2>
           </div>
-          <button
-            type="button"
-            className="admin-button"
-            aria-label="Fechar conferência de itens"
-            onClick={close}
-          >
-            <X size={18} />
-          </button>
+          <div className="fulfillment-window-actions">
+            <button
+              type="button"
+              className="admin-button fulfillment-dock-action"
+              aria-label="Encaixar à esquerda"
+              onClick={() => dock("left")}
+            >
+              <PanelLeft size={16} />
+            </button>
+            <button
+              type="button"
+              className="admin-button fulfillment-dock-action"
+              aria-label="Encaixar à direita"
+              onClick={() => dock("right")}
+            >
+              <PanelRight size={16} />
+            </button>
+            {order.dock && (
+              <button
+                type="button"
+                className="admin-button fulfillment-dock-action"
+                aria-label="Voltar para janela flutuante"
+                onClick={() => {
+                  setPosition(null);
+                  dock(null);
+                }}
+              >
+                <Square size={15} />
+              </button>
+            )}
+            <button
+              type="button"
+              className="admin-button"
+              aria-label="Fechar conferência de itens"
+              onClick={close}
+            >
+              <X size={18} />
+            </button>
+          </div>
         </header>
         <p id={noteId} className="fulfillment-dialog-note">
           Quantidades consultadas na Shopify. Atendimento é independente do
@@ -218,7 +399,7 @@ export default function OrderFulfillmentDetails({
             </footer>
           </>
         )}
-      </dialog>
+      </section>
     </>
   );
 }
