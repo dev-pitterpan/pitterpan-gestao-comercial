@@ -359,6 +359,15 @@ async function financialTotals(
     values,
   );
 }
+function dailySales(db: SqlClient, values: unknown[], where: string) {
+  return db.query<Record<string, string>>(
+    `SELECT currency,(o.processed_at AT TIME ZONE 'America/Sao_Paulo')::date::text AS day,
+ count(*)::text AS orders,count(*) FILTER(WHERE financial_status='PAID' AND cancelled_at IS NULL)::text AS paid,COALESCE(sum(received),0)::text AS received,COALESCE(sum(refunded),0)::text AS refunded,COALESCE(sum(received-refunded),0)::text AS net
+ FROM pitterpan_sales_orders o WHERE ${where} GROUP BY currency,day ORDER BY day`,
+    values,
+  );
+}
+
 export async function readSalesFinance(
   db: SqlClient,
   store: string,
@@ -386,12 +395,7 @@ export async function readSalesFinance(
           where,
         )
       : null;
-  const daily = await db.query<Record<string, string>>(
-    `SELECT currency,(o.processed_at AT TIME ZONE 'America/Sao_Paulo')::date::text AS day,
- count(*)::text AS orders,count(*) FILTER(WHERE financial_status='PAID' AND cancelled_at IS NULL)::text AS paid,COALESCE(sum(received),0)::text AS received,COALESCE(sum(refunded),0)::text AS refunded,COALESCE(sum(received-refunded),0)::text AS net
- FROM pitterpan_sales_orders o WHERE ${where} GROUP BY currency,day ORDER BY day`,
-    values,
-  );
+  const daily = await dailySales(db, values, where);
   const statuses = await db.query<{
     currency: string;
     status: string;
@@ -472,6 +476,100 @@ export async function readSalesOperations(
     failed: Number(queue.rows[0].failed),
     window: { start, end },
     timezone: "America/Sao_Paulo",
+    store,
+  };
+}
+
+/** The sales period applies to reporting only. Open orders use the entire imported history. */
+export async function readCommercialOverview(
+  db: SqlClient,
+  store: string,
+  days: number,
+) {
+  const sales = await readSalesFinance(db, store, days);
+  const previousStart = shiftDate(sales.window.start, -days);
+  const previousEnd = shiftDate(sales.window.start, -1);
+  const coverage = await db.query<{ covered: boolean }>(
+    `SELECT COALESCE((to_jsonb(s)->>'backfill_version')::integer,0) > 0
+      AND s.until_at IS NULL
+      AND s.completed_at >= (($3::date + 1)::timestamp AT TIME ZONE 'America/Sao_Paulo')
+      AND ($2::date::timestamp AT TIME ZONE 'America/Sao_Paulo') >= s.completed_at - interval '1440 hours' AS covered
+     FROM pitterpan_sales_sync s WHERE s.store=$1`,
+    [store, previousStart, previousEnd],
+  );
+  const previousFilters = salesFilterSchema.parse({
+    start: previousStart,
+    end: previousEnd,
+    status: "all",
+    category: "",
+    delivery: "all",
+  });
+  const previousDaily = coverage.rows[0]?.covered
+    ? (
+        await dailySales(
+          db,
+          filterValues(store, days, previousFilters),
+          selection(previousFilters),
+        )
+      ).rows
+    : null;
+  const ranking = await readSoldProducts(db, store, days, {
+    status: "all",
+    category: "",
+    delivery: "all",
+    ...sales.window,
+  });
+  const open = `o.store=$1 AND NOT o.test AND ${awaitingFulfillmentSql}`;
+  const queue = await db.query<{ preparing: string; ready: string }>(
+    `SELECT count(*) FILTER (WHERE fulfillment_status <> 'READY_FOR_PICKUP')::text AS preparing,
+            count(*) FILTER (WHERE fulfillment_status = 'READY_FOR_PICKUP')::text AS ready
+     FROM pitterpan_sales_orders o WHERE ${open}`,
+    [store],
+  );
+  const pending = await db.query<{
+    id: string;
+    name: string;
+    processed_at: string;
+    fulfillment_status: string;
+  }>(
+    `SELECT id,name,processed_at::text,fulfillment_status
+     FROM pitterpan_sales_orders o WHERE ${open} ORDER BY processed_at,id LIMIT 5`,
+    [store],
+  );
+  const top = ranking.items.slice(0, 5);
+  const catalog =
+    top.length &&
+    (await db.query<{ exists: boolean }>(
+      "SELECT to_regclass('catalog_items') IS NOT NULL AND to_regclass('catalog_state') IS NOT NULL AS exists",
+    ));
+  const stock = new Map<string, number | null>();
+  if (catalog && catalog.rows[0].exists) {
+    const variants = await db.query<{ id: string; quantity: number | null }>(
+      `SELECT 'gid://shopify/ProductVariant/'||ci.variant_id AS id, ci.inventory_quantity AS quantity
+       FROM catalog_items ci JOIN catalog_state cs ON cs.singleton=true AND cs.active_import=ci.import_id
+       WHERE ci.variant_id=ANY($1::text[])`,
+      [
+        top
+          .map(
+            ({ id }) =>
+              id.match(/^gid:\/\/shopify\/ProductVariant\/(\d+)$/)?.[1],
+          )
+          .filter(Boolean),
+      ],
+    );
+    for (const { id, quantity } of variants.rows) stock.set(id, quantity);
+  }
+  return {
+    sales,
+    previousDaily,
+    ranking: top.map(({ id, title, units }) => ({
+      id,
+      title,
+      units,
+      stock: stock.get(id) ?? null,
+    })),
+    queue: queue.rows[0],
+    pending: pending.rows,
     store,
   };
 }

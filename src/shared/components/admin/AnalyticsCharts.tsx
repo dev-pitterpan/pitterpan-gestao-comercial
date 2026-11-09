@@ -20,6 +20,7 @@ export function RevenueChart({
   metricLabel = "Vendas diárias",
   axisLabel,
   showTable = true,
+  comparison,
 }: {
   table: AnalyticsTable;
   money: Format;
@@ -28,6 +29,7 @@ export function RevenueChart({
   metricLabel?: string;
   axisLabel?: string;
   showTable?: boolean;
+  comparison?: { label: string; values: number[] };
 }) {
   const id = useId().replace(/:/g, "");
   const [active, setActive] = useState<number | null>(null);
@@ -40,8 +42,9 @@ export function RevenueChart({
         Não há valores disponíveis para este indicador no período.
       </p>
     );
-  const min = Math.min(0, ...valid),
-    max = Math.max(0, ...valid),
+  const comparisonValues = comparison?.values ?? [];
+  const min = Math.min(0, ...valid, ...comparisonValues),
+    max = Math.max(0, ...valid, ...comparisonValues),
     span = max - min || 1;
   const x = (i: number) => 78 + (i * 648) / Math.max(1, rows.length - 1);
   const y = (n: number) => 232 - ((n - min) * 188) / span;
@@ -64,12 +67,16 @@ export function RevenueChart({
       <div className="analytics-chart-readout" aria-live="polite">
         <span className="analytics-legend">
           <i /> {metricLabel}
+          {comparison && <span> · Linha tracejada: {comparison.label}</span>}
         </span>
         <span>
           {chosen ? (
             <>
               <b>{shortDate(chosen.day)}</b> ·{" "}
               {money(numberValue(chosen[metricKey]))}
+              {active !== null && comparison && (
+                <> · Anterior: {money(comparison.values[active] ?? null)}</>
+              )}
             </>
           ) : (
             "Passe pelo gráfico para explorar"
@@ -148,6 +155,27 @@ export function RevenueChart({
         </text>
         {min < 0 && (
           <line x1="78" x2="726" y1={y(0)} y2={y(0)} stroke="#9eafc5" />
+        )}
+        {comparisonValues.length > 1 && (
+          <polyline
+            fill="none"
+            stroke="#617e9b"
+            strokeWidth="2"
+            strokeDasharray="6 5"
+            points={comparisonValues
+              .map((value, index) => `${x(index)},${y(value)}`)
+              .join(" ")}
+          />
+        )}
+        {comparisonValues.length === 1 && (
+          <circle
+            cx={x(0)}
+            cy={y(comparisonValues[0])}
+            r="5"
+            fill="none"
+            stroke="#617e9b"
+            strokeWidth="2"
+          />
         )}
         {segments.map((s, i) => {
           const path = s

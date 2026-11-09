@@ -1,5 +1,6 @@
 import { allowed } from "@shared/server/auth/crypto";
-import SalesOperations from "@shared/components/admin/SalesOperations";
+import CommercialOverview from "@shared/components/admin/CommercialOverview";
+import "./commercial-overview.css";
 import StockOverview from "@shared/components/admin/StockOverview";
 import PartyChart from "@shared/components/admin/PartyChart";
 import Link from "next/link";
@@ -23,7 +24,13 @@ import {
   number,
   statusLabels,
 } from "@shared/components/admin/Primitives";
-export default async function Overview() {
+export default async function Overview({
+  searchParams,
+}: {
+  searchParams: Promise<{ periodo?: string | string[] }>;
+}) {
+  const period = (await searchParams).periodo;
+  const days = period === "1" ? 1 : period === "30" ? 30 : 7;
   const [context, user] = await Promise.all([adminContext(), requireSession()]);
   const s = context.summary;
   const last = context.runs.find((r) => r.id === context.active);
@@ -68,12 +75,10 @@ export default async function Overview() {
       <header className="admin-overview-heading">
         <div>
           <span className="admin-eyebrow">SEU NEGÓCIO, EM PERSPECTIVA</span>
-          <h1>
-            Olá, {user.name.split(" ")[0]}. <span>Bom ter você por aqui.</span>
-          </h1>
+          <h1>Visão geral</h1>
           <p>
-            Seu catálogo, seus produtos e as próximas oportunidades, em um só
-            lugar.
+            Olá, {user.name.split(" ")[0]}. Acompanhe as vendas, o catálogo e as
+            prioridades da operação.
           </p>
         </div>
         <span className="admin-date">
@@ -87,7 +92,7 @@ export default async function Overview() {
       </header>
       <DataNotice context={context} />
       {allowed(user.role, ["admin", "gestor"]) && (
-        <SalesOperations overview params="days=30" />
+        <CommercialOverview days={days} lowStock={context.settings.low} />
       )}
       <section className="admin-stats" aria-label="Indicadores do catálogo">
         {stats.map(({ label, value, detail, icon: Icon, tone, href }) => (
