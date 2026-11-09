@@ -13,6 +13,6 @@ export function shippingChargeLabel(
     currency,
   }).format(Number(amount));
   if (Number(amount) === 0)
-    return `${kind === "PICKUP" ? "Sem cobrança de frete" : "Frete grátis"} · ${value}`;
+    return `${kind === "PICKUP" || kind === "LOCAL" ? "Sem cobrança de frete" : "Frete grátis"} · ${value}`;
   return `Frete: ${value}`;
 }

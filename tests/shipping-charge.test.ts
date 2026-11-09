@@ -85,7 +85,7 @@ test("frete: zero confirmado, valor ausente, linhas removidas e soma decimal sã
   );
   assert.match(
     shippingChargeLabel("0.00", "BRL", true, "LOCAL"),
-    /^Frete grátis/,
+    /^Sem cobrança de frete/,
   );
   assert.match(
     shippingChargeLabel("0", "BRL", true, "PICKUP"),

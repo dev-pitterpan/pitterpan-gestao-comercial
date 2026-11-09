@@ -1,4 +1,3 @@
-import { Package, HelpCircle } from "lucide-react";
 import { deliveryLabels, type DeliveryKind } from "../../lib/admin/delivery";
 export default function DeliveryMark({
   kind,
@@ -116,10 +115,78 @@ export default function DeliveryMark({
             strokeLinecap="round"
           />
         </svg>
-      ) : ["MIXED", "LOCAL", "OTHER"].includes(safe) ? (
-        <Package aria-hidden="true" />
+      ) : safe === "LOCAL" ? (
+        <svg viewBox="0 0 48 40" fill="none" aria-hidden="true">
+          <ellipse cx="24" cy="36" rx="13" ry="2" fill="#d4ede6" />
+          <path
+            d="M24 34c-4-4-13-12-13-19a13 13 0 1 1 26 0c0 7-9 15-13 19Z"
+            fill="#d3f3e6"
+            stroke="#207662"
+            strokeWidth="2.6"
+            strokeLinejoin="round"
+          />
+          <path
+            d="m17 16 7-6 7 6v8h-5v-5h-4v5h-5v-8Z"
+            fill="#fffdf4"
+            stroke="#207662"
+            strokeWidth="2"
+            strokeLinejoin="round"
+          />
+        </svg>
+      ) : safe === "OTHER" ? (
+        <svg viewBox="0 0 48 40" fill="none" aria-hidden="true">
+          <path
+            d="m8 13 16-8 16 8v15l-16 8-16-8V13Z"
+            fill="#fce8bf"
+            stroke="#865619"
+            strokeWidth="2.6"
+            strokeLinejoin="round"
+          />
+          <path
+            d="m8 13 16 8 16-8M24 21v15m-8-27 16 8v6"
+            stroke="#865619"
+            strokeWidth="2.3"
+            strokeLinejoin="round"
+          />
+        </svg>
+      ) : safe === "MIXED" ? (
+        <svg viewBox="0 0 48 40" fill="none" aria-hidden="true">
+          <rect
+            x="9"
+            y="6"
+            width="30"
+            height="28"
+            rx="8"
+            fill="#eee8ff"
+            stroke="#6542a1"
+            strokeWidth="2.4"
+          />
+          <path
+            d="M15 15h18m-5-5 5 5-5 5m5 5H15m5-5-5 5 5 5"
+            stroke="#6542a1"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
       ) : (
-        <HelpCircle aria-hidden="true" />
+        <svg viewBox="0 0 48 40" fill="none" aria-hidden="true">
+          <circle
+            cx="24"
+            cy="20"
+            r="14"
+            fill="#ecf0f7"
+            stroke="#67748e"
+            strokeWidth="2.5"
+          />
+          <path
+            d="M20 15a4 4 0 1 1 6 4c-1.5 1-2 2-2 3"
+            stroke="#67748e"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+          />
+          <circle cx="24" cy="27" r="1.5" fill="#67748e" />
+        </svg>
       )}
       {label && <span>{deliveryLabels[safe]}</span>}
       {units !== undefined && (
