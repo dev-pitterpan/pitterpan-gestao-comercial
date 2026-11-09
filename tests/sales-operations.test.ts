@@ -9,6 +9,7 @@ import {
 import {
   saveOrder,
   readSalesFinance,
+  readCommercialOverview,
   readSalesOperations,
   readSalesOrders,
 } from "../src/shared/server/sales/repository.ts";
@@ -207,6 +208,21 @@ test("operação separa reembolso de cancelamento e pagamento de atendimento, re
         ["#2", "#3", "#5", "#6", "#7", "#8"].includes(o.name),
       ),
     );
+    const today = await readCommercialOverview(db, store, 1);
+    const week = await readCommercialOverview(db, store, 7);
+    assert.deepEqual(today.queue, { preparing: "2", ready: "1" });
+    assert.equal(today.pending[0].name, "#8");
+    assert.deepEqual(today.pending, week.pending);
+    assert.notEqual(today.sales.window.start, week.sales.window.start);
+    assert.equal(today.previousDaily, null);
+    await db.query(
+      "INSERT INTO pitterpan_sales_sync(store, completed_at, backfill_version) VALUES ($1, now(), 1)",
+      [store],
+    );
+    assert.ok(
+      Array.isArray((await readCommercialOverview(db, store, 1)).previousDaily),
+    );
+
     const pickup = await readSalesOperations(db, store, 30, {
       ...filters,
       delivery: "PICKUP",

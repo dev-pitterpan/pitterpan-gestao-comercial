@@ -1,0 +1,42 @@
+.commercial-overview {
+  display: grid;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+.commercial-overview .admin-stats {
+  margin: 0;
+}
+.commercial-overview .admin-stat strong {
+  overflow-wrap: anywhere;
+}
+.commercial-overview-controls {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.commercial-overview-controls [aria-current="true"],
+.commercial-overview-controls [aria-pressed="true"] {
+  color: #fff;
+  background: #24568c;
+  border-color: #24568c;
+}
+.commercial-overview-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  grid-template-areas: "trend pending";
+  gap: 18px;
+}
+.commercial-overview-trend {
+  grid-area: trend;
+}
+#overview-pending {
+  grid-area: pending;
+  scroll-margin-top: 90px;
+}
+@media (max-width: 1100px) {
+  .commercial-overview-grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "pending" "trend";
+  }
+}
