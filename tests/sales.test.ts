@@ -391,6 +391,12 @@ test("worker retoma cursor, completa itens, deduplica pagamento e preserva check
   );
   assert.equal((await readSales(db, store, 30)).failed, 1);
   await db.query(
+    "ALTER TABLE pitterpan_sales_sync DROP COLUMN backfill_version",
+  );
+  assert.equal((await syncSalesPage()).more, true);
+  assert.equal((await syncSalesPage()).more, false);
+
+  await db.query(
     "UPDATE pitterpan_sales_sync SET lease_until=now()+interval '10 minutes'",
   );
   assert.equal((await syncSalesPage()).busy, true);

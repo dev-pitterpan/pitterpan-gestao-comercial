@@ -48,7 +48,7 @@ Gestor e Gerente de Compras têm os mesmos acessos operacionais, incluindo venda
 
 ## Operação de vendas
 
-Antes de publicar alterações de vendas, execute `npm run sales:migrate` com a conexão do ambiente de destino. A migração adiciona as colunas necessárias e preserva os pedidos já importados.
+Execute `npm run sales:migrate` com a conexão do ambiente de destino para habilitar o registro da revisão do histórico. Em um banco que já sincroniza vendas, o processamento incremental continua durante a atualização, mesmo antes de aplicar essa migração.
 
 A Vercel tem uma execução diária de contingência na janela das 09h UTC (06h em Joinville) em `/api/cron/sales/`. Configure `CRON_SECRET` no ambiente de produção com pelo menos 32 caracteres. Cada chamada processa uma etapa. Para atualização frequente durante o expediente, use o agendamento já existente ou configure um agendador para chamar o mesmo endpoint com o cabeçalho `Authorization: Bearer <CRON_SECRET>`. Acompanhe o horário do último ciclo concluído, a idade do evento mais antigo e as falhas da fila no painel de Vendas. Para importar o volume inicial, execute `npm run sales:sync` e retome se o comando indicar lotes pendentes.
 

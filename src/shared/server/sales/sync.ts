@@ -109,6 +109,8 @@ export async function syncSalesPage() {
     [store, lease],
   );
   if (!acquired.rows.length) return { busy: true, more: true, processed: 0 };
+  const state = acquired.rows[0];
+  const tracksBackfill = typeof state.backfill_version === "number";
   let processed = 0;
   const deadline = Date.now() + 180000;
   try {
@@ -159,15 +161,14 @@ export async function syncSalesPage() {
         );
       }
     }
-    const state = acquired.rows[0];
     if (!state.until_at) {
       // One historical pass per metadata version, even if optional fields remain unavailable.
       await pool.query(
         `UPDATE pitterpan_sales_sync SET
-         since_at=GREATEST(CASE WHEN backfill_version < 1 THEN now()-interval '1440 hours'
+         since_at=GREATEST(CASE WHEN $3::boolean THEN now()-interval '1440 hours'
            ELSE COALESCE(completed_at-interval '5 minutes',now()-interval '1440 hours') END,
            now()-interval '1440 hours'),until_at=now(),cursor=NULL WHERE store=$1 AND lease_id=$2`,
-        [store, lease],
+        [store, lease, tracksBackfill && state.backfill_version < 1],
       );
     }
     const current = (
@@ -215,12 +216,17 @@ export async function syncSalesPage() {
         "UPDATE pitterpan_sales_sync SET cursor=$3 WHERE store=$1 AND lease_id=$2",
         [store, lease, page.pageInfo.endCursor],
       );
-    else
+    else {
+      // Continue incremental sync during a rolling deploy before the migration runs.
+      const backfillUpdate = tracksBackfill
+        ? ",backfill_version=CASE WHEN since_at <= until_at-interval '1440 hours' THEN GREATEST(backfill_version,1) ELSE backfill_version END"
+        : "";
       await pool.query(
-        `UPDATE pitterpan_sales_sync SET completed_at=until_at,until_at=NULL,since_at=NULL,cursor=NULL,
-         backfill_version=CASE WHEN since_at <= until_at-interval '1440 hours' THEN GREATEST(backfill_version,1) ELSE backfill_version END WHERE store=$1 AND lease_id=$2`,
+        `UPDATE pitterpan_sales_sync SET completed_at=until_at,until_at=NULL,since_at=NULL,cursor=NULL${backfillUpdate}
+         WHERE store=$1 AND lease_id=$2`,
         [store, lease],
       );
+    }
     return {
       busy: false,
       more: page.pageInfo.hasNextPage || events.rows.length === 3,
