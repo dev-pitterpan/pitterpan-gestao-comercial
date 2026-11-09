@@ -899,3 +899,22 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.fulfillment-product {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.fulfillment-product img {
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border: 1px solid #e2eaf4;
+  border-radius: 8px;
+  background: #fff;
+}
+.fulfillment-product > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}

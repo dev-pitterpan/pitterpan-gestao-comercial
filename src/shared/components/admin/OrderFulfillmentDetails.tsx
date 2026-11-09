@@ -22,6 +22,7 @@ import {
   fulfillmentDescriptions,
 } from "../../lib/admin/fulfillment";
 import type { readFulfillmentDetails } from "../../server/sales/fulfillment-details";
+import ProductThumbnail from "./ProductThumbnail";
 import PitterSpinner from "./PitterSpinner";
 type Data = Awaited<ReturnType<typeof readFulfillmentDetails>>;
 const number = (n: number) => n.toLocaleString("pt-BR");
@@ -332,30 +333,36 @@ function FulfillmentWindow({
                   {data.items.map((item) => (
                     <tr key={item.id}>
                       <td>
-                        <strong>{item.name}</strong>
-                        <small>SKU {item.sku || "não informado"}</small>
-                        {item.current !== item.ordered && (
-                          <small>
-                            Quantidade atual do pedido: {number(item.current)}
-                          </small>
-                        )}
-                        {item.nonFulfillable > 0 && (
-                          <small>
-                            {number(item.nonFulfillable)} un. fora do saldo de
-                            atendimento
-                          </small>
-                        )}
-                        <span
-                          className={`admin-badge ${item.pending > 0 ? "blue" : item.fulfilled > 0 ? "green" : ""}`}
-                        >
-                          {item.pending > 0
-                            ? item.fulfilled > 0
-                              ? "Parcialmente atendido"
-                              : "A atender"
-                            : item.fulfilled > 0
-                              ? "Atendido"
-                              : "Sem saldo a atender"}
-                        </span>
+                        <div className="fulfillment-product">
+                          <ProductThumbnail src={item.imageUrl} />
+                          <div>
+                            <strong>{item.name}</strong>
+                            <small>SKU {item.sku || "não informado"}</small>
+                            {item.current !== item.ordered && (
+                              <small>
+                                Quantidade atual do pedido:{" "}
+                                {number(item.current)}
+                              </small>
+                            )}
+                            {item.nonFulfillable > 0 && (
+                              <small>
+                                {number(item.nonFulfillable)} un. fora do saldo
+                                de atendimento
+                              </small>
+                            )}
+                            <span
+                              className={`admin-badge ${item.pending > 0 ? "blue" : item.fulfilled > 0 ? "green" : ""}`}
+                            >
+                              {item.pending > 0
+                                ? item.fulfilled > 0
+                                  ? "Parcialmente atendido"
+                                  : "A atender"
+                                : item.fulfilled > 0
+                                  ? "Atendido"
+                                  : "Sem saldo a atender"}
+                            </span>
+                          </div>
+                        </div>
                       </td>
                       <td>{number(item.ordered)}</td>
                       <td>

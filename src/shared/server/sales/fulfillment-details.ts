@@ -10,6 +10,7 @@ const line = z.object({
   id: gid("LineItem"),
   name: z.string().max(3000),
   sku: z.string().nullable(),
+  image: z.object({ url: z.string() }).nullish(),
   quantity,
   currentQuantity: quantity,
   nonFulfillableQuantity: quantity,
@@ -30,7 +31,7 @@ const order = z.object({
 });
 const fields =
   "id name updatedAt cancelledAt displayFulfillmentStatus fulfillments{id status updatedAt}";
-export const preparationOrderQuery = `query PreparationOrder($id:ID!,$after:String){order(id:$id){${fields} lineItems(first:100,after:$after){nodes{id name sku quantity currentQuantity nonFulfillableQuantity unfulfilledQuantity} pageInfo{hasNextPage endCursor}}}}`;
+export const preparationOrderQuery = `query PreparationOrder($id:ID!,$after:String){order(id:$id){${fields} lineItems(first:100,after:$after){nodes{id name sku image{url} quantity currentQuantity nonFulfillableQuantity unfulfilledQuantity} pageInfo{hasNextPage endCursor}}}}`;
 export const preparationShipmentQuery = `query PreparationShipment($id:ID!,$after:String){fulfillment(id:$id){id status updatedAt fulfillmentLineItems(first:100,after:$after){nodes{id quantity lineItem{id}} pageInfo{hasNextPage endCursor}}}}`;
 type Client = {
   query<T>(query: string, variables?: Record<string, unknown>): Promise<T>;
@@ -180,6 +181,7 @@ export async function readFulfillmentDetails(
       id: item.id,
       name: item.name,
       sku: item.sku,
+      imageUrl: item.image?.url.startsWith("https://") ? item.image.url : null,
       ordered: item.quantity,
       current: item.currentQuantity,
       fulfilled: done,
