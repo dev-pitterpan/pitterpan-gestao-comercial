@@ -1,5 +1,13 @@
 [
   {
+    "version": "2026.11.10.6",
+    "recordedAt": "2026-11-10T12:22:02-03:00",
+    "title": "Layout original da sincronização",
+    "changes": [
+      "Restaura o indicador de carregamento e a lista de etapas no formato original."
+    ]
+  },
+  {
     "version": "2026.11.10.5",
     "recordedAt": "2026-11-10T12:18:10-03:00",
     "title": "Trilha integrada ao círculo da sincronização",

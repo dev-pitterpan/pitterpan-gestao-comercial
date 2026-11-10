@@ -3,7 +3,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { RefreshCw, CheckCircle2, AlertCircle, ArrowRight } from "lucide-react";
 import PitterSpinner from "./PitterSpinner";
-import SyncJourney from "./SyncJourney";
 type Job = {
   id: string;
   status: string;
@@ -107,7 +106,6 @@ export default function SyncControl() {
     }
   }
   const index = phases.findIndex(([key]) => key === data?.job?.phase);
-  const finished = data?.job?.status === "completed";
   return (
     <section
       className="admin-panel sync-control"
@@ -143,52 +141,42 @@ export default function SyncControl() {
           <strong>{date(data?.lastUpdated || null)}</strong>
         </span>
       </div>
-      {(busy || finished) && (
-        <div className="sync-progress">
-          <SyncJourney
-            key={data?.job?.id}
-            position={
-              finished ? 100 : ((index + 1) / (phases.length + 1)) * 100
+      {busy && (
+        <div className="sync-progress" aria-live="polite">
+          <PitterSpinner
+            label={
+              index >= 0
+                ? phases[index][1]
+                : "Aguardando o início da atualização…"
             }
-            finished={finished}
           />
-          {busy && (
-            <div>
-              <span className="admin-sr-only" role="status">
-                {phases[index]?.[1] ?? "Aguardando a sincronização"}
-              </span>
-              <ol>
-                {phases.map(([key, label], i) => (
-                  <li
-                    key={key}
-                    aria-current={i === index ? "step" : undefined}
-                    className={
-                      i === index ? "is-current" : i < index ? "is-done" : ""
-                    }
-                  >
-                    <span>
-                      {i < index ? <CheckCircle2 size={14} /> : i + 1}
-                    </span>
-                    {label}
-                    {i === index && <ArrowRight size={14} />}
-                  </li>
-                ))}
-              </ol>
-              <p>
-                {(data?.job?.variants || 0) > 0 &&
-                  `${data!.job!.variants.toLocaleString("pt-BR")} variantes preparadas. `}
-                Você pode sair desta página: a sincronização continua em segundo
-                plano.
-              </p>
-            </div>
-          )}
-          {finished && (
-            <p className="sync-success" role="status">
-              <CheckCircle2 size={17} /> 100% · Sincronização concluída.
-              Produtos, estoque e pedidos foram atualizados.
-            </p>
-          )}
+          <ol>
+            {phases.map(([key, label], i) => (
+              <li
+                key={key}
+                className={
+                  i === index ? "is-current" : i < index ? "is-done" : ""
+                }
+              >
+                <span>{i < index ? <CheckCircle2 size={14} /> : i + 1}</span>
+                {label}
+                {i === index && <ArrowRight size={14} />}
+              </li>
+            ))}
+          </ol>
+          <p>
+            {(data?.job?.variants || 0) > 0 &&
+              `${data!.job!.variants.toLocaleString("pt-BR")} variantes preparadas. `}
+            Você pode sair desta página: a sincronização continua em segundo
+            plano.
+          </p>
         </div>
+      )}
+      {data?.job?.status === "completed" && (
+        <p className="sync-success" role="status">
+          <CheckCircle2 size={17} /> Sincronização concluída. Produtos, estoque
+          e pedidos foram atualizados.
+        </p>
       )}
       {(error || data?.job?.status === "failed") && (
         <p className="admin-data-notice" role="alert">
