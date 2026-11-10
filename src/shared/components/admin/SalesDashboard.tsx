@@ -714,6 +714,11 @@ export default function SalesDashboard({
                       <tr key={o.id}>
                         <td>
                           <strong>{o.name}</strong>
+                          {o.discount_labels?.map((label) => (
+                            <small key={label} className="admin-badge blue">
+                              Cupom: {label}
+                            </small>
+                          ))}
                           <small>
                             <time
                               dateTime={new Date(o.processed_at).toISOString()}

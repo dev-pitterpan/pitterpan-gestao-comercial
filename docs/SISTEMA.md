@@ -57,6 +57,8 @@ Mapa funcional e técnico do painel da Floresta, América e Iririú. A versão e
 
 ### Pedidos Shopify
 
+A lista mostra, ao lado do número do pedido, os códigos de cupom e os títulos dos descontos automáticos recebidos da Shopify. Para ativar a captura em uma instalação existente, aplique `npm run sales:migrate`. Para preencher os pedidos já importados no intervalo de reimportação, execute `npm run sales:sync -- --refresh-details`.
+
 1. A integração recebe os eventos de vendas e mantém uma fila persistente com tentativas. A rota de webhook valida assinatura e loja antes de registrar.
 2. O processamento consulta a Shopify, atualiza pedidos e itens e registra o checkpoint. Repetições e interrupções podem ser retomadas pela fila.
 3. A janela automática usa até 60 dias. Períodos anteriores consultam o histórico disponível no banco. O painel mostra o horário da última sincronização.

@@ -91,7 +91,18 @@ test("vendas: reenvio, eventos atrasados, reembolso, cancelamento, teste e outra
     await db.exec(sql);
     await db.exec(sql);
     const paid = order();
-    await saveOrder(db, store, paid, true);
+    await saveOrder(
+      db,
+      store,
+      {
+        ...paid,
+        discountCodes: ["Festa10", "FRETE"],
+        discountApplications: {
+          nodes: [{}, { title: "Aniversário Pitter Pan" }],
+        },
+      },
+      true,
+    );
     await saveOrder(db, store, paid, true);
     assert.equal(
       (await db.query("SELECT * FROM pitterpan_sales_confirmations")).rows
@@ -121,6 +132,14 @@ test("vendas: reenvio, eventos atrasados, reembolso, cancelamento, teste e outra
     await saveOrder(db, store, fake, true);
     await saveOrder(db, "another.myshopify.com", order("5"), true);
     const data = await readSales(db, store, 30, "0");
+    assert.deepEqual(
+      data.orders.find(({ id }) => id === paid.id)?.discount_labels,
+      ["Festa10", "FRETE", "Aniversário Pitter Pan"],
+    );
+    assert.equal(
+      data.orders.find(({ id }) => id === refund.id)?.discount_labels,
+      null,
+    );
     assert.equal(data.totals[0].orders, "3");
     assert.equal(data.totals[0].paid, "1");
     assert.equal(data.totals[0].cancelled, "1");

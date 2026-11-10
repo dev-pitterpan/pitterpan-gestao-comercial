@@ -32,6 +32,12 @@ export const orderSchema = z
     test: z.boolean(),
     displayFinancialStatus: z.string().nullable(),
     displayFulfillmentStatus: z.string(),
+    discountCodes: z.array(z.string()).optional(),
+    discountApplications: z
+      .object({
+        nodes: z.array(z.object({ title: z.string().optional() })),
+      })
+      .optional(),
     destination: destinationSchema.nullable().optional(),
     customerInfo: orderCustomerSchema.nullable().optional(),
     shippingLines: z
@@ -90,6 +96,8 @@ export const paidStatuses = ["PAID", "PARTIALLY_REFUNDED", "REFUNDED"];
 export const lineFields = `id title sku quantity currentQuantity image { url } variant { id } product { id }`;
 export const shippingFields = `title code source deliveryCategory isRemoved discountedPriceSet { shopMoney { amount currencyCode } }`;
 export const orderFields = `id name processedAt updatedAt cancelledAt test displayFinancialStatus displayFulfillmentStatus
+ discountCodes
+ discountApplications(first:50) { nodes { __typename ... on AutomaticDiscountApplication { title } } }
  shippingLines(first:20) { nodes { ${shippingFields} } pageInfo { hasNextPage endCursor } }
  totalOutstandingSet { shopMoney { amount currencyCode } }
  currentTotalPriceSet { shopMoney { amount currencyCode } }
