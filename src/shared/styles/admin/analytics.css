@@ -2531,3 +2531,121 @@
   outline: 2px solid #658bc0;
   outline-offset: 2px;
 }
+
+.sync-journey {
+  position: relative;
+  height: 88px;
+  margin-bottom: 12px;
+  border-radius: 10px;
+  background: linear-gradient(#eaf4ff, #f8fbff);
+  isolation: isolate;
+}
+.sync-journey-path {
+  position: absolute;
+  right: 50px;
+  bottom: 8px;
+  left: 26px;
+  height: 4px;
+  border-radius: 4px;
+  background: #c7dbef;
+}
+.sync-journey-fill {
+  width: var(--sync-position);
+  height: 100%;
+  border-radius: inherit;
+  background: #4a94d4;
+  transition: width 900ms ease;
+}
+.sync-journey-walker {
+  position: absolute;
+  z-index: 1;
+  bottom: -2px;
+  left: var(--sync-position);
+  width: 42px;
+  transform: translateX(-50%);
+  transform-origin: center bottom;
+  transition: left 900ms ease;
+}
+.sync-journey-walker svg {
+  display: block;
+  width: 100%;
+  animation: sync-walk-bob 420ms ease-in-out infinite alternate;
+}
+.sync-journey-walker .sync-step-front,
+.sync-journey-walker .sync-step-back {
+  transform-origin: 24px 39px;
+}
+.sync-journey-walker .sync-arm-front,
+.sync-journey-walker .sync-arm-back {
+  transform-origin: 24px 25px;
+}
+.sync-step-front,
+.sync-arm-back {
+  animation: sync-walk-swing 420ms ease-in-out infinite alternate;
+}
+.sync-step-back,
+.sync-arm-front {
+  animation: sync-walk-swing 420ms ease-in-out infinite alternate-reverse;
+}
+.sync-journey-shop {
+  position: absolute;
+  right: 0;
+  bottom: 2px;
+  width: 100px;
+  height: 88px;
+}
+.sync-journey-door {
+  transform-box: fill-box;
+  transform-origin: left;
+}
+.sync-journey.is-finished .sync-journey-door {
+  transform: scaleX(0.12);
+  transition: transform 220ms ease 500ms;
+}
+.sync-journey.is-finished .sync-journey-walker {
+  animation: sync-shop-entry 320ms ease-in 780ms both;
+}
+.sync-journey.is-finished .sync-journey-fill {
+  background: #318368;
+}
+.sync-journey-total {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  border-radius: 20px;
+  padding: 4px 10px;
+  background: #dff3e9;
+  color: #24654e;
+  font-size: 12px;
+  font-weight: 700;
+}
+@keyframes sync-walk-bob {
+  to {
+    transform: translateY(-2px);
+  }
+}
+@keyframes sync-walk-swing {
+  from {
+    transform: rotate(-19deg);
+  }
+  to {
+    transform: rotate(19deg);
+  }
+}
+@keyframes sync-shop-entry {
+  to {
+    opacity: 0;
+    transform: translate(-50%, -6px) scale(0.62);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sync-journey *,
+  .sync-journey.is-finished .sync-journey-door,
+  .sync-journey.is-finished .sync-journey-walker {
+    animation: none;
+    transition: none;
+  }
+  .sync-journey.is-finished .sync-journey-walker {
+    opacity: 0;
+  }
+}
