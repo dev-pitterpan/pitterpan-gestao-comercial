@@ -33,7 +33,7 @@ Mapa funcional e técnico do painel da Floresta, América e Iririú. A versão e
 | Agenda e fornecedores | `/gestor/agenda/`, `/gestor/calendario/`, `/gestor/reunioes/[id]/` | Fornecedores, compromissos, calendário e reuniões. Permite importar uma exportação HTML de fornecedores do WinThor. Videochamada depende da configuração do Jitsi. |
 | Análises Shopify | `/gestor/analises/`, `/gestor/analises/checkouts/` | Consultas de desempenho, relatórios e checkouts, sujeitas às permissões e à disponibilidade na Shopify. |
 | Relatórios | `/gestor/relatorios/` | Entrada para relatórios disponíveis ao perfil autenticado. |
-| Sincronizações | `/gestor/sincronizacoes/` | Acompanha importação, validação e publicação do catálogo. O círculo fica no início da trilha e a ponta da faixa colorida leva o personagem conforme as etapas. O balão de fala indica a etapa atual e mostra 100% quando a sincronização termina com sucesso. |
+| Sincronizações | `/gestor/sincronizacoes/` | Acompanha importação, validação e publicação do catálogo. O círculo fica no início da trilha e a ponta da faixa colorida leva o personagem conforme as etapas. A etapa atual aparece abaixo da trilha, e a confirmação de sucesso mostra 100%. |
 | Minha conta | `/gestor/minha-conta/` | Informações da sessão e ações disponíveis para a própria conta. |
 | Equipe | `/gestor/usuarios/` | Gestão das contas da equipe e perfis. Acesso Admin. |
 | Configurações | `/gestor/configuracoes/` | Limites de estoque e informações de acesso e integração. Acesso Admin. |

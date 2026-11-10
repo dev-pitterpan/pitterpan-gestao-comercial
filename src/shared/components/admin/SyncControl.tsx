@@ -151,14 +151,12 @@ export default function SyncControl() {
               finished ? 100 : ((index + 1) / (phases.length + 1)) * 100
             }
             finished={finished}
-            label={
-              finished
-                ? "100% · Tudo sincronizado!"
-                : (phases[index]?.[1] ?? "Preparando a saída…")
-            }
           />
           {busy && (
             <div>
+              <span className="admin-sr-only" role="status">
+                {phases[index]?.[1] ?? "Aguardando a sincronização"}
+              </span>
               <ol>
                 {phases.map(([key, label], i) => (
                   <li
@@ -185,9 +183,9 @@ export default function SyncControl() {
             </div>
           )}
           {finished && (
-            <p className="sync-success">
-              <CheckCircle2 size={17} /> Sincronização concluída. Produtos,
-              estoque e pedidos foram atualizados.
+            <p className="sync-success" role="status">
+              <CheckCircle2 size={17} /> 100% · Sincronização concluída.
+              Produtos, estoque e pedidos foram atualizados.
             </p>
           )}
         </div>

@@ -1,20 +1,15 @@
-import { useState, type CSSProperties } from "react";
+import type { CSSProperties } from "react";
 
 export default function SyncJourney({
   position,
   finished,
-  label,
 }: {
   position: number;
   finished: boolean;
-  label: string;
 }) {
-  const [speech, setSpeech] = useState({ current: label, previous: "" });
-  if (speech.current !== label) {
-    setSpeech({ current: label, previous: speech.current });
-  }
   return (
     <div
+      aria-hidden="true"
       className={`sync-journey${finished ? " is-finished" : ""}`}
       style={{ "--sync-position": `${position}%` } as CSSProperties}
     >
@@ -98,20 +93,6 @@ export default function SyncJourney({
               fill="#ffd51a"
             />
           </svg>
-        </div>
-        <div className="sync-journey-speech" role="status" aria-atomic="true">
-          {speech.previous && (
-            <span
-              key={speech.previous}
-              className="sync-speech-out"
-              aria-hidden="true"
-            >
-              {speech.previous}
-            </span>
-          )}
-          <span key={speech.current} className="sync-speech-in">
-            {speech.current}
-          </span>
         </div>
       </div>
       <svg

@@ -1,5 +1,13 @@
 [
   {
+    "version": "2026.11.10.5",
+    "recordedAt": "2026-11-10T12:18:10-03:00",
+    "title": "Trilha integrada ao círculo da sincronização",
+    "changes": [
+      "A faixa colorida sai da borda direita do círculo, e as mensagens ficam abaixo da animação."
+    ]
+  },
+  {
     "version": "2026.11.10.4",
     "recordedAt": "2026-11-10T12:04:40-03:00",
     "title": "Círculo fixo na sincronização",
