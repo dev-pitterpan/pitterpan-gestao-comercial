@@ -1,5 +1,13 @@
 [
   {
+    "version": "2026.11.10.4",
+    "recordedAt": "2026-11-10T12:04:40-03:00",
+    "title": "Círculo fixo na sincronização",
+    "changes": [
+      "O círculo fica à esquerda enquanto a faixa colorida leva o personagem até a loja."
+    ]
+  },
+  {
     "version": "2026.11.10.3",
     "recordedAt": "2026-11-10T12:01:00-03:00",
     "title": "Nova jornada visual da sincronização",

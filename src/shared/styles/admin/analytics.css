@@ -2571,13 +2571,18 @@
   transition: left var(--sync-travel);
 }
 .sync-journey-wheel {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 0;
   display: block;
-  width: 100%;
-  height: 100%;
+  width: 27px;
+  height: 27px;
+  translate: -50% -50%;
 }
 .sync-journey-mascot {
   position: absolute;
-  bottom: 19px;
+  bottom: 10px;
   left: 50%;
   display: block;
   width: 62px;
@@ -2652,8 +2657,7 @@
   animation: sync-shop-entry 470ms ease 1350ms both;
 }
 .sync-journey.is-finished .sync-journey-wheel {
-  opacity: 0;
-  transition: opacity 220ms ease 1500ms;
+  animation-play-state: paused;
 }
 .sync-journey.is-finished .sync-journey-speech {
   color: #24654e;

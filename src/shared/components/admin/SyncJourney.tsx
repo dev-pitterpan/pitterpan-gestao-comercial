@@ -20,8 +20,11 @@ export default function SyncJourney({
     >
       <div className="sync-journey-path">
         <div className="sync-journey-fill" />
+        <span
+          className="pitter-spinner sync-journey-wheel"
+          aria-hidden="true"
+        />
         <div className="sync-journey-carrier" aria-hidden="true">
-          <span className="pitter-spinner sync-journey-wheel" />
           <svg className="sync-journey-mascot" viewBox="0 0 64 76" fill="none">
             <path
               d="M19 66h28"
