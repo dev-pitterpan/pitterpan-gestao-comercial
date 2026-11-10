@@ -13,6 +13,8 @@ Mapa funcional e técnico do painel da Floresta, América e Iririú. A versão e
 | WinThor | ERP das lojas físicas. Vendas na loja, estoque por filial e transferências aguardam conexão com os dados do ERP. |
 | GitHub e Vercel | O repositório versiona o código. A Vercel hospeda a produção a partir de `main`. O GitHub Actions verifica a documentação, tipos, testes e build. |
 
+O avatar na barra lateral permite escolher, trocar ou remover a foto da própria conta. A foto é privada e armazenada no PostgreSQL em tamanho reduzido. Em instalações existentes, execute `npm run db:migrate` antes de habilitar o recurso.
+
 ## 2. Mapa das telas
 
 | Menu ou tela | Rota | O que faz e de onde vêm os dados |

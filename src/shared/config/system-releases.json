@@ -1,5 +1,13 @@
 [
   {
+    "version": "2026.11.10.8",
+    "recordedAt": "2026-11-10T17:35:55-03:00",
+    "title": "Foto de perfil no painel",
+    "changes": [
+      "O avatar na barra lateral permite escolher, trocar ou remover a foto da própria conta."
+    ]
+  },
+  {
     "version": "2026.11.10.7",
     "recordedAt": "2026-11-10T16:25:57-03:00",
     "title": "Calendários com visual unificado",

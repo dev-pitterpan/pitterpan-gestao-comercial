@@ -51,6 +51,9 @@ CREATE TABLE IF NOT EXISTS pitterpan_admin_users (
  password_hash text NOT NULL, disabled boolean NOT NULL DEFAULT false,
  created_at timestamptz NOT NULL DEFAULT now()
 );
+CREATE TABLE IF NOT EXISTS pitterpan_admin_profile_photos (
+ profile_key text PRIMARY KEY, photo bytea NOT NULL
+);
 CREATE TABLE IF NOT EXISTS pitterpan_admin_login_limits (
  bucket text PRIMARY KEY, window_id bigint NOT NULL, attempts integer NOT NULL
 );

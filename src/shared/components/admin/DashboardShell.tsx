@@ -1,4 +1,5 @@
 "use client";
+import ProfilePhoto from "./ProfilePhoto";
 import { allowed, operationalRoles } from "../../server/auth/permissions";
 import AutoFilterForm from "./AutoFilterForm";
 import PartyExperience, { PartySectionScene } from "./PartyExperience";
@@ -502,9 +503,7 @@ export default function DashboardShell({
           </small>
         </div>
         <div className="admin-account">
-          <span className="admin-avatar">
-            {user.name.slice(0, 2).toUpperCase()}
-          </span>
+          <ProfilePhoto key={user.email} name={user.name} />
           <div>
             <strong>{user.name}</strong>
             <small>{roleLabels[user.role]}</small>
