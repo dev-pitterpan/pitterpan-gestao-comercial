@@ -1,57 +1,122 @@
-import type { CSSProperties } from "react";
+import { useState, type CSSProperties } from "react";
 
 export default function SyncJourney({
   position,
   finished,
+  label,
 }: {
   position: number;
   finished: boolean;
+  label: string;
 }) {
+  const [speech, setSpeech] = useState({ current: label, previous: "" });
+  if (speech.current !== label) {
+    setSpeech({ current: label, previous: speech.current });
+  }
   return (
     <div
-      aria-hidden="true"
       className={`sync-journey${finished ? " is-finished" : ""}`}
       style={{ "--sync-position": `${position}%` } as CSSProperties}
     >
       <div className="sync-journey-path">
         <div className="sync-journey-fill" />
-        <div className="sync-journey-walker">
-          <svg viewBox="0 0 48 64" fill="none">
-            <g strokeLinecap="round" strokeLinejoin="round">
-              <path
-                className="sync-step-back"
-                d="M24 39l-5 11 4 9h5"
-                stroke="#526983"
-                strokeWidth="4"
-              />
-              <path
-                className="sync-arm-back"
-                d="M24 25l-6 9 6 5"
-                stroke="#b46d45"
-                strokeWidth="3"
-              />
-              <path d="M17 25c0-4 14-5 14 0l-2 15H19z" fill="#eb4149" />
-              <path
-                className="sync-step-front"
-                d="M25 39l6 10-2 10h6"
-                stroke="#25476a"
-                strokeWidth="4"
-              />
-              <path
-                className="sync-arm-front"
-                d="M26 25l5 8 7-2"
-                stroke="#efab78"
-                strokeWidth="3.5"
-              />
-              <circle cx="25" cy="15" r="8" fill="#efab78" />
-              <path d="M17 16v-4a8 8 0 0 1 16 0H23l-3 4z" fill="#253b58" />
-              <path d="M18 11a7 7 0 0 1 14-1l5 1v2H18z" fill="#ffc741" />
-              <circle cx="29" cy="16" r="1" fill="#253b58" />
-            </g>
+        <div className="sync-journey-carrier" aria-hidden="true">
+          <span className="pitter-spinner sync-journey-wheel" />
+          <svg className="sync-journey-mascot" viewBox="0 0 64 76" fill="none">
+            <path
+              d="M19 66h28"
+              stroke="#1f3779"
+              strokeOpacity=".16"
+              strokeWidth="4"
+              strokeLinecap="round"
+            />
+            <path d="M27 48h10l1 14h-9z" fill="#233980" />
+            <path d="M34 47h10l-1 15h-9z" fill="#354ba7" />
+            <path
+              d="M27 61h10l3 4c1 2-1 3-3 3H26c-2 0-3-2-2-4z"
+              fill="#18265c"
+            />
+            <path
+              d="M36 61h8l5 4c1 2 0 3-3 3H34c-2 0-2-2-1-4z"
+              fill="#243575"
+            />
+            <path
+              d="M34 67h13"
+              stroke="#fff"
+              strokeOpacity=".75"
+              strokeLinecap="round"
+            />
+            <path d="M26 31c-4 3-7 9-6 15l7 2 5-13z" fill="#b51c32" />
+            <path
+              d="M26 32c3-4 12-5 18-1l2 16c-1 5-18 6-22 0z"
+              fill="#f21f26"
+            />
+            <path
+              d="M29 33l3 16m9-16-2 16"
+              stroke="#ff7072"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+            />
+            <path d="M24 46c7 3 15 3 22 0v4c-6 3-15 3-22 0z" fill="#be1730" />
+            <path
+              d="M39 35c1-3 5-3 7 0l2 7 5-2 2 4-8 5c-2 1-4 0-5-2z"
+              fill="#f2ab7e"
+            />
+            <path d="M38 34c2-4 7-4 9 0l1 5-8 2z" fill="#d41f32" />
+            <path d="M31 27h9v7c-2 3-7 3-9 0z" fill="#e3976a" />
+            <path
+              d="M23 17c0-7 4-11 11-11 8 0 12 5 12 12l2 4c1 2-1 3-3 3-1 6-5 8-10 7-7-1-12-5-12-15z"
+              fill="#f6b88a"
+            />
+            <path
+              d="M24 23c-3-4-3-9-1-12 3-4 10-4 12 0l-1 7-5 2-1 5z"
+              fill="#283263"
+            />
+            <circle cx="29" cy="22" r="3.2" fill="#f6b88a" />
+            <circle cx="42" cy="20" r="1.35" fill="#222b53" />
+            <path
+              d="M21 15a12 12 0 0 1 24 0l7 1c2 1 1 3-1 3H24c-2 0-4-2-3-4z"
+              fill="#ffd51a"
+            />
+            <path
+              d="M25 13c2-5 7-7 12-6"
+              stroke="#fff2a2"
+              strokeWidth="2"
+              strokeLinecap="round"
+            />
+            <path
+              d="M23 17h28"
+              stroke="#d99f12"
+              strokeWidth="1.2"
+              strokeLinecap="round"
+            />
+            <path
+              d="M33 40c-2-2-4 0-3 2 1 2 4 2 5 0 1-2-1-4-2-2z"
+              fill="#ffd51a"
+            />
           </svg>
         </div>
+        <div className="sync-journey-speech" role="status" aria-atomic="true">
+          {speech.previous && (
+            <span
+              key={speech.previous}
+              className="sync-speech-out"
+              aria-hidden="true"
+            >
+              {speech.previous}
+            </span>
+          )}
+          <span key={speech.current} className="sync-speech-in">
+            {speech.current}
+          </span>
+        </div>
       </div>
-      <svg className="sync-journey-shop" viewBox="0 0 100 88" fill="none">
+      <svg
+        aria-hidden="true"
+        className="sync-journey-shop"
+        viewBox="0 0 100 88"
+        fill="none"
+      >
         <path
           d="M9 82h82"
           stroke="#c1d4e9"
@@ -96,7 +161,6 @@ export default function SyncJourney({
           fill="#79a9d7"
         />
       </svg>
-      {finished && <span className="sync-journey-total">100%</span>}
     </div>
   );
 }

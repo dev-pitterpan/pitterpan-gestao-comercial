@@ -1,5 +1,13 @@
 [
   {
+    "version": "2026.11.10.3",
+    "recordedAt": "2026-11-10T12:01:00-03:00",
+    "title": "Nova jornada visual da sincronização",
+    "changes": [
+      "O círculo carrega o personagem pela trilha com as cores da Pitter Pan e o balão de fala acompanha as etapas da sincronização."
+    ]
+  },
+  {
     "version": "2026.11.10.2",
     "recordedAt": "2026-11-10T10:39:34-03:00",
     "title": "Animação na sincronização da Shopify",

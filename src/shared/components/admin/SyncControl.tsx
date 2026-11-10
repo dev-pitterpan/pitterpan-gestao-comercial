@@ -151,20 +151,19 @@ export default function SyncControl() {
               finished ? 100 : ((index + 1) / (phases.length + 1)) * 100
             }
             finished={finished}
+            label={
+              finished
+                ? "100% · Tudo sincronizado!"
+                : (phases[index]?.[1] ?? "Preparando a saída…")
+            }
           />
           {busy && (
-            <div aria-live="polite">
-              <PitterSpinner
-                label={
-                  index >= 0
-                    ? phases[index][1]
-                    : "Aguardando o início da atualização…"
-                }
-              />
+            <div>
               <ol>
                 {phases.map(([key, label], i) => (
                   <li
                     key={key}
+                    aria-current={i === index ? "step" : undefined}
                     className={
                       i === index ? "is-current" : i < index ? "is-done" : ""
                     }
@@ -186,7 +185,7 @@ export default function SyncControl() {
             </div>
           )}
           {finished && (
-            <p className="sync-success" role="status">
+            <p className="sync-success">
               <CheckCircle2 size={17} /> Sincronização concluída. Produtos,
               estoque e pedidos foram atualizados.
             </p>

@@ -2533,64 +2533,110 @@
 }
 
 .sync-journey {
+  --sync-brand: linear-gradient(90deg, #354ba7, #f21f26 50%, #ffd51a 90%);
+  --sync-travel: 1.6s cubic-bezier(0.24, 0.72, 0.28, 1);
   position: relative;
-  height: 88px;
+  height: 148px;
   margin-bottom: 12px;
-  border-radius: 10px;
-  background: linear-gradient(#eaf4ff, #f8fbff);
+  border: 1px solid #e1eaf7;
+  border-radius: 14px;
+  background: linear-gradient(155deg, #edf4ff, #fbfdff 72%);
   isolation: isolate;
+  container-type: inline-size;
 }
 .sync-journey-path {
   position: absolute;
   right: 50px;
-  bottom: 8px;
+  bottom: 17px;
   left: 26px;
-  height: 4px;
-  border-radius: 4px;
-  background: #c7dbef;
+  height: 5px;
+  border-radius: 8px;
+  background: #cfddf2;
 }
 .sync-journey-fill {
   width: var(--sync-position);
   height: 100%;
   border-radius: inherit;
-  background: #4a94d4;
-  transition: width 900ms ease;
+  background: var(--sync-brand);
+  transition: width var(--sync-travel);
 }
-.sync-journey-walker {
+.sync-journey-carrier {
   position: absolute;
-  z-index: 1;
-  bottom: -2px;
+  z-index: 2;
   left: var(--sync-position);
-  width: 42px;
-  transform: translateX(-50%);
-  transform-origin: center bottom;
-  transition: left 900ms ease;
+  top: 50%;
+  width: 27px;
+  height: 27px;
+  transform: translate(-50%, -50%);
+  transition: left var(--sync-travel);
 }
-.sync-journey-walker svg {
+.sync-journey-wheel {
   display: block;
   width: 100%;
-  animation: sync-walk-bob 420ms ease-in-out infinite alternate;
+  height: 100%;
 }
-.sync-journey-walker .sync-step-front,
-.sync-journey-walker .sync-step-back {
-  transform-origin: 24px 39px;
+.sync-journey-mascot {
+  position: absolute;
+  bottom: 19px;
+  left: 50%;
+  display: block;
+  width: 62px;
+  transform: translateX(-50%);
+  transform-origin: center bottom;
+  filter: drop-shadow(0 3px 3px #20347a20);
 }
-.sync-journey-walker .sync-arm-front,
-.sync-journey-walker .sync-arm-back {
-  transform-origin: 24px 25px;
+.sync-journey-speech {
+  --speech-width: min(174px, calc(100cqi - 24px));
+  position: absolute;
+  z-index: 3;
+  bottom: 89px;
+  left: clamp(
+    calc(var(--speech-width) / 2 - 15px),
+    var(--sync-position),
+    calc(100% - var(--speech-width) / 2 + 38px)
+  );
+  display: grid;
+  align-items: center;
+  width: var(--speech-width);
+  min-height: 33px;
+  padding: 6px 9px;
+  border: 1px solid #d6e3f7;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 4px 12px #354ba713;
+  color: #263e79;
+  text-align: center;
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: 650;
+  transform: translateX(-50%);
+  transition: left var(--sync-travel);
 }
-.sync-step-front,
-.sync-arm-back {
-  animation: sync-walk-swing 420ms ease-in-out infinite alternate;
+.sync-journey-speech::after {
+  content: "";
+  position: absolute;
+  bottom: -5px;
+  left: calc(50% - 4px);
+  width: 8px;
+  height: 8px;
+  border-right: 1px solid #d6e3f7;
+  border-bottom: 1px solid #d6e3f7;
+  background: #fff;
+  transform: rotate(45deg);
 }
-.sync-step-back,
-.sync-arm-front {
-  animation: sync-walk-swing 420ms ease-in-out infinite alternate-reverse;
+.sync-journey-speech > span {
+  grid-area: 1 / 1;
+}
+.sync-speech-in {
+  animation: sync-speech-appear 420ms ease both;
+}
+.sync-speech-out {
+  animation: sync-speech-disappear 240ms ease both;
 }
 .sync-journey-shop {
   position: absolute;
   right: 0;
-  bottom: 2px;
+  bottom: 11px;
   width: 100px;
   height: 88px;
 }
@@ -2600,52 +2646,50 @@
 }
 .sync-journey.is-finished .sync-journey-door {
   transform: scaleX(0.12);
-  transition: transform 220ms ease 500ms;
+  transition: transform 260ms ease 1150ms;
 }
-.sync-journey.is-finished .sync-journey-walker {
-  animation: sync-shop-entry 320ms ease-in 780ms both;
+.sync-journey.is-finished .sync-journey-mascot {
+  animation: sync-shop-entry 470ms ease 1350ms both;
 }
-.sync-journey.is-finished .sync-journey-fill {
-  background: #318368;
+.sync-journey.is-finished .sync-journey-wheel {
+  opacity: 0;
+  transition: opacity 220ms ease 1500ms;
 }
-.sync-journey-total {
-  position: absolute;
-  top: 12px;
-  left: 14px;
-  border-radius: 20px;
-  padding: 4px 10px;
-  background: #dff3e9;
+.sync-journey.is-finished .sync-journey-speech {
   color: #24654e;
-  font-size: 12px;
-  font-weight: 700;
 }
-@keyframes sync-walk-bob {
-  to {
-    transform: translateY(-2px);
-  }
-}
-@keyframes sync-walk-swing {
+@keyframes sync-speech-appear {
   from {
-    transform: rotate(-19deg);
+    opacity: 0;
+    transform: translateY(3px);
   }
   to {
-    transform: rotate(19deg);
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes sync-speech-disappear {
+  to {
+    opacity: 0;
+    transform: translateY(-3px);
   }
 }
 @keyframes sync-shop-entry {
   to {
     opacity: 0;
-    transform: translate(-50%, -6px) scale(0.62);
+    transform: translate(-50%, 15px) scale(0.48);
   }
 }
 @media (prefers-reduced-motion: reduce) {
   .sync-journey *,
   .sync-journey.is-finished .sync-journey-door,
-  .sync-journey.is-finished .sync-journey-walker {
+  .sync-journey.is-finished .sync-journey-mascot,
+  .sync-journey.is-finished .sync-journey-wheel {
     animation: none;
     transition: none;
   }
-  .sync-journey.is-finished .sync-journey-walker {
+  .sync-speech-out,
+  .sync-journey.is-finished .sync-journey-mascot {
     opacity: 0;
   }
 }
