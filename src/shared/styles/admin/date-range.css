@@ -58,16 +58,42 @@
   font-size: 11px;
   padding-top: 20px;
 }
+.admin-date-field-control {
+  position: relative;
+  display: grid;
+}
+.admin-date-field-control > svg {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #527494;
+}
 .admin-date-inputs input {
   width: 100%;
   min-width: 0;
   border: 1px solid #dce6f0;
   background: #f8fbfe;
   color: #3c5b7c;
-  padding: 9px;
+  padding: 9px 32px 9px 10px;
+  min-height: 41px;
   border-radius: 9px;
   font: inherit;
   font-size: 12px;
+}
+.admin-date-inputs input:focus {
+  border-color: #769ac5;
+  outline: 2px solid #b9d2ee;
+  outline-offset: 1px;
+}
+.admin-date-popover--single .admin-date-months {
+  grid-template-columns: minmax(0, 1fr);
+}
+.admin-date-popover--single
+  .admin-calendar-grid
+  > button.is-other:not(.is-edge) {
+  color: #8295a9;
 }
 .admin-date-months {
   position: relative;
@@ -184,4 +210,25 @@
     flex-wrap: wrap;
     gap: 5px;
   }
+}
+
+.admin-app .agenda-date-field {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+.admin-app .agenda-date-trigger {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 11px 12px;
+  min-height: 42px;
+  border: 1px solid #dae6f1;
+  border-radius: 10px;
+  background: #fbfdff;
+  color: #456580;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
 }

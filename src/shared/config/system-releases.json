@@ -1,5 +1,13 @@
 [
   {
+    "version": "2026.11.10.7",
+    "recordedAt": "2026-11-10T16:25:57-03:00",
+    "title": "Calendários com visual unificado",
+    "changes": [
+      "Filtros de período usam o calendário do painel com entrada manual de datas. Seletores de data da agenda usam o mesmo padrão visual."
+    ]
+  },
+  {
     "version": "2026.11.10.6",
     "recordedAt": "2026-11-10T12:22:02-03:00",
     "title": "Layout original da sincronização",

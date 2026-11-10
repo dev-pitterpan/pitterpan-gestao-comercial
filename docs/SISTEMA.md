@@ -57,6 +57,8 @@ Mapa funcional e técnico do painel da Floresta, América e Iririú. A versão e
 
 ### Pedidos Shopify
 
+Pedidos, visão geral, análises, destinos e histórico de alterações usam o mesmo seletor de período. As datas podem ser digitadas em DD/MM/AAAA ou escolhidas no calendário do painel. Os seletores de data única da agenda usam o mesmo padrão de popover e grade. O calendário mensal da agenda é uma visualização de compromissos.
+
 1. A integração recebe os eventos de vendas e mantém uma fila persistente com tentativas. A rota de webhook valida assinatura e loja antes de registrar.
 2. O processamento consulta a Shopify, atualiza pedidos e itens e registra o checkpoint. Repetições e interrupções podem ser retomadas pela fila.
 3. A janela automática usa até 60 dias. Períodos anteriores consultam o histórico disponível no banco. O painel mostra o horário da última sincronização.

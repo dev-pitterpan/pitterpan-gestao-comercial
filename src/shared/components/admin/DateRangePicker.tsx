@@ -1,14 +1,30 @@
 "use client";
-import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight, Check } from "lucide-react";
 import {
+  calendarDate,
   dateRangeSchema,
   shiftDate,
   todayDate,
   type DateRange,
 } from "../../lib/admin/date-range";
+import useDatePopover from "./useDatePopover";
+
 const display = (day: string) =>
   day ? day.split("-").reverse().join("/") : "";
+function parseDate(text: string) {
+  if (!/^\d{2}\/\d{2}\/\d{4}$/.test(text)) return "";
+  const result = calendarDate.safeParse(text.split("/").reverse().join("-"));
+  return result.success ? result.data : "";
+}
+
+function dateText(value: string) {
+  const digits = value.replace(/\D/g, "").slice(0, 8);
+  return [digits.slice(0, 2), digits.slice(2, 4), digits.slice(4)]
+    .filter(Boolean)
+    .join("/");
+}
+
 export default function DateRangePicker({
   value,
   onChange,
@@ -26,60 +42,13 @@ export default function DateRangePicker({
     heading = useRef<HTMLDivElement>(null),
     today = todayDate();
   const [open, setOpen] = useState(false),
-    [draft, setDraft] = useState<DateRange>(value),
+    [fields, setFields] = useState({
+      start: display(value.start),
+      end: display(value.end),
+    }),
     [choosingEnd, setChoosingEnd] = useState(false),
     [month, setMonth] = useState(today.slice(0, 7) + "-01");
-  useLayoutEffect(() => {
-    const panel = panelRef.current;
-    const button = trigger.current;
-    if (!open || !panel || !button) return;
-    panel.showPopover?.();
-    const viewport = window.visualViewport;
-    function place() {
-      if (!panel || !button) return;
-      const inset = 12;
-      const gap = 8;
-      const rect = button.getBoundingClientRect();
-      const viewportLeft = viewport?.offsetLeft ?? 0;
-      const viewportTop = viewport?.offsetTop ?? 0;
-      const viewportWidth = viewport?.width ?? window.innerWidth;
-      const viewportHeight = viewport?.height ?? window.innerHeight;
-      const main = button.closest("main")?.getBoundingClientRect();
-      const leftEdge =
-        Math.max(
-          viewportLeft,
-          viewportWidth > 980 ? (main?.left ?? viewportLeft) : viewportLeft,
-        ) + inset;
-      const rightEdge = viewportLeft + viewportWidth - inset;
-      const topEdge = viewportTop + inset;
-      const bottomEdge = viewportTop + viewportHeight - inset;
-      const width = Math.min(560, Math.max(0, rightEdge - leftEdge));
-      panel.style.width = `${width}px`;
-      panel.style.maxHeight = `${Math.max(0, bottomEdge - topEdge)}px`;
-      const height = panel.offsetHeight;
-      const below = rect.bottom + gap;
-      const above = rect.top - gap - height;
-      const preferredTop =
-        below + height <= bottomEdge ? below : above >= topEdge ? above : below;
-      panel.style.left = `${Math.max(leftEdge, Math.min(rect.left, rightEdge - width))}px`;
-      panel.style.top = `${Math.max(topEdge, Math.min(preferredTop, bottomEdge - height))}px`;
-    }
-    place();
-    const size = new ResizeObserver(place);
-    size.observe(panel);
-    window.addEventListener("resize", place);
-    window.addEventListener("scroll", place, true);
-    viewport?.addEventListener("resize", place);
-    viewport?.addEventListener("scroll", place);
-    return () => {
-      size.disconnect();
-      window.removeEventListener("resize", place);
-      window.removeEventListener("scroll", place, true);
-      viewport?.removeEventListener("resize", place);
-      viewport?.removeEventListener("scroll", place);
-      panel.hidePopover?.();
-    };
-  }, [open]);
+  useDatePopover(open, trigger, panelRef, 560);
   useEffect(() => {
     if (!open) return;
     function dismiss(e: PointerEvent) {
@@ -104,8 +73,21 @@ export default function DateRangePicker({
     setOpen(false);
     trigger.current?.focus();
   };
+  const draft = { start: parseDate(fields.start), end: parseDate(fields.end) };
+  function updateField(field: keyof DateRange, raw: string) {
+    const text = dateText(raw);
+    setFields((current) => ({ ...current, [field]: text }));
+    const day = parseDate(text);
+    if (day && day <= today) setMonth(day.slice(0, 7) + "-01");
+  }
+  const invalidField = (field: keyof DateRange) =>
+    !!fields[field] && (!draft[field] || draft[field] > today);
   const valid =
-    !!draft.start && !!draft.end && dateRangeSchema.safeParse(draft).success;
+    !!draft.start &&
+    !!draft.end &&
+    !invalidField("start") &&
+    !invalidField("end") &&
+    dateRangeSchema.safeParse(draft).success;
   return (
     <div
       className="admin-date-range"
@@ -129,7 +111,7 @@ export default function DateRangePicker({
         aria-controls={id}
         onClick={() => {
           if (!open) {
-            setDraft(value);
+            setFields({ start: display(value.start), end: display(value.end) });
             setChoosingEnd(false);
             const start = value.start || shiftDate(today, -29);
             const d = new Date(`${start.slice(0, 7)}-01T12:00:00Z`);
@@ -163,28 +145,35 @@ export default function DateRangePicker({
           <div className="admin-date-inputs">
             <label>
               Data inicial
-              <input
-                type="date"
-                ref={startInput}
-                value={draft.start}
-                max={today}
-                onChange={(e) =>
-                  setDraft((d) => ({ ...d, start: e.target.value }))
-                }
-              />
+              <span className="admin-date-field-control">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="dd/mm/aaaa"
+                  ref={startInput}
+                  value={fields.start}
+                  aria-invalid={invalidField("start") || undefined}
+                  onFocus={() => setChoosingEnd(false)}
+                  onChange={(event) => updateField("start", event.target.value)}
+                />
+                <CalendarDays size={15} aria-hidden="true" />
+              </span>
             </label>
             <span>até</span>
             <label>
               Data final
-              <input
-                type="date"
-                value={draft.end}
-                min={draft.start || undefined}
-                max={today}
-                onChange={(e) =>
-                  setDraft((d) => ({ ...d, end: e.target.value }))
-                }
-              />
+              <span className="admin-date-field-control">
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="dd/mm/aaaa"
+                  value={fields.end}
+                  aria-invalid={invalidField("end") || undefined}
+                  onFocus={() => setChoosingEnd(true)}
+                  onChange={(event) => updateField("end", event.target.value)}
+                />
+                <CalendarDays size={15} aria-hidden="true" />
+              </span>
             </label>
           </div>
           <div className="admin-date-months">
@@ -247,11 +236,15 @@ export default function DateRangePicker({
                           aria-label={display(day)}
                           aria-pressed={edge || !!inside}
                           onClick={() => {
-                            if (!choosingEnd || day < draft.start) {
-                              setDraft({ start: day, end: "" });
+                            if (
+                              !choosingEnd ||
+                              !draft.start ||
+                              day < draft.start
+                            ) {
+                              setFields({ start: display(day), end: "" });
                               setChoosingEnd(true);
                             } else {
-                              setDraft((d) => ({ ...d, end: day }));
+                              setFields((d) => ({ ...d, end: display(day) }));
                               setChoosingEnd(false);
                             }
                           }}
@@ -265,9 +258,11 @@ export default function DateRangePicker({
               );
             })}
           </div>
-          {draft.start && draft.end && !valid && (
+          {((fields.start.length === 10 && invalidField("start")) ||
+            (fields.end.length === 10 && invalidField("end")) ||
+            (draft.start && draft.end && !valid)) && (
             <p className="admin-date-error" role="alert">
-              Escolha um intervalo válido de até 366 dias.
+              Use datas válidas até hoje e um intervalo de até 366 dias.
             </p>
           )}
           <footer>

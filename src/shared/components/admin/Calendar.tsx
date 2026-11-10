@@ -3,6 +3,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { CalendarDays, ArrowUpRight, Check } from "lucide-react";
+import { AgendaDateField } from "./agenda/DateTimeFields";
 import type { Campaign } from "../../server/admin/campaigns";
 const labels: Record<string, string> = {
   planned: "Em planejamento",
@@ -20,20 +21,27 @@ export default function Calendar({
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false),
-    [message, setMessage] = useState("");
+    [message, setMessage] = useState(""),
+    [dateFieldKey, setDateFieldKey] = useState(0);
   async function create(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
+    const data = new FormData(form);
+    if (!data.get("event_date")) {
+      setMessage("Selecione a data comercial.");
+      return;
+    }
     setBusy(true);
     try {
       const response = await fetch("/api/admin/campaigns/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(Object.fromEntries(new FormData(form))),
+        body: JSON.stringify(Object.fromEntries(data)),
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error);
       form.reset();
+      setDateFieldKey((key) => key + 1);
       setMessage("Campanha adicionada ao planejamento.");
       router.refresh();
     } catch (error) {
@@ -169,15 +177,13 @@ export default function Calendar({
                 disabled={!ready || busy}
               />
             </label>
-            <label>
-              Data comercial
-              <input
-                name="event_date"
-                type="date"
-                required
-                disabled={!ready || busy}
-              />
-            </label>
+            <AgendaDateField
+              key={dateFieldKey}
+              name="event_date"
+              label="Data comercial"
+              initial=""
+              disabled={!ready || busy}
+            />
             <label>
               Identificador do catálogo (opcional)
               <input

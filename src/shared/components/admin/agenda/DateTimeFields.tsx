@@ -1,7 +1,9 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useId, useRef } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import AdminSelect from "../AdminSelect";
+import useDatePopover from "../useDatePopover";
+import { todayDate } from "../../../lib/admin/date-range";
 import { monthDays, monthShift } from "../../../lib/agenda/calendar";
 export function AgendaDateField({
   name,
@@ -14,43 +16,18 @@ export function AgendaDateField({
   initial: string;
   disabled?: boolean;
 }) {
+  const today = todayDate();
   const [value, setValue] = useState(initial),
     [open, setOpen] = useState(false),
-    [month, setMonth] = useState(initial.slice(0, 7));
+    [month, setMonth] = useState((initial || today).slice(0, 7));
+  const id = useId();
   const trigger = useRef<HTMLButtonElement>(null);
-  const [position, setPosition] = useState({
-    left: 16,
-    top: 80,
-    maxHeight: 400,
-  });
-  useEffect(() => {
-    if (!open) return;
-    function place() {
-      const rect = trigger.current?.getBoundingClientRect();
-      if (!rect) return;
-      const width = Math.min(290, window.innerWidth - 32),
-        height = Math.min(350, window.innerHeight - 32);
-      const top =
-        window.innerHeight - rect.bottom > height + 16
-          ? rect.bottom + 6
-          : Math.max(
-              16,
-              Math.min(rect.top - height - 6, window.innerHeight - height - 16),
-            );
-      setPosition({
-        left: Math.max(16, Math.min(rect.left, window.innerWidth - width - 16)),
-        top,
-        maxHeight: window.innerHeight - top - 16,
-      });
-    }
-    place();
-    window.addEventListener("resize", place);
-    window.addEventListener("scroll", place, true);
-    return () => {
-      window.removeEventListener("resize", place);
-      window.removeEventListener("scroll", place, true);
-    };
-  }, [open]);
+  const panel = useRef<HTMLDivElement>(null);
+  useDatePopover(open, trigger, panel, 320);
+  function close() {
+    setOpen(false);
+    trigger.current?.focus();
+  }
   return (
     <div
       className="agenda-date-field"
@@ -58,82 +35,88 @@ export function AgendaDateField({
         if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
       }}
       onKeyDown={(event) => {
-        if (event.key === "Escape") setOpen(false);
+        if (open && event.key === "Escape") {
+          event.stopPropagation();
+          close();
+        }
       }}
     >
-      <label htmlFor={`${name}-date-trigger`}>{label}</label>
+      <label htmlFor={`${id}-trigger`}>{label}</label>
       <input type="hidden" name={name} value={value} />
       <button
         ref={trigger}
-        id={`${name}-date-trigger`}
+        id={`${id}-trigger`}
         type="button"
         className="agenda-date-trigger"
         aria-expanded={open}
+        aria-haspopup="dialog"
+        aria-controls={id}
         disabled={disabled}
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          if (!open) setMonth((value || today).slice(0, 7));
+          setOpen(!open);
+        }}
       >
         <CalendarDays size={16} />
-        {value.split("-").reverse().join("/")}
+        {value ? value.split("-").reverse().join("/") : "Escolher data"}
       </button>
       {open && (
         <div
-          className="agenda-date-dialog"
-          style={{
-            position: "fixed",
-            left: position.left,
-            top: position.top,
-            right: "auto",
-            maxHeight: position.maxHeight,
-            overflowY: "auto",
-          }}
+          className="admin-date-popover admin-date-popover--single"
+          ref={panel}
+          popover="manual"
+          id={id}
           role="dialog"
           aria-label={`Escolher ${label.toLowerCase()}`}
         >
-          <header>
-            <button
-              type="button"
-              className="agenda-icon-button"
-              aria-label="Mês anterior"
-              onClick={() => setMonth(monthShift(month, -1))}
-            >
-              <ChevronLeft size={16} />
-            </button>
-            <strong>
-              {new Intl.DateTimeFormat("pt-BR", {
-                month: "short",
-                year: "numeric",
-                timeZone: "UTC",
-              }).format(new Date(`${month}-01T12:00:00Z`))}
-            </strong>
-            <button
-              type="button"
-              className="agenda-icon-button"
-              aria-label="Próximo mês"
-              onClick={() => setMonth(monthShift(month, 1))}
-            >
-              <ChevronRight size={16} />
-            </button>
-          </header>
-          <div className="agenda-date-grid">
-            {["D", "S", "T", "Q", "Q", "S", "S"].map((d, i) => (
-              <span key={i}>{d}</span>
-            ))}
-            {monthDays(month).map((day) => (
+          <div className="admin-date-months">
+            <section>
               <button
                 type="button"
-                key={day}
-                className={`${day === value ? "is-selected" : ""} ${day.startsWith(month) ? "" : "is-other"}`}
-                aria-label={day.split("-").reverse().join("/")}
-                aria-pressed={day === value}
-                onClick={() => {
-                  setValue(day);
-                  setOpen(false);
-                  document.getElementById(`${name}-date-trigger`)?.focus();
-                }}
+                className="admin-date-nav admin-date-nav--previous"
+                aria-label="Mês anterior"
+                onClick={() => setMonth(monthShift(month, -1))}
               >
-                {Number(day.slice(-2))}
+                <ChevronLeft size={16} />
               </button>
-            ))}
+              <h3>
+                {new Intl.DateTimeFormat("pt-BR", {
+                  month: "long",
+                  year: "numeric",
+                  timeZone: "UTC",
+                }).format(new Date(`${month}-01T12:00:00Z`))}
+              </h3>
+              <button
+                type="button"
+                className="admin-date-nav admin-date-nav--next"
+                aria-label="Próximo mês"
+                onClick={() => setMonth(monthShift(month, 1))}
+              >
+                <ChevronRight size={16} />
+              </button>
+              <div className="admin-calendar-grid">
+                {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map(
+                  (d, i) => (
+                    <span key={i}>{d}</span>
+                  ),
+                )}
+                {monthDays(month).map((day) => (
+                  <button
+                    type="button"
+                    key={day}
+                    className={`${day === value ? "is-edge" : ""} ${day.startsWith(month) ? "" : "is-other"} ${day === today ? "is-today" : ""}`}
+                    aria-label={day.split("-").reverse().join("/")}
+                    aria-pressed={day === value}
+                    onClick={() => {
+                      setValue(day);
+                      close();
+                    }}
+                  >
+                    {Number(day.slice(-2))}
+                  </button>
+                ))}
+              </div>
+            </section>
           </div>
         </div>
       )}
