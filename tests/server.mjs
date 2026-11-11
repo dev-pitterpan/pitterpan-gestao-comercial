@@ -117,6 +117,9 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
       for (const path of [
         "/gestor/",
         "/gestor/vendas/",
+        "/gestor/vendas/recebimentos/",
+        "/gestor/analises/",
+        "/gestor/produtos/",
         "/gestor/natal/",
         "/gestor/versoes/",
       ]) {
@@ -128,15 +131,28 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
         );
         assert.match(response.headers.get("cache-control"), /no-store/);
         assert.match(response.headers.get("x-robots-tag"), /noindex/);
+        const html = await response.text();
+        assert.doesNotMatch(html, /class="party-section-scene/);
         if (path === "/gestor/versoes/") {
-          const html = await response.text();
           assert.match(html, /Versões e atualizações/);
           assert.match(html, /docs\/SISTEMA\.md/);
         }
         if (path === "/gestor/")
+          assert.match(html, /href="http:\/\/127\.0\.0\.1:3000\/"/);
+        if (path === "/gestor/vendas/recebimentos/")
           assert.match(
-            await response.text(),
-            /href="http:\/\/127\.0\.0\.1:3000\/"/,
+            html,
+            /<header class="admin-page-heading">.*?<h1>Recebimentos<\/h1>.*?Período dos pedidos.*?Modalidade de entrega.*?<\/header>/s,
+          );
+        if (path === "/gestor/analises/")
+          assert.match(
+            html,
+            /<header class="admin-page-heading">.*?<h1>Visão geral da loja<\/h1>.*?Período das análises.*?<\/header>/s,
+          );
+        if (path === "/gestor/produtos/")
+          assert.match(
+            html,
+            /<header class="admin-page-heading">.*?<h1>Produtos<\/h1>.*?Buscar por nome, SKU ou marca.*?<\/header>/s,
           );
       }
     }

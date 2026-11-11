@@ -10,8 +10,7 @@ export default async function Settings() {
   return (
     <>
       <PageHeading
-        eyebrow="A GESTÃO, DO SEU JEITO"
-        title="Cada detalhe, configurado."
+        title="Configurações"
         description="Defina os alertas da operação e acompanhe o estado das integrações com segurança."
       />
       <DataNotice context={context} />

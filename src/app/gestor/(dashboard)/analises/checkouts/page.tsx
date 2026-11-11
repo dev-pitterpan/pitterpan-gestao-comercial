@@ -1,3 +1,4 @@
+import { PageHeading } from "@shared/components/admin/Primitives";
 import { Suspense } from "react";
 import Link from "next/link";
 import { requireSession } from "@shared/server/auth/session";
@@ -112,34 +113,31 @@ export default async function CheckoutsPage({
 
   return (
     <div className={styles.workspace}>
-      <header className={styles.hero}>
-        <span className={styles.eyebrow}>SHOPIFY / RECUPERAÇÃO</span>
-        <h1>Checkouts abandonados</h1>
-        <p>
-          Acompanhe compras interrompidas e confira os detalhes de cada
-          checkout.
-        </p>
-      </header>
+      <PageHeading
+        eyebrow="Shopify"
+        title="Checkouts abandonados"
+        description="Acompanhe compras interrompidas e confira os detalhes de cada checkout."
+        filters={
+          <nav aria-label="Período dos checkouts" className={styles.period}>
+            <Link
+              className={styles.button}
+              aria-current={days === "7" ? "true" : undefined}
+              href={path + "?days=7"}
+            >
+              Últimos 7 dias
+            </Link>
+            <Link
+              className={styles.button}
+              aria-current={days === "30" ? "true" : undefined}
+              href={path + "?days=30"}
+            >
+              Últimos 30 dias
+            </Link>
+          </nav>
+        }
+      />
       <div className={styles.columns}>
         <section className={styles.panel}>
-          <div className={styles.toolbar}>
-            <nav aria-label="Período dos checkouts" className={styles.period}>
-              <Link
-                className={styles.button}
-                aria-current={days === "7" ? "true" : undefined}
-                href={path + "?days=7"}
-              >
-                Últimos 7 dias
-              </Link>
-              <Link
-                className={styles.button}
-                aria-current={days === "30" ? "true" : undefined}
-                href={path + "?days=30"}
-              >
-                Últimos 30 dias
-              </Link>
-            </nav>
-          </div>
           {!data ? (
             <p role="alert">
               Não foi possível consultar os checkouts. Confira as permissões da

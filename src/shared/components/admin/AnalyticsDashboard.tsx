@@ -1,4 +1,5 @@
 "use client";
+import { PageHeading } from "./Primitives";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -23,7 +24,7 @@ import DateRangePicker from "./DateRangePicker";
 import PitterSpinner from "./PitterSpinner";
 import FinanceOverview from "./FinanceOverview";
 import InteractiveColumns from "./InteractiveColumns";
-import { RevenueChart, shortDate, numberValue } from "./AnalyticsCharts";
+import { RevenueChart, numberValue } from "./AnalyticsCharts";
 import {
   reportCategories,
   shopifyReports,
@@ -77,10 +78,14 @@ const normalize = (s: string) =>
     .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase();
 export default function AnalyticsDashboard({
+  title,
+  description,
   reports,
   reportId,
   hub,
 }: {
+  title: string;
+  description: string;
   reports: boolean;
   hub?: "atribuicao" | "clientes" | "vendas";
   reportId: string;
@@ -141,44 +146,40 @@ export default function AnalyticsDashboard({
     }).format(n);
   return (
     <div className="analytics-dashboard shopify-reports">
-      <div className="analytics-toolbar">
-        <div className="analytics-period">
-          <span className="analytics-eyebrow">RESULTADOS DA SUA LOJA</span>
-          <strong>
-            {range.start && range.end
-              ? `${shortDate(range.start)} a ${shortDate(range.end)}`
-              : data && hub === "vendas"
-                ? `${shortDate(data.window.start)} a ${shortDate(data.window.end)}`
-                : days === "1"
-                  ? "Hoje"
-                  : `Últimos ${days} dias`}
-          </strong>
-        </div>
-        <div className="insights-filters">
-          <AdminSelect
-            label="Período das análises"
-            value={days}
-            onValueChange={(v) => {
-              setDays(v);
-              setRange({ start: "", end: "" });
-            }}
-            options={[
-              { value: "1", label: "Hoje" },
-              { value: "7", label: "Últimos 7 dias" },
-              { value: "30", label: "Últimos 30 dias" },
-              { value: "60", label: "Últimos 60 dias" },
-            ]}
-          />
-          <DateRangePicker value={range} onChange={setRange} />
-          <button
-            className="admin-button"
-            onClick={() => setRevision((n) => n + 1)}
-            aria-label="Atualizar relatórios"
-          >
-            <RefreshCw size={16} /> Atualizar
-          </button>
-        </div>
-      </div>
+      <PageHeading
+        eyebrow="Análises Shopify"
+        title={title}
+        description={description}
+        filters={
+          <div className="insights-filters">
+            <AdminSelect
+              label="Período das análises"
+              value={days}
+              onValueChange={(v) => {
+                setDays(v);
+                setRange({ start: "", end: "" });
+              }}
+              options={[
+                { value: "1", label: "Hoje" },
+                { value: "7", label: "Últimos 7 dias" },
+                { value: "30", label: "Últimos 30 dias" },
+                { value: "60", label: "Últimos 60 dias" },
+              ]}
+            />
+            <DateRangePicker
+              value={range.start ? range : (data?.window ?? range)}
+              onChange={setRange}
+            />
+            <button
+              className="admin-button"
+              onClick={() => setRevision((n) => n + 1)}
+              aria-label="Atualizar relatórios"
+            >
+              <RefreshCw size={16} /> Atualizar
+            </button>
+          </div>
+        }
+      />
       {reportId ? (
         <>
           <button

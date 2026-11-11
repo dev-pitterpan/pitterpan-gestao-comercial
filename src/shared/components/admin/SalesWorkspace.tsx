@@ -1,7 +1,6 @@
 import { salesFilterSchema } from "../../server/sales/filters";
 import { requireSession } from "../../server/auth/session";
 import SalesDashboard from "./SalesDashboard";
-import { PageHeading } from "./Primitives";
 
 export const salesPages = {
   resumo: {
@@ -79,19 +78,14 @@ export default async function SalesWorkspace({
     ? Number(value("days"))
     : 30;
   return (
-    <>
-      <PageHeading
-        eyebrow="VENDAS SHOPIFY"
-        title={page.title}
-        description={page.description}
-      />
-      <SalesDashboard
-        key={JSON.stringify([filters, days, page.view, value("metric")])}
-        initialFilters={filters}
-        initialDays={days}
-        view={page.view}
-        netFirst={value("metric") === "net"}
-      />
-    </>
+    <SalesDashboard
+      key={JSON.stringify([filters, days, page.view, value("metric")])}
+      title={page.title}
+      description={page.description}
+      initialFilters={filters}
+      initialDays={days}
+      view={page.view}
+      netFirst={value("metric") === "net"}
+    />
   );
 }

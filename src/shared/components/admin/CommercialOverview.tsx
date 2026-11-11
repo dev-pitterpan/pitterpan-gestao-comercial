@@ -14,7 +14,6 @@ import { fulfillmentLabels } from "../../lib/admin/fulfillment";
 import { salesPageLink } from "../../lib/admin/sales-links";
 import { number, dateTime } from "./Primitives";
 import CommercialTrend from "./CommercialTrend";
-import CommercialPeriod from "./CommercialPeriod";
 import {
   shiftDate,
   todayDate,
@@ -133,7 +132,6 @@ export default function CommercialOverview({
           </p>
         </div>
         <div className="sales-workspace-links">
-          <CommercialPeriod range={range} />
           <Link className="admin-button" href={salesHref}>
             Resumo Shopify <ArrowRight size={15} />
           </Link>

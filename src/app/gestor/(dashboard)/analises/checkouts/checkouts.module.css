@@ -2,23 +2,6 @@
   color: #202647;
   min-width: 0;
 }
-.hero {
-  padding: clamp(1.5rem, 4vw, 3.25rem);
-  border-radius: 24px;
-  color: #f8f7ff;
-  background:
-    radial-gradient(ellipse at 95% 0%, #6355ad, transparent 65%),
-    linear-gradient(120deg, #1c2346, #323365);
-}
-.hero h1 {
-  font-size: 29px;
-  margin: 0.45rem 0;
-  color: inherit;
-}
-.hero p {
-  margin: 0;
-  color: #e0def7;
-}
 .eyebrow {
   font-size: 10px;
   letter-spacing: 0.14em;

@@ -10,8 +10,7 @@ export default async function Reports() {
   return (
     <>
       <PageHeading
-        eyebrow="CLAREZA PARA DECIDIR"
-        title="Relatórios da operação."
+        title="Relatórios da operação"
         description="Exporte os indicadores da versão publicada ou consulte seleções detalhadas. Vendas e faturamento não são inferidos a partir do estoque."
         action={<ReportExport context={context} />}
       />

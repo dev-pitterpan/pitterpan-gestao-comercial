@@ -1,18 +1,8 @@
 import "leaflet/dist/leaflet.css";
 import "@shared/styles/admin/delivery-map.css";
 import { requireSession } from "@shared/server/auth/session";
-import { PageHeading } from "@shared/components/admin/Primitives";
 import DestinationsDashboard from "@shared/components/admin/DestinationsDashboard";
 export default async function MapPage() {
   await requireSession(["admin", "gestor"]);
-  return (
-    <>
-      <PageHeading
-        eyebrow="OS DESTINOS DA SUA LOJA"
-        title="Mapa de entregas."
-        description="Veja os estados, as cidades e as quantidades dos pedidos, com filtros por período e modalidade."
-      />
-      <DestinationsDashboard />
-    </>
-  );
+  return <DestinationsDashboard />;
 }

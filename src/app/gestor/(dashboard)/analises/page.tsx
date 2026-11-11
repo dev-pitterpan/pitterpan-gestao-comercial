@@ -1,5 +1,4 @@
 import { requireSession } from "@shared/server/auth/session";
-import styles from "./analysis.module.css";
 import AnalyticsDashboard from "@shared/components/admin/AnalyticsDashboard";
 import { reportById } from "@shared/lib/admin/shopify-reports";
 
@@ -43,29 +42,13 @@ export default async function AnalyticsPage({
           : reports
             ? "Explore vendas, clientes, tráfego e estoque por relatório."
             : "Acompanhe pagamentos, reembolsos e a evolução das vendas no período.");
-  const category =
-    report?.category ??
-    (sales
-      ? "sales"
-      : attribution
-        ? "marketing"
-        : hub === "clientes"
-          ? "customers"
-          : reports
-            ? "reports"
-            : "overview");
   return (
-    <>
-      <header className={styles.banner} data-category={category}>
-        <span>ANÁLISES / SHOPIFY</span>
-        <h1>{title}</h1>
-        <p>{description}</p>
-      </header>
-      <AnalyticsDashboard
-        hub={hub}
-        reports={reports}
-        reportId={report?.id ?? ""}
-      />
-    </>
+    <AnalyticsDashboard
+      title={title}
+      description={description}
+      hub={hub}
+      reports={reports}
+      reportId={report?.id ?? ""}
+    />
   );
 }

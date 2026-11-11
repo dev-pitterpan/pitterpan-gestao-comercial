@@ -1,4 +1,5 @@
 "use client";
+import { PageHeading } from "../Primitives";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CalendarDays, Building2, NotebookPen, RefreshCw } from "lucide-react";
 import PitterSpinner from "../PitterSpinner";
@@ -99,29 +100,38 @@ export default function AgendaWorkspace() {
   ];
   return (
     <div className="agenda-workspace">
-      <div className="agenda-topline">
-        <nav className="agenda-tabs" aria-label="Área de agenda e fornecedores">
-          {tabs.map(({ id, label, icon: Icon }) => (
-            <button
-              type="button"
-              key={id}
-              aria-current={tab === id ? "page" : undefined}
-              disabled={busy}
-              onClick={() => setTab(id)}
+      <PageHeading
+        title="Agenda e fornecedores"
+        description="Planeje reuniões, consulte contatos e acompanhe tarefas."
+        filters={
+          <div className="agenda-topline">
+            <nav
+              className="agenda-tabs"
+              aria-label="Área de agenda e fornecedores"
             >
-              <Icon size={18} />
-              {label}
+              {tabs.map(({ id, label, icon: Icon }) => (
+                <button
+                  type="button"
+                  key={id}
+                  aria-current={tab === id ? "page" : undefined}
+                  disabled={busy}
+                  onClick={() => setTab(id)}
+                >
+                  <Icon size={18} />
+                  {label}
+                </button>
+              ))}
+            </nav>
+            <button
+              className="admin-text-link"
+              disabled={loading || busy}
+              onClick={() => void load()}
+            >
+              <RefreshCw size={15} /> Atualizar
             </button>
-          ))}
-        </nav>
-        <button
-          className="admin-text-link"
-          disabled={loading || busy}
-          onClick={() => void load()}
-        >
-          <RefreshCw size={15} /> Atualizar
-        </button>
-      </div>
+          </div>
+        }
+      />
       {error && (
         <div className="agenda-feedback is-error" role="alert">
           {error}

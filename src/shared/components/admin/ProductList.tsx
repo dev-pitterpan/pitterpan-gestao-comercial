@@ -18,16 +18,14 @@ export function stockLabel(stock: number | null, low: number, high: number) {
           ? { label: "Estoque alto", tone: "green" }
           : { label: "Disponível", tone: "blue" };
 }
-export default function ProductList({
-  products,
+export function ProductFilters({
   query,
   base,
-  settings,
+  canExport,
 }: {
-  products: AdminProduct[];
   query: AdminQuery;
   base: string;
-  settings: { low: number; high: number };
+  canExport: boolean;
 }) {
   const [stock, setStock] = useState(query.stock);
   useEffect(() => setStock(query.stock), [query.stock]);
@@ -36,61 +34,70 @@ export default function ProductList({
     "/api/admin/products/?" +
     new URLSearchParams({ ...filters, format: "csv" });
   return (
+    <AutoFilterForm action={base} className="admin-filter-bar">
+      <label className="admin-filter-search">
+        <Search size={17} />
+        <input
+          name="q"
+          defaultValue={query.q}
+          placeholder="Buscar por nome, SKU ou marca"
+          aria-label="Buscar produtos"
+        />
+      </label>
+      <input
+        className="admin-filter-input"
+        name="category"
+        defaultValue={query.category}
+        placeholder="Buscar categoria"
+        aria-label="Filtrar categoria"
+      />
+      <input
+        className="admin-filter-input"
+        name="vendor"
+        defaultValue={query.vendor}
+        placeholder="Buscar marca"
+        aria-label="Filtrar marca"
+      />
+      {query.offers === "1" && <input type="hidden" name="offers" value="1" />}
+      <label className="admin-sr-only" htmlFor="stock-filter">
+        Situação de estoque
+      </label>
+      <AdminSelect
+        id="stock-filter"
+        name="stock"
+        value={stock}
+        label="Situação de estoque"
+        onValueChange={(value) => setStock(value as AdminQuery["stock"])}
+        options={[
+          { value: "all", label: "Todo o estoque" },
+          { value: "low", label: "Estoque baixo" },
+          { value: "above", label: "Acima do estoque baixo" },
+          { value: "high", label: "Estoque alto" },
+          { value: "out", label: "Sem estoque" },
+          { value: "unknown", label: "Não informado" },
+        ]}
+      />
+      <button type="submit" className="admin-button admin-button-primary">
+        Aplicar agora
+      </button>
+      {canExport && (
+        <a className="admin-button" href={exportHref} download>
+          <Download size={16} /> Exportar resultados filtrados
+        </a>
+      )}
+    </AutoFilterForm>
+  );
+}
+
+export default function ProductList({
+  products,
+  settings,
+}: {
+  products: AdminProduct[];
+  settings: { low: number; high: number };
+}) {
+  return (
     <section className="admin-panel admin-product-panel">
-      <AutoFilterForm action={base} className="admin-filter-bar">
-        <label className="admin-filter-search">
-          <Search size={17} />
-          <input
-            name="q"
-            defaultValue={query.q}
-            placeholder="Buscar por nome, SKU ou marca"
-            aria-label="Buscar produtos"
-          />
-        </label>
-        <input
-          className="admin-filter-input"
-          name="category"
-          defaultValue={query.category}
-          placeholder="Buscar categoria"
-          aria-label="Filtrar categoria"
-        />
-        <input
-          className="admin-filter-input"
-          name="vendor"
-          defaultValue={query.vendor}
-          placeholder="Buscar marca"
-          aria-label="Filtrar marca"
-        />
-        {query.offers === "1" && (
-          <input type="hidden" name="offers" value="1" />
-        )}
-        <label className="admin-sr-only" htmlFor="stock-filter">
-          Situação de estoque
-        </label>
-        <AdminSelect
-          id="stock-filter"
-          name="stock"
-          value={stock}
-          label="Situação de estoque"
-          onValueChange={(value) => setStock(value as AdminQuery["stock"])}
-          options={[
-            { value: "all", label: "Todo o estoque" },
-            { value: "low", label: "Estoque baixo" },
-            { value: "above", label: "Acima do estoque baixo" },
-            { value: "high", label: "Estoque alto" },
-            { value: "out", label: "Sem estoque" },
-            { value: "unknown", label: "Não informado" },
-          ]}
-        />
-        <button type="submit" className="admin-button admin-button-primary">
-          Aplicar agora
-        </button>
-        {products.length > 0 && (
-          <a className="admin-button" href={exportHref} download>
-            <Download size={16} /> Exportar resultados filtrados
-          </a>
-        )}
-      </AutoFilterForm>
       {products.length ? (
         <div
           className="admin-table-scroll"

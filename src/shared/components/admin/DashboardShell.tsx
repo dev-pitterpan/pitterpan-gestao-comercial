@@ -3,7 +3,7 @@ import { salesPageLink } from "../../lib/admin/sales-links";
 import ProfilePhoto from "./ProfilePhoto";
 import { allowed, operationalRoles } from "../../server/auth/permissions";
 import AutoFilterForm from "./AutoFilterForm";
-import PartyExperience, { PartySectionScene } from "./PartyExperience";
+import PartyExperience from "./PartyExperience";
 import Link, { useLinkStatus } from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
@@ -626,10 +626,6 @@ export default function DashboardShell({
           <Link className="admin-button" href="/gestor/minha-conta/">
             {accountLabel}
           </Link>
-          <span className="admin-secure-label">
-            <ShieldCheck size={15} aria-hidden="true" />
-            Área da equipe
-          </span>
           <Link
             className="admin-public-link"
             href={catalogUrl}
@@ -640,12 +636,10 @@ export default function DashboardShell({
           </Link>
         </header>
         <main className="admin-content" id="admin-main" tabIndex={-1}>
-          <PartySectionScene />
           {children}
         </main>
         <footer className="admin-footer">
           <span>Pitter Pan Festas · Central de gestão</span>
-          <span>Pequenos detalhes. Grandes celebrações.</span>
         </footer>
       </div>
     </PartyExperience>

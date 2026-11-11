@@ -1,4 +1,5 @@
 "use client";
+import { PageHeading } from "./Primitives";
 import { useState } from "react";
 import Link from "next/link";
 import {
@@ -154,18 +155,24 @@ export default function CatalogGrid({
   }
   return (
     <>
-      <div className="admin-catalog-toolbar">
-        <label className="admin-filter-search">
-          <Search size={18} />
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Encontre um catálogo…"
-            aria-label="Buscar catálogo"
-          />
-        </label>
-        <span>{visible.length} seleções disponíveis</span>
-      </div>
+      <PageHeading
+        title="Catálogos"
+        description="Abra uma coleção ou compartilhe o link com seu cliente."
+        filters={
+          <div className="admin-catalog-toolbar">
+            <label className="admin-filter-search">
+              <Search size={18} />
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Encontre um catálogo…"
+                aria-label="Buscar catálogo"
+              />
+            </label>
+            <span>{visible.length} seleções disponíveis</span>
+          </div>
+        }
+      />
       <p className="admin-copy-status" role="status">
         {message}
       </p>

@@ -8,8 +8,7 @@ export default async function Users() {
   return (
     <>
       <PageHeading
-        eyebrow="PESSOAS QUE FAZEM A DIFERENÇA"
-        title="Sua equipe. Bem conectada."
+        title="Usuários e permissões"
         description="Atendimento consulta e compartilha. Gestores acompanham a operação. Administradores gerenciam acessos e preferências."
       />
       <Team {...data} self={session.sub} />

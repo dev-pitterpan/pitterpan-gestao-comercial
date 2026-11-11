@@ -16,20 +16,27 @@ export function PageHeading({
   title,
   description,
   action,
+  filters,
 }: {
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
-  description: string;
+  description?: string;
   action?: React.ReactNode;
+  filters?: React.ReactNode;
 }) {
   return (
     <header className="admin-page-heading">
-      <div>
-        <span className="admin-eyebrow">{eyebrow}</span>
+      <div className="admin-page-heading-copy">
+        {eyebrow && <span className="admin-eyebrow">{eyebrow}</span>}
         <h1>{title}</h1>
-        <p>{description}</p>
+        {description && <p>{description}</p>}
       </div>
-      {action}
+      {(filters || action) && (
+        <div className="admin-page-heading-controls">
+          {filters}
+          {action}
+        </div>
+      )}
     </header>
   );
 }

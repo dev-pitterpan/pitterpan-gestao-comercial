@@ -1,5 +1,13 @@
 [
   {
+    "version": "2026.11.11.10",
+    "recordedAt": "2026-11-11T12:05:46-03:00",
+    "title": "Cabeçalhos do painel reorganizados",
+    "changes": [
+      "Os banners ilustrados foram removidos e os filtros, períodos e ações principais ficam junto ao título de cada página, para administradores e gerentes."
+    ]
+  },
+  {
     "version": "2026.11.11.9",
     "recordedAt": "2026-11-11T11:44:56-03:00",
     "title": "Novo visual dos gráficos de vendas",

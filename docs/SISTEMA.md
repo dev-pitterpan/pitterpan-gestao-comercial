@@ -17,6 +17,8 @@ Escolha ou troque a foto pelo avatar da barra lateral, em Configurações ou em 
 
 ## 2. Mapa das telas
 
+No painel do administrador e do gerente, os títulos e os filtros de consulta ficam logo abaixo da barra global. A data da Visão geral controla os indicadores de vendas. A metodologia de Recebimentos e Reembolsos fica disponível em “Como os valores são calculados”.
+
 | Menu ou tela | Rota | O que faz e de onde vêm os dados |
 | --- | --- | --- |
 | Login e recuperação | `/login/`, `/recuperar-senha/` | Entrada da equipe e solicitação de recuperação. O master usa credenciais configuradas. As contas da equipe ficam no banco. |

@@ -1,4 +1,5 @@
 "use client";
+import { PageHeading } from "./Primitives";
 import {
   fulfillmentLabels,
   fulfillmentFilters,
@@ -65,11 +66,15 @@ const status: Record<string, string> = {
   UNKNOWN: "Não informado",
 };
 export default function SalesDashboard({
+  title,
+  description,
   initialFilters,
   initialDays = 30,
   view = "orders",
   netFirst = false,
 }: {
+  title: string;
+  description: string;
   initialFilters?: SalesFilters;
   initialDays?: number;
   view?: SalesView;
@@ -401,123 +406,137 @@ export default function SalesDashboard({
         : "Recebido confirmado";
   return (
     <div className="sales-dashboard">
-      <div className="sales-toolbar">
-        <div className="sales-period-field">
-          <span className="sales-period-label">Período dos pedidos</span>
-          <DateRangePicker
-            value={{ start: chartStart, end: chartEnd }}
-            resetLabel="Voltar aos últimos 30 dias"
-            onChange={(range) => {
-              resetList();
-              if (!range.start) setDays(30);
-              setFilters((old) => ({ ...old, ...range }));
-            }}
-          />
-        </div>
-        {!finance && !showSummary && (
-          <div>
-            <label htmlFor="sales-status">Situação do pagamento</label>
-            <SalesStatusSelect
-              id="sales-status"
-              value={filters.status}
-              onChange={(status) => {
-                resetList();
-                setFilters((old) => ({ ...old, status }));
-              }}
-            />
+      <PageHeading
+        eyebrow="Vendas Shopify"
+        title={title}
+        description={description}
+        filters={
+          <div className="sales-toolbar">
+            <div className="sales-period-field">
+              <span className="sales-period-label">Período dos pedidos</span>
+              <DateRangePicker
+                value={{ start: chartStart, end: chartEnd }}
+                resetLabel="Voltar aos últimos 30 dias"
+                onChange={(range) => {
+                  resetList();
+                  if (!range.start) setDays(30);
+                  setFilters((old) => ({ ...old, ...range }));
+                }}
+              />
+            </div>
+            {!finance && !showSummary && (
+              <div>
+                <label htmlFor="sales-status">Situação do pagamento</label>
+                <SalesStatusSelect
+                  id="sales-status"
+                  value={filters.status}
+                  onChange={(status) => {
+                    resetList();
+                    setFilters((old) => ({ ...old, status }));
+                  }}
+                />
+              </div>
+            )}
+            {!finance && !showSummary && (
+              <div>
+                <label htmlFor="sales-fulfillment">
+                  Situação do atendimento
+                </label>
+                <AdminSelect
+                  id="sales-fulfillment"
+                  label="Situação do atendimento"
+                  value={filters.fulfillment || "all"}
+                  options={fulfillmentFilters.map((value) => ({
+                    value,
+                    label: fulfillmentFilterLabels[value],
+                  }))}
+                  onValueChange={(fulfillment) => {
+                    resetList();
+                    setFilters((old) => ({
+                      ...old,
+                      fulfillment: fulfillment as FulfillmentFilter,
+                    }));
+                  }}
+                />
+              </div>
+            )}
+            {!showSummary && (
+              <div>
+                <label htmlFor="sales-delivery-filter">
+                  Modalidade de entrega
+                </label>
+                <AdminSelect
+                  id="sales-delivery-filter"
+                  label="Modalidade de entrega"
+                  value={filters.delivery || "all"}
+                  onValueChange={(delivery) => {
+                    resetList();
+                    setFilters((old) => ({
+                      ...old,
+                      delivery: delivery as DeliveryKind | "all",
+                    }));
+                  }}
+                  options={[
+                    { value: "all", label: "Todas as modalidades" },
+                    ...deliveryFilterKinds.map((kind) => ({
+                      value: kind,
+                      label: deliveryLabels[kind],
+                      icon: (
+                        <span aria-hidden="true">
+                          <DeliveryMark kind={kind} label={false} />
+                        </span>
+                      ),
+                      count: data
+                        ? count(
+                            data.deliveries.find((item) => item.kind === kind)
+                              ?.orders ?? 0,
+                          )
+                        : undefined,
+                    })),
+                  ]}
+                />
+              </div>
+            )}
+            {!showSummary && (
+              <div className="sales-category-filter">
+                <label htmlFor="sales-category">Categoria do produto</label>
+                <input
+                  id="sales-category"
+                  type="search"
+                  maxLength={200}
+                  value={categoryDraft}
+                  onChange={(event) => setCategoryDraft(event.target.value)}
+                  placeholder="Buscar qualquer categoria…"
+                />
+              </div>
+            )}
+            {showSummary && (
+              <button
+                type="button"
+                className="admin-button"
+                onClick={sync}
+                disabled={syncing}
+              >
+                <RefreshCw size={16} className={syncing ? "sales-spin" : ""} />
+                {syncing ? "Atualizando…" : "Atualizar uma etapa"}
+              </button>
+            )}
           </div>
-        )}
-        {!finance && !showSummary && (
-          <div>
-            <label htmlFor="sales-fulfillment">Situação do atendimento</label>
-            <AdminSelect
-              id="sales-fulfillment"
-              label="Situação do atendimento"
-              value={filters.fulfillment || "all"}
-              options={fulfillmentFilters.map((value) => ({
-                value,
-                label: fulfillmentFilterLabels[value],
-              }))}
-              onValueChange={(fulfillment) => {
-                resetList();
-                setFilters((old) => ({
-                  ...old,
-                  fulfillment: fulfillment as FulfillmentFilter,
-                }));
-              }}
-            />
-          </div>
-        )}
-        {!showSummary && (
-          <div>
-            <label htmlFor="sales-delivery-filter">Modalidade de entrega</label>
-            <AdminSelect
-              id="sales-delivery-filter"
-              label="Modalidade de entrega"
-              value={filters.delivery || "all"}
-              onValueChange={(delivery) => {
-                resetList();
-                setFilters((old) => ({
-                  ...old,
-                  delivery: delivery as DeliveryKind | "all",
-                }));
-              }}
-              options={[
-                { value: "all", label: "Todas as modalidades" },
-                ...deliveryFilterKinds.map((kind) => ({
-                  value: kind,
-                  label: deliveryLabels[kind],
-                  icon: (
-                    <span aria-hidden="true">
-                      <DeliveryMark kind={kind} label={false} />
-                    </span>
-                  ),
-                  count: data
-                    ? count(
-                        data.deliveries.find((item) => item.kind === kind)
-                          ?.orders ?? 0,
-                      )
-                    : undefined,
-                })),
-              ]}
-            />
-          </div>
-        )}
-        {!showSummary && (
-          <div className="sales-category-filter">
-            <label htmlFor="sales-category">Categoria do produto</label>
-            <input
-              id="sales-category"
-              type="search"
-              maxLength={200}
-              value={categoryDraft}
-              onChange={(event) => setCategoryDraft(event.target.value)}
-              placeholder="Buscar qualquer categoria…"
-            />
-          </div>
-        )}
-        {showSummary && (
-          <button
-            type="button"
-            className="admin-button"
-            onClick={sync}
-            disabled={syncing}
-          >
-            <RefreshCw size={16} className={syncing ? "sales-spin" : ""} />
-            {syncing ? "Atualizando…" : "Atualizar uma etapa"}
-          </button>
-        )}
-      </div>
+        }
+      />
       {(finance || showSummary) && (
-        <p className="sales-definition">
-          Pedidos processados no período, com o estado financeiro atual.
-          Estornos são os valores acumulados desses pedidos e podem ter ocorrido
-          depois do período selecionado. Recebimentos incluem frete e impostos;
-          não são uma apuração contábil por data de pagamento. Pedidos de teste
-          são excluídos.
-          {filters.category &&
-            " Os valores são dos pedidos completos que contêm produtos dessa categoria na última importação; o ranking inclui somente os produtos correspondentes."}
-        </p>
+        <details className="sales-methodology">
+          <summary>Como os valores são calculados</summary>
+          <p className="sales-definition">
+            Pedidos processados no período, com o estado financeiro atual.
+            Estornos são os valores acumulados desses pedidos e podem ter
+            ocorrido depois do período selecionado. Recebimentos incluem frete e
+            impostos; não são uma apuração contábil por data de pagamento.
+            Pedidos de teste são excluídos.
+            {filters.category &&
+              " Os valores são dos pedidos completos que contêm produtos dessa categoria na última importação; o ranking inclui somente os produtos correspondentes."}
+          </p>
+        </details>
       )}
       {outsideAutomaticWindow && (
         <p className="admin-data-notice" role="status">

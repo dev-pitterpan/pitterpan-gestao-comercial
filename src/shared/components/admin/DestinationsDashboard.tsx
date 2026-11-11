@@ -1,4 +1,5 @@
 "use client";
+import { PageHeading } from "./Primitives";
 import { useEffect, useState } from "react";
 import AdminSelect from "./AdminSelect";
 import DateRangePicker from "./DateRangePicker";
@@ -62,71 +63,77 @@ export default function DestinationsDashboard() {
 
   return (
     <>
-      <div className="insights-filters">
-        <AdminSelect
-          label="Período dos destinos"
-          value={days}
-          onValueChange={(v) => {
-            setDays(v);
-            setRange({ start: "", end: "" });
-          }}
-          options={[7, 30, 60].map((n) => ({
-            value: String(n),
-            label: `Últimos ${n} dias`,
-          }))}
-        />
-        <DateRangePicker value={range} onChange={setRange} />
-        <AdminSelect
-          label="Entrega"
-          value={delivery}
-          onValueChange={setDelivery}
-          options={[
-            { value: "all", label: "Todas as entregas" },
-            { value: "PICKUP", label: deliveryLabels.PICKUP },
-            { value: "MOTOBOY", label: "Motoboy" },
-            { value: "SEDEX", label: "Sedex" },
-            { value: "PAC", label: deliveryLabels.PAC },
-            { value: "JADLOG", label: deliveryLabels.JADLOG },
-            { value: "LOCAL", label: deliveryLabels.LOCAL },
-            { value: "OTHER", label: deliveryLabels.OTHER },
-            { value: "MIXED", label: "Modalidades múltiplas" },
-            { value: "UNKNOWN", label: "Não identificado" },
-          ]}
-        />
-        <AdminSelect
-          label="Situação do atendimento"
-          value={fulfillment}
-          onValueChange={setFulfillment}
-          options={[
-            { value: "all", label: "Todo atendimento" },
-            { value: "FULFILLED", label: "Atendimento concluído" },
-            { value: "PARTIALLY_FULFILLED", label: "Atendimento parcial" },
-            { value: "UNFULFILLED", label: "Atendimento pendente" },
-          ]}
-        />
-        <AdminSelect
-          label="Estado de destino"
-          value={state}
-          onValueChange={setState}
-          options={[
-            { value: "", label: "Todos os estados" },
-            ..."AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO RR SC SP SE TO"
-              .split(" ")
-              .map((uf) => ({ value: uf, label: uf })),
-          ]}
-        />
-        <input
-          aria-label="Buscar cidade ou estado"
-          placeholder="Cidade ou estado…"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-        />
-        {state && (
-          <button className="admin-button" onClick={() => setState("")}>
-            Limpar estado · {state}
-          </button>
-        )}
-      </div>
+      <PageHeading
+        title="Mapa de entregas"
+        description="Consulte os destinos dos pedidos por período, modalidade e situação."
+        filters={
+          <div className="insights-filters">
+            <AdminSelect
+              label="Período dos destinos"
+              value={days}
+              onValueChange={(v) => {
+                setDays(v);
+                setRange({ start: "", end: "" });
+              }}
+              options={[7, 30, 60].map((n) => ({
+                value: String(n),
+                label: `Últimos ${n} dias`,
+              }))}
+            />
+            <DateRangePicker value={range} onChange={setRange} />
+            <AdminSelect
+              label="Entrega"
+              value={delivery}
+              onValueChange={setDelivery}
+              options={[
+                { value: "all", label: "Todas as entregas" },
+                { value: "PICKUP", label: deliveryLabels.PICKUP },
+                { value: "MOTOBOY", label: "Motoboy" },
+                { value: "SEDEX", label: "Sedex" },
+                { value: "PAC", label: deliveryLabels.PAC },
+                { value: "JADLOG", label: deliveryLabels.JADLOG },
+                { value: "LOCAL", label: deliveryLabels.LOCAL },
+                { value: "OTHER", label: deliveryLabels.OTHER },
+                { value: "MIXED", label: "Modalidades múltiplas" },
+                { value: "UNKNOWN", label: "Não identificado" },
+              ]}
+            />
+            <AdminSelect
+              label="Situação do atendimento"
+              value={fulfillment}
+              onValueChange={setFulfillment}
+              options={[
+                { value: "all", label: "Todo atendimento" },
+                { value: "FULFILLED", label: "Atendimento concluído" },
+                { value: "PARTIALLY_FULFILLED", label: "Atendimento parcial" },
+                { value: "UNFULFILLED", label: "Atendimento pendente" },
+              ]}
+            />
+            <AdminSelect
+              label="Estado de destino"
+              value={state}
+              onValueChange={setState}
+              options={[
+                { value: "", label: "Todos os estados" },
+                ..."AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO RR SC SP SE TO"
+                  .split(" ")
+                  .map((uf) => ({ value: uf, label: uf })),
+              ]}
+            />
+            <input
+              aria-label="Buscar cidade ou estado"
+              placeholder="Cidade ou estado…"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+            />
+            {state && (
+              <button className="admin-button" onClick={() => setState("")}>
+                Limpar estado · {state}
+              </button>
+            )}
+          </div>
+        }
+      />
       {busy && <PitterSpinner label="Consultando destinos…" />}
       {error && (
         <p className="admin-data-notice" role="alert">

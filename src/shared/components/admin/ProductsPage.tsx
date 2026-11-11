@@ -4,7 +4,7 @@ import {
   adminQuerySchema,
 } from "../../server/admin/repository";
 import { DataNotice, PageHeading, Pagination, number } from "./Primitives";
-import ProductList from "./ProductList";
+import ProductList, { ProductFilters } from "./ProductList";
 export default async function ProductsPage({
   searchParams,
   mode = "products",
@@ -34,19 +34,12 @@ export default async function ProductsPage({
   return (
     <>
       <PageHeading
-        eyebrow={
-          mode === "stock"
-            ? "CADA UNIDADE CONTA"
-            : mode === "offers"
-              ? "OPORTUNIDADES DA LOJA"
-              : "SEU MIX, ORGANIZADO"
-        }
         title={
           mode === "stock"
-            ? "Estoque sob controle."
+            ? "Estoque"
             : mode === "offers"
-              ? "Boas ofertas. Grandes festas."
-              : "Todos os produtos."
+              ? "Ofertas"
+              : "Produtos"
         }
         description={
           mode === "stock"
@@ -54,6 +47,13 @@ export default async function ProductsPage({
             : mode === "offers"
               ? "Variantes com preço menor que o preço anterior cadastrado. Vigência e regras finais são confirmadas na loja."
               : "Encontre produtos por nome, SKU ou marca e consulte os detalhes da sua seleção."
+        }
+        filters={
+          <ProductFilters
+            query={query}
+            base={base}
+            canExport={result.products.length > 0}
+          />
         }
       />
       <DataNotice context={context} />
@@ -72,12 +72,7 @@ export default async function ProductsPage({
           ))}
         </div>
       )}
-      <ProductList
-        products={result.products}
-        query={query}
-        base={base}
-        settings={context.settings}
-      />
+      <ProductList products={result.products} settings={context.settings} />
       <Pagination
         {...result}
         base={base}

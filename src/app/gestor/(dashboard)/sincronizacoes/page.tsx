@@ -20,8 +20,7 @@ export default async function Sync() {
   return (
     <>
       <PageHeading
-        eyebrow="DADOS EM QUE VOCÊ PODE CONFIAR"
-        title="Sincronização da loja."
+        title="Sincronização da loja"
         description="Atualize os dados da Shopify e acompanhe o andamento por aqui."
       />
       <DataNotice context={context} />

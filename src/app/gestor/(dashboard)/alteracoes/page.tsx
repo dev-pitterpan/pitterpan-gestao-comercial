@@ -46,9 +46,9 @@ export default async function Changes({
         eyebrow="SHOPIFY → CATÁLOGO"
         title="Alterações na Shopify"
         description="Veja quais dados dos produtos mudaram na Shopify entre as sincronizações do catálogo. O filtro usa a data em que a diferença foi detectada. A última atualização do produto na Shopify aparece quando disponível."
+        filters={<ChangeHistoryFilters range={range} kind={kind} />}
       />
       <DataNotice context={context} />
-      <ChangeHistoryFilters range={range} kind={kind} />
       {!parsed.success && (
         <p role="alert">Escolha um período válido de até 366 dias.</p>
       )}

@@ -8,6 +8,7 @@ import CommercialOverview, {
   loadOverview,
 } from "@shared/components/admin/CommercialOverview";
 import "./commercial-overview.css";
+import CommercialPeriod from "@shared/components/admin/CommercialPeriod";
 import StockOverview from "@shared/components/admin/StockOverview";
 import PartyChart from "@shared/components/admin/PartyChart";
 import Link from "next/link";
@@ -27,6 +28,7 @@ import { adminContext } from "@shared/server/admin/repository";
 import { requireSession } from "@shared/server/auth/session";
 import {
   DataNotice,
+  PageHeading,
   dateTime,
   number,
   statusLabels,
@@ -95,24 +97,11 @@ export default async function Overview({
   ];
   return (
     <>
-      <header className="admin-overview-heading">
-        <div>
-          <span className="admin-eyebrow">SEU NEGÓCIO, EM PERSPECTIVA</span>
-          <h1>Visão geral</h1>
-          <p>
-            Olá, {user.name.split(" ")[0]}. Acompanhe as vendas, o catálogo e as
-            prioridades da operação.
-          </p>
-        </div>
-        <span className="admin-date">
-          <Clock3 size={15} />
-          {new Intl.DateTimeFormat("pt-BR", {
-            day: "numeric",
-            month: "long",
-            timeZone: "America/Sao_Paulo",
-          }).format(new Date())}
-        </span>
-      </header>
+      <PageHeading
+        title="Visão geral"
+        description={`Olá, ${user.name.split(" ")[0]}. Acompanhe vendas, catálogo e prioridades da operação.`}
+        filters={canViewSales ? <CommercialPeriod range={range} /> : undefined}
+      />
       <DataNotice context={context} />
       {canViewSales && (
         <CommercialOverview
