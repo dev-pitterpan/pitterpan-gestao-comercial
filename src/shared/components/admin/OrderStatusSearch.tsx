@@ -52,7 +52,7 @@ export default function OrderStatusSearch({
         {value === "NO_MATCH"
           ? "Nenhuma situação corresponde à busca. Apague para ver todas."
           : value === "all"
-            ? "Todas as situações. Digite para filtrar automaticamente."
+            ? "Todas as situações"
             : `Filtro aplicado: ${orderStatusSearchLabel(value)}. Apague para ver todas as situações.`}
       </small>
     </>

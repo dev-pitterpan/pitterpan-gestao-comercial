@@ -24,6 +24,7 @@ import {
 } from "../../lib/admin/fulfillment";
 import type { readFulfillmentDetails } from "../../server/sales/fulfillment-details";
 import ProductThumbnail from "./ProductThumbnail";
+import DragScroll from "./DragScroll";
 import PitterSpinner from "./PitterSpinner";
 type Data = Awaited<ReturnType<typeof readFulfillmentDetails>>;
 const number = (n: number) => n.toLocaleString("pt-BR");
@@ -317,7 +318,12 @@ function FulfillmentWindow({
           } as CSSProperties
         }
       >
-        <div className="fulfillment-window-content">
+        <div
+          className="fulfillment-window-content"
+          role="region"
+          aria-label="Conferência de itens com rolagem"
+          tabIndex={0}
+        >
           <header className="fulfillment-dialog-heading">
             <div
               className="fulfillment-window-grip"
@@ -422,11 +428,9 @@ function FulfillmentWindow({
                   </div>
                 ))}
               </div>
-              <div
+              <DragScroll
                 className="fulfillment-dialog-table"
-                role="region"
-                aria-label="Produtos e quantidades do atendimento"
-                tabIndex={0}
+                label="Produtos e quantidades do atendimento"
               >
                 <table className="admin-table">
                   <thead>
@@ -490,7 +494,7 @@ function FulfillmentWindow({
                     Nenhum produto informado neste pedido.
                   </p>
                 )}
-              </div>
+              </DragScroll>
               <p className="fulfillment-dialog-note">
                 “Atendido” conta somente registros concluídos com sucesso.
                 Cancelamentos ou falhas de atendimento não entram nessa

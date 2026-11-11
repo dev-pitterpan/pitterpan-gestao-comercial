@@ -4,9 +4,11 @@ import { useRef, type ReactNode } from "react";
 
 export default function DragScroll({
   children,
+  className = "admin-table-scroll finance-table-viewport",
   label = "Pedidos com rolagem. Clique e arraste para navegar pela tabela.",
 }: {
   children: ReactNode;
+  className?: string;
   label?: string;
 }) {
   const gesture = useRef<{
@@ -21,23 +23,26 @@ export default function DragScroll({
 
   return (
     <div
-      className="admin-table-scroll finance-table-viewport drag-scroll"
+      className={`${className} drag-scroll`}
       role="region"
       tabIndex={0}
       aria-label={label}
       onPointerDown={(event) => {
         if (event.pointerType !== "mouse" || event.button !== 0) return;
+        suppressClick.current = false;
+        gesture.current = null;
         const node = event.currentTarget;
         const rect = node.getBoundingClientRect();
         if (
           (event.target as Element).closest(
-            "a, button, input, select, textarea",
+            "a, button, input, select, textarea, summary, [contenteditable]",
           ) ||
+          (node.scrollWidth <= node.clientWidth &&
+            node.scrollHeight <= node.clientHeight) ||
           event.clientX - rect.left >= node.clientWidth ||
           event.clientY - rect.top >= node.clientHeight
         )
           return;
-        suppressClick.current = false;
         gesture.current = {
           id: event.pointerId,
           x: event.clientX,
@@ -57,8 +62,13 @@ export default function DragScroll({
         }
         const dx = event.clientX - start.x;
         const dy = event.clientY - start.y;
-        if (!start.dragging && Math.hypot(dx, dy) < 5) return;
         if (!start.dragging) {
+          const node = event.currentTarget;
+          const distance = Math.hypot(
+            node.scrollWidth > node.clientWidth ? dx : 0,
+            node.scrollHeight > node.clientHeight ? dy : 0,
+          );
+          if (distance < 5) return;
           start.dragging = true;
           event.currentTarget.setPointerCapture(event.pointerId);
           event.currentTarget.dataset.dragging = "true";
@@ -86,8 +96,10 @@ export default function DragScroll({
       onClickCapture={(event) => {
         if (!suppressClick.current) return;
         suppressClick.current = false;
-        event.preventDefault();
-        event.stopPropagation();
+        if (event.detail > 0) {
+          event.preventDefault();
+          event.stopPropagation();
+        }
       }}
       onDragStart={(event) => event.preventDefault()}
     >

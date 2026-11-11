@@ -2090,11 +2090,7 @@
   min-width: 180px;
   max-width: 440px;
 }
-/* Light column guides keep financial values easy to scan. */
-.admin-app .drag-scroll {
-  cursor: grab;
-}
-.admin-app .drag-scroll[data-dragging="true"] {
+.drag-scroll[data-dragging="true"] {
   cursor: grabbing;
   user-select: none;
 }
@@ -2342,37 +2338,52 @@
   padding: 4px 7px;
   width: fit-content;
 }
-.admin-app .sales-customer-refresh {
+.sales-orders-tools {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 10px 20px;
+  margin-block: 10px 4px;
+}
+.sales-orders-status-filter {
+  flex: 1 1 280px;
   display: grid;
-  gap: 7px;
-  padding-bottom: 14px;
-  flex: 0 0 auto;
-  font-size: 10px;
-  line-height: 1.7;
-  color: #8295a8;
+  gap: 5px;
+  min-width: 0;
 }
-.admin-app .sales-customer-refresh button {
-  justify-self: start;
-  border: 0;
-  background: none;
+.sales-customer-refresh {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 6px 12px;
+  max-width: 100%;
+  color: #526b83;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.sales-customer-refresh .admin-button {
+  min-height: 36px;
+  padding: 6px 10px;
+}
+.sales-customer-refresh details {
+  min-width: 0;
+}
+.sales-customer-refresh summary {
+  display: list-item;
+  padding: 8px 0;
   cursor: pointer;
-  padding: 0;
 }
-.admin-app .sales-customer-refresh button:disabled {
-  cursor: wait;
-  opacity: 0.7;
+.sales-customer-refresh details[open] {
+  max-width: 52ch;
+}
+.sales-customer-refresh details small {
+  display: block;
+  padding-bottom: 4px;
+}
+.sales-customer-refresh > [role="status"] {
+  flex-basis: 100%;
 }
 
-.admin-app .sales-orders-status-filter {
-  flex: 0 0 auto;
-  display: grid;
-  gap: 7px;
-  padding: 12px;
-  margin: 12px 0 0;
-  border: 1px solid #dce7f4;
-  border-radius: 14px;
-  background: #f5f9fe;
-}
 .admin-app .sales-orders-status-filter > label {
   color: #315b88;
   font-size: 12px;

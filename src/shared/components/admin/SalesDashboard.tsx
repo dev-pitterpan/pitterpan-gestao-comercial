@@ -849,39 +849,40 @@ export default function SalesDashboard({
                 </h2>
                 <ShoppingCart size={22} />
               </header>
-              {!finance && (
-                <div className="sales-orders-status-filter">
-                  <label htmlFor="recent-orders-status">
-                    Buscar pagamento ou cancelamento
-                  </label>
-                  <OrderStatusSearch
-                    value={filters.status}
-                    onChange={(status) => {
-                      resetList(true);
-                      setFilters((old) => ({ ...old, status }));
-                    }}
-                  />
-                  <small>Combina com período, categoria e entrega.</small>
-                  {filters.status === "REFUNDS" && (
-                    <small>
-                      Inclui estornos totais e parciais com valor reembolsado,
-                      mesmo em pedidos cancelados.
-                    </small>
-                  )}
-                  {filters.status === "CANCELLED" && (
-                    <small>
-                      Inclui pedidos cancelados com ou sem reembolso. Confira as
-                      colunas Recebido e Estornado.
-                    </small>
-                  )}
-                </div>
-              )}
-              <OrderCustomerRefresh
-                orders={data.orders}
-                onUpdate={updateCustomers}
-              />
+              <div className="sales-orders-tools">
+                {!finance && (
+                  <div className="sales-orders-status-filter">
+                    <label htmlFor="recent-orders-status">
+                      Buscar pagamento ou cancelamento
+                    </label>
+                    <OrderStatusSearch
+                      value={filters.status}
+                      onChange={(status) => {
+                        resetList(true);
+                        setFilters((old) => ({ ...old, status }));
+                      }}
+                    />
+                    {filters.status === "REFUNDS" && (
+                      <small>
+                        Inclui estornos totais e parciais com valor reembolsado,
+                        mesmo em pedidos cancelados.
+                      </small>
+                    )}
+                    {filters.status === "CANCELLED" && (
+                      <small>
+                        Inclui pedidos cancelados com ou sem reembolso. Confira
+                        as colunas Recebido e Estornado.
+                      </small>
+                    )}
+                  </div>
+                )}
+                <OrderCustomerRefresh
+                  orders={data.orders}
+                  onUpdate={updateCustomers}
+                />
+              </div>
               {loading && <small role="status">Atualizando pedidos…</small>}
-              <DragScroll>
+              <DragScroll key={pageCursors.at(-1) || "first"}>
                 <table
                   aria-busy={loading || moreLoading}
                   className="admin-table"

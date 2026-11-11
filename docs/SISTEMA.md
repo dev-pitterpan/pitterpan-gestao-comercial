@@ -24,7 +24,7 @@ No painel do administrador e do gerente, os títulos e os filtros de consulta fi
 | Login e recuperação | `/login/`, `/recuperar-senha/` | Entrada da equipe e solicitação de recuperação. O master usa credenciais configuradas. As contas da equipe ficam no banco. |
 | Visão geral | `/gestor/` | Indicadores, evolução de vendas e ranking por data. A fila Atenção agora considera as pendências do histórico importado. Também reúne categorias, estoque e mudanças de catálogo. |
 | Resumo Shopify | `/gestor/vendas/resumo/` | Indicadores e situação dos pedidos. Os cartões abrem o detalhe no período selecionado. |
-| Vendas Shopify | `/gestor/vendas/` | Lista de pedidos recentes com filtros, pagamento, entrega e itens. Exibe oito pedidos por página, com navegação anterior e próxima. |
+| Vendas Shopify | `/gestor/vendas/` | Lista de pedidos recentes com filtros, pagamento, entrega e itens. Exibe oito pedidos por página em uma tabela com rolagem interna. A conferência tem rolagem vertical na janela e horizontal na tabela de produtos. |
 | Atendimento de pedidos | `/gestor/vendas/atendimento/` | Fila de preparo e retirada, com detalhes do atendimento. |
 | Recebimentos | `/gestor/vendas/recebimentos/` | Evolução diária do recebido e do líquido, com total em destaque, leitura por dia e consulta dos pedidos que compõem o resultado. |
 | Estornos e reembolsos | `/gestor/vendas/reembolsos/` | Evolução e pedidos com reembolso total ou parcial, incluindo cancelados quando houver valor devolvido. |

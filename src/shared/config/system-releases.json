@@ -1,5 +1,14 @@
 [
   {
+    "version": "2026.11.11.11",
+    "recordedAt": "2026-11-11T12:33:32-03:00",
+    "title": "Rolagem e controles dos pedidos",
+    "changes": [
+      "A tabela de pedidos volta a ter rolagem interna. A conferência de itens usa a rolagem vertical da janela e mantém a tabela de produtos navegável na horizontal.",
+      "A busca por situação, a atualização de clientes e a explicação dos vínculos ficam agrupadas acima da lista."
+    ]
+  },
+  {
     "version": "2026.11.11.10",
     "recordedAt": "2026-11-11T12:05:46-03:00",
     "title": "Cabeçalhos do painel reorganizados",

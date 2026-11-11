@@ -73,7 +73,7 @@ export default function OrderCustomerRefresh({
     <div className="sales-customer-refresh">
       <button
         type="button"
-        className="admin-text-link"
+        className="admin-button"
         disabled={busy || !orders.length}
         onClick={() => void refresh(orders.slice(-10).map((o) => o.id))}
       >
@@ -81,11 +81,11 @@ export default function OrderCustomerRefresh({
           <PitterSpinner label="Consultando clientes…" />
         ) : (
           <>
-            <RefreshCw size={14} /> Atualizar clientes destes pedidos
+            <RefreshCw size={14} aria-hidden="true" /> Atualizar clientes dos
+            pedidos
           </>
         )}
       </button>
-      {message && <small role="status">{message}</small>}
       <details>
         <summary>Como os pedidos são vinculados</summary>
         <small>
@@ -95,6 +95,7 @@ export default function OrderCustomerRefresh({
           nos pedidos pendentes; não confirma dívida.
         </small>
       </details>
+      {message && <small role="status">{message}</small>}
     </div>
   );
 }
