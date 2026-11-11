@@ -24,7 +24,7 @@ Escolha ou troque a foto pelo avatar da barra lateral, em Configurações ou em 
 | Resumo Shopify | `/gestor/vendas/resumo/` | Indicadores e situação dos pedidos. Os cartões abrem o detalhe no período selecionado. |
 | Vendas Shopify | `/gestor/vendas/` | Lista de pedidos recentes com filtros, pagamento, entrega e itens. Exibe oito pedidos por página, com navegação anterior e próxima. |
 | Atendimento de pedidos | `/gestor/vendas/atendimento/` | Fila de preparo e retirada, com detalhes do atendimento. |
-| Recebimentos | `/gestor/vendas/recebimentos/` | Valores diários do recebido e do líquido em colunas, com escala que inclui zero e consulta dos pedidos que compõem o resultado. |
+| Recebimentos | `/gestor/vendas/recebimentos/` | Evolução diária do recebido e do líquido, com total em destaque, leitura por dia e consulta dos pedidos que compõem o resultado. |
 | Estornos e reembolsos | `/gestor/vendas/reembolsos/` | Evolução e pedidos com reembolso total ou parcial, incluindo cancelados quando houver valor devolvido. |
 | Produtos mais vendidos | `/gestor/produtos-vendidos/` | Ranking e consulta paginada de produtos e variantes vendidos, com busca e filtros. |
 | Mapa de entregas | `/gestor/mapa/` | Agrupa destinos dos pedidos online por município e UF quando identificados. |

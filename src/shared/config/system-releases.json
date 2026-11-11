@@ -1,5 +1,13 @@
 [
   {
+    "version": "2026.11.11.9",
+    "recordedAt": "2026-11-11T11:44:56-03:00",
+    "title": "Novo visual dos gráficos de vendas",
+    "changes": [
+      "Gráficos de evolução com total em destaque, indicadores segmentados e leitura diária. A comparação fica disponível sob demanda e os reembolsos aparecem como eventos por dia."
+    ]
+  },
+  {
     "version": "2026.11.11.8",
     "recordedAt": "2026-11-11T11:36:54-03:00",
     "title": "Paginação de tabelas e gráficos de vendas revisados",

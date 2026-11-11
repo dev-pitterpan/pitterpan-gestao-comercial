@@ -1233,39 +1233,10 @@
   display: grid;
   gap: 16px;
 }
-.sales-finance-panel > header,
-.sales-finance-series > p {
-  margin: 0;
-}
-.sales-finance-series {
-  display: grid;
-  min-width: 0;
-  gap: 10px;
-}
-.sales-finance-series > p {
-  overflow-wrap: anywhere;
-}
-.sales-finance-switch > button {
-  min-height: 42px;
-  white-space: normal;
-}
-.sales-finance-switch > button[aria-pressed="true"] {
-  border-color: #87a9ce;
-  background: #eaf3fd;
-  color: #214f80;
-}
-.sales-finance-series .analytics-revenue-chart {
-  display: block;
-  width: 100%;
-  min-width: 0;
-}
 @media (max-width: 600px) {
   .sales-period-field .admin-date-trigger {
     width: 100%;
     justify-content: center;
-  }
-  .sales-finance-switch > button {
-    flex: 1 1 132px;
   }
 }
 
@@ -1277,20 +1248,6 @@
 .admin-app .sales-orders-panel .admin-table tbody td {
   padding-block: 12px;
 }
-.admin-app .analytics-revenue-chart[data-compact] {
-  height: 188px;
-  min-height: 0;
-  max-height: 188px;
-}
-.sales-finance-panel {
-  gap: 12px;
-}
-
-.admin-app .sales-finance-panel {
-  width: min(100%, 740px);
-  justify-self: start;
-}
-
 .admin-table-pagination {
   display: flex;
   align-items: center;
@@ -1315,15 +1272,6 @@
 .admin-table-pagination-controls [aria-current="page"] {
   white-space: nowrap;
 }
-.analytics-chart-wrap[data-compact] .analytics-chart-readout {
-  min-height: 30px;
-  margin-bottom: 4px;
-  color: #536b83;
-}
-.sales-finance-series > p > strong {
-  font-size: clamp(16px, 2vw, 20px);
-  letter-spacing: -0.015em;
-}
 @media (max-width: 430px) {
   .admin-table-pagination-controls .admin-button {
     min-width: 40px;
@@ -1332,5 +1280,179 @@
   }
   .admin-table-pagination-controls .admin-button > span {
     display: none;
+  }
+}
+
+.admin-app .sales-finance-panel,
+.admin-app .commercial-overview-trend {
+  padding: clamp(15px, 2.5vw, 23px);
+  background: #fff;
+}
+.admin-app .sales-finance-panel {
+  width: min(100%, 740px);
+  justify-self: start;
+}
+.sales-trend {
+  --trend-color: #2865a3;
+  min-width: 0;
+  color: #172e46;
+}
+.sales-trend--refunds {
+  --trend-color: #a95136;
+}
+.sales-trend .sales-trend-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+  margin: 0 0 12px;
+}
+.sales-trend-head > div:first-child {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.admin-app .sales-trend-head h2 {
+  margin: 0 0 4px;
+  color: #213d59;
+  font-size: 14px;
+  font-weight: 700;
+}
+.sales-trend-head span {
+  color: #526b83;
+  font-size: 11px;
+}
+.sales-trend-head strong {
+  color: #142c46;
+  font-size: clamp(22px, 3vw, 32px);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.035em;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.sales-trend-controls,
+.sales-trend-segments,
+.sales-trend-caption,
+.sales-trend-key,
+.sales-trend-key > :is(span, label),
+.sales-trend-value {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.sales-trend-controls {
+  gap: 6px;
+}
+.sales-trend-segments {
+  gap: 3px;
+  padding: 3px;
+  border: 1px solid #e3ebf3;
+  border-radius: 9px;
+  background: #f1f5fa;
+}
+.admin-app .sales-trend-segments button {
+  min-height: 34px;
+  padding: 4px 9px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: #405d78;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 650;
+  cursor: pointer;
+}
+.admin-app .sales-trend-segments button[aria-pressed="true"] {
+  border-color: #dce7f3;
+  background: #fff;
+  color: #194f82;
+  box-shadow: 0 1px 3px #223f6414;
+}
+.sales-trend-caption {
+  justify-content: space-between;
+  gap: 8px 12px;
+  min-height: 30px;
+  padding: 7px 9px;
+  border-radius: 8px 8px 0 0;
+  background: #f4f7fb;
+  color: #4d647c;
+  font-size: 11px;
+}
+.sales-trend-key,
+.sales-trend-value,
+.sales-trend-key > :is(span, label) {
+  gap: 6px;
+}
+.sales-trend-key {
+  gap: 6px 12px;
+}
+.sales-trend-key i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--trend-color);
+}
+.sales-trend-key label {
+  cursor: pointer;
+}
+.sales-trend-value {
+  font-variant-numeric: tabular-nums;
+}
+.sales-trend-value b {
+  color: #234867;
+}
+.sales-trend-plot {
+  min-width: 0;
+  border: 1px solid #edf2f7;
+  border-top: 0;
+  border-radius: 0 0 8px 8px;
+}
+.sales-trend-plot svg {
+  display: block;
+  width: 100%;
+  height: 174px;
+  touch-action: pan-y;
+}
+.sales-trend-plot svg text {
+  fill: #526b83;
+  font-size: 10px;
+  font-family: inherit;
+}
+.sales-trend-gridline {
+  stroke: #e8eef5;
+}
+.sales-trend-zero {
+  stroke: #b7c9db;
+}
+.sales-trend-line,
+.sales-trend-previous {
+  fill: none;
+  stroke: var(--trend-color);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.sales-trend-previous,
+.sales-trend-guide {
+  stroke: #8297ac;
+  stroke-width: 1.25;
+  stroke-dasharray: 4 4;
+}
+.sales-trend-dot,
+.sales-trend-refund circle {
+  fill: var(--trend-color);
+  stroke: white;
+  stroke-width: 1.5;
+}
+.sales-trend-refund line {
+  stroke: var(--trend-color);
+  stroke-width: 2;
+  stroke-opacity: 0.45;
+}
+@media (pointer: coarse) {
+  .admin-app .sales-trend-segments button {
+    min-height: 42px;
   }
 }

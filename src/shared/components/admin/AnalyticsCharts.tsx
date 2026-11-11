@@ -1,5 +1,5 @@
 "use client";
-import { useId, useLayoutEffect, useRef, useState } from "react";
+import { useId, useState } from "react";
 import { ChevronDown, ChevronUp, TrendingUp } from "lucide-react";
 import type { AnalyticsTable } from "../../server/sales/analytics";
 export const numberValue = (v: unknown) =>
@@ -21,7 +21,6 @@ export function RevenueChart({
   axisLabel,
   showTable = true,
   comparison,
-  compact = false,
 }: {
   table: AnalyticsTable;
   money: Format;
@@ -30,7 +29,6 @@ export function RevenueChart({
   metricLabel?: string;
   axisLabel?: string;
   showTable?: boolean;
-  compact?: boolean;
   comparison?: { label: string; values: number[] };
 }) {
   const id = useId().replace(/:/g, "");
@@ -42,92 +40,37 @@ export function RevenueChart({
       : null;
   const values = rows.map((r) => numberValue(r[metricKey]));
   const valid = values.filter((v): v is number => v !== null);
-  const chart = useRef<SVGSVGElement>(null);
-  const [measuredWidth, setMeasuredWidth] = useState(760);
-  const hasValues = valid.length > 0;
-  const comparisonValues = comparison?.values ?? [];
-  const allZero =
-    compact &&
-    valid.every((value) => value === 0) &&
-    comparisonValues.every((value) => value === 0);
-  useLayoutEffect(() => {
-    if (!compact || !hasValues || allZero || !chart.current) return;
-    const element = chart.current;
-    function measure() {
-      const width = Math.round(element.getBoundingClientRect().width);
-      if (width > 0) setMeasuredWidth(width);
-    }
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, [compact, hasValues, allZero]);
-  if (!hasValues)
+  if (!valid.length)
     return (
       <p className="analytics-empty">
         Não há valores disponíveis para este indicador no período.
       </p>
     );
-  if (allZero) {
-    return (
-      <p className="analytics-empty">Nenhum valor registrado no período.</p>
-    );
-  }
-  const minValue = Math.min(0, ...valid, ...comparisonValues);
-  const maxValue = Math.max(0, ...valid, ...comparisonValues);
-  const rawStep = (maxValue - minValue || 1) / 4;
-  const magnitude = 10 ** Math.floor(Math.log10(rawStep));
-  const gridStep = Math.max(
-    metricKey === "paid" ? 1 : 0.01,
-    ([1, 2, 2.5, 5, 10].find((value) => value * magnitude >= rawStep) ?? 10) *
-      magnitude,
-  );
-  const min = compact ? Math.floor(minValue / gridStep) * gridStep : minValue;
-  const max = compact
-    ? Math.ceil((maxValue || (minValue === 0 ? 1 : 0)) / gridStep) * gridStep
-    : maxValue;
-  const span = max - min || 1;
-  const gridValues = compact
-    ? Array.from(
-        { length: Math.round(span / gridStep) + 1 },
-        (_, index) => min + index * gridStep,
-      )
-    : Array.from({ length: 5 }, (_, index) => min + (span * index) / 4);
-  const width = compact ? measuredWidth : 760;
-  const height = compact ? 188 : 280;
-  const left = compact ? 46 : 78;
-  const right = width - (compact ? 12 : 34);
-  const top = compact ? 13 : 44;
-  const bottom = compact ? 154 : 232;
-  const tickCount = compact && width < 420 ? 4 : 7;
-  const step = (right - left) / Math.max(1, rows.length - (compact ? 0 : 1));
-  const firstPoint = compact ? left + step / 2 : left;
-  const x = (i: number) => firstPoint + i * step;
-  const y = (n: number) => bottom - ((n - min) * (bottom - top)) / span;
-  const barWidth = Math.min(24, step * 0.68);
+  const comparisonValues = comparison?.values ?? [];
+  const min = Math.min(0, ...valid, ...comparisonValues),
+    max = Math.max(0, ...valid, ...comparisonValues),
+    span = max - min || 1;
+  const x = (i: number) => 78 + (i * 648) / Math.max(1, rows.length - 1);
+  const y = (n: number) => 232 - ((n - min) * 188) / span;
   const segments: { i: number; v: number }[][] = [];
-  if (!compact) {
-    values.forEach((v, i) => {
-      if (v === null) return;
-      if (i === 0 || values[i - 1] === null) segments.push([]);
-      segments.at(-1)!.push({ i, v });
-    });
-  }
-  const barColor = metricKey === "refunded" ? "#b76b39" : "#356da6";
+  values.forEach((v, i) => {
+    if (v === null) return;
+    if (i === 0 || values[i - 1] === null) segments.push([]);
+    segments.at(-1)!.push({ i, v });
+  });
   const chosen = active === null ? null : rows[active];
   const ticks = [
     ...new Set(
-      Array.from({ length: tickCount }, (_, i) =>
-        Math.round((i * Math.max(0, rows.length - 1)) / (tickCount - 1)),
+      Array.from({ length: 7 }, (_, i) =>
+        Math.round((i * Math.max(0, rows.length - 1)) / 6),
       ),
     ),
   ];
   return (
-    <div className="analytics-chart-wrap" data-compact={compact || undefined}>
+    <div className="analytics-chart-wrap">
       <div className="analytics-chart-readout" aria-live="polite">
         <span className="analytics-legend">
-          <i style={compact ? { background: barColor } : undefined} />{" "}
-          {compact ? "Por dia" : metricLabel}
+          <i /> {metricLabel}
           {comparison && <span> · Linha tracejada: {comparison.label}</span>}
         </span>
         <span>
@@ -139,18 +82,14 @@ export function RevenueChart({
                 <> · Anterior: {money(comparison.values[active] ?? null)}</>
               )}
             </>
-          ) : compact ? (
-            "Selecione um dia"
           ) : (
             "Passe pelo gráfico para explorar"
           )}
         </span>
       </div>
       <svg
-        ref={chart}
-        viewBox={`0 0 ${width} ${height}`}
+        viewBox="0 0 760 280"
         className="analytics-revenue-chart"
-        data-compact={compact || undefined}
         role="group"
         tabIndex={0}
         aria-label={`${metricLabel} por dia. Use as setas esquerda e direita para consultar os valores.`}
@@ -172,13 +111,15 @@ export function RevenueChart({
         }}
         onPointerMove={(e) => {
           const rect = e.currentTarget.getBoundingClientRect();
-          const position = ((e.clientX - rect.left) * width) / rect.width;
+          const position = ((e.clientX - rect.left) * 760) / rect.width;
           setActive(
             Math.max(
               0,
               Math.min(
                 rows.length - 1,
-                Math.round((position - firstPoint) / step),
+                Math.round(
+                  ((position - 78) / 648) * Math.max(1, rows.length - 1),
+                ),
               ),
             ),
           );
@@ -192,37 +133,32 @@ export function RevenueChart({
             <stop offset="100%" stopColor="#397bc4" stopOpacity=".015" />
           </linearGradient>
         </defs>
-        {gridValues.map((v, i) => {
+        {[0, 1, 2, 3, 4].map((i) => {
+          const v = min + (span * i) / 4;
           return (
             <g key={i}>
               <line
-                x1={left}
-                x2={right}
+                x1="78"
+                x2="726"
                 y1={y(v)}
                 y2={y(v)}
-                stroke={
-                  compact && Math.abs(v) < gridStep / 100
-                    ? "#aabccc"
-                    : "#e1e9f2"
-                }
-                strokeDasharray={compact ? undefined : "4 6"}
+                stroke="#e1e9f2"
+                strokeDasharray="4 6"
               />
-              <text x={left - (compact ? 8 : 12)} y={y(v) + 4} textAnchor="end">
+              <text x="66" y={y(v) + 4} textAnchor="end">
                 {new Intl.NumberFormat("pt-BR", {
                   notation: "compact",
-                  maximumFractionDigits: compact && Math.abs(v) < 1 ? 2 : 1,
+                  maximumFractionDigits: 1,
                 }).format(v)}
               </text>
             </g>
           );
         })}
-        {!compact && (
-          <text x={left} y="22">
-            {axisLabel || `Valores em ${currency}`}
-          </text>
-        )}
-        {!compact && min < 0 && (
-          <line x1={left} x2={right} y1={y(0)} y2={y(0)} stroke="#9eafc5" />
+        <text x="78" y="22">
+          {axisLabel || `Valores em ${currency}`}
+        </text>
+        {min < 0 && (
+          <line x1="78" x2="726" y1={y(0)} y2={y(0)} stroke="#9eafc5" />
         )}
         {comparisonValues.length > 1 && (
           <polyline
@@ -245,43 +181,25 @@ export function RevenueChart({
             strokeWidth="2"
           />
         )}
-        {compact &&
-          values.map((value, index) => {
-            if (value === null || value === 0) return null;
-            return (
-              <rect
-                key={index}
-                x={x(index) - barWidth / 2}
-                y={Math.min(y(0), y(value))}
-                width={barWidth}
-                height={Math.abs(y(value) - y(0))}
-                rx={Math.min(3, barWidth / 3)}
-                fill={value < 0 ? "#b95670" : barColor}
-                opacity={active === null || active === index ? 1 : 0.48}
-              />
-            );
-          })}
         {segments.map((s, i) => {
           const path = s
             .map((p, j) => `${j ? "L" : "M"}${x(p.i)},${y(p.v)}`)
             .join(" ");
           return (
             <g key={i}>
-              {!compact && (
-                <path
-                  d={`${path} L${x(s.at(-1)!.i)},${y(0)} L${x(s[0].i)},${y(0)} Z`}
-                  fill={`url(#${id})`}
-                />
-              )}
+              <path
+                d={`${path} L${x(s.at(-1)!.i)},${y(0)} L${x(s[0].i)},${y(0)} Z`}
+                fill={`url(#${id})`}
+              />
               <path
                 d={path}
                 fill="none"
                 stroke="#356fb3"
-                strokeWidth={compact ? 2 : 3}
+                strokeWidth="3"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
-              {!compact && s.length === 1 && (
+              {s.length === 1 && (
                 <circle cx={x(s[0].i)} cy={y(s[0].v)} r="4" fill="#356fb3" />
               )}
             </g>
@@ -291,7 +209,7 @@ export function RevenueChart({
           <text
             key={i}
             x={x(i)}
-            y={compact ? 175 : 262}
+            y="262"
             textAnchor={
               i === 0 ? "start" : i === rows.length - 1 ? "end" : "middle"
             }
@@ -304,12 +222,12 @@ export function RevenueChart({
             <line
               x1={x(active)}
               x2={x(active)}
-              y1={top - 6}
-              y2={bottom}
+              y1="38"
+              y2="232"
               stroke="#829bbd"
               strokeDasharray="4 4"
             />
-            {!compact && values[active] !== null && (
+            {values[active] !== null && (
               <circle
                 cx={x(active)}
                 cy={y(values[active]!)}

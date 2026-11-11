@@ -245,9 +245,6 @@ export default function CommercialOverview({
               </Link>
             </section>
             <section className="admin-panel commercial-overview-trend">
-              <header>
-                <h2>Evolução das vendas</h2>
-              </header>
               <CommercialTrend
                 key={`${range.start}-${range.end}`}
                 sales={data.sales}

@@ -7,7 +7,7 @@ import {
 } from "../../lib/admin/fulfillment";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { RevenueChart } from "./AnalyticsCharts";
+import SalesTrendChart, { salesTrendPoints } from "./SalesTrendChart";
 import type { SalesView } from "./SalesWorkspace";
 import {
   salesPageLink,
@@ -747,34 +747,7 @@ export default function SalesDashboard({
           )}
           {finance && (
             <section className="admin-panel sales-finance-panel">
-              <header>
-                <h2>Evolução por data do pedido</h2>
-              </header>
-              {view === "receipts" && (
-                <div
-                  className="sales-workspace-links sales-finance-switch"
-                  role="group"
-                  aria-label="Indicador financeiro"
-                >
-                  <button
-                    type="button"
-                    className="admin-button"
-                    aria-pressed={metric === "received"}
-                    onClick={() => setMetric("received")}
-                  >
-                    Recebido confirmado
-                  </button>
-                  <button
-                    type="button"
-                    className="admin-button"
-                    aria-pressed={metric === "net"}
-                    onClick={() => setMetric("net")}
-                  >
-                    Líquido após estornos
-                  </button>
-                </div>
-              )}
-              {data.totals.map((total) => {
+              {data.totals.map((total, index) => {
                 const byDay = new Map(
                   data.daily
                     .filter((row) => row.currency === total.currency)
@@ -788,41 +761,55 @@ export default function SalesDashboard({
                       )
                     : "";
                 return (
-                  <div key={total.currency} className="sales-finance-series">
-                    <p>
-                      <strong>
-                        {chartLabel} ·{" "}
-                        {money(total[chartMetric], total.currency)}
-                      </strong>
-                    </p>
-                    <RevenueChart
-                      key={`${total.currency}-${chartMetric}`}
-                      table={{
-                        columns: [],
-                        rows: chartDates.map(
-                          (day) =>
-                            byDay.get(day) ?? {
-                              day,
-                              [chartMetric]:
-                                day < completedDay && day >= automaticStart
-                                  ? "0"
-                                  : null,
-                            },
-                        ),
-                      }}
-                      currency={total.currency}
-                      showTable={false}
-                      compact
-                      metricKey={chartMetric}
-                      metricLabel={chartLabel}
-                      axisLabel={total.currency}
-                      money={(value) =>
-                        value === null
-                          ? "—"
-                          : money(String(value), total.currency)
-                      }
-                    />
-                  </div>
+                  <SalesTrendChart
+                    key={total.currency}
+                    title={
+                      view === "refunds"
+                        ? "Evolução dos reembolsos"
+                        : "Evolução dos recebimentos"
+                    }
+                    label={chartLabel}
+                    total={money(total[chartMetric], total.currency)}
+                    rows={salesTrendPoints(
+                      chartDates.map(
+                        (day) =>
+                          byDay.get(day) ?? {
+                            day,
+                            [chartMetric]:
+                              day < completedDay && day >= automaticStart
+                                ? "0"
+                                : null,
+                          },
+                      ),
+                      chartMetric,
+                    )}
+                    format={(value) => money(String(value), total.currency)}
+                    refunds={view === "refunds"}
+                    controls={
+                      view === "receipts" && index === 0 ? (
+                        <div
+                          className="sales-trend-segments"
+                          role="group"
+                          aria-label="Indicador financeiro"
+                        >
+                          <button
+                            type="button"
+                            aria-pressed={metric === "received"}
+                            onClick={() => setMetric("received")}
+                          >
+                            Recebido
+                          </button>
+                          <button
+                            type="button"
+                            aria-pressed={metric === "net"}
+                            onClick={() => setMetric("net")}
+                          >
+                            Líquido
+                          </button>
+                        </div>
+                      ) : undefined
+                    }
+                  />
                 );
               })}
               {!data.totals.length && (

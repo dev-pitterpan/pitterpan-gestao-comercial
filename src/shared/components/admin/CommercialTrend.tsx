@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { RevenueChart } from "./AnalyticsCharts";
+import SalesTrendChart, { salesTrendPoints } from "./SalesTrendChart";
 import type { readSalesFinance } from "../../server/sales/repository";
 import { shiftDate, todayDate } from "../../lib/admin/date-range";
 
@@ -66,57 +66,52 @@ export default function CommercialTrend({
       ? { style: "currency", currency }
       : { maximumFractionDigits: 0 },
   );
+  const label = metric === "net" ? "Líquido após estornos" : "Pedidos pagos";
+  const total = sales.totals.find((row) => row.currency === currency);
   return (
-    <>
-      <div className="commercial-overview-controls">
-        <div
-          role="group"
-          aria-label="Indicador do gráfico"
-          className="commercial-overview-controls"
-        >
-          <button
-            type="button"
-            className="admin-button"
-            aria-pressed={metric === "net"}
-            onClick={() => setMetric("net")}
+    <SalesTrendChart
+      key={currency}
+      title="Evolução das vendas"
+      label={label}
+      total={format.format(Number(total?.[metric] ?? 0))}
+      rows={salesTrendPoints(rows, metric)}
+      format={(value) => format.format(value)}
+      previous={comparison?.values}
+      controls={
+        <>
+          <div
+            className="sales-trend-segments"
+            role="group"
+            aria-label="Indicador do gráfico"
           >
-            Valor recebido
-          </button>
-          <button
-            type="button"
-            className="admin-button"
-            aria-pressed={metric === "paid"}
-            onClick={() => setMetric("paid")}
-          >
-            Pedidos pagos
-          </button>
-        </div>
-        {sales.totals.length > 1 && (
-          <select
-            aria-label="Moeda do gráfico"
-            value={currency}
-            onChange={(e) => setCurrency(e.target.value)}
-          >
-            {sales.totals.map(({ currency }) => (
-              <option key={currency}>{currency}</option>
-            ))}
-          </select>
-        )}
-      </div>
-      <RevenueChart
-        key={currency}
-        table={{ columns: [], rows }}
-        currency={currency}
-        showTable={false}
-        compact
-        comparison={comparison}
-        metricKey={metric}
-        metricLabel={
-          metric === "net" ? "Recebido após reembolsos" : "Pedidos pagos"
-        }
-        axisLabel={metric === "net" ? currency : "Pedidos"}
-        money={(value) => (value === null ? "—" : format.format(value))}
-      />
-    </>
+            <button
+              type="button"
+              aria-pressed={metric === "net"}
+              onClick={() => setMetric("net")}
+            >
+              Líquido
+            </button>
+            <button
+              type="button"
+              aria-pressed={metric === "paid"}
+              onClick={() => setMetric("paid")}
+            >
+              Pedidos pagos
+            </button>
+          </div>
+          {sales.totals.length > 1 && (
+            <select
+              aria-label="Moeda do gráfico"
+              value={currency}
+              onChange={(event) => setCurrency(event.target.value)}
+            >
+              {sales.totals.map(({ currency }) => (
+                <option key={currency}>{currency}</option>
+              ))}
+            </select>
+          )}
+        </>
+      }
+    />
   );
 }
