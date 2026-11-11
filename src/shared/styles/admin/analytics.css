@@ -1930,6 +1930,20 @@
   top: auto;
   background: #edf4fc !important;
 }
+.history-table-viewport {
+  max-height: clamp(280px, 52dvh, 560px);
+  margin-top: 0;
+  overscroll-behavior-y: auto;
+  scrollbar-gutter: stable;
+}
+.history-table-viewport th:first-child,
+.history-table-viewport td:first-child {
+  left: auto;
+  box-shadow: none;
+}
+.history-table-viewport td:first-child {
+  position: static;
+}
 .admin-app .admin-product-viewport {
   --product-heading-height: 56px;
   --product-row-height: 68px;

@@ -1,5 +1,7 @@
 import Link from "next/link";
 import ChangeHistoryFilters from "@shared/components/admin/ChangeHistoryFilters";
+import DragScroll from "@shared/components/admin/DragScroll";
+import TablePagination from "@shared/components/admin/TablePagination";
 import { dateRangeSchema } from "@shared/lib/admin/date-range";
 import ProductThumbnail from "@shared/components/admin/ProductThumbnail";
 import { adminContext, adminChanges } from "@shared/server/admin/repository";
@@ -7,7 +9,6 @@ import {
   PageHeading,
   DataNotice,
   EmptyState,
-  Pagination,
   number,
   dateTime,
 } from "@shared/components/admin/Primitives";
@@ -35,6 +36,8 @@ export default async function Changes({
   const page = Math.max(1, Math.min(10000, Number(raw) || 1));
   const context = await adminContext("changes");
   const data = await adminChanges(Math.floor(page), range, kind);
+  const pageHref = (target: number) =>
+    `/gestor/alteracoes/?${new URLSearchParams({ ...range, kind, page: String(target) })}`;
   const labels: Record<string, string> = {
     added: "Entrou na Shopify",
     removed: "Saiu desta versão",
@@ -85,11 +88,10 @@ export default async function Changes({
             description="Não há diferenças registradas nas publicações deste período. Tente outro intervalo ou escolha a última publicação."
           />
         ) : (
-          <div
-            className="admin-table-scroll"
-            tabIndex={0}
-            role="region"
-            aria-label="Alterações de produtos na Shopify"
+          <DragScroll
+            className="admin-table-scroll finance-table-viewport history-table-viewport"
+            label="Alterações de produtos na Shopify"
+            resetKey={pageHref(data.page)}
           >
             <table className="admin-table">
               <thead>
@@ -247,16 +249,26 @@ export default async function Changes({
                 })}
               </tbody>
             </table>
-          </div>
+          </DragScroll>
+        )}
+        {data.items.length > 0 && (
+          <TablePagination
+            label="Páginas de alterações na Shopify"
+            page={data.page}
+            pages={data.pages}
+            range={
+              data.total === 1
+                ? "1 alteração"
+                : `${number(data.total)} alterações`
+            }
+            hrefs={{
+              previous: data.page > 1 ? pageHref(data.page - 1) : undefined,
+              next:
+                data.page < data.pages ? pageHref(data.page + 1) : undefined,
+            }}
+          />
         )}
       </section>
-      {context.previous && (
-        <Pagination
-          {...data}
-          base="/gestor/alteracoes/"
-          params={{ ...range, kind }}
-        />
-      )}
     </>
   );
 }
