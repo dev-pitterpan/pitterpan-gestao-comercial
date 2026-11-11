@@ -403,33 +403,18 @@ export default function SalesDashboard({
   return (
     <div className="sales-dashboard">
       <div className="sales-toolbar">
-        <div>
-          <label htmlFor="sales-period">Período dos pedidos</label>
-          <AdminSelect
-            id="sales-period"
-            value={String(days)}
-            label="Período dos pedidos"
-            onValueChange={(value) => {
-              if (Number(value) === days && !filters.start) return;
+        <div className="sales-period-field">
+          <span className="sales-period-label">Período dos pedidos</span>
+          <DateRangePicker
+            value={{ start: chartStart, end: chartEnd }}
+            resetLabel="Voltar aos últimos 30 dias"
+            onChange={(range) => {
               resetList();
-              setDays(Number(value));
-              setFilters((old) => ({ ...old, start: "", end: "" }));
+              if (!range.start) setDays(30);
+              setFilters((old) => ({ ...old, ...range }));
             }}
-            options={[
-              { value: "1", label: "Hoje" },
-              { value: "7", label: "Últimos 7 dias" },
-              { value: "30", label: "Últimos 30 dias" },
-              { value: "60", label: "Últimos 60 dias" },
-            ]}
           />
         </div>
-        <DateRangePicker
-          value={{ start: filters.start || "", end: filters.end || "" }}
-          onChange={(range) => {
-            resetList();
-            setFilters((old) => ({ ...old, ...range }));
-          }}
-        />
         {!finance && !showSummary && (
           <div>
             <label htmlFor="sales-status">Situação do pagamento</label>
@@ -762,13 +747,13 @@ export default function SalesDashboard({
             </nav>
           )}
           {finance && (
-            <section className="admin-panel">
+            <section className="admin-panel sales-finance-panel">
               <header>
                 <h2>Evolução por data do pedido</h2>
               </header>
               {view === "receipts" && (
                 <div
-                  className="sales-workspace-links"
+                  className="sales-workspace-links sales-finance-switch"
                   role="group"
                   aria-label="Indicador financeiro"
                 >
@@ -804,7 +789,7 @@ export default function SalesDashboard({
                       )
                     : "";
                 return (
-                  <div key={total.currency}>
+                  <div key={total.currency} className="sales-finance-series">
                     <p>
                       <strong>
                         {chartLabel} ·{" "}

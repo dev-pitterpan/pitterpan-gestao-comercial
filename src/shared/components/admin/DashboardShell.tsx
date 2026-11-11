@@ -15,7 +15,6 @@ import {
   type ReactNode,
 } from "react";
 import {
-  ArrowLeft,
   ChevronDown,
   CircleDollarSign,
   ReceiptText,
@@ -271,79 +270,85 @@ const analyticsPath = "/gestor/analises/";
 function AnalyticsNavigation({ close }: { close: () => void }) {
   const params = useSearchParams();
   const selected = reportById(params.get("relatorio") ?? "");
-  const checkouts = usePathname()?.startsWith(analyticsPath + "checkouts");
+  const pathname = usePathname();
+  const active = !!pathname?.startsWith(analyticsPath);
+  const checkouts = active && pathname.startsWith(analyticsPath + "checkouts");
   const sales = !selected && params.get("secao") === "vendas";
   const customers = !selected && params.get("secao") === "clientes";
   const attribution = !selected && params.get("secao") === "atribuicao";
   const reports = params.get("secao") === "relatorios";
   return (
-    <section className="admin-nav-group">
-      <h2>Análises Shopify</h2>
-      {[
-        {
-          href: analyticsPath,
-          label: "Visão geral",
-          icon: LayoutDashboard,
-          active:
-            !reports &&
-            !attribution &&
-            !customers &&
-            !selected &&
-            !sales &&
-            !checkouts,
-        },
-        {
-          href: analyticsPath + "?secao=vendas",
-          label: "Vendas",
-          icon: ShoppingCart,
-          active: sales,
-        },
-        {
-          href: analyticsPath + "checkouts/",
-          label: "Checkouts abandonados",
-          icon: ShoppingCart,
-          active: Boolean(checkouts),
-        },
-        {
-          href: analyticsPath + "?secao=relatorios",
-          label: "Relatórios",
-          icon: BarChart3,
-          active: reports || Boolean(selected),
-        },
-        {
-          href: analyticsPath + "?secao=atribuicao",
-          label: "Atribuição",
-          icon: ChartNoAxesCombined,
-          active: attribution,
-        },
-        {
-          href: analyticsPath + "?secao=clientes",
-          label: "Visão de clientes",
-          icon: Users,
-          active: customers,
-        },
-        {
-          href: "/gestor/",
-          label: "Voltar à gestão",
-          icon: ArrowLeft,
-          active: false,
-        },
-      ].map(({ href, label, icon: Icon, active }) => (
-        <Link
-          key={href}
-          href={href}
-          prefetch={false}
-          onClick={close}
-          aria-current={active ? "page" : undefined}
-          className={active ? "active" : ""}
-        >
-          <Icon size={19} strokeWidth={1.7} aria-hidden="true" />
-          <span>{label}</span>
-          <NavigationPending />
-          {active && <span className="admin-nav-marker" />}
-        </Link>
-      ))}
-    </section>
+    <details className="admin-nav-section admin-nav-submenu" open={active}>
+      <summary>
+        <ChartNoAxesCombined size={17} strokeWidth={1.7} aria-hidden="true" />
+        <span>Análises Shopify</span>
+        <ChevronDown
+          size={15}
+          className="admin-nav-chevron"
+          aria-hidden="true"
+        />
+      </summary>
+      <div className="admin-nav-section-links">
+        {[
+          {
+            href: analyticsPath,
+            label: "Visão geral",
+            icon: LayoutDashboard,
+            active:
+              !reports &&
+              !attribution &&
+              !customers &&
+              !selected &&
+              !sales &&
+              !checkouts,
+          },
+          {
+            href: analyticsPath + "?secao=vendas",
+            label: "Vendas",
+            icon: ShoppingCart,
+            active: sales,
+          },
+          {
+            href: analyticsPath + "checkouts/",
+            label: "Checkouts abandonados",
+            icon: ShoppingCart,
+            active: Boolean(checkouts),
+          },
+          {
+            href: analyticsPath + "?secao=relatorios",
+            label: "Relatórios",
+            icon: BarChart3,
+            active: reports || Boolean(selected),
+          },
+          {
+            href: analyticsPath + "?secao=atribuicao",
+            label: "Atribuição",
+            icon: ChartNoAxesCombined,
+            active: attribution,
+          },
+          {
+            href: analyticsPath + "?secao=clientes",
+            label: "Visão de clientes",
+            icon: Users,
+            active: customers,
+          },
+        ].map(({ href, label, icon: Icon, active: selected }) => (
+          <Link
+            key={href}
+            href={href}
+            prefetch={false}
+            onClick={close}
+            aria-current={active && selected ? "page" : undefined}
+            className={active && selected ? "active" : ""}
+          >
+            <Icon size={19} strokeWidth={1.7} aria-hidden="true" />
+            <span>{label}</span>
+            <NavigationPending />
+            {active && selected && <span className="admin-nav-marker" />}
+          </Link>
+        ))}
+      </div>
+    </details>
   );
 }
 
@@ -485,12 +490,7 @@ export default function DashboardShell({
             aria-hidden="true"
           />
         </div>
-        <nav
-          className="admin-navigation"
-          aria-label={
-            analytics ? "Seções de Análises Shopify" : "Seções da central"
-          }
-        >
+        <nav className="admin-navigation" aria-label="Seções da central">
           {navigationGroups.map((group) => {
             const items = links.filter(
               (link) =>
@@ -507,7 +507,7 @@ export default function DashboardShell({
             const entries = group.paths.flatMap((path) => {
               const item = items.find(({ href }) => href === path);
               if (!item) return [];
-              if (analytics && path === analyticsPath)
+              if (path === analyticsPath)
                 return (
                   <Suspense key={path}>
                     <AnalyticsNavigation close={() => setOpen(false)} />

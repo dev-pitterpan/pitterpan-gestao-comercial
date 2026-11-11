@@ -3252,3 +3252,13 @@
 .admin-nav-section[open] > summary .admin-nav-chevron {
   transform: rotate(180deg);
 }
+
+.admin-nav-submenu > summary {
+  min-height: 36px;
+  padding: 6px 8px;
+  background: transparent;
+}
+.admin-nav-submenu[open] > summary,
+.admin-nav-submenu > summary:hover {
+  background: #eaf2f9;
+}

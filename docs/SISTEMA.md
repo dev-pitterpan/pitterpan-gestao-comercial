@@ -37,7 +37,7 @@ Escolha ou troque a foto pelo avatar da barra lateral, em Configurações ou em 
 | Estoque por loja | `/gestor/winthor/estoque-por-loja/` | Área reservada para saldo por filial no WinThor. A integração está pendente. |
 | Transferências | `/gestor/winthor/transferencias/` | Área reservada para histórico de movimentações WinThor. A etapa inicial é mapear a fonte e uma amostra real. |
 | Agenda e fornecedores | `/gestor/agenda/`, `/gestor/calendario/`, `/gestor/reunioes/[id]/` | Fornecedores, compromissos, calendário e reuniões. Permite importar uma exportação HTML de fornecedores do WinThor. Videochamada depende da configuração do Jitsi. |
-| Análises Shopify | `/gestor/analises/`, `/gestor/analises/checkouts/` | Consultas de desempenho, relatórios e checkouts, sujeitas às permissões e à disponibilidade na Shopify. |
+| Análises Shopify | `/gestor/analises/`, `/gestor/analises/checkouts/` | Submenu expansível na barra lateral com visão geral, vendas, checkouts, relatórios, atribuição e clientes, conforme as permissões e a disponibilidade na Shopify. |
 | Relatórios | `/gestor/relatorios/` | Entrada para relatórios disponíveis ao perfil autenticado. |
 | Sincronizações | `/gestor/sincronizacoes/` | Acompanha importação, validação e publicação do catálogo. |
 | Minha conta | `/gestor/minha-conta/` | Informações da sessão e ações disponíveis para a própria conta. |
@@ -62,6 +62,8 @@ Escolha ou troque a foto pelo avatar da barra lateral, em Configurações ou em 
 4. No modo local sem banco, o painel pode usar os JSON de catálogo como referência. O estado da tela indica quando a fonte está indisponível ou quando o histórico depende de importação.
 
 ### Pedidos Shopify
+
+As telas de vendas abrem com um período móvel de 30 dias por padrão. O calendário permite escolher um dia ou intervalo e voltar à janela padrão.
 
 Pedidos, visão geral, análises, destinos e histórico de alterações usam o mesmo seletor de período. As datas podem ser digitadas em DD/MM/AAAA ou escolhidas no calendário do painel. Os seletores de data única da agenda usam o mesmo padrão de popover e grade. O calendário mensal da agenda é uma visualização de compromissos.
 

@@ -1,5 +1,14 @@
 [
   {
+    "version": "2026.11.11.5",
+    "recordedAt": "2026-11-11T10:25:39-03:00",
+    "title": "Calendário único e submenu de Análises Shopify",
+    "changes": [
+      "As telas de vendas abrem nos últimos 30 dias e usam um único calendário para escolher outro período.",
+      "O submenu de Análises Shopify abre na barra lateral. Gráficos, filtros e tabelas têm espaçamento adaptável."
+    ]
+  },
+  {
     "version": "2026.11.11.4",
     "recordedAt": "2026-11-11T10:04:14-03:00",
     "title": "Navegação por módulos e páginas dedicadas de vendas",
