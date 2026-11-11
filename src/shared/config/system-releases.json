@@ -1,5 +1,13 @@
 [
   {
+    "version": "2026.11.11.7",
+    "recordedAt": "2026-11-11T11:28:15-03:00",
+    "title": "Gráficos de vendas com colunas e tendência",
+    "changes": [
+      "Recebimentos e reembolsos usam cartões mais estreitos. Os gráficos compactos mostram colunas por dia e uma média móvel de até sete dias."
+    ]
+  },
+  {
     "version": "2026.11.11.6",
     "recordedAt": "2026-11-11T11:22:54-03:00",
     "title": "Pedidos em grupos de oito e gráficos compactos",

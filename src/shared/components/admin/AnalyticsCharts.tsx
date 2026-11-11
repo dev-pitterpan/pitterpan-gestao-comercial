@@ -70,13 +70,29 @@ export function RevenueChart({
   const top = compact ? 30 : 44;
   const bottom = compact ? 181 : 232;
   const tickCount = compact && width < 420 ? 4 : 7;
-  const x = (i: number) =>
-    left + (i * (right - left)) / Math.max(1, rows.length - 1);
+  const step = (right - left) / Math.max(1, rows.length - (compact ? 0 : 1));
+  const firstPoint = compact ? left + step / 2 : left;
+  const x = (i: number) => firstPoint + i * step;
   const y = (n: number) => bottom - ((n - min) * (bottom - top)) / span;
+  const barWidth = Math.min(24, step * 0.68);
+  const series = compact
+    ? values.map((value, index) => {
+        if (value === null) return null;
+        let sum = 0;
+        let count = 0;
+        for (let day = index; day >= Math.max(0, index - 6); day--) {
+          const sample = values[day];
+          if (sample === null) break;
+          sum += sample;
+          count++;
+        }
+        return count > 1 ? sum / count : null;
+      })
+    : values;
   const segments: { i: number; v: number }[][] = [];
-  values.forEach((v, i) => {
+  series.forEach((v, i) => {
     if (v === null) return;
-    if (i === 0 || values[i - 1] === null) segments.push([]);
+    if (i === 0 || series[i - 1] === null) segments.push([]);
     segments.at(-1)!.push({ i, v });
   });
   const chosen = active === null ? null : rows[active];
@@ -92,6 +108,11 @@ export function RevenueChart({
       <div className="analytics-chart-readout" aria-live="polite">
         <span className="analytics-legend">
           <i /> {metricLabel}
+          {compact && series.some((value) => value !== null) && (
+            <span className="analytics-trend-legend">
+              · Média móvel de até 7 dias
+            </span>
+          )}
           {comparison && <span> · Linha tracejada: {comparison.label}</span>}
         </span>
         <span>
@@ -140,10 +161,7 @@ export function RevenueChart({
               0,
               Math.min(
                 rows.length - 1,
-                Math.round(
-                  ((position - left) / (right - left)) *
-                    Math.max(1, rows.length - 1),
-                ),
+                Math.round((position - firstPoint) / step),
               ),
             ),
           );
@@ -205,25 +223,48 @@ export function RevenueChart({
             strokeWidth="2"
           />
         )}
+        {compact &&
+          values.map((value, index) => {
+            if (value === null || value === 0) return null;
+            return (
+              <rect
+                key={index}
+                x={x(index) - barWidth / 2}
+                y={Math.min(y(0), y(value))}
+                width={barWidth}
+                height={Math.abs(y(value) - y(0))}
+                rx={Math.min(3, barWidth / 3)}
+                fill={
+                  value < 0
+                    ? "#d86e81"
+                    : metricKey === "refunded"
+                      ? "#e6a854"
+                      : "#55ab9d"
+                }
+              />
+            );
+          })}
         {segments.map((s, i) => {
           const path = s
             .map((p, j) => `${j ? "L" : "M"}${x(p.i)},${y(p.v)}`)
             .join(" ");
           return (
             <g key={i}>
-              <path
-                d={`${path} L${x(s.at(-1)!.i)},${y(0)} L${x(s[0].i)},${y(0)} Z`}
-                fill={`url(#${id})`}
-              />
+              {!compact && (
+                <path
+                  d={`${path} L${x(s.at(-1)!.i)},${y(0)} L${x(s[0].i)},${y(0)} Z`}
+                  fill={`url(#${id})`}
+                />
+              )}
               <path
                 d={path}
                 fill="none"
                 stroke="#356fb3"
-                strokeWidth="3"
+                strokeWidth={compact ? 2 : 3}
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
-              {s.length === 1 && (
+              {!compact && s.length === 1 && (
                 <circle cx={x(s[0].i)} cy={y(s[0].v)} r="4" fill="#356fb3" />
               )}
             </g>

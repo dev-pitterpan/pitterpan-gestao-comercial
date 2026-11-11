@@ -1285,3 +1285,11 @@
 .sales-finance-panel {
   gap: 12px;
 }
+
+.admin-app .sales-finance-panel {
+  width: min(100%, 840px);
+  justify-self: start;
+}
+.analytics-trend-legend {
+  color: #356fb3;
+}
