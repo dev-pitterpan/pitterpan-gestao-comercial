@@ -1268,3 +1268,20 @@
     flex: 1 1 132px;
   }
 }
+
+.admin-app .sales-orders-panel > .finance-table-viewport {
+  height: auto;
+  min-height: 0;
+  max-height: none;
+}
+.admin-app .sales-orders-panel .admin-table tbody td {
+  padding-block: 12px;
+}
+.admin-app .analytics-revenue-chart[data-compact] {
+  height: 216px;
+  min-height: 0;
+  max-height: 216px;
+}
+.sales-finance-panel {
+  gap: 12px;
+}

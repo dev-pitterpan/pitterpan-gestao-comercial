@@ -1,3 +1,4 @@
+import { SALES_PAGE_SIZE } from "../../lib/admin/sales-links.ts";
 import {
   outstandingSql,
   officialOutstandingSql,
@@ -13,7 +14,6 @@ import { shopifyImageUrl } from "../shopify/media.ts";
 import { containsPattern } from "../../lib/admin/filters.ts";
 import {
   salesFilterSchema,
-  SALES_PAGE_SIZE,
   decodeOrderCursor,
   type SalesFilters,
 } from "./filters.ts";

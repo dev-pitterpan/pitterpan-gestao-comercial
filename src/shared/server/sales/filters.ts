@@ -59,4 +59,3 @@ export function decodeOrderCursor(value?: string | null) {
     JSON.parse(Buffer.from(value, "base64url").toString("utf8")),
   );
 }
-export const SALES_PAGE_SIZE = 10;

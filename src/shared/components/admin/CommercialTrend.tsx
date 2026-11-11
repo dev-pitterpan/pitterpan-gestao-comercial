@@ -108,6 +108,7 @@ export default function CommercialTrend({
         table={{ columns: [], rows }}
         currency={currency}
         showTable={false}
+        compact
         comparison={comparison}
         metricKey={metric}
         metricLabel={

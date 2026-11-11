@@ -457,7 +457,7 @@ test("setup reaproveita arquivo validado com BOM e preserva as credenciais e ban
   }
 });
 
-test("vendas pagina de dez em dez, combina situação/categoria e mantém totais completos", async () => {
+test("vendas pagina de oito em oito, combina situação/categoria e mantém totais completos", async () => {
   const db = new PGlite();
   try {
     await db.exec(
@@ -501,7 +501,7 @@ test("vendas pagina de dez em dez, combina situação/categoria e mantém totais
       "24",
     );
     assert.equal(first.top[0].units, "69");
-    assert.equal(first.orders.length, 10);
+    assert.equal(first.orders.length, 8);
     assert.equal(first.hasMore, true);
     const second = await readSalesOrders(
       db,
@@ -510,7 +510,7 @@ test("vendas pagina de dez em dez, combina situação/categoria e mantém totais
       filter,
       first.nextCursor!,
     );
-    assert.equal(second.orders.length, 10);
+    assert.equal(second.orders.length, 8);
     assert.equal(second.hasMore, true);
     const third = await readSalesOrders(
       db,
@@ -519,7 +519,7 @@ test("vendas pagina de dez em dez, combina situação/categoria e mantém totais
       filter,
       second.nextCursor!,
     );
-    assert.equal(third.orders.length, 4);
+    assert.equal(third.orders.length, 8);
     assert.equal(third.hasMore, false);
     assert.equal(third.nextCursor, null);
     assert.equal(

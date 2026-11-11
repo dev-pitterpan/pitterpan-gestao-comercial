@@ -11,6 +11,7 @@ import { RevenueChart } from "./AnalyticsCharts";
 import type { SalesView } from "./SalesWorkspace";
 import {
   salesPageLink,
+  SALES_PAGE_SIZE,
   salesSectionFromHash,
 } from "../../lib/admin/sales-links";
 import OrderFulfillmentDetails from "./OrderFulfillmentDetails";
@@ -813,6 +814,7 @@ export default function SalesDashboard({
                       }}
                       currency={total.currency}
                       showTable={false}
+                      compact
                       metricKey={chartMetric}
                       metricLabel={chartLabel}
                       axisLabel={total.currency}
@@ -872,7 +874,7 @@ export default function SalesDashboard({
               )}
               <p className="sales-definition">
                 Mostrando {data.orders.length} pedidos nesta seleção, em lotes
-                de 10.
+                de {SALES_PAGE_SIZE}.
                 {expanded.current &&
                   " A atualização automática da lista fica pausada durante esta consulta."}
               </p>
@@ -1005,7 +1007,7 @@ export default function SalesDashboard({
                     {moreLoading ? (
                       <PitterSpinner label="Carregando pedidos…" />
                     ) : (
-                      "Carregar mais 10"
+                      `Carregar mais ${SALES_PAGE_SIZE}`
                     )}
                   </button>
                 )}

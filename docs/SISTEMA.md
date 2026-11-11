@@ -22,7 +22,7 @@ Escolha ou troque a foto pelo avatar da barra lateral, em Configurações ou em 
 | Login e recuperação | `/login/`, `/recuperar-senha/` | Entrada da equipe e solicitação de recuperação. O master usa credenciais configuradas. As contas da equipe ficam no banco. |
 | Visão geral | `/gestor/` | Indicadores, evolução de vendas e ranking por data. A fila Atenção agora considera as pendências do histórico importado. Também reúne categorias, estoque e mudanças de catálogo. |
 | Resumo Shopify | `/gestor/vendas/resumo/` | Indicadores e situação dos pedidos. Os cartões abrem o detalhe no período selecionado. |
-| Pedidos Shopify | `/gestor/vendas/` | Lista paginada dos pedidos recentes, com filtros, pagamento, entrega e itens. |
+| Pedidos Shopify | `/gestor/vendas/` | Lista de pedidos recentes com filtros, pagamento, entrega e itens. Exibe oito pedidos por vez e acrescenta oito ao carregar mais. |
 | Atendimento de pedidos | `/gestor/vendas/atendimento/` | Fila de preparo e retirada, com detalhes do atendimento. |
 | Recebimentos | `/gestor/vendas/recebimentos/` | Evolução do recebido e do líquido, com os pedidos que compõem o resultado. |
 | Estornos e reembolsos | `/gestor/vendas/reembolsos/` | Evolução e pedidos com reembolso total ou parcial, incluindo cancelados quando houver valor devolvido. |
