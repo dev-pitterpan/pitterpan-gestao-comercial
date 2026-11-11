@@ -35,78 +35,78 @@ const categoryArt = [
   {
     match: /halloween|terror/,
     icon: Ghost,
-    colors: ["#6245a2", "#f1eaff", "#e3955e"],
+    color: "#6245a2",
   },
-  { match: /natal/, icon: TreePine, colors: ["#256b52", "#e7f6ee", "#e07880"] },
-  { match: /pascoa/, icon: Egg, colors: ["#8d478f", "#f9ecfb", "#edbc67"] },
-  { match: /junina/, icon: Flag, colors: ["#a24e2c", "#fff0dc", "#ec9567"] },
+  { match: /natal/, icon: TreePine, color: "#256b52" },
+  { match: /pascoa/, icon: Egg, color: "#8d478f" },
+  { match: /junina/, icon: Flag, color: "#a24e2c" },
   {
     match: /criancas|brinqued/,
     icon: ToyBrick,
-    colors: ["#305fb4", "#e8f1ff", "#de8cc6"],
+    color: "#305fb4",
   },
   {
     match: /copa|futebol/,
     icon: Trophy,
-    colors: ["#387345", "#ecf6dc", "#e6b84b"],
+    color: "#387345",
   },
-  { match: /patrick/, icon: Clover, colors: ["#287354", "#e7f5e6", "#c6a840"] },
+  { match: /patrick/, icon: Clover, color: "#287354" },
   {
     match: /carnaval|fantasia|maquiagem/,
     icon: Drama,
-    colors: ["#813fa1", "#f8eafb", "#eb9f6c"],
+    color: "#813fa1",
   },
   {
     match: /artesanato|papelaria/,
     icon: Palette,
-    colors: ["#a24861", "#fcecf0", "#d7a65b"],
+    color: "#a24861",
   },
   {
     match: /datas|ocasioes/,
     icon: CalendarHeart,
-    colors: ["#974278", "#faeaf4", "#a28de3"],
+    color: "#974278",
   },
   {
     match: /ofertas|promoc/,
     icon: Tags,
-    colors: ["#a64b30", "#fff1e3", "#e0ad4d"],
+    color: "#a64b30",
   },
   {
     match: /chocolate/,
     icon: Croissant,
-    colors: ["#874e36", "#f9eee2", "#da9d73"],
+    color: "#874e36",
   },
   {
     match: /confeitaria|bolo/,
     icon: Cake,
-    colors: ["#93477a", "#fbeaf4", "#e6a475"],
+    color: "#93477a",
   },
   {
     match: /gulo|doces/,
     icon: Candy,
-    colors: ["#944587", "#f8eafb", "#e7a85e"],
+    color: "#944587",
   },
-  { match: /embalag/, icon: Gift, colors: ["#32786d", "#e5f6f1", "#8fa8e2"] },
+  { match: /embalag/, icon: Gift, color: "#32786d" },
   {
     match: /adornos|decor/,
     icon: Ribbon,
-    colors: ["#7953ae", "#f2eafa", "#e799bd"],
+    color: "#7953ae",
   },
   {
     match: /utilidad/,
     icon: Package,
-    colors: ["#2a687e", "#e7f4f7", "#85bea5"],
+    color: "#2a687e",
   },
   {
     match: /festas|baloes/,
     icon: PartyPopper,
-    colors: ["#305fa4", "#e9f2ff", "#e5a64e"],
+    color: "#305fa4",
   },
-  { match: /todos/, icon: Layers3, colors: ["#3f5ea1", "#ecf1fc", "#a595e3"] },
+  { match: /todos/, icon: Layers3, color: "#3f5ea1" },
 ];
 const fallbackArt = {
   icon: Sparkles,
-  colors: ["#4d579d", "#edf0fd", "#d6a45e"],
+  color: "#4d579d",
 };
 
 import type { CatalogSummary } from "../../types/catalog";
@@ -178,92 +178,65 @@ export default function CatalogGrid({
       </p>
       <div className="catalog-library-grid">
         {visible.map((catalog) => {
-          const { icon: Icon, colors } =
+          const { icon: Icon, color } =
             categoryArt.find(({ match }) =>
               match.test(normalize(catalog.slug + " " + catalog.name)),
             ) ?? fallbackArt;
-          const [accent, background, confetti] = colors;
           return (
-            <article
-              key={catalog.slug}
-              className="catalog-library-card"
-              style={
-                {
-                  "--collection-accent": accent,
-                  "--collection-background": background,
-                  "--collection-confetti": confetti,
-                } as React.CSSProperties
-              }
-            >
-              <div className="catalog-library-art" aria-hidden="true">
-                <svg
-                  className="catalog-library-confetti"
-                  viewBox="0 0 240 92"
-                  preserveAspectRatio="xMidYMid slice"
-                  fill="none"
-                >
-                  <path d="M10 66c34-35 45 28 79 6M154 19c28 20 43-25 74-4M171 75c24-22 41-17 69-20" />
-                  <path d="M34 24l5 10m25-15 8 4m116 19 4 9m27-18 8-6M78 59l7-8" />
-                  <circle cx="21" cy="45" r="3" />
-                  <circle cx="164" cy="44" r="3" />
-                  <circle cx="211" cy="72" r="3" />
-                </svg>
-                <span className="catalog-library-symbol">
-                  <Icon size={30} strokeWidth={1.65} />
+            <article key={catalog.slug} className="catalog-library-card">
+              <div className="catalog-library-heading">
+                <span className="catalog-library-symbol" aria-hidden="true">
+                  <Icon size={27} strokeWidth={1.7} style={{ color }} />
                 </span>
-                {catalog.count !== null && (
-                  <span className="catalog-library-count">
-                    {catalog.count.toLocaleString("pt-BR")} variantes
-                  </span>
-                )}
-              </div>
-              <div className="catalog-library-content">
-                <h2>{catalog.name}</h2>
-                {catalog.count !== null && (
-                  <span className="admin-sr-only">
-                    {catalog.count} variantes
-                  </span>
-                )}
-                <div className="catalog-library-actions">
-                  <Link
-                    href={`/gestor/${catalog.slug}/`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    prefetch={false}
-                    className="catalog-library-open"
-                  >
-                    Abrir catálogo <ArrowUpRight size={15} aria-hidden="true" />
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() => share(catalog.slug, catalog.name, "copy")}
-                    title="Copiar link público"
-                    aria-label={`Copiar link de ${catalog.name}`}
-                  >
-                    {copied === catalog.slug ? (
-                      <Check size={16} />
-                    ) : (
-                      <Copy size={16} />
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => share(catalog.slug, catalog.name, "share")}
-                    title="Compartilhar"
-                    aria-label={`Compartilhar ${catalog.name}`}
-                  >
-                    <Share2 size={16} />
-                  </button>
-                  <a
-                    href={`${publicCatalogUrl(catalog.slug, base)}?view=client`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title="Ver como cliente"
-                    aria-label={`Ver ${catalog.name} como cliente`}
-                  >
-                    <ExternalLink size={16} />
-                  </a>
+                <div>
+                  <h2>{catalog.name}</h2>
+                  {catalog.count !== null && (
+                    <span className="catalog-library-count">
+                      {catalog.count.toLocaleString("pt-BR")}{" "}
+                      {catalog.count === 1 ? "variante" : "variantes"}
+                    </span>
+                  )}
                 </div>
+              </div>
+              <div className="catalog-library-actions">
+                <Link
+                  href={`/gestor/${catalog.slug}/`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  prefetch={false}
+                  className="catalog-library-open"
+                >
+                  Abrir catálogo <ArrowUpRight size={15} aria-hidden="true" />
+                </Link>
+                <button
+                  type="button"
+                  onClick={() => share(catalog.slug, catalog.name, "copy")}
+                  title="Copiar link público"
+                  aria-label={`Copiar link de ${catalog.name}`}
+                >
+                  {copied === catalog.slug ? (
+                    <Check size={16} />
+                  ) : (
+                    <Copy size={16} />
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => share(catalog.slug, catalog.name, "share")}
+                  title="Compartilhar"
+                  aria-label={`Compartilhar ${catalog.name}`}
+                >
+                  <Share2 size={16} />
+                </button>
+                <a
+                  href={`${publicCatalogUrl(catalog.slug, base)}?view=client`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Ver como cliente"
+                  aria-label={`Ver ${catalog.name} como cliente`}
+                >
+                  <ExternalLink size={16} />
+                </a>
               </div>
             </article>
           );
