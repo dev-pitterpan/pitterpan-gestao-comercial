@@ -1,5 +1,14 @@
 [
   {
+    "version": "2026.11.11.3",
+    "recordedAt": "2026-11-11T09:50:02-03:00",
+    "title": "Catálogos e foto de perfil com visual mais compacto",
+    "changes": [
+      "Cartões do catálogo com ícones e cores por categoria, ações de abertura e compartilhamento e grade adaptável.",
+      "O avatar mostra as iniciais quando a foto está ausente e indica se é possível escolher ou trocar a foto."
+    ]
+  },
+  {
     "version": "2026.11.11.2",
     "recordedAt": "2026-11-11T09:40:27-03:00",
     "title": "Otimização de imagens do catálogo",

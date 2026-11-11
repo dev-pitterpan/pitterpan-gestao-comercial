@@ -73,6 +73,8 @@ export default function ProfilePhoto({
     return () => window.removeEventListener(photoUpdated, refresh);
   }, []);
 
+  const photoAction = loaded ? "Trocar foto" : "Escolher foto";
+
   function openEditor() {
     setError("");
     dialog.current?.showModal();
@@ -111,9 +113,9 @@ export default function ProfilePhoto({
       <button
         type="button"
         className="admin-avatar admin-avatar-edit"
-        aria-label="Editar foto de perfil"
+        aria-label={`${photoAction} de perfil`}
         aria-haspopup="dialog"
-        title="Editar foto de perfil"
+        title={photoAction}
         onClick={openEditor}
       >
         {!loaded && name.slice(0, 2).toUpperCase()}
@@ -133,7 +135,7 @@ export default function ProfilePhoto({
       </button>
       {showLabel && (
         <button type="button" className="admin-button" onClick={openEditor}>
-          Editar foto
+          {photoAction}
         </button>
       )}
       <dialog
@@ -186,7 +188,7 @@ export default function ProfilePhoto({
             disabled={busy}
             onClick={() => input.current?.click()}
           >
-            {busy ? "Salvando…" : "Escolher foto"}
+            {busy ? "Salvando…" : photoAction}
           </button>
         </div>
       </dialog>

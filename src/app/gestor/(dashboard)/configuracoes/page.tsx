@@ -15,7 +15,7 @@ export default async function Settings() {
         description="Defina os alertas da operação e acompanhe o estado das integrações com segurança."
       />
       <DataNotice context={context} />
-      <section className="admin-panel">
+      <section className="admin-panel admin-profile-photo-panel">
         <header>
           <h2>Foto de perfil</h2>
         </header>

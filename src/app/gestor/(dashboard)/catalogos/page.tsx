@@ -6,9 +6,9 @@ export default async function Catalogs() {
   return (
     <>
       <PageHeading
-        eyebrow="ESCOLHA. COMPARTILHE. ENCANTE."
-        title="Um catálogo para cada ocasião."
-        description="Selecione uma coleção e compartilhe o link público com seu cliente. O acesso do cliente não exige login."
+        eyebrow="COLEÇÕES PITTER PAN"
+        title="Catálogos"
+        description="Abra uma coleção ou compartilhe o link com seu cliente."
       />
       <CatalogGrid {...data} />
     </>

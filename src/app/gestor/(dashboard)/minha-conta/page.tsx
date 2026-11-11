@@ -16,7 +16,7 @@ export default async function AccountPage() {
           title="Minha conta"
           description="Atualize a senha da sua conta."
         />
-        <section className="admin-panel">
+        <section className="admin-panel admin-profile-photo-panel">
           <header>
             <h2>Foto de perfil</h2>
           </header>

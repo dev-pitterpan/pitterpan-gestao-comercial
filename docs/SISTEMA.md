@@ -13,7 +13,7 @@ Mapa funcional e técnico do painel da Floresta, América e Iririú. A versão e
 | WinThor | ERP das lojas físicas. Vendas na loja, estoque por filial e transferências aguardam conexão com os dados do ERP. |
 | GitHub e Vercel | O repositório versiona o código. A Vercel hospeda a produção a partir de `main`. O GitHub Actions verifica a documentação, tipos, testes e build. |
 
-A foto da própria conta pode ser editada pelo avatar da barra lateral, em Configurações ou em Minha conta para perfis sem acesso administrativo. O navegador ajusta imagens de até 25 MB ao formato quadrado de 256 × 256 px, e o servidor armazena a foto privada em WebP no PostgreSQL. Em instalações existentes, execute `npm run db:migrate` antes de habilitar o recurso.
+Escolha ou troque a foto pelo avatar da barra lateral, em Configurações ou em Minha conta para perfis sem acesso administrativo. As iniciais aparecem quando a conta está sem foto. O navegador ajusta imagens de até 25 MB ao formato quadrado de 256 × 256 px, e o servidor armazena a foto privada em WebP no PostgreSQL. Em instalações existentes, execute `npm run db:migrate` antes de habilitar o recurso.
 
 ## 2. Mapa das telas
 
@@ -27,7 +27,7 @@ A foto da própria conta pode ser editada pelo avatar da barra lateral, em Confi
 | Vendas na loja | `/gestor/winthor/balcao/` | Área reservada para vendas de caixa por filial. A integração está pendente. |
 | Todos os produtos | `/gestor/produtos/` | Pesquisa, filtros e indicadores das variantes do catálogo publicado. |
 | Ofertas | `/gestor/ofertas/` | Variantes em que o preço de comparação supera o preço atual. |
-| Catálogos | `/gestor/catalogos/`, `/gestor/[slug]/` | Lista de coleções e prévias. Permite consultar e compartilhar os catálogos. |
+| Catálogos | `/gestor/catalogos/`, `/gestor/[slug]/` | Coleções em cartões compactos, com ícones por categoria e ações para abrir, copiar ou compartilhar. |
 | Alterações na Shopify | `/gestor/alteracoes/` | Compara publicações sucessivas. Exibe inclusão, ausência e campos modificados. Filtra pela detecção na sincronização e mostra a data Shopify quando disponível. |
 | Estoque da Shopify | `/gestor/estoque/` | Saldo agregado da última publicação. Classifica estoque baixo, sem estoque e indisponível conforme dados e limites configurados. |
 | Estoque por loja | `/gestor/winthor/estoque-por-loja/` | Área reservada para saldo por filial no WinThor. A integração está pendente. |
