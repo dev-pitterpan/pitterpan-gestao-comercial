@@ -5,6 +5,7 @@ import {
   adminQuerySchema,
 } from "../../server/admin/repository";
 import { DataNotice, PageHeading, number } from "./Primitives";
+import AutoFilterForm from "./AutoFilterForm";
 import TablePagination from "./TablePagination";
 import ProductList, { ProductFilters } from "./ProductList";
 export default async function ProductsPage({
@@ -37,7 +38,7 @@ export default async function ProductsPage({
     `${base}?${new URLSearchParams({ ...query, page: String(page) })}`;
   const offset = (result.page - 1) * ADMIN_PRODUCT_PAGE_SIZE;
   return (
-    <>
+    <AutoFilterForm action={base} className="admin-products-form">
       <PageHeading
         title={
           mode === "stock"
@@ -56,7 +57,6 @@ export default async function ProductsPage({
         filters={
           <ProductFilters
             query={query}
-            base={base}
             canExport={result.products.length > 0}
           />
         }
@@ -79,7 +79,8 @@ export default async function ProductsPage({
       )}
       <section className="admin-panel admin-product-panel">
         <ProductList
-          key={pageHref(result.page)}
+          resetKey={pageHref(result.page)}
+          search={query.q}
           products={result.products}
           settings={context.settings}
         />
@@ -99,6 +100,6 @@ export default async function ProductsPage({
           />
         )}
       </section>
-    </>
+    </AutoFilterForm>
   );
 }

@@ -2,7 +2,6 @@
 import { salesPageLink } from "../../lib/admin/sales-links";
 import ProfilePhoto from "./ProfilePhoto";
 import { allowed, operationalRoles } from "../../server/auth/permissions";
-import AutoFilterForm from "./AutoFilterForm";
 import PartyExperience from "./PartyExperience";
 import Link, { useLinkStatus } from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
@@ -39,7 +38,6 @@ import {
   LogOut,
   Menu,
   X,
-  Search,
   ArrowUpRight,
   Sparkles,
 } from "lucide-react";
@@ -604,36 +602,27 @@ export default function DashboardShell({
               <strong>{title}</strong>
             </span>
           </div>
-          <AutoFilterForm
-            action="/gestor/produtos/"
-            className="admin-global-search"
-          >
-            <Search size={17} />
-            <input
-              aria-label="Buscar produtos no painel"
-              name="q"
-              placeholder="Buscar produto ou SKU…"
-            />
-          </AutoFilterForm>
-          {allowed(user.role, operationalRoles) && (
-            <Link
-              className="admin-button admin-sync-shortcut"
-              href="/gestor/sincronizacoes/"
-            >
-              <RefreshCw size={15} /> Sincronizar
+          <div className="admin-topbar-actions">
+            {allowed(user.role, operationalRoles) && (
+              <Link
+                className="admin-button admin-sync-shortcut"
+                href="/gestor/sincronizacoes/"
+              >
+                <RefreshCw size={15} /> Sincronizar
+              </Link>
+            )}
+            <Link className="admin-button" href="/gestor/minha-conta/">
+              {accountLabel}
             </Link>
-          )}
-          <Link className="admin-button" href="/gestor/minha-conta/">
-            {accountLabel}
-          </Link>
-          <Link
-            className="admin-public-link"
-            href={catalogUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Ver catálogo <ArrowUpRight size={16} />
-          </Link>
+            <Link
+              className="admin-public-link"
+              href={catalogUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Ver catálogo <ArrowUpRight size={16} />
+            </Link>
+          </div>
         </header>
         <main className="admin-content" id="admin-main" tabIndex={-1}>
           {children}

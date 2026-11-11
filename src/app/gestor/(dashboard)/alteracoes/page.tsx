@@ -36,7 +36,7 @@ export default async function Changes({
   const context = await adminContext("changes");
   const data = await adminChanges(Math.floor(page), range, kind);
   const labels: Record<string, string> = {
-    added: "Entrou no catálogo",
+    added: "Entrou na Shopify",
     removed: "Saiu desta versão",
     changed: "Informação alterada",
   };
@@ -97,8 +97,7 @@ export default async function Changes({
                   <th>Detectado na sincronização</th>
                   <th>Produto / SKU</th>
                   <th>O que mudou</th>
-                  <th>Preço anterior</th>
-                  <th>Preço atual</th>
+                  <th>Preço</th>
                   <th>Estoque anterior</th>
                   <th>Estoque atual</th>
                 </tr>
@@ -120,6 +119,8 @@ export default async function Changes({
                     Number.isFinite(Date.parse(item.shopify_updated_at))
                       ? dateTime(item.shopify_updated_at)
                       : null;
+                  const priceChanged =
+                    item.kind === "changed" && item.fields.includes("Preço");
                   const differences = [
                     ["Nome", item.old_name, item.name],
                     ["SKU", item.old_sku, item.current_sku],
@@ -180,7 +181,7 @@ export default async function Changes({
                         </span>
                         <small>
                           {item.kind === "added"
-                            ? "Produto novo nesta versão"
+                            ? "Não constava na sincronização anterior"
                             : item.kind === "removed"
                               ? "Produto ausente nesta versão; não indica venda"
                               : item.fields.join(", ")}
@@ -208,25 +209,28 @@ export default async function Changes({
                           )}
                       </td>
                       <td>
-                        {item.kind === "added"
-                          ? "Não existia no catálogo"
-                          : item.old_price !== null
-                            ? formatMoney(
-                                item.old_price,
-                                item.old_currency || "BRL",
-                              )
-                            : "Não informado"}
+                        {item.kind === "removed" ? (
+                          "Fora do catálogo"
+                        ) : item.price !== null ? (
+                          <strong>
+                            {formatMoney(item.price, item.currency || "BRL")}
+                          </strong>
+                        ) : (
+                          "Não informado"
+                        )}
+                        {priceChanged && item.old_price !== null && (
+                          <small>
+                            Anterior:{" "}
+                            {formatMoney(
+                              item.old_price,
+                              item.old_currency || "BRL",
+                            )}
+                          </small>
+                        )}
                       </td>
                       <td>
-                        {item.kind === "removed"
-                          ? "Fora do catálogo"
-                          : item.price !== null
-                            ? formatMoney(item.price, item.currency || "BRL")
-                            : "Não informado"}
-                      </td>
-                      <td>
                         {item.kind === "added"
-                          ? "Não existia no catálogo"
+                          ? "—"
                           : item.old_stock === null
                             ? "Não informado"
                             : `${number(item.old_stock)} un.`}

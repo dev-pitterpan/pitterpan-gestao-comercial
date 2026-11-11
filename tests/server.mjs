@@ -152,12 +152,17 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
         if (path === "/gestor/produtos/") {
           assert.match(
             html,
-            /<header class="admin-page-heading">.*?<h1>Produtos<\/h1>.*?Buscar por nome, SKU ou marca.*?<\/header>/s,
+            /<header class="admin-page-heading">.*?<h1>Produtos<\/h1>.*?Filtrar categoria.*?Filtrar marca.*?<\/header>/s,
           );
           assert.match(
             html,
-            /class="admin-table-scroll finance-table-viewport drag-scroll"/,
+            /class="admin-table-scroll finance-table-viewport admin-product-viewport drag-scroll"/,
           );
+          assert.match(
+            html,
+            /<th scope="col">.*?<span>Produto<\/span>.*?aria-label="Buscar produto por nome ou SKU".*?<\/th>/s,
+          );
+          assert.doesNotMatch(html, /class="admin-global-search"/);
           assert.match(
             html,
             /<nav class="admin-table-pagination" aria-label="Páginas de produtos"/,

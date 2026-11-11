@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import AutoFilterForm from "./AutoFilterForm";
 import AdminSelect from "./AdminSelect";
 import DragScroll from "./DragScroll";
 import { Download, Search, ArrowUpRight, Package } from "lucide-react";
@@ -21,11 +20,9 @@ export function stockLabel(stock: number | null, low: number, high: number) {
 }
 export function ProductFilters({
   query,
-  base,
   canExport,
 }: {
   query: AdminQuery;
-  base: string;
   canExport: boolean;
 }) {
   const [stock, setStock] = useState(query.stock);
@@ -35,19 +32,11 @@ export function ProductFilters({
     "/api/admin/products/?" +
     new URLSearchParams({ ...filters, format: "csv" });
   return (
-    <AutoFilterForm action={base} className="admin-filter-bar">
-      <label className="admin-filter-search">
-        <Search size={17} />
-        <input
-          name="q"
-          defaultValue={query.q}
-          placeholder="Buscar por nome, SKU ou marca"
-          aria-label="Buscar produtos"
-        />
-      </label>
+    <div className="admin-filter-bar">
       <input
         className="admin-filter-input"
         name="category"
+        maxLength={200}
         defaultValue={query.category}
         placeholder="Buscar categoria"
         aria-label="Filtrar categoria"
@@ -55,6 +44,7 @@ export function ProductFilters({
       <input
         className="admin-filter-input"
         name="vendor"
+        maxLength={200}
         defaultValue={query.vendor}
         placeholder="Buscar marca"
         aria-label="Filtrar marca"
@@ -86,107 +76,138 @@ export function ProductFilters({
           <Download size={16} /> Exportar resultados filtrados
         </a>
       )}
-    </AutoFilterForm>
+    </div>
   );
 }
 
 export default function ProductList({
   products,
   settings,
+  search,
+  resetKey,
 }: {
   products: AdminProduct[];
+  search: string;
+  resetKey: string;
   settings: { low: number; high: number };
 }) {
-  return products.length ? (
-    <DragScroll label="Resultados de produtos com rolagem. Clique e arraste para navegar pela tabela.">
-      <table className="admin-table">
-        <thead>
-          <tr>
-            <th>Produto</th>
-            <th>Categoria / marca</th>
-            <th>Preço</th>
-            <th>Estoque</th>
-            <th>Situação</th>
-            <th>
-              <span className="admin-sr-only">Link</span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {products.map((p) => {
-            const stock = stockLabel(
-              p.inventoryQuantity,
-              settings.low,
-              settings.high,
-            );
-            return (
-              <tr key={p.id}>
-                <td>
-                  <div className="admin-product-name">
-                    <img
-                      src={cardImage(p.image, 120)}
-                      alt=""
-                      width={48}
-                      height={48}
-                      loading="lazy"
+  return (
+    <>
+      <DragScroll
+        className="admin-table-scroll finance-table-viewport admin-product-viewport"
+        label="Resultados de produtos"
+        resetKey={resetKey}
+      >
+        <table className="admin-table">
+          <colgroup>
+            <col className="admin-product-column" />
+            <col span={5} />
+          </colgroup>
+          <thead>
+            <tr>
+              <th scope="col">
+                <div className="admin-product-column-heading">
+                  <span>Produto</span>
+                  <label className="admin-filter-search">
+                    <Search size={16} aria-hidden="true" />
+                    <input
+                      type="search"
+                      name="q"
+                      defaultValue={search}
+                      maxLength={120}
+                      placeholder="Buscar por nome ou SKU"
+                      aria-label="Buscar produto por nome ou SKU"
                     />
-                    <div>
-                      <strong>{p.name}</strong>
-                      <small>SKU {p.sku || "não informado"}</small>
+                  </label>
+                </div>
+              </th>
+              <th scope="col">Categoria / marca</th>
+              <th scope="col">Preço</th>
+              <th scope="col">Estoque</th>
+              <th scope="col">Situação</th>
+              <th scope="col">
+                <span className="admin-sr-only">Link</span>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {products.map((p) => {
+              const stock = stockLabel(
+                p.inventoryQuantity,
+                settings.low,
+                settings.high,
+              );
+              return (
+                <tr key={p.id}>
+                  <td>
+                    <div className="admin-product-name">
+                      <img
+                        src={cardImage(p.image, 120)}
+                        alt=""
+                        width={48}
+                        height={48}
+                        loading="lazy"
+                      />
+                      <div>
+                        <strong>{p.name}</strong>
+                        <small>SKU {p.sku || "não informado"}</small>
+                      </div>
                     </div>
-                  </div>
-                </td>
-                <td>
-                  <strong>{p.category || "Sem categoria"}</strong>
-                  <small>{p.vendor || "Marca não informada"}</small>
-                </td>
-                <td>
-                  <strong>
-                    {p.price !== undefined
-                      ? formatMoney(p.price, p.currency)
-                      : "Não informado"}
-                  </strong>
-                  {p.compareAtPrice && (
-                    <small>
-                      Anterior: {formatMoney(p.compareAtPrice, p.currency)}
-                    </small>
-                  )}
-                </td>
-                <td>
-                  <strong>{number(p.inventoryQuantity)}</strong>
-                </td>
-                <td>
-                  <span className={`admin-badge ${stock.tone}`}>
-                    {stock.label}
-                  </span>
-                </td>
-                <td>
-                  {p.siteUrl && (
-                    <a
-                      href={p.siteUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={`Ver ${p.name} na loja`}
-                    >
-                      <ArrowUpRight size={17} />
-                    </a>
-                  )}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </DragScroll>
-  ) : (
-    <div className="admin-empty">
-      <span>
-        <Package size={25} />
-      </span>
-      <h3>Nenhum produto nesta seleção</h3>
-      <p>
-        Revise os filtros ou confira a primeira importação em Sincronizações.
-      </p>
-    </div>
+                  </td>
+                  <td>
+                    <strong>{p.category || "Sem categoria"}</strong>
+                    <small>{p.vendor || "Marca não informada"}</small>
+                  </td>
+                  <td>
+                    <strong>
+                      {p.price !== undefined
+                        ? formatMoney(p.price, p.currency)
+                        : "Não informado"}
+                    </strong>
+                    {p.compareAtPrice && (
+                      <small>
+                        Anterior: {formatMoney(p.compareAtPrice, p.currency)}
+                      </small>
+                    )}
+                  </td>
+                  <td>
+                    <strong>{number(p.inventoryQuantity)}</strong>
+                  </td>
+                  <td>
+                    <span className={`admin-badge ${stock.tone}`}>
+                      {stock.label}
+                    </span>
+                  </td>
+                  <td>
+                    {p.siteUrl && (
+                      <a
+                        href={p.siteUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={`Ver ${p.name} na loja`}
+                      >
+                        <ArrowUpRight size={17} />
+                      </a>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </DragScroll>
+      {products.length === 0 && (
+        <div className="admin-empty">
+          <span>
+            <Package size={25} />
+          </span>
+          <h3>Nenhum produto nesta seleção</h3>
+          <p>
+            Revise os filtros ou confira a primeira importação em
+            Sincronizações.
+          </p>
+        </div>
+      )}
+    </>
   );
 }

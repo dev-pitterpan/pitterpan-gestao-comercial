@@ -1,16 +1,24 @@
 "use client";
 
-import { useRef, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 
 export default function DragScroll({
   children,
   className = "admin-table-scroll finance-table-viewport",
+  resetKey,
   label = "Pedidos com rolagem. Clique e arraste para navegar pela tabela.",
 }: {
   children: ReactNode;
   className?: string;
   label?: string;
+  resetKey?: string;
 }) {
+  const viewport = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (resetKey !== undefined && viewport.current) {
+      viewport.current.scrollTop = 0;
+    }
+  }, [resetKey]);
   const gesture = useRef<{
     id: number;
     x: number;
@@ -23,6 +31,7 @@ export default function DragScroll({
 
   return (
     <div
+      ref={viewport}
       className={`${className} drag-scroll`}
       role="region"
       tabIndex={0}
