@@ -31,7 +31,7 @@ No painel do administrador e do gerente, os títulos e os filtros de consulta fi
 | Produtos mais vendidos | `/gestor/produtos-vendidos/` | Ranking e consulta paginada de produtos e variantes vendidos, com busca e filtros. |
 | Mapa de entregas | `/gestor/mapa/` | Agrupa destinos dos pedidos online por município e UF quando identificados. |
 | Vendas Loja | `/gestor/winthor/balcao/` | Área reservada para vendas de caixa por filial. A integração está pendente. |
-| Todos os produtos | `/gestor/produtos/` | Pesquisa, filtros e indicadores das variantes do catálogo publicado. |
+| Todos os produtos | `/gestor/produtos/` | Pesquisa, filtros e indicadores das variantes do catálogo publicado. A tabela tem rolagem interna e paginação com intervalo, total e botões Anterior e Próxima, também usados em Estoque e Ofertas. |
 | Ofertas | `/gestor/ofertas/` | Variantes em que o preço de comparação supera o preço atual. |
 | Catálogos | `/gestor/catalogos/`, `/gestor/[slug]/` | Coleções em cartões compactos, com ícones por categoria e ações para abrir, copiar ou compartilhar. |
 | Alterações na Shopify | `/gestor/alteracoes/` | Compara publicações sucessivas. Exibe inclusão, ausência e campos modificados. Filtra pela detecção na sincronização e mostra a data Shopify quando disponível. |

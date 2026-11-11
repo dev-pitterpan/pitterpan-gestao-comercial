@@ -149,12 +149,40 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
             html,
             /<header class="admin-page-heading">.*?<h1>Visão geral da loja<\/h1>.*?Período das análises.*?<\/header>/s,
           );
-        if (path === "/gestor/produtos/")
+        if (path === "/gestor/produtos/") {
           assert.match(
             html,
             /<header class="admin-page-heading">.*?<h1>Produtos<\/h1>.*?Buscar por nome, SKU ou marca.*?<\/header>/s,
           );
+          assert.match(
+            html,
+            /class="admin-table-scroll finance-table-viewport drag-scroll"/,
+          );
+          assert.match(
+            html,
+            /<nav class="admin-table-pagination" aria-label="Páginas de produtos"/,
+          );
+        }
       }
+      const productPage = await get("/gestor/produtos/?q=a&page=2", {
+        headers: { cookie },
+      });
+      assert.equal(productPage.status, 200);
+      const productHtml = await productPage.text();
+      const pager = productHtml.match(
+        /<nav class="admin-table-pagination"[^>]*>.*?<\/nav>/s,
+      )?.[0];
+      assert.ok(pager);
+      assert.match(pager, /21–40 de [\d.]+ produtos/);
+      assert.match(pager, /Página <!-- -->2/);
+      assert.match(
+        pager,
+        /aria-label="Página anterior" href="[^"]*q=a&amp;[^"]*page=1"/,
+      );
+      assert.match(
+        pager,
+        /aria-label="Próxima página" href="[^"]*q=a&amp;[^"]*page=3"/,
+      );
     }
     console.log(
       `${application}: rotas, recursos compartilhados e isolamento HTTP OK.`,

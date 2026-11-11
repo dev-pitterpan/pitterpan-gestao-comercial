@@ -1158,10 +1158,23 @@
     grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr);
   }
 }
-.admin-app .sales-orders-panel > .finance-table-viewport {
+.admin-app
+  :is(.sales-orders-panel, .admin-product-panel)
+  > .finance-table-viewport {
   max-height: clamp(280px, 52dvh, 560px);
   overscroll-behavior-y: auto;
   scrollbar-gutter: stable;
+}
+.admin-app .admin-product-panel > .finance-table-viewport {
+  margin-top: 0;
+}
+.admin-product-panel .finance-table-viewport th:first-child {
+  left: auto;
+  box-shadow: none;
+}
+.admin-product-panel .finance-table-viewport td:first-child {
+  position: static;
+  box-shadow: none;
 }
 .admin-app .sales-orders-panel .admin-table tr > :not(:last-child) {
   border-right: 1px solid #e6eef7;

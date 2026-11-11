@@ -201,6 +201,7 @@ export const adminQuerySchema = z.object({
 export type AdminQuery = z.infer<typeof adminQuerySchema>;
 const selectProduct =
   '\'shopify-\'||variant_id AS id,COALESCE(sku,id) AS sku,name,description,category,vendor,price::text,compare_at_price::text AS "compareAtPrice",currency,image_url AS image,inventory_quantity AS "inventoryQuantity",variant_id AS "shopifyVariantId",site_url AS "siteUrl"';
+export const ADMIN_PRODUCT_PAGE_SIZE = 20;
 export async function adminProducts(
   input: AdminQuery,
   {
@@ -231,10 +232,18 @@ export async function adminProducts(
           context.settings.high,
         ),
     );
-    const pages = Math.max(1, Math.ceil(products.length / 20));
+    const pages = Math.max(
+      1,
+      Math.ceil(products.length / ADMIN_PRODUCT_PAGE_SIZE),
+    );
     const page = Math.min(input.page, pages);
     return {
-      products: all ? products : products.slice((page - 1) * 20, page * 20),
+      products: all
+        ? products
+        : products.slice(
+            (page - 1) * ADMIN_PRODUCT_PAGE_SIZE,
+            page * ADMIN_PRODUCT_PAGE_SIZE,
+          ),
       total: products.length,
       pages,
       page,
@@ -257,11 +266,11 @@ export async function adminProducts(
     values,
   );
   const total = Number(count.rows[0].total),
-    pages = Math.max(1, Math.ceil(total / 20)),
+    pages = Math.max(1, Math.ceil(total / ADMIN_PRODUCT_PAGE_SIZE)),
     page = Math.min(input.page, pages);
   const { rows } = await database().query<AdminProduct>(
-    `SELECT ${selectProduct} FROM catalog_items WHERE ${where} ORDER BY name,variant_id${all ? "" : " LIMIT 20 OFFSET $9"}`,
-    all ? values : [...values, (page - 1) * 20],
+    `SELECT ${selectProduct} FROM catalog_items WHERE ${where} ORDER BY name,variant_id${all ? "" : ` LIMIT ${ADMIN_PRODUCT_PAGE_SIZE} OFFSET $9`}`,
+    all ? values : [...values, (page - 1) * ADMIN_PRODUCT_PAGE_SIZE],
   );
   return {
     products: rows.map((p) => ({

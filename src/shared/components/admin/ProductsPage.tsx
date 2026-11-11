@@ -1,9 +1,11 @@
 import {
+  ADMIN_PRODUCT_PAGE_SIZE,
   adminContext,
   adminProducts,
   adminQuerySchema,
 } from "../../server/admin/repository";
-import { DataNotice, PageHeading, Pagination, number } from "./Primitives";
+import { DataNotice, PageHeading, number } from "./Primitives";
+import TablePagination from "./TablePagination";
 import ProductList, { ProductFilters } from "./ProductList";
 export default async function ProductsPage({
   searchParams,
@@ -31,6 +33,9 @@ export default async function ProductsPage({
       : mode === "offers"
         ? "/gestor/ofertas/"
         : "/gestor/produtos/";
+  const pageHref = (page: number) =>
+    `${base}?${new URLSearchParams({ ...query, page: String(page) })}`;
+  const offset = (result.page - 1) * ADMIN_PRODUCT_PAGE_SIZE;
   return (
     <>
       <PageHeading
@@ -72,14 +77,28 @@ export default async function ProductsPage({
           ))}
         </div>
       )}
-      <ProductList products={result.products} settings={context.settings} />
-      <Pagination
-        {...result}
-        base={base}
-        params={Object.fromEntries(
-          Object.entries(query).map(([k, v]) => [k, String(v)]),
+      <section className="admin-panel admin-product-panel">
+        <ProductList
+          key={pageHref(result.page)}
+          products={result.products}
+          settings={context.settings}
+        />
+        {result.total > 0 && (
+          <TablePagination
+            label="Páginas de produtos"
+            page={result.page}
+            pages={result.pages}
+            range={`${number(offset + 1)}–${number(offset + result.products.length)} de ${number(result.total)} produtos`}
+            hrefs={{
+              previous: result.page > 1 ? pageHref(result.page - 1) : undefined,
+              next:
+                result.page < result.pages
+                  ? pageHref(result.page + 1)
+                  : undefined,
+            }}
+          />
         )}
-      />
+      </section>
     </>
   );
 }
