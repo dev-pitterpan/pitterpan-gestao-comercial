@@ -1,5 +1,8 @@
 export const statusSearchEntries = [
+  ["CASH_FLOW", "Com recebimento ou estorno", ["com recebimento ou estorno"]],
+  ["OPEN_BALANCE", "Aguardando pagamento", ["aguardando pagamento"]],
   ["PAID", "Pago", ["pago", "pagos", "paga", "pagas"]],
+  ["PAID_ACTIVE", "Pagos não cancelados", ["pagos nao cancelados"]],
   ["EXPIRED", "Expirado", ["expirado", "expirados", "expirada", "expiradas"]],
   [
     "CANCELLED",

@@ -11,7 +11,7 @@ import { database } from "../../server/database/client";
 import { salesConfig, salesReady } from "../../server/sales/config";
 import { readCommercialOverview } from "../../server/sales/repository";
 import { fulfillmentLabels } from "../../lib/admin/fulfillment";
-import { salesLink } from "../../lib/admin/sales-links";
+import { salesPageLink } from "../../lib/admin/sales-links";
 import { number, dateTime } from "./Primitives";
 import CommercialTrend from "./CommercialTrend";
 import CommercialPeriod from "./CommercialPeriod";
@@ -46,14 +46,17 @@ export async function loadOverview(range: DateRange) {
 export default function CommercialOverview({
   range,
   data,
+  admin,
 }: {
   range: DateRange;
+  admin: boolean;
   data: Awaited<ReturnType<typeof loadOverview>>;
 }) {
   const syncedAt = data?.sales.state?.completed_at;
   const stale = syncedAt && Date.now() - Date.parse(syncedAt) > 86_400_000;
   const filters = new URLSearchParams(range);
-  const salesHref = salesLink(filters);
+  const salesHref = salesPageLink("/gestor/vendas/resumo/", filters);
+  const operationsHref = salesPageLink("/gestor/vendas/atendimento/", filters);
   const cards = data
     ? [
         {
@@ -68,7 +71,9 @@ export default function CommercialOverview({
                 ),
               )
             : "—",
-          href: salesLink(filters, { status: "PAID" }, "recent-orders"),
+          href: salesPageLink("/gestor/vendas/", filters, {
+            status: "PAID_ACTIVE",
+          }),
           hint: "No período selecionado",
         },
         {
@@ -84,7 +89,9 @@ export default function CommercialOverview({
                 }).format(Number(row.net)),
               )
               .join(" · ") || "—",
-          href: salesHref,
+          href: salesPageLink("/gestor/vendas/recebimentos/", filters, {
+            metric: "net",
+          }),
           hint: "Recebimentos menos reembolsos",
         },
         {
@@ -92,7 +99,7 @@ export default function CommercialOverview({
           icon: Package,
           tone: "amber",
           value: number(Number(data.queue.preparing)),
-          href: "#overview-pending",
+          href: operationsHref,
           hint: "Atendimentos em aberto, exceto retiradas prontas",
         },
         {
@@ -100,11 +107,14 @@ export default function CommercialOverview({
           icon: Store,
           tone: "violet",
           value: number(Number(data.queue.ready)),
-          href: "#overview-pending",
+          href: operationsHref,
           hint: "Aguardando retirada do cliente",
         },
       ]
     : [];
+  const orderedCards = admin
+    ? [cards[1], cards[0], ...cards.slice(2)].filter(Boolean)
+    : [...cards.slice(2), ...cards.slice(0, 2)];
   return (
     <section
       aria-label="Resumo comercial Shopify"
@@ -122,7 +132,12 @@ export default function CommercialOverview({
             {data?.sales.state?.until_at && " · Sincronização em andamento"}
           </p>
         </div>
-        <CommercialPeriod range={range} />
+        <div className="sales-workspace-links">
+          <CommercialPeriod range={range} />
+          <Link className="admin-button" href={salesHref}>
+            Resumo Shopify <ArrowRight size={15} />
+          </Link>
+        </div>
       </header>
       {!data ? (
         <p className="admin-data-notice" role="status">
@@ -148,22 +163,24 @@ export default function CommercialOverview({
             </p>
           )}
           <div className="admin-stats">
-            {cards.map(({ label, icon: Icon, tone, value, href, hint }) => (
-              <Link
-                key={label}
-                className={`admin-stat admin-stat--${tone}`}
-                href={href}
-              >
-                <div>
-                  <span className={`admin-stat-icon ${tone}`}>
-                    <Icon size={20} aria-hidden="true" />
-                  </span>
-                </div>
-                <span>{label}</span>
-                <strong>{value}</strong>
-                <small>{hint}</small>
-              </Link>
-            ))}
+            {orderedCards.map(
+              ({ label, icon: Icon, tone, value, href, hint }) => (
+                <Link
+                  key={label}
+                  className={`admin-stat admin-stat--${tone}`}
+                  href={href}
+                >
+                  <div>
+                    <span className={`admin-stat-icon ${tone}`}>
+                      <Icon size={20} aria-hidden="true" />
+                    </span>
+                  </div>
+                  <span>{label}</span>
+                  <strong>{value}</strong>
+                  <small>{hint}</small>
+                </Link>
+              ),
+            )}
           </div>
           <div className="commercial-overview-grid">
             <section
@@ -220,7 +237,10 @@ export default function CommercialOverview({
                   Nenhuma pendência encontrada no histórico importado.
                 </p>
               )}
-              <Link href="/gestor/vendas/" className="admin-text-link">
+              <Link
+                href={salesPageLink("/gestor/vendas/", filters)}
+                className="admin-text-link"
+              >
                 Abrir Vendas e pedidos <ArrowRight size={15} />
               </Link>
             </section>

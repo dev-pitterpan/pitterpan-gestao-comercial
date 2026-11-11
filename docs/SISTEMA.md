@@ -21,8 +21,12 @@ Escolha ou troque a foto pelo avatar da barra lateral, em Configurações ou em 
 | --- | --- | --- |
 | Login e recuperação | `/login/`, `/recuperar-senha/` | Entrada da equipe e solicitação de recuperação. O master usa credenciais configuradas. As contas da equipe ficam no banco. |
 | Visão geral | `/gestor/` | Indicadores, evolução de vendas e ranking por data. A fila Atenção agora considera as pendências do histórico importado. Também reúne categorias, estoque e mudanças de catálogo. |
-| Pedidos Shopify | `/gestor/vendas/` | Lista paginada, filtros, situação de pagamento e atendimento, conferência de itens, frete, estornos e indicadores. O calendário ajusta a posição ao espaço disponível e abre acima da navegação; em telas estreitas mostra um mês por vez. Usa o histórico de vendas sincronizado. |
-| Produtos vendidos | `/gestor/produtos-vendidos/` | Consulta de produtos e variantes vendidos, com busca e filtros. |
+| Resumo Shopify | `/gestor/vendas/resumo/` | Indicadores e situação dos pedidos. Os cartões abrem o detalhe no período selecionado. |
+| Pedidos Shopify | `/gestor/vendas/` | Lista paginada dos pedidos recentes, com filtros, pagamento, entrega e itens. |
+| Atendimento de pedidos | `/gestor/vendas/atendimento/` | Fila de preparo e retirada, com detalhes do atendimento. |
+| Recebimentos | `/gestor/vendas/recebimentos/` | Evolução do recebido e do líquido, com os pedidos que compõem o resultado. |
+| Estornos e reembolsos | `/gestor/vendas/reembolsos/` | Evolução e pedidos com reembolso total ou parcial, incluindo cancelados quando houver valor devolvido. |
+| Produtos mais vendidos | `/gestor/produtos-vendidos/` | Ranking e consulta paginada de produtos e variantes vendidos, com busca e filtros. |
 | Mapa de entregas | `/gestor/mapa/` | Agrupa destinos dos pedidos online por município e UF quando identificados. |
 | Vendas na loja | `/gestor/winthor/balcao/` | Área reservada para vendas de caixa por filial. A integração está pendente. |
 | Todos os produtos | `/gestor/produtos/` | Pesquisa, filtros e indicadores das variantes do catálogo publicado. |

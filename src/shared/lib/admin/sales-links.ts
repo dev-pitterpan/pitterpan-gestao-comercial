@@ -54,3 +54,20 @@ export function salesOverviewCards(source: URLSearchParams) {
     },
   ];
 }
+
+export function salesPageLink(
+  path: string,
+  source: URLSearchParams,
+  overrides: Record<string, string> = {},
+) {
+  const params = new URLSearchParams();
+  for (const key of salesLinkKeys) {
+    const value = source.get(key);
+    if (value && value !== "all") params.set(key, value);
+  }
+  for (const [key, value] of Object.entries(overrides)) {
+    if (value && value !== "all") params.set(key, value);
+    else params.delete(key);
+  }
+  return `${path}${params.size ? `?${params}` : ""}`;
+}

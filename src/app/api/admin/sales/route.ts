@@ -109,7 +109,10 @@ export async function GET(request: Request) {
                     days,
                     after,
                     parsed.data,
-                    { includeRanking: url.searchParams.get("ranking") !== "0" },
+                    {
+                      includeRanking: url.searchParams.get("ranking") !== "0",
+                      includeDaily: url.searchParams.get("daily") === "1",
+                    },
                   );
       await db.query("COMMIT");
       return Response.json(data, { headers: { "Cache-Control": "no-store" } });

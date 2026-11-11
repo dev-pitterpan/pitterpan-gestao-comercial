@@ -115,19 +115,22 @@
 .admin-nav-section {
   margin: 5px 0;
 }
-.admin-nav-section > h2 {
+.admin-nav-section > summary {
   display: flex;
   align-items: center;
   min-height: 42px;
   margin: 0;
   padding: 8px 13px;
   border-radius: 10px;
+  gap: 8px;
+  list-style: none;
+  cursor: pointer;
   background: #eaf2f9;
   color: #345e88;
   font-size: 12px;
   font-weight: 700;
 }
-.admin-nav-section.is-active > h2 {
+.admin-nav-section.is-active > summary {
   background: #dceaf6;
   color: #294f78;
 }
@@ -3238,4 +3241,14 @@
   .catalog-library-card {
     transition: none;
   }
+}
+
+.admin-nav-section > summary::-webkit-details-marker {
+  display: none;
+}
+.admin-nav-section > summary .admin-nav-chevron {
+  margin-inline-start: auto;
+}
+.admin-nav-section[open] > summary .admin-nav-chevron {
+  transform: rotate(180deg);
 }

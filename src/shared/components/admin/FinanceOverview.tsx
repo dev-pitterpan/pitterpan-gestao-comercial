@@ -5,7 +5,7 @@ import type { readSalesFinance } from "../../server/sales/repository";
 import { RevenueChart, numberValue } from "./AnalyticsCharts";
 import AdminSelect from "./AdminSelect";
 import PitterSpinner from "./PitterSpinner";
-import { salesLink } from "../../lib/admin/sales-links";
+import { salesLink, salesPageLink } from "../../lib/admin/sales-links";
 import Link from "next/link";
 import { shiftDate } from "../../lib/admin/date-range";
 type Data = Awaited<ReturnType<typeof readSalesFinance>>;
@@ -152,28 +152,34 @@ export default function FinanceOverview({
         key: "net",
         value: money(totals.net),
         hint: "Recebido menos reembolsado",
-        href: "?secao=vendas",
+        href: salesPageLink("/gestor/vendas/recebimentos/", filters, {
+          metric: "net",
+        }),
       },
       {
         label: "Pedidos pagos",
         key: "paid",
         value: count(numberValue(totals.paid)),
         hint: "Status pago, sem cancelados",
-        href: salesLink(filters, { status: "PAID" }, "recent-orders"),
+        href: salesPageLink("/gestor/vendas/", filters, {
+          status: "PAID_ACTIVE",
+        }),
       },
       {
         label: "Ticket médio",
         key: "ticket",
         value: Number(totals.paid) ? money(totals.ticket) : "—",
         hint: "Valor médio dos pedidos pagos",
-        href: "?secao=vendas",
+        href: salesPageLink("/gestor/vendas/", filters, {
+          status: "PAID_ACTIVE",
+        }),
       },
       {
         label: "Reembolsos",
         key: "refunded",
         value: money(totals.refunded),
         hint: "Total devolvido nos pedidos do período",
-        href: salesLink(filters, { status: "REFUNDS" }, "recent-orders"),
+        href: salesPageLink("/gestor/vendas/reembolsos/", filters),
       },
     ];
     const paid = metric === "paid";

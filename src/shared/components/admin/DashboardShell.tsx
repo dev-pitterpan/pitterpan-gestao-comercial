@@ -1,4 +1,5 @@
 "use client";
+import { salesPageLink } from "../../lib/admin/sales-links";
 import ProfilePhoto from "./ProfilePhoto";
 import { allowed, operationalRoles } from "../../server/auth/permissions";
 import AutoFilterForm from "./AutoFilterForm";
@@ -15,6 +16,9 @@ import {
 } from "react";
 import {
   ArrowLeft,
+  ChevronDown,
+  CircleDollarSign,
+  ReceiptText,
   CalendarDays,
   ShieldCheck,
   LoaderCircle,
@@ -101,6 +105,36 @@ const links = [
     icon: MapPinned,
     financial: true,
   },
+  {
+    href: "/gestor/vendas/resumo/",
+    label: "Resumo Shopify",
+    icon: LayoutDashboard,
+    financial: true,
+  },
+  {
+    href: "/gestor/vendas/recebimentos/",
+    label: "Recebimentos",
+    icon: CircleDollarSign,
+    financial: true,
+  },
+  {
+    href: "/gestor/vendas/reembolsos/",
+    label: "Estornos e reembolsos",
+    icon: ReceiptText,
+    financial: true,
+  },
+  {
+    href: "/gestor/vendas/atendimento/",
+    label: "Atendimento de pedidos",
+    icon: Package,
+    financial: true,
+  },
+  {
+    href: "/gestor/produtos-vendidos/",
+    label: "Produtos mais vendidos",
+    icon: ChartNoAxesCombined,
+    financial: true,
+  },
   { href: "/gestor/produtos/", label: "Todos os produtos", icon: Package },
   {
     href: "/gestor/estoque/",
@@ -173,12 +207,23 @@ const navigationGroups = [
   { label: "Início", paths: ["/gestor/"] },
   {
     label: "Vendas e pedidos",
-    paths: ["/gestor/vendas/", "/gestor/winthor/balcao/", "/gestor/mapa/"],
+    icon: ShoppingCart,
+    paths: [
+      "/gestor/vendas/resumo/",
+      "/gestor/vendas/",
+      "/gestor/vendas/atendimento/",
+      "/gestor/vendas/recebimentos/",
+      "/gestor/vendas/reembolsos/",
+      "/gestor/mapa/",
+      "/gestor/winthor/balcao/",
+    ],
   },
   {
-    label: "Produtos",
+    label: "Produtos e catálogos",
+    icon: Package,
     paths: [
       "/gestor/produtos/",
+      "/gestor/produtos-vendidos/",
       "/gestor/ofertas/",
       "/gestor/catalogos/",
       "/gestor/catalogos/imagens/",
@@ -187,6 +232,7 @@ const navigationGroups = [
   },
   {
     label: "Estoque e transferências",
+    icon: Boxes,
     paths: [
       "/gestor/estoque/",
       "/gestor/winthor/estoque-por-loja/",
@@ -195,7 +241,8 @@ const navigationGroups = [
   },
   { label: "Planejamento", paths: ["/gestor/agenda/"] },
   {
-    label: "Análises",
+    label: "Análises e relatórios",
+    icon: ChartNoAxesCombined,
     paths: ["/gestor/analises/", "/gestor/relatorios/"],
   },
   {
@@ -204,6 +251,7 @@ const navigationGroups = [
   },
   {
     label: "Administração",
+    icon: Settings2,
     paths: ["/gestor/usuarios/", "/gestor/configuracoes/", "/gestor/versoes/"],
   },
 ];
@@ -317,6 +365,7 @@ export default function DashboardShell({
   user: { name: string; email: string; role: Role };
 }) {
   const pathname = (usePathname() || "/gestor/").replace(/\/+$/, "") + "/";
+  const searchParams = useSearchParams();
   const sidebarRef = useRef<HTMLElement>(null);
   useEffect(() => {
     document.documentElement.className = "";
@@ -334,7 +383,7 @@ export default function DashboardShell({
     const controls = () =>
       [
         ...(sidebarRef.current?.querySelectorAll<HTMLElement>(
-          "a[href],button:not(:disabled)",
+          "a[href],button:not(:disabled),summary",
         ) || []),
       ].filter((node) => node.getClientRects().length);
     controls()[0]?.focus();
@@ -442,74 +491,84 @@ export default function DashboardShell({
             analytics ? "Seções de Análises Shopify" : "Seções da central"
           }
         >
-          {analytics ? (
-            <Suspense>
-              <AnalyticsNavigation close={() => setOpen(false)} />
-            </Suspense>
-          ) : (
-            navigationGroups.map((group) => {
-              const items = links.filter(
-                (link) =>
-                  group.paths.includes(link.href) &&
-                  (!link.admin || user.role === "admin") &&
-                  (!link.financial || user.role !== "atendimento"),
-              );
-              if (!items.length) return null;
-              const active = items.some(({ href }) => pathname === href);
-              const entries = group.paths.flatMap((path) => {
-                const item = items.find(({ href }) => href === path);
-                if (!item) return [];
-                const { href, label, icon: Icon, planned } = item;
+          {navigationGroups.map((group) => {
+            const items = links.filter(
+              (link) =>
+                group.paths.includes(link.href) &&
+                (!link.admin || user.role === "admin") &&
+                (!link.financial || user.role !== "atendimento"),
+            );
+            if (!items.length) return null;
+            const analyticsGroup = group.paths.includes(analyticsPath);
+            const active =
+              (analytics && analyticsGroup) ||
+              items.some(({ href }) => pathname === href);
+            const GroupIcon = group.icon ?? Boxes;
+            const entries = group.paths.flatMap((path) => {
+              const item = items.find(({ href }) => href === path);
+              if (!item) return [];
+              if (analytics && path === analyticsPath)
                 return (
-                  <Link
-                    key={href}
-                    href={href}
-                    prefetch={false}
-                    aria-current={pathname === href ? "page" : undefined}
-                    className={pathname === href ? "active" : ""}
-                    onClick={() => setOpen(false)}
-                  >
-                    <Icon size={19} strokeWidth={1.7} aria-hidden="true" />
-                    <span>{label}</span>
-                    {planned && (
-                      <small className="admin-nav-planned">Pendente</small>
-                    )}
-                    <NavigationPending />
-                    {pathname === href && <span className="admin-nav-marker" />}
-                  </Link>
+                  <Suspense key={path}>
+                    <AnalyticsNavigation close={() => setOpen(false)} />
+                  </Suspense>
                 );
-              });
-              if (items.length === 1)
-                return (
-                  <div className="admin-nav-direct" key={group.label}>
-                    {entries}
-                  </div>
-                );
+              const { href, label, icon: Icon, planned } = item;
               return (
-                <section
-                  className={`admin-nav-section${active ? " is-active" : ""}`}
-                  key={group.label}
+                <Link
+                  key={href}
+                  href={
+                    href.startsWith("/gestor/vendas/") ||
+                    href === "/gestor/produtos-vendidos/"
+                      ? salesPageLink(href, new URLSearchParams(searchParams), {
+                          status: "",
+                          category: "",
+                          delivery: "",
+                          fulfillment: "",
+                        })
+                      : href
+                  }
+                  prefetch={false}
+                  aria-current={pathname === href ? "page" : undefined}
+                  className={pathname === href ? "active" : ""}
+                  onClick={() => setOpen(false)}
                 >
-                  <h2>{group.label}</h2>
-                  <div className="admin-nav-section-links">{entries}</div>
-                </section>
+                  <Icon size={19} strokeWidth={1.7} aria-hidden="true" />
+                  <span>{label}</span>
+                  {planned && (
+                    <small className="admin-nav-planned">Pendente</small>
+                  )}
+                  <NavigationPending />
+                  {pathname === href && <span className="admin-nav-marker" />}
+                </Link>
               );
-            })
-          )}
+            });
+            if (group.paths.length === 1)
+              return (
+                <div className="admin-nav-direct" key={group.label}>
+                  {entries}
+                </div>
+              );
+            return (
+              <details
+                open={active}
+                className={`admin-nav-section${active ? " is-active" : ""}`}
+                key={`${group.label}:${active}`}
+              >
+                <summary>
+                  <GroupIcon size={17} strokeWidth={1.7} aria-hidden="true" />
+                  <span>{group.label}</span>
+                  <ChevronDown
+                    size={15}
+                    className="admin-nav-chevron"
+                    aria-hidden="true"
+                  />
+                </summary>
+                <div className="admin-nav-section-links">{entries}</div>
+              </details>
+            );
+          })}
         </nav>
-        <div className="admin-sidebar-note">
-          <span>
-            Uma festa começa
-            <br />
-            <strong>nos detalhes.</strong>
-          </span>
-          <Sparkles size={26} />
-          <small>
-            Informação organizada.
-            <br />
-            Mais tempo para criar.
-          </small>
-        </div>
         <div className="admin-account">
           <ProfilePhoto key={user.email} name={user.name} />
           <div>

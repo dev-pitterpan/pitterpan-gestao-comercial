@@ -805,6 +805,32 @@ test("financeiro separa recebido, estorno e expirado, preservando reembolsos de 
       status: "REFUNDED",
       category: "",
     });
+    const paidActive = await readSalesOrders(db, store, 30, {
+      status: "PAID_ACTIVE",
+      category: "",
+    });
+    assert.equal(paidActive.orders.length, Number(total.paid));
+    assert.ok(paidActive.orders.every((order) => !order.cancelled_at));
+    const cashFlow = await readSales(
+      db,
+      store,
+      30,
+      "0",
+      {
+        status: "CASH_FLOW",
+        category: "",
+      },
+      { includeRanking: false, includeDaily: true },
+    );
+    assert.equal(
+      cashFlow.daily.reduce((sum, row) => sum + Number(row.net), 0),
+      Number(total.net),
+    );
+    assert.ok(
+      cashFlow.orders.every(
+        (order) => Number(order.received) || Number(order.refunded),
+      ),
+    );
     const allRefunds = await readSalesOrders(db, store, 30, {
       status: "REFUNDS",
       category: "",

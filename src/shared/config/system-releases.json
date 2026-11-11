@@ -1,5 +1,14 @@
 [
   {
+    "version": "2026.11.11.4",
+    "recordedAt": "2026-11-11T10:04:14-03:00",
+    "title": "Navegação por módulos e páginas dedicadas de vendas",
+    "changes": [
+      "A barra lateral organiza as áreas em módulos expansíveis e destaca a tela atual.",
+      "Resumo, pedidos, atendimento, recebimentos, reembolsos e produtos mais vendidos têm páginas próprias. Os atalhos carregam o período selecionado."
+    ]
+  },
+  {
     "version": "2026.11.11.3",
     "recordedAt": "2026-11-11T09:50:02-03:00",
     "title": "Catálogos e foto de perfil com visual mais compacto",

@@ -129,7 +129,7 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
 }
-.sales-status-values > div {
+.sales-status-values > a {
   display: grid;
   gap: 5px;
   padding: 10px 12px;
@@ -139,7 +139,7 @@
   background: #f4f7fb;
   overflow-wrap: anywhere;
 }
-.sales-status-values > [data-status="PENDING"] {
+.sales-status-values > [data-status="OPEN_BALANCE"] {
   border-left-color: #c58a2b;
 }
 .sales-status-values > [data-status="CANCELLED"] {
@@ -1192,4 +1192,20 @@
 }
 .admin-app .sales-orders-panel .admin-table tr > :not(:last-child) {
   border-right: 1px solid #e6eef7;
+}
+
+.sales-workspace-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.sales-metric-link,
+.sales-status-values > a {
+  color: inherit;
+  text-decoration: none;
+}
+.sales-metric-link:hover,
+.sales-status-values > a:hover {
+  outline: 1px solid #6b93b7;
+  outline-offset: -1px;
 }

@@ -5,7 +5,14 @@ import {
   fulfillmentFilterLabels,
   type FulfillmentFilter,
 } from "../../lib/admin/fulfillment";
-import { salesSectionFromHash } from "../../lib/admin/sales-links";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { RevenueChart } from "./AnalyticsCharts";
+import type { SalesView } from "./SalesWorkspace";
+import {
+  salesPageLink,
+  salesSectionFromHash,
+} from "../../lib/admin/sales-links";
 import OrderFulfillmentDetails from "./OrderFulfillmentDetails";
 import SalesOperations from "./SalesOperations";
 import SoldProductsHistory from "./SoldProductsHistory";
@@ -58,12 +65,22 @@ const status: Record<string, string> = {
 export default function SalesDashboard({
   initialFilters,
   initialDays = 30,
-  initialOperations = false,
+  view = "orders",
+  netFirst = false,
 }: {
   initialFilters?: SalesFilters;
   initialDays?: number;
-  initialOperations?: boolean;
+  view?: SalesView;
+  netFirst?: boolean;
 }) {
+  const router = useRouter();
+  const initialOperations = view === "operations";
+  const showSummary = view === "summary";
+  const productsOnly = view === "products";
+  const finance = view === "receipts" || view === "refunds";
+  const [metric, setMetric] = useState<"received" | "net">(
+    netFirst ? "net" : "received",
+  );
   const [filters, setFilters] = useState<SalesFilters>(
     initialFilters || {
       status: "all",
@@ -90,7 +107,20 @@ export default function SalesDashboard({
   useEffect(() => {
     if (entryPositioned.current) return;
     const section = salesSectionFromHash(window.location.hash);
-    if (section) {
+    if (
+      view === "orders" &&
+      (section === "sold-products" || section === "sales-operations")
+    ) {
+      const path =
+        section === "sold-products"
+          ? "/gestor/produtos-vendidos/"
+          : "/gestor/vendas/atendimento/";
+      router.replace(
+        salesPageLink(path, new URLSearchParams(window.location.search)),
+      );
+      return;
+    }
+    if (section === "recent-orders" && view === "orders") {
       if (!data) return;
       const target = document.getElementById(section);
       if (!target) return;
@@ -99,7 +129,7 @@ export default function SalesDashboard({
       window.scrollTo({ top: 0, left: 0, behavior: "auto" });
     }
     entryPositioned.current = true;
-  }, [data]);
+  }, [data, router, view]);
   const updateCustomers = useCallback((rows: Record<string, string>[]) => {
     const byId = new Map(rows.map((row) => [row.id, row]));
     setData((old) =>
@@ -164,6 +194,7 @@ export default function SalesDashboard({
         const params = new URLSearchParams({
           days: String(days),
           ranking: "0",
+          daily: finance ? "1" : "0",
           start: filters.start || "",
           end: filters.end || "",
           status: filters.status,
@@ -205,9 +236,13 @@ export default function SalesDashboard({
           setLoading(false);
       }
     },
-    [days, filters],
+    [days, filters, finance],
   );
   useEffect(() => {
+    if (productsOnly) {
+      setLoading(false);
+      return;
+    }
     const controller = new AbortController();
     setLoading(true);
     void load(controller.signal);
@@ -224,7 +259,7 @@ export default function SalesDashboard({
       controller.abort();
       clearInterval(timer);
     };
-  }, [load, revision]);
+  }, [load, revision, productsOnly]);
   async function loadMore() {
     if (loading || !data?.nextCursor || moreBusy.current) return;
     const epoch = generation.current;
@@ -334,6 +369,37 @@ export default function SalesDashboard({
   const automaticStart = shiftDate(todayDate(), -59);
   const outsideAutomaticWindow =
     !!filters.start && filters.start < automaticStart;
+  const linkParams = new URLSearchParams({
+    days: String(days),
+    start: filters.start || "",
+    end: filters.end || "",
+    category: filters.category,
+    delivery: filters.delivery || "all",
+    fulfillment: filters.fulfillment || "all",
+    status: filters.status,
+  });
+  const ordersPath = "/gestor/vendas/";
+  const receiptsPath = "/gestor/vendas/recebimentos/";
+  const refundsPath = "/gestor/vendas/reembolsos/";
+  const chartEnd = filters.end || todayDate();
+  const chartStart = filters.start || shiftDate(chartEnd, 1 - days);
+  const chartDates: string[] = [];
+  if (finance) {
+    for (
+      let date = chartStart;
+      date <= chartEnd && chartDates.length < 366;
+      date = shiftDate(date, 1)
+    ) {
+      chartDates.push(date);
+    }
+  }
+  const chartMetric = view === "refunds" ? "refunded" : metric;
+  const chartLabel =
+    view === "refunds"
+      ? "Valor reembolsado"
+      : metric === "net"
+        ? "Líquido após estornos"
+        : "Recebido confirmado";
   return (
     <div className="sales-dashboard">
       <div className="sales-toolbar">
@@ -364,98 +430,111 @@ export default function SalesDashboard({
             setFilters((old) => ({ ...old, ...range }));
           }}
         />
-        <div>
-          <label htmlFor="sales-status">Situação do pagamento</label>
-          <SalesStatusSelect
-            id="sales-status"
-            value={filters.status}
-            onChange={(status) => {
-              resetList();
-              setFilters((old) => ({ ...old, status }));
-            }}
-          />
-        </div>
-        <div>
-          <label htmlFor="sales-fulfillment">Situação do atendimento</label>
-          <AdminSelect
-            id="sales-fulfillment"
-            label="Situação do atendimento"
-            value={filters.fulfillment || "all"}
-            options={fulfillmentFilters.map((value) => ({
-              value,
-              label: fulfillmentFilterLabels[value],
-            }))}
-            onValueChange={(fulfillment) => {
-              resetList();
-              setFilters((old) => ({
-                ...old,
-                fulfillment: fulfillment as FulfillmentFilter,
-              }));
-            }}
-          />
-        </div>
-        <div>
-          <label htmlFor="sales-delivery-filter">Modalidade de entrega</label>
-          <AdminSelect
-            id="sales-delivery-filter"
-            label="Modalidade de entrega"
-            value={filters.delivery || "all"}
-            onValueChange={(delivery) => {
-              resetList();
-              setFilters((old) => ({
-                ...old,
-                delivery: delivery as DeliveryKind | "all",
-              }));
-            }}
-            options={[
-              { value: "all", label: "Todas as modalidades" },
-              ...deliveryFilterKinds.map((kind) => ({
-                value: kind,
-                label: deliveryLabels[kind],
-                icon: (
-                  <span aria-hidden="true">
-                    <DeliveryMark kind={kind} label={false} />
-                  </span>
-                ),
-                count: data
-                  ? count(
-                      data.deliveries.find((item) => item.kind === kind)
-                        ?.orders ?? 0,
-                    )
-                  : undefined,
-              })),
-            ]}
-          />
-        </div>
-        <div className="sales-category-filter">
-          <label htmlFor="sales-category">Categoria do produto</label>
-          <input
-            id="sales-category"
-            type="search"
-            maxLength={200}
-            value={categoryDraft}
-            onChange={(event) => setCategoryDraft(event.target.value)}
-            placeholder="Buscar qualquer categoria…"
-          />
-        </div>
-        <button
-          type="button"
-          className="admin-button"
-          onClick={sync}
-          disabled={syncing}
-        >
-          <RefreshCw size={16} className={syncing ? "sales-spin" : ""} />
-          {syncing ? "Atualizando…" : "Atualizar uma etapa"}
-        </button>
+        {!finance && !showSummary && (
+          <div>
+            <label htmlFor="sales-status">Situação do pagamento</label>
+            <SalesStatusSelect
+              id="sales-status"
+              value={filters.status}
+              onChange={(status) => {
+                resetList();
+                setFilters((old) => ({ ...old, status }));
+              }}
+            />
+          </div>
+        )}
+        {!finance && !showSummary && (
+          <div>
+            <label htmlFor="sales-fulfillment">Situação do atendimento</label>
+            <AdminSelect
+              id="sales-fulfillment"
+              label="Situação do atendimento"
+              value={filters.fulfillment || "all"}
+              options={fulfillmentFilters.map((value) => ({
+                value,
+                label: fulfillmentFilterLabels[value],
+              }))}
+              onValueChange={(fulfillment) => {
+                resetList();
+                setFilters((old) => ({
+                  ...old,
+                  fulfillment: fulfillment as FulfillmentFilter,
+                }));
+              }}
+            />
+          </div>
+        )}
+        {!showSummary && (
+          <div>
+            <label htmlFor="sales-delivery-filter">Modalidade de entrega</label>
+            <AdminSelect
+              id="sales-delivery-filter"
+              label="Modalidade de entrega"
+              value={filters.delivery || "all"}
+              onValueChange={(delivery) => {
+                resetList();
+                setFilters((old) => ({
+                  ...old,
+                  delivery: delivery as DeliveryKind | "all",
+                }));
+              }}
+              options={[
+                { value: "all", label: "Todas as modalidades" },
+                ...deliveryFilterKinds.map((kind) => ({
+                  value: kind,
+                  label: deliveryLabels[kind],
+                  icon: (
+                    <span aria-hidden="true">
+                      <DeliveryMark kind={kind} label={false} />
+                    </span>
+                  ),
+                  count: data
+                    ? count(
+                        data.deliveries.find((item) => item.kind === kind)
+                          ?.orders ?? 0,
+                      )
+                    : undefined,
+                })),
+              ]}
+            />
+          </div>
+        )}
+        {!showSummary && (
+          <div className="sales-category-filter">
+            <label htmlFor="sales-category">Categoria do produto</label>
+            <input
+              id="sales-category"
+              type="search"
+              maxLength={200}
+              value={categoryDraft}
+              onChange={(event) => setCategoryDraft(event.target.value)}
+              placeholder="Buscar qualquer categoria…"
+            />
+          </div>
+        )}
+        {showSummary && (
+          <button
+            type="button"
+            className="admin-button"
+            onClick={sync}
+            disabled={syncing}
+          >
+            <RefreshCw size={16} className={syncing ? "sales-spin" : ""} />
+            {syncing ? "Atualizando…" : "Atualizar uma etapa"}
+          </button>
+        )}
       </div>
-      <p className="sales-definition">
-        Pedidos processados no período, com o estado financeiro atual. Estornos
-        são os valores acumulados desses pedidos e podem ter ocorrido depois do
-        período selecionado. Recebimentos incluem frete e impostos; não são uma
-        apuração contábil por data de pagamento. Pedidos de teste são excluídos.
-        {filters.category &&
-          " Os valores são dos pedidos completos que contêm produtos dessa categoria na última importação; o ranking inclui somente os produtos correspondentes."}
-      </p>
+      {(finance || showSummary) && (
+        <p className="sales-definition">
+          Pedidos processados no período, com o estado financeiro atual.
+          Estornos são os valores acumulados desses pedidos e podem ter ocorrido
+          depois do período selecionado. Recebimentos incluem frete e impostos;
+          não são uma apuração contábil por data de pagamento. Pedidos de teste
+          são excluídos.
+          {filters.category &&
+            " Os valores são dos pedidos completos que contêm produtos dessa categoria na última importação; o ranking inclui somente os produtos correspondentes."}
+        </p>
+      )}
       {outsideAutomaticWindow && (
         <p className="admin-data-notice" role="status">
           Este período inclui datas anteriores à janela automática de 60 dias.
@@ -475,7 +554,8 @@ export default function SalesDashboard({
           {message}
         </p>
       )}
-      {loading && !data && (
+      {productsOnly && <SoldProductsHistory filters={filters} days={days} />}
+      {!productsOnly && loading && !data && (
         <div className="admin-panel" role="status">
           <PitterSpinner label="Consultando vendas…" />
         </div>
@@ -489,23 +569,25 @@ export default function SalesDashboard({
               importação dos demais pedidos continua funcionando.
             </p>
           )}
-          <div className="sales-health">
-            <span>
-              <BadgeCheck size={16} />{" "}
-              {data.state?.completed_at
-                ? `Última conferência: ${new Date(data.state.completed_at).toLocaleString("pt-BR")}`
-                : "Importação inicial ainda não concluída"}
-            </span>
-            <span>{data.pending} eventos aguardando processamento</span>
-            {data.oldestPendingAt && (
+          {showSummary && (
+            <div className="sales-health">
               <span>
-                Evento mais antigo na fila:{" "}
-                {new Date(data.oldestPendingAt).toLocaleString("pt-BR", {
-                  timeZone: "America/Sao_Paulo",
-                })}
+                <BadgeCheck size={16} />{" "}
+                {data.state?.completed_at
+                  ? `Última conferência: ${new Date(data.state.completed_at).toLocaleString("pt-BR")}`
+                  : "Importação inicial ainda não concluída"}
               </span>
-            )}
-          </div>
+              <span>{data.pending} eventos aguardando processamento</span>
+              {data.oldestPendingAt && (
+                <span>
+                  Evento mais antigo na fila:{" "}
+                  {new Date(data.oldestPendingAt).toLocaleString("pt-BR", {
+                    timeZone: "America/Sao_Paulo",
+                  })}
+                </span>
+              )}
+            </div>
+          )}
           {data.state?.until_at && (
             <p className="admin-inline-note">
               Importação em andamento: os indicadores representam apenas os
@@ -513,169 +595,296 @@ export default function SalesDashboard({
               janela.
             </p>
           )}
-          {data.totals.map((t) => (
-            <section
-              key={t.currency}
-              aria-label={`Indicadores em ${t.currency}`}
-            >
-              <div className="sales-currency">MOEDA DA LOJA · {t.currency}</div>
-              <div className="sales-stats">
-                <div className="sales-metric sales-metric--hero">
-                  <span>
-                    <CircleDollarSign size={19} aria-hidden="true" /> Líquido
-                    após estornos
-                  </span>
-                  <strong>{money(t.net, t.currency)}</strong>
-                  <small>Recebido menos reembolsado</small>
+          {showSummary &&
+            data.totals.map((t) => (
+              <section
+                key={t.currency}
+                aria-label={`Indicadores em ${t.currency}`}
+              >
+                <div className="sales-currency">
+                  MOEDA DA LOJA · {t.currency}
                 </div>
-                {[
-                  {
-                    label: "Recebido confirmado",
-                    tone: "received",
-                    value: money(t.received, t.currency),
-                    detail: "Valores recebidos informados pela Shopify",
-                    icon: CircleDollarSign,
-                  },
-                  {
-                    label: "Pagos não cancelados",
-                    tone: "paid",
-                    value: count(t.paid),
-                    detail: `${money(t.paid_value, t.currency)} em pedidos pagos e não cancelados`,
-                    icon: ShoppingCart,
-                  },
-                  {
-                    label: "Ticket dos pedidos pagos",
-                    tone: "ticket",
-                    value: money(t.ticket, t.currency),
-                    detail: "Total médio dos pedidos com status pago",
-                    icon: ArrowUpRight,
-                  },
-                  {
-                    label: "Estornos / reembolsos",
-                    tone: "refunds",
-                    value: money(t.refunded, t.currency),
-                    detail: `${count(t.refunded_orders)} pedidos com reembolso total ou parcial`,
-                    icon: ArrowDownLeft,
-                  },
-                ].map(({ label, value, detail, icon: Icon, tone }) => (
-                  <div
-                    className={`sales-metric sales-metric--${tone}`}
-                    key={label}
+                <div className="sales-stats">
+                  <Link
+                    href={salesPageLink(receiptsPath, linkParams, {
+                      metric: "net",
+                    })}
+                    className="sales-metric sales-metric--hero sales-metric-link"
                   >
                     <span>
-                      <Icon size={16} aria-hidden="true" /> {label}
+                      <CircleDollarSign size={19} aria-hidden="true" /> Líquido
+                      após estornos
                     </span>
-                    <strong>{value}</strong>
-                    <small>{detail}</small>
-                  </div>
-                ))}
-              </div>
-              <h3 className="sales-status-heading">Situação dos pedidos</h3>
-              <div className="sales-status-values">
-                {[
-                  {
-                    label: Number(t.outstanding_estimated)
-                      ? "Saldo não pago (parte calculada)"
-                      : "Saldo não pago · Shopify",
-                    count: t.pending,
-                    value: t.outstanding,
-                    status: "PENDING",
-                  },
-                  {
-                    label: "Expirados",
-                    count: t.expired,
-                    value: t.expired_value,
-                    status: "EXPIRED",
-                  },
-                  {
-                    label: "Anulados",
-                    count: t.voided,
-                    value: t.voided_value,
-                    status: "VOIDED",
-                  },
-                  {
-                    label: "Cancelados",
-                    count: t.cancelled,
-                    value: t.cancelled_value,
-                    status: "CANCELLED",
-                  },
-                ].map((s) => (
-                  <div key={s.status} data-status={s.status}>
-                    <span>
-                      {s.label} · {count(s.count)}
-                    </span>
-                    <strong>{money(s.value, t.currency)}</strong>
-                  </div>
-                ))}
-              </div>
-              {Number(t.inconsistent) > 0 && (
-                <p className="admin-data-notice">
-                  Há {t.inconsistent} pedidos com divergência entre os campos
-                  financeiros da Shopify. O líquido exibido usa recebido menos
-                  estornado; sincronize para conferir.
+                    <strong>{money(t.net, t.currency)}</strong>
+                    <small>Recebido menos reembolsado</small>
+                  </Link>
+                  {[
+                    {
+                      label: "Recebido confirmado",
+                      tone: "received",
+                      href: salesPageLink(receiptsPath, linkParams),
+                      value: money(t.received, t.currency),
+                      detail: "Valores recebidos informados pela Shopify",
+                      icon: CircleDollarSign,
+                    },
+                    {
+                      label: "Pagos não cancelados",
+                      tone: "paid",
+                      href: salesPageLink(ordersPath, linkParams, {
+                        status: "PAID_ACTIVE",
+                      }),
+                      value: count(t.paid),
+                      detail: `${money(t.paid_value, t.currency)} em pedidos pagos e não cancelados`,
+                      icon: ShoppingCart,
+                    },
+                    {
+                      label: "Ticket dos pedidos pagos",
+                      tone: "ticket",
+                      href: salesPageLink(ordersPath, linkParams, {
+                        status: "PAID_ACTIVE",
+                      }),
+                      value: money(t.ticket, t.currency),
+                      detail: "Total médio dos pedidos com status pago",
+                      icon: ArrowUpRight,
+                    },
+                    {
+                      label: "Estornos / reembolsos",
+                      tone: "refunds",
+                      href: salesPageLink(refundsPath, linkParams),
+                      value: money(t.refunded, t.currency),
+                      detail: `${count(t.refunded_orders)} pedidos com reembolso total ou parcial`,
+                      icon: ArrowDownLeft,
+                    },
+                  ].map(({ label, value, detail, icon: Icon, tone, href }) => (
+                    <Link
+                      href={href}
+                      className={`sales-metric sales-metric--${tone} sales-metric-link`}
+                      key={label}
+                    >
+                      <span>
+                        <Icon size={16} aria-hidden="true" /> {label}
+                      </span>
+                      <strong>{value}</strong>
+                      <small>{detail}</small>
+                    </Link>
+                  ))}
+                </div>
+                <h3 className="sales-status-heading">Situação dos pedidos</h3>
+                <div className="sales-status-values">
+                  {[
+                    {
+                      label: Number(t.outstanding_estimated)
+                        ? "Saldo não pago (parte calculada)"
+                        : "Saldo não pago · Shopify",
+                      count: t.pending,
+                      value: t.outstanding,
+                      status: "OPEN_BALANCE",
+                    },
+                    {
+                      label: "Expirados",
+                      count: t.expired,
+                      value: t.expired_value,
+                      status: "EXPIRED",
+                    },
+                    {
+                      label: "Anulados",
+                      count: t.voided,
+                      value: t.voided_value,
+                      status: "VOIDED",
+                    },
+                    {
+                      label: "Cancelados",
+                      count: t.cancelled,
+                      value: t.cancelled_value,
+                      status: "CANCELLED",
+                    },
+                  ].map((s) => (
+                    <Link
+                      key={s.status}
+                      data-status={s.status}
+                      href={salesPageLink(ordersPath, linkParams, {
+                        status: s.status,
+                      })}
+                    >
+                      <span>
+                        {s.label} · {count(s.count)}
+                      </span>
+                      <strong>{money(s.value, t.currency)}</strong>
+                    </Link>
+                  ))}
+                </div>
+                {Number(t.inconsistent) > 0 && (
+                  <p className="admin-data-notice">
+                    Há {t.inconsistent} pedidos com divergência entre os campos
+                    financeiros da Shopify. O líquido exibido usa recebido menos
+                    estornado; sincronize para conferir.
+                  </p>
+                )}
+                <p className="sales-definition">
+                  {count(t.pending)} pedidos aguardando pagamento/conclusão ·{" "}
+                  {count(t.cancelled)} cancelados. Expirados e anulados mostram
+                  o valor dos pedidos, não dinheiro recebido. Cancelamentos são
+                  uma situação independente do pagamento: não some esses
+                  quadros.
                 </p>
-              )}
-              <p className="sales-definition">
-                {count(t.pending)} pedidos aguardando pagamento/conclusão ·{" "}
-                {count(t.cancelled)} cancelados. Expirados e anulados mostram o
-                valor dos pedidos, não dinheiro recebido. Cancelamentos são uma
-                situação independente do pagamento: não some esses quadros.
-              </p>
-            </section>
-          ))}
-          {!data.totals.length && (
+              </section>
+            ))}
+          {showSummary && !data.totals.length && (
             <div className="admin-panel sales-empty">
               <Package size={36} />
-              <h2>Seu próximo capítulo de vendas</h2>
+              <h2>Nenhum pedido no período</h2>
               <p>
                 Nenhum pedido importado corresponde ao período e aos filtros
                 escolhidos. Experimente outra situação, categoria ou período.
               </p>
             </div>
           )}
-          <div className="admin-overview-grid sales-comparison-grid">
-            <SoldProductsHistory
-              key={JSON.stringify([filters, days])}
-              filters={filters}
-              days={days}
-              revision={revision}
-            />
+          {showSummary && (
+            <nav className="sales-workspace-links" aria-label="Telas de vendas">
+              <Link
+                className="admin-button"
+                href={salesPageLink(ordersPath, linkParams)}
+              >
+                Pedidos recentes <ArrowUpRight size={15} />
+              </Link>
+              <Link
+                className="admin-button"
+                href={salesPageLink("/gestor/vendas/atendimento/", linkParams)}
+              >
+                Atendimento de pedidos <ArrowUpRight size={15} />
+              </Link>
+              <Link
+                className="admin-button"
+                href={salesPageLink("/gestor/produtos-vendidos/", linkParams)}
+              >
+                Produtos mais vendidos <ArrowUpRight size={15} />
+              </Link>
+            </nav>
+          )}
+          {finance && (
+            <section className="admin-panel">
+              <header>
+                <h2>Evolução por data do pedido</h2>
+              </header>
+              {view === "receipts" && (
+                <div
+                  className="sales-workspace-links"
+                  role="group"
+                  aria-label="Indicador financeiro"
+                >
+                  <button
+                    type="button"
+                    className="admin-button"
+                    aria-pressed={metric === "received"}
+                    onClick={() => setMetric("received")}
+                  >
+                    Recebido confirmado
+                  </button>
+                  <button
+                    type="button"
+                    className="admin-button"
+                    aria-pressed={metric === "net"}
+                    onClick={() => setMetric("net")}
+                  >
+                    Líquido após estornos
+                  </button>
+                </div>
+              )}
+              {data.totals.map((total) => {
+                const byDay = new Map(
+                  data.daily
+                    .filter((row) => row.currency === total.currency)
+                    .map((row) => [row.day, row]),
+                );
+                const completedDay =
+                  data.state?.completed_at && !data.state.until_at
+                    ? todayDate(
+                        "America/Sao_Paulo",
+                        new Date(data.state.completed_at),
+                      )
+                    : "";
+                return (
+                  <div key={total.currency}>
+                    <p>
+                      <strong>
+                        {chartLabel} ·{" "}
+                        {money(total[chartMetric], total.currency)}
+                      </strong>
+                    </p>
+                    <RevenueChart
+                      key={`${total.currency}-${chartMetric}`}
+                      table={{
+                        columns: [],
+                        rows: chartDates.map(
+                          (day) =>
+                            byDay.get(day) ?? {
+                              day,
+                              [chartMetric]:
+                                day < completedDay && day >= automaticStart
+                                  ? "0"
+                                  : null,
+                            },
+                        ),
+                      }}
+                      currency={total.currency}
+                      showTable={false}
+                      metricKey={chartMetric}
+                      metricLabel={chartLabel}
+                      axisLabel={total.currency}
+                      money={(value) =>
+                        value === null
+                          ? "—"
+                          : money(String(value), total.currency)
+                      }
+                    />
+                  </div>
+                );
+              })}
+              {!data.totals.length && (
+                <p>Nenhum movimento encontrado no período.</p>
+              )}
+            </section>
+          )}
+          {(view === "orders" || finance) && (
             <section
               id="recent-orders"
               className="admin-panel sales-orders-panel"
             >
               <header>
-                <h2>Pedidos recentes</h2>
+                <h2>
+                  {finance
+                    ? "Pedidos que compõem o resultado"
+                    : "Pedidos recentes"}
+                </h2>
                 <ShoppingCart size={22} />
               </header>
-              <div className="sales-orders-status-filter">
-                <label htmlFor="recent-orders-status">
-                  Buscar pagamento ou cancelamento
-                </label>
-                <OrderStatusSearch
-                  value={filters.status}
-                  onChange={(status) => {
-                    resetList(true);
-                    setFilters((old) => ({ ...old, status }));
-                  }}
-                />
-                <small>
-                  Combina com período, categoria e entrega. Atualiza também os
-                  indicadores desta página.
-                </small>
-                {filters.status === "REFUNDS" && (
-                  <small>
-                    Inclui estornos totais e parciais com valor reembolsado,
-                    mesmo em pedidos cancelados.
-                  </small>
-                )}
-                {filters.status === "CANCELLED" && (
-                  <small>
-                    Inclui pedidos cancelados com ou sem reembolso. Confira as
-                    colunas Recebido e Estornado.
-                  </small>
-                )}
-              </div>
+              {!finance && (
+                <div className="sales-orders-status-filter">
+                  <label htmlFor="recent-orders-status">
+                    Buscar pagamento ou cancelamento
+                  </label>
+                  <OrderStatusSearch
+                    value={filters.status}
+                    onChange={(status) => {
+                      resetList(true);
+                      setFilters((old) => ({ ...old, status }));
+                    }}
+                  />
+                  <small>Combina com período, categoria e entrega.</small>
+                  {filters.status === "REFUNDS" && (
+                    <small>
+                      Inclui estornos totais e parciais com valor reembolsado,
+                      mesmo em pedidos cancelados.
+                    </small>
+                  )}
+                  {filters.status === "CANCELLED" && (
+                    <small>
+                      Inclui pedidos cancelados com ou sem reembolso. Confira as
+                      colunas Recebido e Estornado.
+                    </small>
+                  )}
+                </div>
+              )}
               <p className="sales-definition">
                 Mostrando {data.orders.length} pedidos nesta seleção, em lotes
                 de 10.
@@ -694,8 +903,8 @@ export default function SalesDashboard({
                       <th>Pedido</th>
                       <th>Cliente</th>
                       <th>Situação</th>
-                      <th>Entrega escolhida</th>
-                      <th>Total do pedido</th>
+                      {!finance && <th>Entrega escolhida</th>}
+                      {!finance && <th>Total do pedido</th>}
                       <th>Recebido</th>
                       <th>Estornado</th>
                       <th>Líquido</th>
@@ -704,7 +913,7 @@ export default function SalesDashboard({
                   <tbody>
                     {!data.orders.length && (
                       <tr>
-                        <td colSpan={8}>
+                        <td colSpan={finance ? 6 : 8}>
                           Nenhum pedido importado corresponde aos filtros
                           escolhidos.
                         </td>
@@ -735,6 +944,13 @@ export default function SalesDashboard({
                               )}
                             </time>
                           </small>
+                          {finance && (
+                            <OrderFulfillmentDetails
+                              id={o.id}
+                              name={o.name}
+                              storedStatus={o.fulfillment_status}
+                            />
+                          )}
                         </td>
                         <td>
                           <OrderCustomer order={o} />
@@ -751,35 +967,39 @@ export default function SalesDashboard({
                             </small>
                           )}
                         </td>
-                        <td>
-                          <DeliveryMark kind={o.delivery_kind} />
-                          <ShippingCharge order={o} />
-                          {o.delivery_label &&
-                            o.delivery_kind !== "LOCAL" &&
-                            !(
-                              o.delivery_kind === "PAC" &&
-                              o.delivery_label.trim().toLowerCase() ===
-                                "envio normal (pac)"
-                            ) && <small>{o.delivery_label}</small>}
-                          <small>
-                            {fulfillmentLabels[o.fulfillment_status] ||
-                              o.fulfillment_status}
-                          </small>
-                          <OrderFulfillmentDetails
-                            id={o.id}
-                            name={o.name}
-                            storedStatus={o.fulfillment_status}
-                          />
-                        </td>
-                        <td>
-                          {money(o.total, o.currency)}
-                          {o.current_total != null &&
-                            Number(o.current_total) !== Number(o.total) && (
-                              <small className="sales-current-total">
-                                Atual: {money(o.current_total, o.currency)}
+                        {!finance && (
+                          <>
+                            <td>
+                              <DeliveryMark kind={o.delivery_kind} />
+                              <ShippingCharge order={o} />
+                              {o.delivery_label &&
+                                o.delivery_kind !== "LOCAL" &&
+                                !(
+                                  o.delivery_kind === "PAC" &&
+                                  o.delivery_label.trim().toLowerCase() ===
+                                    "envio normal (pac)"
+                                ) && <small>{o.delivery_label}</small>}
+                              <small>
+                                {fulfillmentLabels[o.fulfillment_status] ||
+                                  o.fulfillment_status}
                               </small>
-                            )}
-                        </td>
+                              <OrderFulfillmentDetails
+                                id={o.id}
+                                name={o.name}
+                                storedStatus={o.fulfillment_status}
+                              />
+                            </td>
+                            <td>
+                              {money(o.total, o.currency)}
+                              {o.current_total != null &&
+                                Number(o.current_total) !== Number(o.total) && (
+                                  <small className="sales-current-total">
+                                    Atual: {money(o.current_total, o.currency)}
+                                  </small>
+                                )}
+                            </td>
+                          </>
+                        )}
                         <td>{money(o.received, o.currency)}</td>
                         <td>{money(o.refunded, o.currency)}</td>
                         <td>{money(o.net, o.currency)}</td>
@@ -821,15 +1041,7 @@ export default function SalesDashboard({
                 )}
               </div>
             </section>
-          </div>
-          {!initialOperations &&
-            (filters.status !== "all" ||
-              (filters.fulfillment || "all") !== "all" ||
-              filters.delivery !== "all" ||
-              !!filters.category ||
-              !!filters.start ||
-              days !== 30) &&
-            operations}
+          )}
         </>
       )}
     </div>

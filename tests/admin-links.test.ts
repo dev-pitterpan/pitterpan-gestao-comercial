@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { PGlite } from "@electric-sql/pglite";
 import {
   salesLink,
+  salesPageLink,
   salesOverviewCards,
   salesSectionFromHash,
 } from "../src/shared/lib/admin/sales-links.ts";
@@ -22,6 +23,15 @@ test("atalhos de vendas aplicam o filtro anunciado e preservam só o contexto co
     focus: "operations",
     snapshot: "old",
   });
+  const details = new URL(
+    salesPageLink("/gestor/vendas/recebimentos/", source, { metric: "net" }),
+    "https://local.test",
+  );
+  assert.equal(details.pathname, "/gestor/vendas/recebimentos/");
+  assert.equal(details.searchParams.get("start"), "2026-10-01");
+  assert.equal(details.searchParams.get("end"), "2026-10-07");
+  assert.equal(details.searchParams.get("metric"), "net");
+  assert.equal(details.searchParams.has("cursor"), false);
   const cards = salesOverviewCards(source);
   assert.equal(cards.length, 4);
   const actualCard = new URL(

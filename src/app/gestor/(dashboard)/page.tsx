@@ -114,7 +114,13 @@ export default async function Overview({
         </span>
       </header>
       <DataNotice context={context} />
-      {canViewSales && <CommercialOverview range={range} data={sales} />}
+      {canViewSales && (
+        <CommercialOverview
+          range={range}
+          data={sales}
+          admin={user.role === "admin"}
+        />
+      )}
       <section className="admin-stats" aria-label="Indicadores do catálogo">
         {stats.map(({ label, value, detail, icon: Icon, tone, href }) => (
           <Link
