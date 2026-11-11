@@ -1,3 +1,4 @@
+import ProfilePhoto from "@shared/components/admin/ProfilePhoto";
 import { requireSession } from "@shared/server/auth/session";
 import { pendingPasswordRequests } from "@shared/server/auth/password-events";
 import { database } from "@shared/server/database/client";
@@ -15,6 +16,14 @@ export default async function AccountPage() {
           title="Minha conta"
           description="Atualize a senha da sua conta."
         />
+        <section className="admin-panel">
+          <header>
+            <h2>Foto de perfil</h2>
+          </header>
+          <div className="admin-profile-photo-settings">
+            <ProfilePhoto name={session.name} showLabel />
+          </div>
+        </section>
         <section className="admin-panel">
           <h2>Alterar senha</h2>
           <PasswordForm mode="change" />

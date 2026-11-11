@@ -13,7 +13,7 @@ Mapa funcional e técnico do painel da Floresta, América e Iririú. A versão e
 | WinThor | ERP das lojas físicas. Vendas na loja, estoque por filial e transferências aguardam conexão com os dados do ERP. |
 | GitHub e Vercel | O repositório versiona o código. A Vercel hospeda a produção a partir de `main`. O GitHub Actions verifica a documentação, tipos, testes e build. |
 
-O avatar na barra lateral permite escolher, trocar ou remover a foto da própria conta. A foto é privada e armazenada no PostgreSQL em tamanho reduzido. Em instalações existentes, execute `npm run db:migrate` antes de habilitar o recurso.
+A foto da própria conta pode ser editada pelo avatar da barra lateral, em Configurações ou em Minha conta para perfis sem acesso administrativo. O navegador ajusta imagens de até 25 MB ao formato quadrado de 256 × 256 px, e o servidor armazena a foto privada em WebP no PostgreSQL. Em instalações existentes, execute `npm run db:migrate` antes de habilitar o recurso.
 
 ## 2. Mapa das telas
 
@@ -150,3 +150,10 @@ Vendas físicas serão tratadas em outra etapa. Para conciliar a Shopify com o W
 2. Adicione uma entrada no início de [system-releases.json](../src/shared/config/system-releases.json) com versão única `AAAA.MM.DD.N`, data ISO 8601 com fuso, título e resumo. Preserve as entradas anteriores.
 3. O workflow executa `node scripts/check-system-docs.mjs`. Em mudanças funcionais, verifica se o mapa e o registro de versões foram atualizados juntos.
 4. Revise a versão em execução após o deploy. Alterações de produto, sincronização e ações administrativas têm históricos próprios, conforme a seção 4.
+
+
+## Imagens do catálogo
+
+Em Catálogos → Imagens do catálogo, administradores podem selecionar imagens, converter todas as pendentes ou tentar novamente as que falharam. O histórico compara formato, dimensões e bytes antes e depois e registra o horário do processamento. A sincronização processa as imagens pendentes após publicar o catálogo. A versão WebP usa 1000 × 1000 px, fundo branco e enquadramento sem cortes.
+
+Execute `npm run db:migrate` no PostgreSQL usado pelo catálogo e pela Gestão Comercial. A vitrine pública usa a foto convertida quando consulta o mesmo PostgreSQL em modo `postgres`. Fotos pendentes ou que falharam continuam disponíveis pelo arquivo original. O histórico consolida URLs de imagem compartilhadas entre variantes.

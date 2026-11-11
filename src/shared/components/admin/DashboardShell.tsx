@@ -27,6 +27,7 @@ import {
   BadgePercent,
   ShoppingCart,
   BookOpen,
+  Images,
   History,
   ArrowLeftRight,
   RefreshCw,
@@ -130,6 +131,12 @@ const links = [
   { href: "/gestor/ofertas/", label: "Ofertas", icon: BadgePercent },
   { href: "/gestor/catalogos/", label: "Catálogos", icon: BookOpen },
   {
+    href: "/gestor/catalogos/imagens/",
+    label: "Imagens do catálogo",
+    icon: Images,
+    admin: true,
+  },
+  {
     href: "/gestor/agenda/",
     label: "Agenda e fornecedores",
     icon: CalendarDays,
@@ -174,6 +181,7 @@ const navigationGroups = [
       "/gestor/produtos/",
       "/gestor/ofertas/",
       "/gestor/catalogos/",
+      "/gestor/catalogos/imagens/",
       "/gestor/alteracoes/",
     ],
   },

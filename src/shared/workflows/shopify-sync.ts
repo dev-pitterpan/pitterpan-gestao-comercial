@@ -8,6 +8,7 @@ import {
   publish,
   finish,
   fail,
+  catalogImages,
 } from "./sync-steps";
 export async function shopifySync(id: string) {
   "use workflow";
@@ -48,5 +49,13 @@ export async function shopifySync(id: string) {
     await finish(id);
   } catch {
     await fail(id);
+    return;
+  }
+  try {
+    for (let batch = 0; batch < 5000; batch++) {
+      if (!(await catalogImages()).more) break;
+    }
+  } catch {
+    // Image processing can be resumed from the administration panel.
   }
 }

@@ -1,10 +1,11 @@
+import ProfilePhoto from "@shared/components/admin/ProfilePhoto";
 import { requireSession } from "@shared/server/auth/session";
 import { adminContext } from "@shared/server/admin/repository";
 import { PageHeading, DataNotice } from "@shared/components/admin/Primitives";
 import SettingsForm from "@shared/components/admin/SettingsForm";
 import { ShieldCheck, Boxes, Link as LinkIcon } from "lucide-react";
 export default async function Settings() {
-  await requireSession(["admin"]);
+  const session = await requireSession(["admin"]);
   const context = await adminContext("basic");
   return (
     <>
@@ -14,6 +15,14 @@ export default async function Settings() {
         description="Defina os alertas da operação e acompanhe o estado das integrações com segurança."
       />
       <DataNotice context={context} />
+      <section className="admin-panel">
+        <header>
+          <h2>Foto de perfil</h2>
+        </header>
+        <div className="admin-profile-photo-settings">
+          <ProfilePhoto name={session.name} showLabel />
+        </div>
+      </section>
       <div className="admin-settings-grid">
         <section className="admin-panel">
           <header>

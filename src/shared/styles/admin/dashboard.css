@@ -3033,7 +3033,7 @@
   max-width: 27ch;
 }
 
-.admin-app .admin-account .admin-avatar-edit {
+.admin-app button.admin-avatar-edit {
   position: relative;
   flex-shrink: 0;
   overflow: hidden;
@@ -3089,4 +3089,10 @@
   flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px;
+}
+
+.admin-profile-photo-settings {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }

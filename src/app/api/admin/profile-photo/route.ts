@@ -24,10 +24,14 @@ export async function GET() {
       [profileKey(auth.session)],
     );
     if (!rows[0]) return new Response(null, { status: 204, headers });
-    return new Response(new Uint8Array(rows[0].photo), {
+    const photo = rows[0].photo;
+    const isWebp =
+      photo.toString("ascii", 0, 4) === "RIFF" &&
+      photo.toString("ascii", 8, 12) === "WEBP";
+    return new Response(new Uint8Array(photo), {
       headers: {
         ...headers,
-        "Content-Type": "image/jpeg",
+        "Content-Type": isWebp ? "image/webp" : "image/jpeg",
         "X-Content-Type-Options": "nosniff",
         "Cross-Origin-Resource-Policy": "same-origin",
       },
@@ -63,11 +67,14 @@ export async function PUT(request: Request) {
       .autoOrient()
       .resize(256, 256, { fit: "cover" })
       .flatten({ background: "#f3f6fb" })
-      .jpeg({ quality: 85 })
+      .webp({ quality: 84 })
       .toBuffer();
   } catch {
     return Response.json(
-      { error: "Escolha uma imagem JPG, PNG ou WebP válida de até 2 MB." },
+      {
+        error:
+          "Não foi possível processar a foto. Escolha um JPG, PNG ou WebP válido.",
+      },
       { status: 400, headers },
     );
   }

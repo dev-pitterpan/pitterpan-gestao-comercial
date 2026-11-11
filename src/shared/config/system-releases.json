@@ -1,5 +1,22 @@
 [
   {
+    "version": "2026.11.11.2",
+    "recordedAt": "2026-11-11T09:40:27-03:00",
+    "title": "Otimização de imagens do catálogo",
+    "changes": [
+      "Painel de imagens com seleção, conversão em lote para WebP e comparação de formato, dimensões e peso.",
+      "A sincronização processa as imagens pendentes após publicar o catálogo."
+    ]
+  },
+  {
+    "version": "2026.11.11.1",
+    "recordedAt": "2026-11-11T09:32:19-03:00",
+    "title": "Foto de perfil em Configurações",
+    "changes": [
+      "A foto de perfil pode ser editada em Configurações e em Minha conta para perfis sem acesso administrativo. Imagens grandes são ajustadas para 256 × 256 px e salvas em WebP."
+    ]
+  },
+  {
     "version": "2026.11.10.8",
     "recordedAt": "2026-11-10T17:35:55-03:00",
     "title": "Foto de perfil no painel",

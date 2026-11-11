@@ -1,3 +1,4 @@
+import { processImages } from "../server/catalog-images/repository";
 import {
   beginCatalog,
   catalogReady,
@@ -96,4 +97,9 @@ export async function fail(id: string) {
     "UPDATE catalog_imports SET status='failed' WHERE id=$1 AND status='loading'",
     [id],
   );
+}
+
+export async function catalogImages() {
+  "use step";
+  return processImages();
 }
