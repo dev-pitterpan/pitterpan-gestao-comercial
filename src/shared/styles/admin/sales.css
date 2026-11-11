@@ -1278,18 +1278,59 @@
   padding-block: 12px;
 }
 .admin-app .analytics-revenue-chart[data-compact] {
-  height: 216px;
+  height: 188px;
   min-height: 0;
-  max-height: 216px;
+  max-height: 188px;
 }
 .sales-finance-panel {
   gap: 12px;
 }
 
 .admin-app .sales-finance-panel {
-  width: min(100%, 840px);
+  width: min(100%, 740px);
   justify-self: start;
 }
-.analytics-trend-legend {
-  color: #356fb3;
+
+.admin-table-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  padding: 10px 0 0;
+  color: #536b83;
+  font-size: 12px;
+}
+.admin-table-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-inline-start: auto;
+}
+.admin-table-pagination-controls .admin-button {
+  gap: 4px;
+  min-height: 36px;
+  padding: 5px 8px;
+}
+.admin-table-pagination-controls [aria-current="page"] {
+  white-space: nowrap;
+}
+.analytics-chart-wrap[data-compact] .analytics-chart-readout {
+  min-height: 30px;
+  margin-bottom: 4px;
+  color: #536b83;
+}
+.sales-finance-series > p > strong {
+  font-size: clamp(16px, 2vw, 20px);
+  letter-spacing: -0.015em;
+}
+@media (max-width: 430px) {
+  .admin-table-pagination-controls .admin-button {
+    min-width: 40px;
+    min-height: 40px;
+    justify-content: center;
+  }
+  .admin-table-pagination-controls .admin-button > span {
+    display: none;
+  }
 }

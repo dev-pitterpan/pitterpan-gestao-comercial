@@ -1,5 +1,15 @@
 [
   {
+    "version": "2026.11.11.8",
+    "recordedAt": "2026-11-11T11:36:54-03:00",
+    "title": "Paginação de tabelas e gráficos de vendas revisados",
+    "changes": [
+      "Pedidos, produtos vendidos, relatórios, imagens do catálogo e notas usam navegação por páginas.",
+      "Os gráficos de vendas mostram os valores diários em colunas, com escalas mais legíveis e cartão financeiro mais estreito.",
+      "A navegação usa os nomes Vendas Shopify e Vendas Loja."
+    ]
+  },
+  {
     "version": "2026.11.11.7",
     "recordedAt": "2026-11-11T11:28:15-03:00",
     "title": "Gráficos de vendas com colunas e tendência",

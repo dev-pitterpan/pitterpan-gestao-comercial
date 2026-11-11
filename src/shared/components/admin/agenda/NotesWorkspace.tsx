@@ -1,4 +1,5 @@
 "use client";
+import TablePagination from "../TablePagination";
 import { useState, type FormEvent } from "react";
 import { Plus, NotebookPen, CheckSquare } from "lucide-react";
 import type { Note, Supplier } from "../../../lib/agenda/types";
@@ -125,13 +126,15 @@ export default function NotesWorkspace({
 }) {
   const [selected, setSelected] = useState<string | null>(null);
   const [query, setQuery] = useState("");
-  const [limit, setLimit] = useState(20);
+  const [page, setPage] = useState(1);
   const note = notes.find((n) => n.id === selected);
   const filtered = notes.filter((n) =>
     `${n.title} ${n.body} ${suppliers.find((s) => s.id === n.supplier_id)?.name || ""}`
       .toLowerCase()
       .includes(query.toLowerCase()),
   );
+  const pages = Math.max(1, Math.ceil(filtered.length / 20));
+  const currentPage = Math.min(page, pages);
   return (
     <div className="agenda-directory-layout">
       <section className="admin-panel">
@@ -148,12 +151,12 @@ export default function NotesWorkspace({
             value={query}
             onChange={(e) => {
               setQuery(e.target.value);
-              setLimit(20);
+              setPage(1);
             }}
           />
         </label>
         <div className="agenda-note-list">
-          {filtered.slice(0, limit).map((n) => (
+          {filtered.slice((currentPage - 1) * 20, currentPage * 20).map((n) => (
             <button
               key={n.id}
               className={n.id === selected ? "is-selected" : ""}
@@ -175,15 +178,15 @@ export default function NotesWorkspace({
               Suas pautas, decisões e tarefas ficam organizadas aqui.
             </p>
           )}
-          {filtered.length > limit && (
-            <button
-              className="admin-button"
-              onClick={() => setLimit((v) => v + 20)}
-            >
-              Carregar mais notas
-            </button>
-          )}
         </div>
+        <TablePagination
+          label="Páginas de notas"
+          page={currentPage}
+          pages={pages}
+          hasNext={currentPage < pages}
+          onPrevious={() => setPage(currentPage - 1)}
+          onNext={() => setPage(currentPage + 1)}
+        />
       </section>
       <NoteEditor
         key={note ? `${note.id}-${note.revision}` : `new-${notes.length}`}

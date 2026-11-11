@@ -10,7 +10,7 @@ Mapa funcional e técnico do painel da Floresta, América e Iririú. A versão e
 | [Catálogo digital](https://catalogopitterpanfesta.vercel.app/) | Aplicação pública com endereço e deploy próprios. A gestão oferece uma prévia autenticada das coleções e atalhos para o catálogo público. |
 | Shopify Admin | Fonte dos pedidos online e do cadastro publicado no catálogo. Integrações de catálogo e vendas usam configurações distintas. |
 | PostgreSQL | Guarda snapshots do catálogo, pedidos sincronizados, fila de eventos, configurações, usuários, agenda e eventos administrativos. |
-| WinThor | ERP das lojas físicas. Vendas na loja, estoque por filial e transferências aguardam conexão com os dados do ERP. |
+| WinThor | ERP das lojas físicas. Vendas Loja, estoque por filial e transferências aguardam conexão com os dados do ERP. |
 | GitHub e Vercel | O repositório versiona o código. A Vercel hospeda a produção a partir de `main`. O GitHub Actions verifica a documentação, tipos, testes e build. |
 
 Escolha ou troque a foto pelo avatar da barra lateral, em Configurações ou em Minha conta para perfis sem acesso administrativo. As iniciais aparecem quando a conta está sem foto. O navegador ajusta imagens de até 25 MB ao formato quadrado de 256 × 256 px, e o servidor armazena a foto privada em WebP no PostgreSQL. Em instalações existentes, execute `npm run db:migrate` antes de habilitar o recurso.
@@ -22,13 +22,13 @@ Escolha ou troque a foto pelo avatar da barra lateral, em Configurações ou em 
 | Login e recuperação | `/login/`, `/recuperar-senha/` | Entrada da equipe e solicitação de recuperação. O master usa credenciais configuradas. As contas da equipe ficam no banco. |
 | Visão geral | `/gestor/` | Indicadores, evolução de vendas e ranking por data. A fila Atenção agora considera as pendências do histórico importado. Também reúne categorias, estoque e mudanças de catálogo. |
 | Resumo Shopify | `/gestor/vendas/resumo/` | Indicadores e situação dos pedidos. Os cartões abrem o detalhe no período selecionado. |
-| Pedidos Shopify | `/gestor/vendas/` | Lista de pedidos recentes com filtros, pagamento, entrega e itens. Exibe oito pedidos por vez e acrescenta oito ao carregar mais. |
+| Vendas Shopify | `/gestor/vendas/` | Lista de pedidos recentes com filtros, pagamento, entrega e itens. Exibe oito pedidos por página, com navegação anterior e próxima. |
 | Atendimento de pedidos | `/gestor/vendas/atendimento/` | Fila de preparo e retirada, com detalhes do atendimento. |
-| Recebimentos | `/gestor/vendas/recebimentos/` | Valores diários do recebido e do líquido em colunas, com média móvel de até sete dias e os pedidos que compõem o resultado. |
+| Recebimentos | `/gestor/vendas/recebimentos/` | Valores diários do recebido e do líquido em colunas, com escala que inclui zero e consulta dos pedidos que compõem o resultado. |
 | Estornos e reembolsos | `/gestor/vendas/reembolsos/` | Evolução e pedidos com reembolso total ou parcial, incluindo cancelados quando houver valor devolvido. |
 | Produtos mais vendidos | `/gestor/produtos-vendidos/` | Ranking e consulta paginada de produtos e variantes vendidos, com busca e filtros. |
 | Mapa de entregas | `/gestor/mapa/` | Agrupa destinos dos pedidos online por município e UF quando identificados. |
-| Vendas na loja | `/gestor/winthor/balcao/` | Área reservada para vendas de caixa por filial. A integração está pendente. |
+| Vendas Loja | `/gestor/winthor/balcao/` | Área reservada para vendas de caixa por filial. A integração está pendente. |
 | Todos os produtos | `/gestor/produtos/` | Pesquisa, filtros e indicadores das variantes do catálogo publicado. |
 | Ofertas | `/gestor/ofertas/` | Variantes em que o preço de comparação supera o preço atual. |
 | Catálogos | `/gestor/catalogos/`, `/gestor/[slug]/` | Coleções em cartões compactos, com ícones por categoria e ações para abrir, copiar ou compartilhar. |
@@ -61,7 +61,7 @@ Escolha ou troque a foto pelo avatar da barra lateral, em Configurações ou em 
 3. As telas do painel consultam o snapshot publicado. A comparação de alterações usa pares de versões da mesma loja.
 4. No modo local sem banco, o painel pode usar os JSON de catálogo como referência. O estado da tela indica quando a fonte está indisponível ou quando o histórico depende de importação.
 
-### Pedidos Shopify
+### Vendas Shopify
 
 As telas de vendas abrem com um período móvel de 30 dias por padrão. O calendário permite escolher um dia ou intervalo e voltar à janela padrão.
 

@@ -12,7 +12,7 @@ export const salesPages = {
   },
   pedidos: {
     view: "orders",
-    title: "Pedidos Shopify",
+    title: "Vendas Shopify",
     description: "Consulte pedidos, itens, pagamentos e entregas.",
   },
   recebimentos: {

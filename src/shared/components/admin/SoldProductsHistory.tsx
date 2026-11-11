@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
-import { Boxes, ChevronLeft, ChevronRight, Search } from "lucide-react";
+import { Boxes, Search } from "lucide-react";
+import TablePagination from "./TablePagination";
 import DeliveryMark from "./DeliveryMark";
 import PitterSpinner from "./PitterSpinner";
 import { deliveryKinds } from "../../lib/admin/delivery";
@@ -174,30 +175,17 @@ export default function SoldProductsHistory({
           <p>Nenhum produto vendido corresponde aos filtros escolhidos.</p>
         )}
       </div>
-      <nav
-        className="sales-pagination"
-        aria-label="Páginas de produtos vendidos"
-      >
-        <button
-          type="button"
-          className="admin-button"
-          disabled={loading || !data || data.page <= 1}
-          onClick={() => setPage((data?.page || 1) - 1)}
-        >
-          <ChevronLeft size={16} /> Anterior
-        </button>
-        <span>
-          Página {data?.page || 1} de {data?.pages || 1}
-        </span>
-        <button
-          type="button"
-          className="admin-button"
-          disabled={loading || !data || data.page >= data.pages}
-          onClick={() => setPage((data?.page || 1) + 1)}
-        >
-          Próxima <ChevronRight size={16} />
-        </button>
-      </nav>
+      {data && (
+        <TablePagination
+          label="Páginas de produtos vendidos"
+          page={data.page}
+          pages={data.pages}
+          hasNext={data.page < data.pages}
+          busy={loading}
+          onPrevious={() => setPage(data.page - 1)}
+          onNext={() => setPage(data.page + 1)}
+        />
+      )}
     </section>
   );
 }

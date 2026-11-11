@@ -94,7 +94,7 @@ const links = [
   { href: "/gestor/", label: "Visão geral", icon: LayoutDashboard },
   {
     href: "/gestor/vendas/",
-    label: "Pedidos Shopify",
+    label: "Vendas Shopify",
     icon: ShopifyNavMark,
     financial: true,
   },
@@ -142,7 +142,7 @@ const links = [
   },
   {
     href: "/gestor/winthor/balcao/",
-    label: "Vendas na loja",
+    label: "Vendas Loja",
     icon: PitterPanNavMark,
     financial: true,
     planned: true,

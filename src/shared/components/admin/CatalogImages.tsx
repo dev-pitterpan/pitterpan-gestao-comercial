@@ -1,5 +1,6 @@
 "use client";
 
+import TablePagination from "./TablePagination";
 import { useEffect, useState } from "react";
 
 const endpoint = "/api/admin/catalog-images/";
@@ -277,23 +278,14 @@ export default function CatalogImages() {
           </tbody>
         </table>
       </div>
-      <div className="admin-profile-photo-actions">
-        <button
-          className="admin-button"
-          disabled={page === 1 || loading || working}
-          onClick={() => setPage(page - 1)}
-        >
-          Anterior
-        </button>
-        <span>Página {page}</span>
-        <button
-          className="admin-button"
-          disabled={!data.more || loading || working}
-          onClick={() => setPage(page + 1)}
-        >
-          Próxima
-        </button>
-      </div>
+      <TablePagination
+        label="Páginas de imagens do catálogo"
+        page={page}
+        hasNext={data.more}
+        busy={loading || working}
+        onPrevious={() => setPage(page - 1)}
+        onNext={() => setPage(page + 1)}
+      />
     </section>
   );
 }

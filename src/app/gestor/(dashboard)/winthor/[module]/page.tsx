@@ -6,7 +6,7 @@ import { requireSession } from "@shared/server/auth/session";
 
 const modules = {
   balcao: {
-    title: "Vendas de balcão",
+    title: "Vendas Loja",
     description: "Vendas registradas no caixa das lojas físicas.",
     fields: [
       "Loja e data da venda",

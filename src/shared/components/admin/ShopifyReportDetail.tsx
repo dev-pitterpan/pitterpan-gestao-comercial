@@ -1,4 +1,5 @@
 "use client";
+import TablePagination from "./TablePagination";
 import { useEffect, useState } from "react";
 import { Download, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { csvCell } from "../../lib/admin/csv";
@@ -51,14 +52,12 @@ export default function ShopifyReportDetail({
   const [data, setData] = useState<Data | null>(null),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(true),
-    [metric, setMetric] = useState(report.metrics[0].key),
-    [limit, setLimit] = useState(10);
+    [metric, setMetric] = useState(report.metrics[0].key);
   useEffect(() => {
     const controller = new AbortController();
     setData(null);
     setError("");
     setBusy(true);
-    setLimit(10);
     setPage(0);
     void fetch(`/api/admin/analytics/?${params}&report=${id}`, {
       cache: "no-store",
@@ -302,7 +301,7 @@ export default function ShopifyReportDetail({
                     />
                   ) : report.dimensions?.length ? (
                     <ol className="analytics-ranking shopify-report-bars">
-                      {data.table.rows.slice(0, limit).map((row, i) => {
+                      {data.table.rows.slice(0, 10).map((row, i) => {
                         const label = report
                             .dimensions!.map((d) =>
                               String(row[d.key] ?? "Não informado"),
@@ -427,40 +426,16 @@ export default function ShopifyReportDetail({
                   </table>
                 </div>
                 {!rows.length && <p>Nenhuma linha corresponde à busca.</p>}
-                <div className="analytics-table-toolbar">
-                  <span aria-live="polite">
-                    {rows.length} linhas · Página {visiblePage + 1} de{" "}
-                    {pageCount}
-                  </span>
-                  <div className="analytics-table-pages">
-                    <button
-                      className="admin-button"
-                      disabled={visiblePage === 0}
-                      onClick={() => setPage(visiblePage - 1)}
-                    >
-                      Anterior
-                    </button>
-                    <button
-                      className="admin-button"
-                      disabled={visiblePage + 1 >= pageCount}
-                      onClick={() => setPage(visiblePage + 1)}
-                    >
-                      Próxima
-                    </button>
-                  </div>
-                </div>
+                <TablePagination
+                  label="Páginas do relatório"
+                  page={visiblePage + 1}
+                  pages={pageCount}
+                  range={`${rows.length} resultados`}
+                  hasNext={visiblePage + 1 < pageCount}
+                  onPrevious={() => setPage(visiblePage - 1)}
+                  onNext={() => setPage(visiblePage + 1)}
+                />
               </section>
-              {limit < data.table.rows.length &&
-                Boolean(report.dimensions?.length) && (
-                  <button
-                    className="analytics-expand"
-                    onClick={() => setLimit((n) => n + 10)}
-                  >
-                    Carregar mais 10 resultados ·{" "}
-                    {Math.min(limit, data.table.rows.length)} de{" "}
-                    {data.table.rows.length}
-                  </button>
-                )}
               {report.dimensions?.length && data.table.rows.length === 50 && (
                 <p className="analytics-session-note">
                   Exibindo os 50 primeiros grupos. Os indicadores do período são

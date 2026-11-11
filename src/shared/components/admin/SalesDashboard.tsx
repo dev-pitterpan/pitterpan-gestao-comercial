@@ -14,6 +14,7 @@ import {
   SALES_PAGE_SIZE,
   salesSectionFromHash,
 } from "../../lib/admin/sales-links";
+import TablePagination from "./TablePagination";
 import OrderFulfillmentDetails from "./OrderFulfillmentDetails";
 import SalesOperations from "./SalesOperations";
 import SoldProductsHistory from "./SoldProductsHistory";
@@ -95,7 +96,8 @@ export default function SalesDashboard({
   const [moreLoading, setMoreLoading] = useState(false);
   const [moreError, setMoreError] = useState("");
   const generation = useRef(0);
-  const expanded = useRef(false);
+  const paged = useRef(false);
+  const [pageCursors, setPageCursors] = useState([""]);
   const moreBusy = useRef(false);
   const [days, setDays] = useState(initialDays),
     [data, setData] = useState<Data | null>(null),
@@ -148,7 +150,8 @@ export default function SalesDashboard({
   const fetching = useRef(0);
   const resetList = (preserveData = false) => {
     generation.current++;
-    expanded.current = false;
+    paged.current = false;
+    setPageCursors([""]);
     if (!preserveData) setData(null);
     setLoading(true);
     setMoreLoading(false);
@@ -250,7 +253,7 @@ export default function SalesDashboard({
     const timer = window.setInterval(() => {
       if (
         document.visibilityState === "visible" &&
-        !expanded.current &&
+        !paged.current &&
         !moreBusy.current
       )
         void load(controller.signal);
@@ -261,14 +264,20 @@ export default function SalesDashboard({
       clearInterval(timer);
     };
   }, [load, revision, productsOnly]);
-  async function loadMore() {
-    if (loading || !data?.nextCursor || moreBusy.current) return;
+  async function changePage(direction: -1 | 1) {
+    if (loading || !data || moreBusy.current) return;
+    const nextCursor = data.nextCursor;
+    if (direction === 1 ? !nextCursor : pageCursors.length === 1) return;
+    const cursors =
+      direction === 1
+        ? [...pageCursors, nextCursor!]
+        : pageCursors.slice(0, -1);
+    const cursor = cursors.at(-1) || "";
+
     const epoch = generation.current;
     moreBusy.current = true;
     setMoreLoading(true);
     setMoreError("");
-    // Freeze polling before fetching the next page so it cannot collapse the list.
-    expanded.current = true;
     fetching.current++;
     try {
       const params = new URLSearchParams({
@@ -280,7 +289,7 @@ export default function SalesDashboard({
         fulfillment: filters.fulfillment || "all",
         category: filters.category,
         delivery: filters.delivery || "all",
-        orderCursor: data.nextCursor,
+        orderCursor: cursor,
       });
       const response = await fetch(`/api/admin/sales/?${params}`, {
         cache: "no-store",
@@ -290,32 +299,21 @@ export default function SalesDashboard({
       if (epoch !== generation.current) return;
       if (!response.ok)
         throw new Error(
-          body.error || "Não foi possível carregar mais pedidos.",
+          body.error || "Não foi possível abrir esta página de pedidos.",
         );
       const page = body as Pick<Data, "orders" | "hasMore" | "nextCursor">;
-      setData((current) =>
-        current
-          ? {
-              ...current,
-              orders: [
-                ...new Map(
-                  [...current.orders, ...page.orders].map((order) => [
-                    order.id,
-                    order,
-                  ]),
-                ).values(),
-              ],
-              hasMore: page.hasMore,
-              nextCursor: page.nextCursor,
-            }
-          : current,
-      );
+      setData((current) => (current ? { ...current, ...page } : current));
+      setPageCursors(cursors);
+      paged.current = cursors.length > 1;
+      document
+        .getElementById("recent-orders")
+        ?.scrollIntoView({ block: "nearest" });
     } catch (error) {
       if (epoch === generation.current)
         setMoreError(
           error instanceof Error
             ? error.message
-            : "Falha ao carregar mais pedidos.",
+            : "Falha ao abrir a página de pedidos.",
         );
     } finally {
       if (epoch === generation.current) {
@@ -872,19 +870,16 @@ export default function SalesDashboard({
                   )}
                 </div>
               )}
-              <p className="sales-definition">
-                Mostrando {data.orders.length} pedidos nesta seleção, em lotes
-                de {SALES_PAGE_SIZE}.
-                {expanded.current &&
-                  " A atualização automática da lista fica pausada durante esta consulta."}
-              </p>
               <OrderCustomerRefresh
                 orders={data.orders}
                 onUpdate={updateCustomers}
               />
               {loading && <small role="status">Atualizando pedidos…</small>}
               <DragScroll>
-                <table aria-busy={loading} className="admin-table">
+                <table
+                  aria-busy={loading || moreLoading}
+                  className="admin-table"
+                >
                   <thead>
                     <tr>
                       <th>Pedido</th>
@@ -995,38 +990,24 @@ export default function SalesDashboard({
                   </tbody>
                 </table>
               </DragScroll>
-              <div className="sales-pagination">
-                {moreError && <p role="alert">{moreError}</p>}
-                {data.hasMore && (
-                  <button
-                    type="button"
-                    className="admin-button admin-button-primary"
-                    disabled={moreLoading || loading}
-                    onClick={loadMore}
-                  >
-                    {moreLoading ? (
-                      <PitterSpinner label="Carregando pedidos…" />
-                    ) : (
-                      `Carregar mais ${SALES_PAGE_SIZE}`
-                    )}
-                  </button>
-                )}
-                {expanded.current && (
-                  <button
-                    type="button"
-                    className="admin-button"
-                    onClick={() => {
-                      resetList();
-                      setRevision((n) => n + 1);
-                    }}
-                  >
-                    Atualizar lista
-                  </button>
-                )}
-                {!data.hasMore && data.orders.length > 0 && (
-                  <span>Todos os pedidos desta seleção foram exibidos.</span>
-                )}
-              </div>
+              {moreError && (
+                <p className="admin-data-notice" role="alert">
+                  {moreError}
+                </p>
+              )}
+              <TablePagination
+                label="Páginas de pedidos"
+                page={pageCursors.length}
+                range={
+                  data.orders.length
+                    ? `${(pageCursors.length - 1) * SALES_PAGE_SIZE + 1}–${(pageCursors.length - 1) * SALES_PAGE_SIZE + data.orders.length} pedidos`
+                    : undefined
+                }
+                hasNext={data.hasMore}
+                busy={moreLoading || loading}
+                onPrevious={() => void changePage(-1)}
+                onNext={() => void changePage(1)}
+              />
             </section>
           )}
         </>
