@@ -170,6 +170,7 @@ test("operação separa reembolso de cancelamento e pagamento de atendimento, re
       store,
       order(4, {
         displayFulfillmentStatus: "READY_FOR_PICKUP",
+        customerInfo: undefined,
         shippingLines: {
           nodes: [
             {
@@ -203,6 +204,11 @@ test("operação separa reembolso de cancelamento e pagamento de atendimento, re
     assert.equal(Number(data.totals[0].refunded), 240.93);
     assert.equal(data.refunds.find((o) => o.name === "#1")?.net, "0.99");
     assert.equal(data.awaiting.length, 2);
+    assert.equal(
+      data.awaiting.find((o) => o.name === "#1")?.customer_name,
+      "Cliente de teste",
+    );
+    assert.equal(data.awaiting.find((o) => o.name === "#4")?.customer_name, "");
     assert.ok(
       !data.awaiting.some((o) =>
         ["#2", "#3", "#5", "#6", "#7", "#8"].includes(o.name),

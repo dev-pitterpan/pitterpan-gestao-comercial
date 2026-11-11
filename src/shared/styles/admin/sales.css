@@ -667,6 +667,11 @@
   font-weight: 600;
   color: #376da7;
 }
+.sales-operations-customer {
+  color: #405e7a;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
 .sales-operations-orders small,
 .sales-refunds-table small,
 .sales-current-total {

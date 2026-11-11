@@ -219,6 +219,9 @@ export default function SalesOperations({
                               Abrir pedido na Shopify em nova aba
                             </span>
                           </a>
+                          <span className="sales-operations-customer">
+                            {o.customer_name || "Nome do cliente indisponível"}
+                          </span>
                           <small>{date(o.processed_at)}</small>
                           <OrderFulfillmentDetails
                             id={o.id}
