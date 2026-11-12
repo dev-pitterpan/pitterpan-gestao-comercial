@@ -454,7 +454,7 @@ export async function readSalesOperations(
     values,
   );
   const awaiting = await db.query<Record<string, string>>(
-    `SELECT o.id,o.name,o.processed_at::text,o.currency,o.fulfillment_status,${customerNameColumn},to_jsonb(o)->>'shipping_charge' AS shipping_charge,COALESCE(to_jsonb(o)->>'shipping_charge_checked','false') AS shipping_charge_checked,${orderDeliverySql} AS delivery_kind
+    `SELECT o.id,o.name,o.processed_at::text,o.currency,o.fulfillment_status,o.refunded::text,(o.received-o.refunded)::text AS net,${customerNameColumn},to_jsonb(o)->>'shipping_charge' AS shipping_charge,COALESCE(to_jsonb(o)->>'shipping_charge_checked','false') AS shipping_charge_checked,${orderDeliverySql} AS delivery_kind
      FROM pitterpan_sales_orders o WHERE ${where} AND ${open}
      ORDER BY o.processed_at,o.id LIMIT 10`,
     values,

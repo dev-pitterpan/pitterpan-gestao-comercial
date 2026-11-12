@@ -26,7 +26,14 @@ import type { readFulfillmentDetails } from "../../server/sales/fulfillment-deta
 import ProductThumbnail from "./ProductThumbnail";
 import DragScroll from "./DragScroll";
 import PitterSpinner from "./PitterSpinner";
-type Data = Awaited<ReturnType<typeof readFulfillmentDetails>>;
+type Data = Awaited<ReturnType<typeof readFulfillmentDetails>> & {
+  customerName: string;
+};
+const money = ({ amount, currencyCode }: Data["payment"]["received"]) =>
+  new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: currencyCode,
+  }).format(Number(amount));
 const number = (n: number) => n.toLocaleString("pt-BR");
 type Order = { id: string; name: string; storedStatus?: string };
 type Dock = "left" | "right";
@@ -336,6 +343,11 @@ function FulfillmentWindow({
             >
               <span className="admin-eyebrow">ATENDIMENTO DO PEDIDO</span>
               <h2 id={titleId}>{data?.name || name}</h2>
+              {data && (
+                <span className="fulfillment-dialog-customer">
+                  {data.customerName || "Nome do cliente indisponível"}
+                </span>
+              )}
             </div>
             <div className="fulfillment-window-actions">
               <button
@@ -417,6 +429,45 @@ function FulfillmentWindow({
                 </p>
               </div>
               <div className="fulfillment-dialog-totals">
+                {(
+                  [
+                    ["Recebido", data.payment.received],
+                    ["Reembolsado", data.payment.refunded],
+                    ["Líquido após reembolsos", data.payment.net],
+                  ] as const
+                ).map(([label, value]) => (
+                  <div key={label}>
+                    <span>{label}</span>
+                    <strong>{money(value)}</strong>
+                  </div>
+                ))}
+              </div>
+              {(Number(data.payment.refunded.amount) > 0 ||
+                data.payment.failedRefund ||
+                data.payment.pendingRefund) && (
+                <div className="fulfillment-dialog-refunds">
+                  {Number(data.payment.refunded.amount) > 0 && (
+                    <p>
+                      <strong>
+                        {data.payment.status === "REFUNDED" ||
+                        Number(data.payment.net.amount) <= 0
+                          ? "Reembolso integral registrado"
+                          : "Reembolso parcial registrado"}
+                      </strong>
+                      {" · "}Confira os itens a atender antes de expedir.
+                    </p>
+                  )}
+                  {data.payment.failedRefund && (
+                    <p>
+                      Tentativa de reembolso sem sucesso registrada na Shopify.
+                    </p>
+                  )}
+                  {data.payment.pendingRefund && (
+                    <p>Há uma tentativa de reembolso pendente na Shopify.</p>
+                  )}
+                </div>
+              )}
+              <div className="fulfillment-dialog-totals">
                 {[
                   ["Unidades no pedido original", data.totals.ordered],
                   ["Unidades atendidas", data.totals.fulfilled],
@@ -450,6 +501,12 @@ function FulfillmentWindow({
                             <div>
                               <strong>{item.name}</strong>
                               <small>SKU {item.sku || "não informado"}</small>
+                              <small>
+                                <strong>{money(item.unitPrice)} / un.</strong>
+                                {Number(item.unitPrice.amount) !==
+                                  Number(item.originalUnitPrice.amount) &&
+                                  ` com descontos · original ${money(item.originalUnitPrice)}`}
+                              </small>
                               {item.current !== item.ordered && (
                                 <small>
                                   Quantidade atual do pedido:{" "}

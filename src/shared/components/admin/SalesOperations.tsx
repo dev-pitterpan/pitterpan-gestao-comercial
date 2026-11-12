@@ -232,6 +232,15 @@ export default function SalesOperations({
                         <div>
                           <DeliveryMark kind={o.delivery_kind} />
                           <ShippingCharge order={o} />
+                          {Number(o.refunded) > 0 && (
+                            <>
+                              <span className="admin-badge amber">
+                                Reembolso parcial ·{" "}
+                                {money(o.refunded, o.currency)}
+                              </span>
+                              <small>Líquido: {money(o.net, o.currency)}</small>
+                            </>
+                          )}
                           <small>
                             {fulfillmentLabels[o.fulfillment_status] ||
                               o.fulfillment_status}

@@ -204,6 +204,8 @@ test("operação separa reembolso de cancelamento e pagamento de atendimento, re
     assert.equal(Number(data.totals[0].refunded), 240.93);
     assert.equal(data.refunds.find((o) => o.name === "#1")?.net, "0.99");
     assert.equal(data.awaiting.length, 2);
+    assert.equal(data.awaiting.find((o) => o.name === "#1")?.refunded, "4.00");
+    assert.equal(data.awaiting.find((o) => o.name === "#1")?.net, "0.99");
     assert.equal(
       data.awaiting.find((o) => o.name === "#1")?.customer_name,
       "Cliente de teste",

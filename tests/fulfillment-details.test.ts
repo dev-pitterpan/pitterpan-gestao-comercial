@@ -5,6 +5,9 @@ const info = (more = false, cursor: string | null = null) => ({
   hasNextPage: more,
   endCursor: cursor,
 });
+const money = (amount: string) => ({
+  shopMoney: { amount, currencyCode: "BRL" },
+});
 const line = (id: number, q = 3, pending = 1) => ({
   id: `gid://shopify/LineItem/${id}`,
   name: `Produto ${id}`,
@@ -13,6 +16,8 @@ const line = (id: number, q = 3, pending = 1) => ({
   currentQuantity: q,
   nonFulfillableQuantity: 0,
   unfulfilledQuantity: pending,
+  originalUnitPriceSet: money("12.00"),
+  discountedUnitPriceAfterAllDiscountsSet: money("10.00"),
 });
 const shipment = (id: number, status = "SUCCESS") => ({
   id: `gid://shopify/Fulfillment/${id}`,
@@ -25,6 +30,27 @@ const header = () => ({
   updatedAt: "2026-11-03T10:00:00Z",
   cancelledAt: null,
   displayFulfillmentStatus: "PARTIALLY_FULFILLED",
+  displayFinancialStatus: "PARTIALLY_REFUNDED",
+  totalReceivedSet: money("30.00"),
+  totalRefundedSet: money("20.00"),
+  netPaymentSet: money("10.00"),
+  transactions: [
+    {
+      id: "gid://shopify/OrderTransaction/1",
+      kind: "REFUND",
+      status: "SUCCESS",
+    },
+    {
+      id: "gid://shopify/OrderTransaction/2",
+      kind: "REFUND",
+      status: "FAILURE",
+    },
+    {
+      id: "gid://shopify/OrderTransaction/3",
+      kind: "REFUND",
+      status: "PENDING",
+    },
+  ],
   fulfillments: [shipment(1), shipment(2, "CANCELLED"), shipment(3, "FAILURE")],
 });
 const entry = (id: number, lineId: number, q: number | null) => ({
@@ -81,6 +107,16 @@ test("detalhes paginam produtos e atendimentos, somam sucessos por item e não t
   const result = await readFulfillmentDetails(client, h.id);
   assert.equal(final, true);
   assert.equal(result.items[0].name, "Produto 1");
+  assert.deepEqual(result.items[0].unitPrice, money("10.00").shopMoney);
+  assert.deepEqual(result.items[0].originalUnitPrice, money("12.00").shopMoney);
+  assert.deepEqual(result.payment, {
+    status: "PARTIALLY_REFUNDED",
+    received: money("30.00").shopMoney,
+    refunded: money("20.00").shopMoney,
+    net: money("10.00").shopMoney,
+    failedRefund: true,
+    pendingRefund: true,
+  });
   assert.equal(result.items[0].fulfilled, 2);
   assert.equal(result.items[0].pending, 1);
   assert.equal(result.items[1].fulfilled, 0);

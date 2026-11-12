@@ -6,6 +6,12 @@ const pageInfo = z.object({
   hasNextPage: z.boolean(),
   endCursor: z.string().nullable(),
 });
+const moneyBag = z.object({
+  shopMoney: z.object({
+    amount: z.string().regex(/^-?\d+(?:\.\d+)?$/),
+    currencyCode: z.string().regex(/^[A-Z]{3}$/),
+  }),
+});
 const line = z.object({
   id: gid("LineItem"),
   name: z.string().max(3000),
@@ -15,6 +21,8 @@ const line = z.object({
   currentQuantity: quantity,
   nonFulfillableQuantity: quantity,
   unfulfilledQuantity: quantity,
+  originalUnitPriceSet: moneyBag,
+  discountedUnitPriceAfterAllDiscountsSet: moneyBag,
 });
 const shipment = z.object({
   id: gid("Fulfillment"),
@@ -27,11 +35,35 @@ const order = z.object({
   updatedAt: z.string(),
   cancelledAt: z.string().nullable(),
   displayFulfillmentStatus: z.string(),
+  displayFinancialStatus: z.string(),
+  totalReceivedSet: moneyBag,
+  totalRefundedSet: moneyBag,
+  netPaymentSet: moneyBag,
+  transactions: z
+    .array(
+      z.object({
+        id: gid("OrderTransaction"),
+        kind: z.string(),
+        status: z.string(),
+      }),
+    )
+    .max(50),
   fulfillments: z.array(shipment).max(1000),
 });
-const fields =
-  "id name updatedAt cancelledAt displayFulfillmentStatus fulfillments{id status updatedAt}";
-export const preparationOrderQuery = `query PreparationOrder($id:ID!,$after:String){order(id:$id){${fields} lineItems(first:100,after:$after){nodes{id name sku image{url} quantity currentQuantity nonFulfillableQuantity unfulfilledQuantity} pageInfo{hasNextPage endCursor}}}}`;
+const moneyFields = "{shopMoney{amount currencyCode}}";
+const fields = `id name updatedAt cancelledAt displayFulfillmentStatus
+  displayFinancialStatus totalReceivedSet${moneyFields}
+  totalRefundedSet${moneyFields} netPaymentSet${moneyFields}
+  transactions(first:50){id kind status} fulfillments{id status updatedAt}`;
+export const preparationOrderQuery = `query PreparationOrder($id:ID!,$after:String){
+  order(id:$id){${fields}
+    lineItems(first:50,after:$after){
+      nodes{id name sku image{url} quantity currentQuantity nonFulfillableQuantity unfulfilledQuantity
+        originalUnitPriceSet${moneyFields} discountedUnitPriceAfterAllDiscountsSet${moneyFields}}
+      pageInfo{hasNextPage endCursor}
+    }
+  }
+}`;
 export const preparationShipmentQuery = `query PreparationShipment($id:ID!,$after:String){fulfillment(id:$id){id status updatedAt fulfillmentLineItems(first:100,after:$after){nodes{id quantity lineItem{id}} pageInfo{hasNextPage endCursor}}}}`;
 type Client = {
   query<T>(query: string, variables?: Record<string, unknown>): Promise<T>;
@@ -41,6 +73,11 @@ function version(value: z.infer<typeof order>) {
     value.updatedAt,
     value.displayFulfillmentStatus,
     value.cancelledAt,
+    value.displayFinancialStatus,
+    value.totalReceivedSet,
+    value.totalRefundedSet,
+    value.netPaymentSet,
+    [...value.transactions].sort((a, b) => a.id.localeCompare(b.id)),
     [...value.fulfillments].sort((a, b) => a.id.localeCompare(b.id)),
   ]);
 }
@@ -187,6 +224,8 @@ export async function readFulfillmentDetails(
       fulfilled: done,
       pending: item.unfulfilledQuantity,
       nonFulfillable: item.nonFulfillableQuantity,
+      originalUnitPrice: item.originalUnitPriceSet.shopMoney,
+      unitPrice: item.discountedUnitPriceAfterAllDiscountsSet.shopMoney,
     };
   });
   return {
@@ -195,6 +234,22 @@ export async function readFulfillmentDetails(
     status: first.displayFulfillmentStatus,
     cancelledAt: first.cancelledAt,
     updatedAt: first.updatedAt,
+    payment: {
+      status: first.displayFinancialStatus,
+      received: first.totalReceivedSet.shopMoney,
+      refunded: first.totalRefundedSet.shopMoney,
+      net: first.netPaymentSet.shopMoney,
+      failedRefund: first.transactions.some(
+        (transaction) =>
+          transaction.kind === "REFUND" &&
+          ["FAILURE", "ERROR"].includes(transaction.status),
+      ),
+      pendingRefund: first.transactions.some(
+        (transaction) =>
+          transaction.kind === "REFUND" &&
+          ["PENDING", "AWAITING_RESPONSE"].includes(transaction.status),
+      ),
+    },
     checkedAt: new Date().toISOString(),
     items: rows,
     totals: rows.reduce(

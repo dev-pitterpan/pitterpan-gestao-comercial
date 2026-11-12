@@ -1109,6 +1109,25 @@
   scrollbar-gutter: stable;
   padding: 16px 20px 30px;
 }
+.fulfillment-dialog-customer {
+  display: block;
+  margin-top: 4px;
+  color: #e0eaf8;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.fulfillment-dialog-refunds {
+  margin: 12px 0;
+  padding: 9px 12px;
+  border: 1px solid #efd9a9;
+  border-radius: 10px;
+  background: #fff7e6;
+  color: #6a4c1b;
+  font-size: 12px;
+}
+.fulfillment-dialog-refunds p {
+  margin: 3px 0;
+}
 .fulfillment-window .fulfillment-dialog-heading h2 {
   font-weight: 700;
 }

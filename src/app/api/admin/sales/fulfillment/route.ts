@@ -6,6 +6,7 @@ import {
   salesConfig,
   salesReady,
 } from "@shared/server/sales/config";
+import { customerNameColumn } from "@shared/server/sales/customers";
 import { readFulfillmentDetails } from "@shared/server/sales/fulfillment-details";
 export const maxDuration = 60;
 const headers = { "Cache-Control": "no-store" };
@@ -28,18 +29,22 @@ export async function GET(request: Request) {
       { status: 503, headers },
     );
   try {
-    const exists = await database().query(
-      "SELECT 1 FROM pitterpan_sales_orders WHERE store=$1 AND id=$2 AND NOT test",
+    const {
+      rows: [order],
+    } = await database().query<{ customer_name: string }>(
+      `SELECT ${customerNameColumn} FROM pitterpan_sales_orders o WHERE store=$1 AND id=$2 AND NOT test`,
       [salesConfig().SHOPIFY_SALES_STORE_DOMAIN, id.data],
     );
-    if (!exists.rows.length)
+    if (!order)
       return Response.json(
         { error: "Pedido não encontrado no histórico sincronizado." },
         { status: 404, headers },
       );
-    return Response.json(await readFulfillmentDetails(salesClient(), id.data), {
-      headers,
-    });
+    const details = await readFulfillmentDetails(salesClient(), id.data);
+    return Response.json(
+      { ...details, customerName: order.customer_name },
+      { headers },
+    );
   } catch {
     return Response.json(
       {
