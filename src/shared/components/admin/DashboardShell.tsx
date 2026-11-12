@@ -31,7 +31,6 @@ import {
   ShoppingCart,
   BookOpen,
   Images,
-  History,
   ArrowLeftRight,
   RefreshCw,
   Settings2,
@@ -195,12 +194,6 @@ const links = [
   { href: "/gestor/relatorios/", label: "Relatórios", icon: BarChart3 },
   { href: "/gestor/usuarios/", label: "Equipe", icon: Users, admin: true },
   {
-    href: "/gestor/versoes/",
-    label: "Versões e atualizações",
-    icon: History,
-    admin: true,
-  },
-  {
     href: "/gestor/configuracoes/",
     label: "Configurações",
     icon: Settings2,
@@ -257,7 +250,7 @@ const navigationGroups = [
   {
     label: "Administração",
     icon: Settings2,
-    paths: ["/gestor/usuarios/", "/gestor/configuracoes/", "/gestor/versoes/"],
+    paths: ["/gestor/usuarios/", "/gestor/configuracoes/"],
   },
 ];
 function NavigationPending() {

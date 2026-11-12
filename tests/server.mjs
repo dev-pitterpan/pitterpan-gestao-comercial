@@ -113,7 +113,10 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
       assert.match(guarded.headers.get("location"), /^\/login/);
       assert.equal((await get("/api/admin/sales/")).status, 401);
       assert.equal((await get("/login/")).status, 200);
-      assert.equal((await get("/gestor/versoes/")).status, 307);
+      const removedVersions = await get("/gestor/versoes/", {
+        headers: { cookie },
+      });
+      assert.match(await removedVersions.text(), /Página não encontrada/);
       for (const path of [
         "/gestor/",
         "/gestor/vendas/",
@@ -122,7 +125,6 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
         "/gestor/produtos/",
         "/gestor/clientes/",
         "/gestor/natal/",
-        "/gestor/versoes/",
       ]) {
         const response = await get(path, { headers: { cookie } });
         assert.equal(
@@ -138,12 +140,10 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
           assert.match(html, /<h1>Ranking de clientes<\/h1>/);
           assert.match(html, /Ordenar clientes/);
         }
-        if (path === "/gestor/versoes/") {
-          assert.match(html, /Versões e atualizações/);
-          assert.match(html, /docs\/SISTEMA\.md/);
-        }
-        if (path === "/gestor/")
+        if (path === "/gestor/") {
           assert.match(html, /href="http:\/\/127\.0\.0\.1:3000\/"/);
+          assert.doesNotMatch(html, /href="\/gestor\/versoes\/"/);
+        }
         if (path === "/gestor/vendas/recebimentos/")
           assert.match(
             html,

@@ -1,6 +1,6 @@
 # Gestão Comercial Pitter Pan Festas
 
-Mapa funcional e técnico do painel da Floresta, América e Iririú. A versão e a data de registro de cada mudança ficam em [system-releases.json](../src/shared/config/system-releases.json) e aparecem em **Administração → Versões e atualizações**.
+Mapa funcional e técnico do painel da Floresta, América e Iririú.
 
 ## 1. Ambientes e fontes
 
@@ -45,11 +45,10 @@ No painel do administrador e do gerente, os títulos e os filtros de consulta fi
 | Minha conta | `/gestor/minha-conta/` | Informações da sessão e ações disponíveis para a própria conta. |
 | Equipe | `/gestor/usuarios/` | Gestão das contas da equipe e perfis. Acesso Admin. |
 | Configurações | `/gestor/configuracoes/` | Limites de estoque e informações de acesso e integração. Acesso Admin. |
-| Versões e atualizações | `/gestor/versoes/` | Versão em execução, data de registro, commit quando disponível, mapa do sistema e até 20 eventos recentes de equipe e configuração. Acesso Admin. Os históricos usam linhas que se empilham em telas estreitas. |
 
 ## 3. Acesso e responsabilidades
 
-- **Admin** pode acessar os módulos de operação, gerenciar Equipe e Configurações e consultar Versões e atualizações.
+- **Admin** pode acessar os módulos de operação, gerenciar Equipe e Configurações.
 - **Gestor e Gerente de Compras** compartilham as permissões operacionais. Incluem vendas, análises, agenda e sincronização de catálogo. Os atalhos de administração são exclusivos do Admin.
 - **Atendimento** tem acesso às telas liberadas para seu perfil, sem acesso aos indicadores financeiros e módulos WinThor. A proteção é validada nas rotas e no servidor.
 - Os eventos de equipe e configuração registram ação, responsável e horário no banco. A tela de versões exibe apenas os eventos permitidos. Dados detalhados da alteração, credenciais e ações de senha ficam fora dessa visualização.
@@ -82,7 +81,6 @@ Pedidos, visão geral, análises, destinos e histórico de alterações usam o m
 | --- | --- | --- |
 | Alterações na Shopify | Diferença entre snapshots do catálogo | Detecção na sincronização e última atualização Shopify quando disponível |
 | Sincronizações | Execução ou publicação de catálogo | Início e conclusão da importação |
-| Versões e atualizações | Mudança documentada no código | Data de registro da versão; o commit identifica o código deste ambiente |
 | Atividade administrativa | Evento de equipe ou configuração | Data e hora do evento no banco |
 
 O histórico de versões é editorial. Para o horário exato da publicação, consulte o deploy associado ao commit na Vercel. A atividade administrativa mostra eventos registrados a partir das ações existentes do painel.
@@ -123,7 +121,6 @@ Vendas físicas serão tratadas em outra etapa. Para conciliar a Shopify com o W
 | `src/shared/server/sync/` e `src/shared/workflows/` | Controle e execução da sincronização longa de catálogo. |
 | `src/shared/server/http/` | Utilitários HTTP e implementação compartilhada de APIs de catálogo. |
 | `src/shared/styles/`, `public/` e `config/` | Estilos, arquivos públicos, dados locais e mapeamento de coleções. |
-| `src/shared/config/system-releases.json` | Registro das versões exibidas no Admin. |
 | `scripts/`, `tests/`, `.github/workflows/` | Rotinas de implantação, manutenção e verificação. |
 
 ### Endpoints
@@ -150,15 +147,13 @@ Vendas físicas serão tratadas em outra etapa. Para conciliar a Shopify com o W
 - Catálogo usa `shopify:sync`, `shopify:publish` e `shopify:report`. Vendas usa `sales:setup`, `sales:webhooks`, `sales:sync`, `sales:retry` e `sales:audit`. Consulte o [README](../README.md) e os scripts antes de operar em produção.
 - Para validar alterações, rode `npm run format:check`, `npm run typecheck`, `npm test`, `npm run build` e `npm run test:server`. O teste HTTP usa ambiente local com dados de teste. Confira o login, as permissões e a fonte de dados antes de considerar uma integração homologada.
 - Segredos ficam nas variáveis do ambiente autorizado. Use dados fictícios ou anonimizados em testes e documentação.
-- Após publicar, confira o status na Vercel, a resposta de `/api/health/` e a versão indicada no Admin. Em caso de regressão, identifique o commit e restaure uma versão estável pela Vercel ou pelo histórico do repositório, levando em conta qualquer migração já aplicada.
+- Após publicar, confira o status e o commit na Vercel e a resposta de `/api/health/`. Em caso de regressão, identifique o commit e restaure uma versão estável pela Vercel ou pelo histórico do repositório, levando em conta qualquer migração já aplicada.
 
 ## 8. Manutenção da documentação
 
 1. Na mesma alteração de código, atualize este mapa com a rota, dados, permissões ou procedimento afetado.
-2. Adicione uma entrada no início de [system-releases.json](../src/shared/config/system-releases.json) com versão única `AAAA.MM.DD.N`, data ISO 8601 com fuso, título e resumo. Preserve as entradas anteriores.
-3. O workflow executa `node scripts/check-system-docs.mjs`. Em mudanças funcionais, verifica se o mapa e o registro de versões foram atualizados juntos.
-4. Revise a versão em execução após o deploy. Alterações de produto, sincronização e ações administrativas têm históricos próprios, conforme a seção 4.
-
+2. O workflow executa `node scripts/check-system-docs.mjs` para verificar o mapa do sistema.
+3. Confira o commit em execução na Vercel após o deploy. Alterações de produto e sincronização têm históricos próprios, conforme a seção 4.
 
 ## Imagens do catálogo
 

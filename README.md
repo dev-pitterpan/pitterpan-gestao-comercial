@@ -56,4 +56,4 @@ A importação automática consulta pedidos criados na janela móvel de 60 dias.
 
 ## Mapa do sistema e versões
 
-Consulte [a documentação funcional e técnica](docs/SISTEMA.md). No painel, **Administração → Versões e atualizações** mostra o histórico e a versão em execução. Atualize o mapa e o registro de versões junto com cada mudança funcional.
+Consulte [a documentação funcional e técnica](docs/SISTEMA.md). Atualize o mapa do sistema junto com cada mudança funcional.
