@@ -1,6 +1,28 @@
 import sharp from "sharp";
-import { database } from "../database/client";
-import { shopifyImageUrl } from "../shopify/media";
+import { database } from "../database/client.ts";
+import type { SqlClient } from "../database/catalog-repository.ts";
+import { catalogImagesSchema } from "./schema.ts";
+import { shopifyImageUrl } from "../shopify/media.ts";
+
+async function hasImageTable(db: SqlClient) {
+  const { rows } = await db.query<{ ready: boolean }>(
+    "SELECT to_regclass('pitterpan_catalog_images') IS NOT NULL AS ready",
+  );
+  return rows[0]?.ready === true;
+}
+
+export async function ensureCatalogImages(db: SqlClient) {
+  if (await hasImageTable(db)) return;
+  try {
+    await db.query(catalogImagesSchema);
+  } catch (error) {
+    // Concurrent requests can both reach CREATE before the relation is visible.
+    const { code } = error as { code?: string };
+    if ((code === "23505" || code === "42P07") && (await hasImageTable(db)))
+      return;
+    throw error;
+  }
+}
 
 const sources = `SELECT DISTINCT ON (media.url) media.url AS source, i.name, coalesce(i.sku,i.id) AS sku
 FROM catalog_state state JOIN catalog_items i ON i.import_id=state.active_import
@@ -16,8 +38,10 @@ export async function listImages(
   status: string,
   page: number,
   days: number,
+  db: SqlClient = database(),
 ) {
-  const { rows } = await database().query(
+  await ensureCatalogImages(db);
+  const { rows } = await db.query(
     `WITH sources AS (${sources}), inventory AS (
       SELECT coalesce(s.source,c.source) AS source, coalesce(s.name,c.name) AS name,
         coalesce(s.sku,c.sku) AS sku, coalesce(c.status,'pending') AS status,
@@ -63,8 +87,7 @@ async function download(source: string) {
 }
 
 type Source = { source: string; name: string; sku: string };
-async function convertImage({ source, name, sku }: Source) {
-  const db = database();
+async function convertImage(db: SqlClient, { source, name, sku }: Source) {
   try {
     const url = shopifyImageUrl(source);
     if (!url) throw new Error("Origem da foto inválida.");
@@ -128,8 +151,13 @@ async function convertImage({ source, name, sku }: Source) {
   }
 }
 
-export async function processImages(selected?: string[], limit = 12) {
-  const { rows } = await database().query<Source>(
+export async function processImages(
+  selected?: string[],
+  limit = 12,
+  db: SqlClient = database(),
+) {
+  await ensureCatalogImages(db);
+  const { rows } = await db.query<Source>(
     `WITH sources AS (${sources})
      SELECT s.* FROM sources s LEFT JOIN pitterpan_catalog_images c ON c.source=s.source
      WHERE ($1::text[] IS NULL AND c.source IS NULL)
@@ -139,7 +167,9 @@ export async function processImages(selected?: string[], limit = 12) {
   );
   let converted = 0;
   for (let i = 0; i < rows.length; i += 3) {
-    const results = await Promise.all(rows.slice(i, i + 3).map(convertImage));
+    const results = await Promise.all(
+      rows.slice(i, i + 3).map((row) => convertImage(db, row)),
+    );
     converted += results.filter(Boolean).length;
   }
   return {

@@ -1,6 +1,8 @@
 "use client";
 import { PageHeading } from "./Primitives";
-
+import AdminSelect from "./AdminSelect";
+import DragScroll from "./DragScroll";
+import PitterSpinner from "./PitterSpinner";
 import TablePagination from "./TablePagination";
 import { useEffect, useState } from "react";
 
@@ -43,11 +45,14 @@ export default function CatalogImages() {
   const [working, setWorking] = useState(false);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+  const [loadError, setLoadError] = useState("");
   const [revision, refresh] = useState(0);
   const [period, setPeriod] = useState("");
   useEffect(() => {
     const controller = new AbortController();
     setLoading(true);
+    setLoadError("");
+    setSelection([]);
     const params = new URLSearchParams({
       q: query,
       status,
@@ -58,11 +63,17 @@ export default function CatalogImages() {
       .then(async (response) => {
         const result = await response.json();
         if (!response.ok) throw new Error(result.error);
-        setData(result);
-        setSelection([]);
+        if (!controller.signal.aborted) setData(result);
       })
       .catch((failure) => {
-        if (!controller.signal.aborted) setError(failure.message);
+        if (!controller.signal.aborted) {
+          setLoadError(
+            failure instanceof Error && failure.message
+              ? failure.message
+              : "Não foi possível carregar as imagens.",
+          );
+          setData({ images: [], more: false });
+        }
       })
       .finally(() => {
         if (!controller.signal.aborted) setLoading(false);
@@ -133,38 +144,41 @@ export default function CatalogImages() {
                 maxLength={100}
               />
             </label>
-            <label>
-              Situação{" "}
-              <select
+            <div className="catalog-images-filter">
+              <span>Situação</span>
+              <AdminSelect
+                label="Situação"
                 value={status}
-                onChange={(event) => {
+                options={[
+                  { value: "", label: "Todas" },
+                  ...Object.entries(labels).map(([value, label]) => ({
+                    value,
+                    label,
+                  })),
+                ]}
+                onValueChange={(value) => {
                   setPage(1);
-                  setStatus(event.target.value);
+                  setStatus(value);
                 }}
-              >
-                <option value="">Todas</option>
-                {Object.entries(labels).map(([key, label]) => (
-                  <option key={key} value={key}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Processamento{" "}
-              <select
+              />
+            </div>
+            <div className="catalog-images-filter">
+              <span>Processamento</span>
+              <AdminSelect
+                label="Processamento"
                 value={period}
-                onChange={(event) => {
+                options={[
+                  { value: "", label: "Todo o período" },
+                  { value: "7", label: "Últimos 7 dias" },
+                  { value: "30", label: "Últimos 30 dias" },
+                  { value: "90", label: "Últimos 90 dias" },
+                ]}
+                onValueChange={(value) => {
                   setPage(1);
-                  setPeriod(event.target.value);
+                  setPeriod(value);
                 }}
-              >
-                <option value="">Todo o período</option>
-                <option value="7">Últimos 7 dias</option>
-                <option value="30">Últimos 30 dias</option>
-                <option value="90">Últimos 90 dias</option>
-              </select>
-            </label>
+              />
+            </div>
             <button className="admin-button" type="submit">
               Buscar
             </button>
@@ -182,7 +196,7 @@ export default function CatalogImages() {
           </button>
           <button
             className="admin-button"
-            disabled={loading || working}
+            disabled={loading || working || Boolean(loadError)}
             onClick={() => void convert(true)}
           >
             Converter todas as pendentes
@@ -197,7 +211,20 @@ export default function CatalogImages() {
         </div>
         {message && <p role="status">{message}</p>}
         {error && <p role="alert">{error}</p>}
-        <div className="admin-table-scroll">
+        {loadError && (
+          <div className="admin-data-notice" role="alert">
+            <p>{loadError}</p>
+            <button
+              type="button"
+              className="admin-button"
+              onClick={() => refresh((value) => value + 1)}
+            >
+              Tentar novamente
+            </button>
+          </div>
+        )}
+        {loading && <PitterSpinner label="Carregando imagens…" />}
+        <DragScroll label="Imagens do catálogo">
           <table className="admin-table">
             <thead>
               <tr>
@@ -281,17 +308,17 @@ export default function CatalogImages() {
                   </td>
                 </tr>
               ))}
-              {!loading && !data.images.length && (
+              {!loading && !loadError && !data.images.length && (
                 <tr>
                   <td colSpan={6}>Nenhuma foto encontrada.</td>
                 </tr>
               )}
             </tbody>
           </table>
-        </div>
+        </DragScroll>
         <TablePagination
           label="Páginas de imagens do catálogo"
-          page={page}
+          page={loadError ? 1 : page}
           hasNext={data.more}
           busy={loading || working}
           onPrevious={() => setPage(page - 1)}

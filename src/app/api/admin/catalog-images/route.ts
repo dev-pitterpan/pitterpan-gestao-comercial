@@ -3,6 +3,7 @@ import { z } from "zod";
 import { apiSession, sameOrigin } from "@shared/server/auth/session";
 import { readJsonBody } from "@shared/server/http/body";
 import {
+  ensureCatalogImages,
   listImages,
   processImages,
 } from "@shared/server/catalog-images/repository";
@@ -13,11 +14,15 @@ const selection = z.object({
   sources: z.array(z.string().max(2048)).max(12).optional(),
 });
 
-function unavailable() {
+function unavailable(error: unknown) {
+  const { code } = (error ?? {}) as { code?: string };
+  console.error("Não foi possível acessar as imagens do catálogo.", { code });
   return Response.json(
     {
       error:
-        "Não foi possível acessar as imagens. Confira a migração do banco do catálogo.",
+        code === "42501" || code === "42P01"
+          ? "A estrutura de imagens do catálogo está indisponível. Confira a migração e as permissões do banco."
+          : "Não foi possível acessar as imagens do catálogo. Tente novamente.",
     },
     { status: 503, headers },
   );
@@ -30,7 +35,9 @@ export async function GET(request: Request) {
   const source = searchParams.get("source");
   if (source) {
     try {
-      const { rows } = await database().query<{ webp: Buffer }>(
+      const db = database();
+      await ensureCatalogImages(db);
+      const { rows } = await db.query<{ webp: Buffer }>(
         "SELECT webp FROM pitterpan_catalog_images WHERE source=$1 AND status='completed'",
         [source],
       );
@@ -43,8 +50,8 @@ export async function GET(request: Request) {
             },
           })
         : new Response(null, { status: 404, headers });
-    } catch {
-      return unavailable();
+    } catch (error) {
+      return unavailable(error);
     }
   }
 
@@ -72,8 +79,8 @@ export async function GET(request: Request) {
       ),
       { headers },
     );
-  } catch {
-    return unavailable();
+  } catch (error) {
+    return unavailable(error);
   }
 }
 
@@ -95,7 +102,7 @@ export async function POST(request: Request) {
     );
   try {
     return Response.json(await processImages(input.data.sources), { headers });
-  } catch {
-    return unavailable();
+  } catch (error) {
+    return unavailable(error);
   }
 }

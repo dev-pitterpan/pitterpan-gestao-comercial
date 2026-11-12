@@ -79,11 +79,3 @@ CREATE INDEX IF NOT EXISTS pitterpan_admin_campaigns_date ON pitterpan_admin_cam
 ALTER TABLE pitterpan_admin_users
  DROP CONSTRAINT IF EXISTS pitterpan_admin_users_role_check,
  ADD CONSTRAINT pitterpan_admin_users_role_check CHECK(role IN ('admin','gerente_compras','gestor','atendimento'));
-
-CREATE TABLE IF NOT EXISTS pitterpan_catalog_images (
-  source text PRIMARY KEY, name text NOT NULL, sku text NOT NULL,
-  status text NOT NULL CHECK (status IN ('completed','failed')),
-  original_format text, original_width integer, original_height integer,
-  original_bytes integer, webp_bytes integer, webp bytea, error text,
-  processed_at timestamptz NOT NULL DEFAULT now()
-);

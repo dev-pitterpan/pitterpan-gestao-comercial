@@ -3104,3 +3104,11 @@
     max-width: 100%;
   }
 }
+
+.admin-settings-form .catalog-images-filter {
+  display: grid;
+  gap: 8px;
+  color: #698aa6;
+  font-size: 12px;
+  font-weight: 500;
+}
