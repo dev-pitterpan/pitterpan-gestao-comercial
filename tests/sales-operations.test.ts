@@ -218,6 +218,8 @@ test("operação separa reembolso de cancelamento e pagamento de atendimento, re
     const week = await readCommercialOverview(db, store, 7);
     assert.deepEqual(today.queue, { preparing: "2", ready: "1" });
     assert.equal(today.pending[0].name, "#8");
+    assert.equal(today.pending[0].customer_name, "Cliente de teste");
+    assert.equal(today.pending.find((o) => o.name === "#4")?.customer_name, "");
     assert.deepEqual(today.pending, week.pending);
     const custom = await readCommercialOverview(db, store, 7, {
       start: "2026-09-01",

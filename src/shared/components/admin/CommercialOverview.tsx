@@ -216,6 +216,10 @@ export default function CommercialOverview({
                         >
                           {order.name}
                         </a>
+                        <span className="sales-operations-customer">
+                          {order.customer_name ||
+                            "Nome do cliente indisponível"}
+                        </span>
                         <small>
                           {dateTime(order.processed_at)} ·{" "}
                           {fulfillmentLabels[order.fulfillment_status] ??

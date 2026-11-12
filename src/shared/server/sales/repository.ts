@@ -549,10 +549,11 @@ export async function readCommercialOverview(
   const pending = await db.query<{
     id: string;
     name: string;
+    customer_name: string;
     processed_at: string;
     fulfillment_status: string;
   }>(
-    `SELECT id,name,processed_at::text,fulfillment_status
+    `SELECT id,name,${customerNameColumn},processed_at::text,fulfillment_status
      FROM pitterpan_sales_orders o WHERE ${open} ORDER BY processed_at,id LIMIT 5`,
     [store],
   );
