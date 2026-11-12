@@ -1,0 +1,124 @@
+.customer-ranking-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 16px;
+  align-items: start;
+}
+.customer-ranking-panel {
+  min-width: 0;
+}
+.customer-ranking-panel h2 {
+  margin: 0 0 10px;
+  overflow-wrap: anywhere;
+}
+.customer-ranking-orders {
+  scroll-margin-top: 80px;
+}
+.customer-ranking-orders header p {
+  margin: 0 0 14px;
+  color: var(--admin-muted);
+  font-size: 12px;
+}
+.customer-ranking-list,
+.customer-ranking-order-list,
+.customer-ranking-products {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.customer-ranking-list > li + li,
+.customer-ranking-order-list > li + li {
+  border-top: 1px solid #e1eaf3;
+}
+.customer-ranking-list a {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 8px;
+  border-radius: 9px;
+  font-size: 12px;
+  color: #2d537a;
+}
+.customer-ranking-list a:hover,
+.customer-ranking-list a[aria-current] {
+  background: #eaf2fb;
+}
+.customer-ranking-position {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 5px 3px;
+  color: #526b85;
+  font-weight: 700;
+  border-radius: 7px;
+}
+.customer-ranking-position[data-rank="1"] {
+  color: #775312;
+  background: #fff0c9;
+}
+.customer-ranking-position[data-rank="2"] {
+  color: #4c5d70;
+  background: #e7edf3;
+}
+.customer-ranking-position[data-rank="3"] {
+  color: #813f28;
+  background: #fae7da;
+}
+.customer-ranking-identity {
+  overflow-wrap: anywhere;
+}
+.customer-ranking-layout small {
+  display: block;
+  font-size: 11px;
+  color: #5c7186;
+}
+.customer-ranking-order {
+  padding: 12px 0;
+}
+.customer-ranking-order-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 6px 14px;
+  color: #294f75;
+  font-size: 12px;
+}
+.customer-ranking-order-header a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 700;
+}
+.customer-ranking-products {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0;
+}
+.customer-ranking-products li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+.customer-ranking-products img {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+  object-fit: contain;
+  border: 1px solid #dce7f1;
+  border-radius: 8px;
+  background: #fff;
+}
+.customer-ranking-more {
+  color: #5c7186;
+}
+@media (max-width: 1100px) {
+  .customer-ranking-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

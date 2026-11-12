@@ -120,6 +120,7 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
         "/gestor/vendas/recebimentos/",
         "/gestor/analises/",
         "/gestor/produtos/",
+        "/gestor/clientes/",
         "/gestor/natal/",
         "/gestor/versoes/",
       ]) {
@@ -133,6 +134,10 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
         assert.match(response.headers.get("x-robots-tag"), /noindex/);
         const html = await response.text();
         assert.doesNotMatch(html, /class="party-section-scene/);
+        if (path === "/gestor/clientes/") {
+          assert.match(html, /<h1>Ranking de clientes<\/h1>/);
+          assert.match(html, /Ordenar clientes/);
+        }
         if (path === "/gestor/versoes/") {
           assert.match(html, /Versões e atualizações/);
           assert.match(html, /docs\/SISTEMA\.md/);

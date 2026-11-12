@@ -17,6 +17,7 @@ import {
   ChevronDown,
   CircleDollarSign,
   ReceiptText,
+  Medal,
   CalendarDays,
   ShieldCheck,
   LoaderCircle,
@@ -127,6 +128,12 @@ const links = [
     financial: true,
   },
   {
+    href: "/gestor/clientes/",
+    label: "Ranking de clientes",
+    icon: Medal,
+    financial: true,
+  },
+  {
     href: "/gestor/produtos-vendidos/",
     label: "Produtos mais vendidos",
     icon: ChartNoAxesCombined,
@@ -212,6 +219,7 @@ const navigationGroups = [
       "/gestor/vendas/recebimentos/",
       "/gestor/vendas/reembolsos/",
       "/gestor/mapa/",
+      "/gestor/clientes/",
       "/gestor/winthor/balcao/",
     ],
   },
@@ -517,7 +525,8 @@ export default function DashboardShell({
                   key={href}
                   href={
                     href.startsWith("/gestor/vendas/") ||
-                    href === "/gestor/produtos-vendidos/"
+                    href === "/gestor/produtos-vendidos/" ||
+                    href === "/gestor/clientes/"
                       ? salesPageLink(href, new URLSearchParams(searchParams), {
                           status: "",
                           category: "",
