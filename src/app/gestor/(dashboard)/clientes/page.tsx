@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, ArrowUpRight, Medal } from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
 import CustomerRankingFilters from "@shared/components/admin/CustomerRankingFilters";
 import OrderFulfillmentDetails from "@shared/components/admin/OrderFulfillmentDetails";
 import ProductThumbnail from "@shared/components/admin/ProductThumbnail";
@@ -23,6 +23,7 @@ import {
   rankingPageSize,
   readCustomerRanking,
 } from "@shared/server/sales/customer-ranking";
+import RankingMedal from "./RankingMedal";
 import "./customer-ranking.css";
 
 const currency = new Intl.NumberFormat("pt-BR", {
@@ -116,15 +117,9 @@ export default async function CustomerRankingPage({
                     prefetch={false}
                     aria-current={entry.id === selected.id ? "true" : undefined}
                   >
-                    <span
-                      className="customer-ranking-position"
-                      data-rank={entry.rank}
-                      aria-label={`${entry.rank}º lugar`}
-                    >
-                      {entry.rank <= 3 && (
-                        <Medal size={18} aria-hidden="true" />
-                      )}
-                      {entry.rank}º
+                    <span className="customer-ranking-position">
+                      <span className="admin-sr-only">{entry.rank}º lugar</span>
+                      <RankingMedal rank={entry.rank} />
                     </span>
                     <div className="customer-ranking-identity">
                       <strong>

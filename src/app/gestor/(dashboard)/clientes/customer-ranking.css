@@ -46,26 +46,14 @@
   background: #eaf2fb;
 }
 .customer-ranking-position {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  padding: 5px 3px;
+  display: grid;
+  place-items: center;
   color: #526b85;
   font-weight: 700;
-  border-radius: 7px;
 }
-.customer-ranking-position[data-rank="1"] {
-  color: #775312;
-  background: #fff0c9;
-}
-.customer-ranking-position[data-rank="2"] {
-  color: #4c5d70;
-  background: #e7edf3;
-}
-.customer-ranking-position[data-rank="3"] {
-  color: #813f28;
-  background: #fae7da;
+.customer-ranking-medal {
+  display: block;
+  filter: drop-shadow(0 2px 2px #162e4e32);
 }
 .customer-ranking-identity {
   overflow-wrap: anywhere;
