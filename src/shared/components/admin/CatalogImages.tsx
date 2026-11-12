@@ -3,6 +3,7 @@ import { PageHeading } from "./Primitives";
 import AdminSelect from "./AdminSelect";
 import DragScroll from "./DragScroll";
 import PitterSpinner from "./PitterSpinner";
+import ProductThumbnail from "./ProductThumbnail";
 import TablePagination from "./TablePagination";
 import { useEffect, useState } from "react";
 
@@ -262,23 +263,28 @@ export default function CatalogImages() {
                     />
                   </td>
                   <td>
-                    <strong>{photo.name}</strong>
-                    <small>
-                      SKU {photo.sku} ·{" "}
-                      {photo.active ? "No catálogo" : "Histórico"}
-                    </small>
-                    <a href={photo.source} target="_blank" rel="noreferrer">
-                      Ver original
-                    </a>
-                    {photo.webp_bytes && (
-                      <a
-                        href={`${endpoint}?source=${encodeURIComponent(photo.source)}`}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        {" · Ver WebP"}
-                      </a>
-                    )}
+                    <div className="admin-product-name">
+                      <ProductThumbnail src={photo.source} />
+                      <div>
+                        <strong>{photo.name}</strong>
+                        <small>
+                          SKU {photo.sku} ·{" "}
+                          {photo.active ? "No catálogo" : "Histórico"}
+                        </small>
+                        <a href={photo.source} target="_blank" rel="noreferrer">
+                          Ver original
+                        </a>
+                        {photo.webp_bytes && (
+                          <a
+                            href={`${endpoint}?source=${encodeURIComponent(photo.source)}`}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {" · Ver WebP"}
+                          </a>
+                        )}
+                      </div>
+                    </div>
                   </td>
                   <td>
                     {photo.original_format
