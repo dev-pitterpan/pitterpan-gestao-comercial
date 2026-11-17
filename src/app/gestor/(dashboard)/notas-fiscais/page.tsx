@@ -1,6 +1,11 @@
 import Link from "next/link";
 import { Download, FileCheck2, Printer, Search } from "lucide-react";
-import { PageHeading } from "@shared/components/admin/Primitives";
+import ProductThumbnail from "@shared/components/admin/ProductThumbnail";
+import {
+  EmptyState,
+  PageHeading,
+  Pagination,
+} from "@shared/components/admin/Primitives";
 import { requireSession } from "@shared/server/auth/session";
 import {
   fiscalPath,
@@ -40,25 +45,25 @@ export default async function FiscalPage({
 }: {
   searchParams: Promise<{
     pedido?: string | string[];
+    page?: string | string[];
     pagina?: string | string[];
   }>;
 }) {
   await requireSession(fiscalRoles);
-  const { pedido, pagina } = await searchParams;
+  const { pedido, page: pageParam, pagina } = await searchParams;
+  const pageValue = pageParam ?? pagina;
   const query = typeof pedido === "string" ? pedido.trim().slice(0, 100) : "";
   const page =
-    typeof pagina === "string" && /^[1-9]\d{0,5}$/.test(pagina)
-      ? Number(pagina)
+    typeof pageValue === "string" && /^[1-9]\d{0,5}$/.test(pageValue)
+      ? Number(pageValue)
       : 1;
   const state = await (async () => {
     try {
-      const { orders, hasNext } = await listFiscalOrders(query, page);
+      const result = await listFiscalOrders(query, page);
       const selected =
-        page === 1 && orders.length === 1 && query && !hasNext
-          ? orders[0]
-          : undefined;
+        query && result.total === 1 ? result.orders[0] : undefined;
       const invoices = selected ? await listInvoices(selected.id) : [];
-      return { orders, hasNext, selected, invoices };
+      return { ...result, selected, invoices };
     } catch {
       return null;
     }
@@ -66,7 +71,7 @@ export default async function FiscalPage({
   const selected = state?.selected;
 
   return (
-    <>
+    <div className="fiscal-workspace">
       <PageHeading
         title="Notas fiscais"
         description="Consulte os pedidos sincronizados da Shopify e imprima os DANFEs anexados."
@@ -103,48 +108,119 @@ export default async function FiscalPage({
         )}
       </section>
       {state && (
-        <section className="admin-panel">
+        <section className="admin-panel fiscal-list" id="pedidos-fiscais">
           <header>
             <h2>{query ? "Resultado da busca" : "Pedidos Shopify"}</h2>
             <FileCheck2 size={20} aria-hidden="true" />
           </header>
           {state.orders.length === 0 ? (
-            <p role="status">
-              Nenhum pedido nesta página do histórico sincronizado.
-            </p>
+            <EmptyState
+              title="Nenhum pedido encontrado"
+              description={
+                query
+                  ? "Confira o número ou volte para todos os pedidos."
+                  : "Os pedidos aparecem aqui após a sincronização."
+              }
+            />
           ) : (
             <div className="fiscal-table">
-              <table className="admin-table">
-                <thead>
-                  <tr>
-                    <th>Pedido</th>
-                    <th>Data</th>
-                    <th>Cliente</th>
-                    <th>Valor</th>
-                    <th>Nota fiscal</th>
-                    <th>Ações</th>
+              <table
+                className="admin-table fiscal-orders"
+                role="table"
+                aria-label="Pedidos Shopify"
+              >
+                <thead role="rowgroup">
+                  <tr role="row">
+                    <th scope="col" role="columnheader">
+                      Pedido
+                    </th>
+                    <th scope="col" role="columnheader">
+                      Produtos
+                    </th>
+                    <th scope="col" role="columnheader">
+                      Data
+                    </th>
+                    <th scope="col" role="columnheader">
+                      Cliente
+                    </th>
+                    <th scope="col" role="columnheader">
+                      Valor
+                    </th>
+                    <th scope="col" role="columnheader">
+                      Nota fiscal
+                    </th>
+                    <th scope="col" role="columnheader">
+                      Ações
+                    </th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody role="rowgroup">
                   {state.orders.map((order) => (
-                    <tr key={order.id}>
-                      <td>
+                    <tr key={order.id} role="row">
+                      <td role="cell" className="fiscal-order-number">
                         <Link href={orderLink(order.id)}>{order.name}</Link>
                       </td>
-                      <td>{date.format(order.processed_at)}</td>
-                      <td>{order.customer_name || "—"}</td>
-                      <td>
+                      <td role="cell" className="fiscal-products">
+                        {order.products.length ? (
+                          <ul
+                            className="fiscal-thumbnails"
+                            aria-label="Produtos do pedido"
+                          >
+                            {order.products.map((product) => (
+                              <li key={product.id} title={product.title}>
+                                <ProductThumbnail src={product.image_url} />
+                                <span className="admin-sr-only">
+                                  {product.title}
+                                </span>
+                              </li>
+                            ))}
+                            {order.product_count > order.products.length && (
+                              <li className="fiscal-more">
+                                <span aria-hidden="true">
+                                  +{order.product_count - order.products.length}
+                                </span>
+                                <span className="admin-sr-only">
+                                  Mais{" "}
+                                  {order.product_count - order.products.length}{" "}
+                                  produtos
+                                </span>
+                              </li>
+                            )}
+                          </ul>
+                        ) : (
+                          <span className="fiscal-muted">
+                            Sem itens sincronizados
+                          </span>
+                        )}
+                      </td>
+                      <td role="cell" className="fiscal-date">
+                        {date.format(order.processed_at)}
+                      </td>
+                      <td role="cell" className="fiscal-customer">
+                        {order.customer_name || "Cliente não informado"}
+                      </td>
+                      <td role="cell" className="fiscal-value">
                         {new Intl.NumberFormat("pt-BR", {
                           style: "currency",
                           currency: order.currency,
                         }).format(Number(order.total))}
                       </td>
-                      <td>
-                        {order.notes > 0
-                          ? `${order.notes} NF-e vinculada${order.notes === 1 ? "" : "s"}`
-                          : "Sem nota vinculada"}
+                      <td role="cell" className="fiscal-status">
+                        <span
+                          className={
+                            order.printable_key
+                              ? "admin-badge green"
+                              : order.notes
+                                ? "admin-badge blue"
+                                : "admin-badge"
+                          }
+                        >
+                          {order.notes > 0
+                            ? `${order.notes} NF-e vinculada${order.notes === 1 ? "" : "s"}`
+                            : "Sem nota vinculada"}
+                        </span>
                       </td>
-                      <td>
+                      <td role="cell" className="fiscal-actions">
                         {order.notes === 1 && order.printable_key ? (
                           <PrintDanfe accessKey={order.printable_key} />
                         ) : (
@@ -166,32 +242,15 @@ export default async function FiscalPage({
               </table>
             </div>
           )}
-          {(page > 1 || state.hasNext) && (
-            <nav className="fiscal-pages" aria-label="Páginas de pedidos">
-              {page > 1 && (
-                <Link
-                  className="admin-button"
-                  href={{
-                    pathname: fiscalPath,
-                    query: { pedido: query || undefined, pagina: page - 1 },
-                  }}
-                >
-                  Anterior
-                </Link>
-              )}
-              <span>Página {page}</span>
-              {state.hasNext && (
-                <Link
-                  className="admin-button"
-                  href={{
-                    pathname: fiscalPath,
-                    query: { pedido: query || undefined, pagina: page + 1 },
-                  }}
-                >
-                  Próxima
-                </Link>
-              )}
-            </nav>
+          {state.total > 0 && (
+            <Pagination
+              page={state.page}
+              pages={state.pages}
+              total={state.total}
+              base={fiscalPath}
+              params={query ? { pedido: query } : undefined}
+              anchor="pedidos-fiscais"
+            />
           )}
         </section>
       )}
@@ -235,6 +294,6 @@ export default async function FiscalPage({
           </div>
         </section>
       )}
-    </>
+    </div>
   );
 }

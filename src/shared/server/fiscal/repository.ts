@@ -15,8 +15,20 @@ function storeDomain() {
 
 export const fiscalPageSize = 8;
 
-export async function listFiscalOrders(query: string, page: number) {
-  const { rows } = await database().query<{
+export async function listFiscalOrders(query: string, requestedPage: number) {
+  const db = database();
+  const store = storeDomain();
+  const filter = `store=$1 AND NOT test
+    AND ($2='' OR id=$2 OR lower(ltrim(name, '#'))=lower(ltrim($2, '#')))`;
+  const {
+    rows: [{ total }],
+  } = await db.query<{ total: number }>(
+    `SELECT count(*)::int AS total FROM pitterpan_sales_orders WHERE ${filter}`,
+    [store, query],
+  );
+  const pages = Math.max(1, Math.ceil(total / fiscalPageSize));
+  const page = Math.min(requestedPage, pages);
+  const { rows } = await db.query<{
     id: string;
     name: string;
     customer_name: string | null;
@@ -25,14 +37,15 @@ export async function listFiscalOrders(query: string, page: number) {
     total: string;
     notes: number;
     printable_key: string | null;
+    products: { id: string; title: string; image_url: string | null }[];
+    product_count: number;
   }>(
     `SELECT o.id, o.name, o.processed_at, o.currency, ${customerNameColumn},
           COALESCE(o.current_total,o.total) AS total,
-          n.notes, n.printable_key
+          n.notes, n.printable_key, p.products, p.product_count
       FROM (
         SELECT * FROM pitterpan_sales_orders
-        WHERE store=$1 AND NOT test
-          AND ($2='' OR id=$2 OR lower(ltrim(name, '#'))=lower(ltrim($2, '#')))
+        WHERE ${filter}
         ORDER BY processed_at DESC,id DESC
         LIMIT $3 OFFSET $4
       ) o
@@ -40,13 +53,22 @@ export async function listFiscalOrders(query: string, page: number) {
         SELECT count(*)::int AS notes, min(access_key) FILTER (WHERE danfe_pdf IS NOT NULL) AS printable_key
         FROM pitterpan_sales_invoices WHERE store=o.store AND order_id=o.id
       ) n
+      CROSS JOIN LATERAL (
+        SELECT COALESCE(jsonb_agg(jsonb_build_object('id', item.id, 'title', item.title, 'image_url', item.image_url)
+          ORDER BY item.image_url IS NULL, item.id), '[]'::jsonb) AS products,
+          COALESCE(max(item.product_count), 0)::int AS product_count
+        FROM (
+          SELECT id, title, NULLIF(image_url, '') AS image_url, count(*) OVER () AS product_count
+          FROM pitterpan_sales_items
+          WHERE store=o.store AND order_id=o.id
+          ORDER BY NULLIF(image_url, '') IS NULL, id
+          LIMIT 3
+        ) item
+      ) p
       ORDER BY o.processed_at DESC,o.id DESC`,
-    [storeDomain(), query, fiscalPageSize + 1, (page - 1) * fiscalPageSize],
+    [store, query, fiscalPageSize, (page - 1) * fiscalPageSize],
   );
-  return {
-    orders: rows.slice(0, fiscalPageSize),
-    hasNext: rows.length > fiscalPageSize,
-  };
+  return { orders: rows, page, pages, total };
 }
 
 export async function listInvoices(orderId: string) {
