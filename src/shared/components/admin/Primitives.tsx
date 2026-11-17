@@ -81,15 +81,18 @@ export function Pagination({
   total,
   base,
   params = {},
+  anchor,
 }: {
   page: number;
   pages: number;
   total: number;
   base: string;
   params?: Record<string, string>;
+  anchor?: string;
 }) {
   function href(p: number) {
-    return `${base}?${new URLSearchParams({ ...params, page: String(p) })}`;
+    const hash = anchor ? `#${encodeURIComponent(anchor)}` : "";
+    return `${base}?${new URLSearchParams({ ...params, page: String(p) })}${hash}`;
   }
   return (
     <nav className="admin-pagination" aria-label="Paginação">
