@@ -1,0 +1,44 @@
+.fiscal-search,
+.fiscal-upload {
+  display: flex;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.fiscal-search label,
+.fiscal-upload label:not(.fiscal-confirm) {
+  display: grid;
+  gap: 0.4rem;
+  max-width: 100%;
+}
+
+.fiscal-search input {
+  padding: 0.65rem 0.85rem;
+  border: 1px solid var(--admin-line, #d1ddeb);
+  border-radius: 0.65rem;
+  color: inherit;
+  background: var(--admin-surface, #fff);
+}
+
+.fiscal-order {
+  border-top: 1px solid var(--admin-line, #d1ddeb);
+  margin-top: 1rem;
+  padding-top: 1rem;
+}
+
+.fiscal-upload {
+  align-items: start;
+  flex-direction: column;
+}
+
+.fiscal-confirm {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.fiscal-table {
+  overflow: auto;
+  max-height: 34rem;
+}

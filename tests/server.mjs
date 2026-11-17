@@ -113,6 +113,16 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
       assert.match(guarded.headers.get("location"), /^\/login/);
       assert.equal((await get("/api/admin/sales/")).status, 401);
       assert.equal((await get("/login/")).status, 200);
+      const fiscal = await get("/gestor/notas-fiscais/");
+      assert.equal(fiscal.status, 307);
+      assert.match(fiscal.headers.get("location"), /^\/login/);
+      const xmlPath = "/api/admin/notas-fiscais/" + "1".repeat(44) + "/";
+      assert.equal((await get(xmlPath)).status, 401);
+      const fiscalAdmin = await get("/gestor/notas-fiscais/", {
+        headers: { cookie },
+      });
+      assert.equal(fiscalAdmin.status, 200);
+      assert.match(await fiscalAdmin.text(), /Localizar pedido/);
       const removedVersions = await get("/gestor/versoes/", {
         headers: { cookie },
       });

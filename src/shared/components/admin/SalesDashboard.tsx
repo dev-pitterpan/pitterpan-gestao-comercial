@@ -913,6 +913,17 @@ export default function SalesDashboard({
                         <td>
                           <strong>{o.name}</strong>
                           <small>
+                            <Link
+                              className="admin-text-link"
+                              href={{
+                                pathname: "/gestor/notas-fiscais/",
+                                query: { pedido: o.id },
+                              }}
+                            >
+                              Nota fiscal
+                            </Link>
+                          </small>
+                          <small>
                             <time
                               dateTime={new Date(o.processed_at).toISOString()}
                               title="Horário do pedido registrado na Shopify · Brasília"

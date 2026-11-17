@@ -53,3 +53,16 @@ ALTER TABLE pitterpan_sales_orders ADD COLUMN IF NOT EXISTS shipping_charge_chec
 
 -- Record completed metadata backfills independently from nullable Shopify fields.
 ALTER TABLE pitterpan_sales_sync ADD COLUMN IF NOT EXISTS backfill_version integer NOT NULL DEFAULT 0;
+
+-- Imported fiscal documents are retained independently of sales refreshes.
+CREATE TABLE IF NOT EXISTS pitterpan_sales_invoices (
+ store text NOT NULL, order_id text NOT NULL, access_key text NOT NULL CHECK (access_key ~ '^[0-9]{44}$'),
+ authorization_protocol text NOT NULL, invoice_number integer NOT NULL, series integer NOT NULL,
+ xml bytea NOT NULL, imported_at timestamptz NOT NULL DEFAULT now(), imported_by text NOT NULL,
+ PRIMARY KEY (store, access_key),
+ FOREIGN KEY (store, order_id) REFERENCES pitterpan_sales_orders(store, id)
+);
+CREATE INDEX IF NOT EXISTS pitterpan_sales_invoices_order
+ ON pitterpan_sales_invoices(store, order_id, imported_at DESC);
+CREATE INDEX IF NOT EXISTS pitterpan_sales_invoices_recent
+ ON pitterpan_sales_invoices(store, imported_at DESC);
