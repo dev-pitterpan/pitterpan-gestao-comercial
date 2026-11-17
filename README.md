@@ -60,8 +60,8 @@ Consulte [a documentação funcional e técnica](docs/SISTEMA.md). Atualize o ma
 
 ### Notas fiscais de pedidos Shopify
 
-Em **Fiscal → Notas fiscais**, localize o pedido pelo número Shopify. A mesma tela fica disponível pelo link **Nota fiscal** na lista de pedidos. A seção usa o banco e o domínio já configurados para vendas. Execute `npm run sales:migrate` no banco de vendas antes de usar a seção.
+Em **Fiscal → Notas fiscais**, navegue pelo histórico de pedidos sincronizados ou localize um pedido pelo número Shopify. A mesma tela fica disponível pelo link **Nota fiscal** na lista de pedidos. A seção usa o banco e o domínio já configurados para vendas. Execute `npm run sales:migrate` no banco de vendas antes de usar a seção.
 
-Confirme no Winthor se o pedido já tem NF-e. Para um pedido Winthor ainda a faturar, siga a rotina 1406 e a emissão via 1452. Para uma nota emitida, exporte o XML processado na rotina 1452, confira destinatário, itens e valores e vincule o XML ao pedido Shopify. O arquivo pode ser baixado novamente na tela. O DANFE continua disponível na rotina do emissor.
+Confirme no Winthor se o pedido já tem NF-e. Para um pedido Winthor ainda a faturar, siga a rotina 1406 e a emissão via 1452. Para uma nota emitida, exporte o XML processado na rotina 1452, confira destinatário, itens e valores e vincule o XML ao pedido Shopify. O arquivo pode ser baixado novamente na tela. Exporte também o DANFE em PDF na rotina do emissor e anexe-o à NF-e correspondente. **Imprimir nota fiscal** abre o PDF em outra aba, usando o visualizador do navegador. O limite do PDF é 800 KB.
 
 A importação aceita XML de até 800 KB de NF-e de venda modelo 55 em produção, com protocolo de autorização presente e chave correspondente. O vínculo é manual e registra a conta que importou. A conferência estrutural não valida assinatura nem consulta eventos fiscais posteriores, como cancelamentos. Aplique os controles de acesso e retenção já usados para dados fiscais ao banco de vendas e aos seus backups.

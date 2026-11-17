@@ -118,6 +118,7 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
       assert.match(fiscal.headers.get("location"), /^\/login/);
       const xmlPath = "/api/admin/notas-fiscais/" + "1".repeat(44) + "/";
       assert.equal((await get(xmlPath)).status, 401);
+      assert.equal((await get(xmlPath + "danfe/")).status, 401);
       const fiscalAdmin = await get("/gestor/notas-fiscais/", {
         headers: { cookie },
       });

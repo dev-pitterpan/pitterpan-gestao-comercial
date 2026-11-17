@@ -5,6 +5,11 @@ import {
   readAuthorizedNfe,
 } from "../src/shared/server/fiscal/nfe.ts";
 
+import {
+  isDanfePdf,
+  maxDanfeBytes,
+} from "../src/shared/server/fiscal/danfe.ts";
+
 const key = "42261100000000000000550010000000421123456789";
 const authorization = "342260000000001";
 const xml = `<?xml version="1.0" encoding="UTF-8"?>
@@ -37,4 +42,14 @@ test("rejeita XML malformado, cancelado, de homologação, sem protocolo ou com 
   ]) {
     assert.throws(() => readAuthorizedNfe(Buffer.from(invalid)), InvalidNfe);
   }
+});
+
+test("valida formato e limite dos PDFs de DANFE", () => {
+  assert.equal(isDanfePdf(Buffer.from("%PDF-1.7\r\n%%EOF\r\n")), true);
+  assert.equal(isDanfePdf(Buffer.from("%PDF-1.7\n")), false);
+  assert.equal(isDanfePdf(Buffer.from("<html>%%EOF")), false);
+  assert.equal(
+    isDanfePdf(Buffer.from("%PDF-1.7\n" + " ".repeat(maxDanfeBytes) + "%%EOF")),
+    false,
+  );
 });

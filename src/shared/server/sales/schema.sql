@@ -66,3 +66,8 @@ CREATE INDEX IF NOT EXISTS pitterpan_sales_invoices_order
  ON pitterpan_sales_invoices(store, order_id, imported_at DESC);
 CREATE INDEX IF NOT EXISTS pitterpan_sales_invoices_recent
  ON pitterpan_sales_invoices(store, imported_at DESC);
+
+-- DANFE imported from the issuer for an existing fiscal document.
+ALTER TABLE pitterpan_sales_invoices ADD COLUMN IF NOT EXISTS danfe_pdf bytea;
+ALTER TABLE pitterpan_sales_invoices ADD COLUMN IF NOT EXISTS danfe_imported_at timestamptz;
+ALTER TABLE pitterpan_sales_invoices ADD COLUMN IF NOT EXISTS danfe_imported_by text;
