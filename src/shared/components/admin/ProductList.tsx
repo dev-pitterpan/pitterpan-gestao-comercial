@@ -25,6 +25,8 @@ export function ProductFilters({
   query: AdminQuery;
   canExport: boolean;
 }) {
+  const [sort, setSort] = useState(query.sort);
+  useEffect(() => setSort(query.sort), [query.sort]);
   const [stock, setStock] = useState(query.stock);
   useEffect(() => setStock(query.stock), [query.stock]);
   const { page: _page, ...filters } = query;
@@ -68,6 +70,19 @@ export function ProductFilters({
           { value: "unknown", label: "Não informado" },
         ]}
       />
+      {query.offers === "1" && (
+        <AdminSelect
+          name="sort"
+          value={sort}
+          label="Ordenar produtos"
+          onValueChange={(value) => setSort(value as AdminQuery["sort"])}
+          options={[
+            { value: "updated_desc", label: "Atualizados recentemente" },
+            { value: "updated_asc", label: "Atualizados há mais tempo" },
+            { value: "name_asc", label: "Nome de A a Z" },
+          ]}
+        />
+      )}
       <button type="submit" className="admin-button admin-button-primary">
         Aplicar agora
       </button>
