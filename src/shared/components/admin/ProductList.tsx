@@ -25,8 +25,6 @@ export function ProductFilters({
   query: AdminQuery;
   canExport: boolean;
 }) {
-  const [sort, setSort] = useState(query.sort);
-  useEffect(() => setSort(query.sort), [query.sort]);
   const [stock, setStock] = useState(query.stock);
   useEffect(() => setStock(query.stock), [query.stock]);
   const { page: _page, ...filters } = query;
@@ -70,19 +68,6 @@ export function ProductFilters({
           { value: "unknown", label: "Não informado" },
         ]}
       />
-      {query.offers === "1" && (
-        <AdminSelect
-          name="sort"
-          value={sort}
-          label="Ordenar produtos"
-          onValueChange={(value) => setSort(value as AdminQuery["sort"])}
-          options={[
-            { value: "updated_desc", label: "Atualizados recentemente" },
-            { value: "updated_asc", label: "Atualizados há mais tempo" },
-            { value: "name_asc", label: "Nome de A a Z" },
-          ]}
-        />
-      )}
       <button type="submit" className="admin-button admin-button-primary">
         Aplicar agora
       </button>
@@ -91,6 +76,30 @@ export function ProductFilters({
           <Download size={16} /> Exportar resultados filtrados
         </a>
       )}
+    </div>
+  );
+}
+
+export function ProductOrder({ sort }: { sort: AdminQuery["sort"] }) {
+  const [value, setValue] = useState(sort);
+  useEffect(() => setValue(sort), [sort]);
+
+  return (
+    <div className="admin-products-order">
+      <label htmlFor="product-order-filter">Ordenar por</label>
+      <AdminSelect
+        id="product-order-filter"
+        name="sort"
+        value={value}
+        label="Ordenar ofertas"
+        onValueChange={(next) => setValue(next as AdminQuery["sort"])}
+        options={[
+          { value: "updated_desc", label: "Mais recentes" },
+          { value: "updated_asc", label: "Mais antigos" },
+          { value: "name_asc", label: "Nome de A a Z" },
+        ]}
+      />
+      <small>Última atualização do produto na Shopify</small>
     </div>
   );
 }
