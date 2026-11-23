@@ -4,14 +4,14 @@ Mapa funcional e técnico do painel da Floresta, América e Iririú.
 
 ## 1. Ambientes e fontes
 
-| Componente | Responsabilidade |
-| --- | --- |
-| [Gestão Comercial](https://pitterpangestaocomercial.vercel.app/) | Painel autenticado. Next.js App Router, React, TypeScript e PostgreSQL. |
-| [Catálogo digital](https://catalogopitterpanfesta.vercel.app/) | Aplicação pública com endereço e deploy próprios. A gestão oferece uma prévia autenticada das coleções e atalhos para o catálogo público. |
-| Shopify Admin | Fonte dos pedidos online e do cadastro publicado no catálogo. Integrações de catálogo e vendas usam configurações distintas. |
-| PostgreSQL | Guarda snapshots do catálogo, pedidos sincronizados, fila de eventos, configurações, usuários, agenda e eventos administrativos. |
-| WinThor | ERP das lojas físicas. Vendas Loja, estoque por filial e transferências aguardam conexão com os dados do ERP. |
-| GitHub e Vercel | O repositório versiona o código. A Vercel hospeda a produção a partir de `main`. O GitHub Actions verifica a documentação, tipos, testes e build. |
+| Componente                                                       | Responsabilidade                                                                                                                                                                                          |
+| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Gestão Comercial](https://pitterpangestaocomercial.vercel.app/) | Painel autenticado. Next.js App Router, React, TypeScript e PostgreSQL.                                                                                                                                   |
+| [Catálogo digital](https://catalogopitterpanfesta.vercel.app/)   | Aplicação pública com endereço e deploy próprios. A gestão oferece uma prévia autenticada das coleções e atalhos para o catálogo público.                                                                 |
+| Shopify Admin                                                    | Fonte dos pedidos online e do cadastro publicado no catálogo. Integrações de catálogo e vendas usam configurações distintas.                                                                              |
+| PostgreSQL                                                       | Guarda snapshots do catálogo, pedidos sincronizados, fila de eventos, configurações, usuários, agenda e eventos administrativos.                                                                          |
+| WinThor                                                          | ERP das lojas físicas. Vendas Loja, estoque por filial e transferências aguardam conexão com os dados do ERP.                                                                                             |
+| GitHub e Vercel                                                  | O repositório versiona o código. A Vercel hospeda a produção a partir de `main`. O GitHub Actions verifica a documentação, formatação, tipos, testes, build e dependências com alertas altos ou críticos. |
 
 Escolha ou troque a foto pelo avatar da barra lateral, em Configurações ou em Minha conta para perfis sem acesso administrativo. As iniciais aparecem quando a conta está sem foto. O navegador ajusta imagens de até 25 MB ao formato quadrado de 256 × 256 px, e o servidor armazena a foto privada em WebP no PostgreSQL. Em instalações existentes, execute `npm run db:migrate` antes de habilitar o recurso.
 
@@ -19,39 +19,39 @@ Escolha ou troque a foto pelo avatar da barra lateral, em Configurações ou em 
 
 No painel do administrador e do gerente, os títulos e os filtros de consulta ficam logo abaixo da barra global. A data da Visão geral controla os indicadores de vendas. A metodologia de Recebimentos e Reembolsos fica disponível em “Como os valores são calculados”.
 
-| Menu ou tela | Rota | O que faz e de onde vêm os dados |
-| --- | --- | --- |
-| Login e recuperação | `/login/`, `/recuperar-senha/` | Entrada da equipe e solicitação de recuperação. O master usa credenciais configuradas. As contas da equipe ficam no banco. |
-| Visão geral | `/gestor/` | Indicadores, evolução de vendas e ranking por data. A fila Atenção agora considera as pendências do histórico importado. Também reúne categorias, estoque e mudanças de catálogo. |
-| Resumo Shopify | `/gestor/vendas/resumo/` | Indicadores e situação dos pedidos. Os cartões abrem o detalhe no período selecionado. |
-| Vendas Shopify | `/gestor/vendas/` | Lista de pedidos recentes com filtros, pagamento, entrega e itens. Exibe oito pedidos por página em uma tabela com rolagem interna. A conferência tem rolagem vertical na janela e horizontal na tabela de produtos. |
-| Atendimento de pedidos | `/gestor/vendas/atendimento/` | Fila de preparo e retirada, com detalhes do atendimento. |
-| Recebimentos | `/gestor/vendas/recebimentos/` | Evolução diária do recebido e do líquido, com total em destaque, leitura por dia e consulta dos pedidos que compõem o resultado. |
-| Estornos e reembolsos | `/gestor/vendas/reembolsos/` | Evolução e pedidos com reembolso total ou parcial, incluindo cancelados quando houver valor devolvido. |
-| Produtos mais vendidos | `/gestor/produtos-vendidos/` | Ranking e consulta paginada de produtos e variantes vendidos, com busca e filtros. |
-| Mapa de entregas | `/gestor/mapa/` | Agrupa destinos dos pedidos online por município e UF quando identificados. |
-| Vendas Loja | `/gestor/winthor/balcao/` | Área reservada para vendas de caixa por filial. A integração está pendente. |
-| Todos os produtos | `/gestor/produtos/` | Pesquisa, filtros e indicadores das variantes do catálogo publicado. A tabela tem rolagem interna e paginação com intervalo, total e botões Anterior e Próxima, também usados em Estoque e Ofertas. |
-| Ofertas | `/gestor/ofertas/` | Variantes em que o preço de comparação supera o preço atual. |
-| Catálogos | `/gestor/catalogos/`, `/gestor/[slug]/` | Coleções em cartões compactos, com ícones por categoria e ações para abrir, copiar ou compartilhar. |
-| Alterações na Shopify | `/gestor/alteracoes/` | Compara publicações sucessivas. Exibe inclusão, ausência e campos modificados. Filtra pela detecção na sincronização e mostra a data Shopify quando disponível. |
-| Estoque da Shopify | `/gestor/estoque/` | Saldo agregado da última publicação. Classifica estoque baixo, sem estoque e indisponível conforme dados e limites configurados. |
-| Estoque por loja | `/gestor/winthor/estoque-por-loja/` | Área reservada para saldo por filial no WinThor. A integração está pendente. |
-| Transferências | `/gestor/winthor/transferencias/` | Área reservada para histórico de movimentações WinThor. A etapa inicial é mapear a fonte e uma amostra real. |
-| Agenda e fornecedores | `/gestor/agenda/`, `/gestor/calendario/`, `/gestor/reunioes/[id]/` | Fornecedores, compromissos, calendário e reuniões. Permite importar uma exportação HTML de fornecedores do WinThor. Videochamada depende da configuração do Jitsi. |
-| Análises Shopify | `/gestor/analises/`, `/gestor/analises/checkouts/` | Submenu expansível na barra lateral com visão geral, vendas, checkouts, relatórios, atribuição e clientes, conforme as permissões e a disponibilidade na Shopify. |
-| Relatórios | `/gestor/relatorios/` | Entrada para relatórios disponíveis ao perfil autenticado. |
-| Sincronizações | `/gestor/sincronizacoes/` | Acompanha importação, validação e publicação do catálogo. |
-| Minha conta | `/gestor/minha-conta/` | Informações da sessão e ações disponíveis para a própria conta. |
-| Equipe | `/gestor/usuarios/` | Gestão das contas da equipe e perfis. Acesso Admin. |
-| Configurações | `/gestor/configuracoes/` | Limites de estoque e informações de acesso e integração. Acesso Admin. |
+| Menu ou tela           | Rota                                                               | O que faz e de onde vêm os dados                                                                                                                                                                                     |
+| ---------------------- | ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Login e recuperação    | `/login/`, `/recuperar-senha/`                                     | Entrada da equipe e solicitação de recuperação. O master usa credenciais configuradas. As contas da equipe ficam no banco.                                                                                           |
+| Visão geral            | `/gestor/`                                                         | Indicadores, evolução de vendas e ranking por data. A fila Atenção agora considera as pendências do histórico importado. Também reúne categorias, estoque e mudanças de catálogo.                                    |
+| Resumo Shopify         | `/gestor/vendas/resumo/`                                           | Indicadores e situação dos pedidos. Os cartões abrem o detalhe no período selecionado.                                                                                                                               |
+| Vendas Shopify         | `/gestor/vendas/`                                                  | Lista de pedidos recentes com filtros, pagamento, entrega e itens. Exibe oito pedidos por página em uma tabela com rolagem interna. A conferência tem rolagem vertical na janela e horizontal na tabela de produtos. |
+| Atendimento de pedidos | `/gestor/vendas/atendimento/`                                      | Fila de preparo e retirada, com detalhes do atendimento.                                                                                                                                                             |
+| Recebimentos           | `/gestor/vendas/recebimentos/`                                     | Evolução diária do recebido e do líquido, com total em destaque, leitura por dia e consulta dos pedidos que compõem o resultado.                                                                                     |
+| Estornos e reembolsos  | `/gestor/vendas/reembolsos/`                                       | Evolução e pedidos com reembolso total ou parcial, incluindo cancelados quando houver valor devolvido.                                                                                                               |
+| Produtos mais vendidos | `/gestor/produtos-vendidos/`                                       | Ranking e consulta paginada de produtos e variantes vendidos, com busca e filtros.                                                                                                                                   |
+| Mapa de entregas       | `/gestor/mapa/`                                                    | Agrupa destinos dos pedidos online por município e UF quando identificados.                                                                                                                                          |
+| Vendas Loja            | `/gestor/winthor/balcao/`                                          | Área reservada para vendas de caixa por filial. A integração está pendente.                                                                                                                                          |
+| Todos os produtos      | `/gestor/produtos/`                                                | Pesquisa, filtros e indicadores das variantes do catálogo publicado. A tabela tem rolagem interna e paginação com intervalo, total e botões Anterior e Próxima, também usados em Estoque e Ofertas.                  |
+| Ofertas                | `/gestor/ofertas/`                                                 | Variantes em que o preço de comparação supera o preço atual.                                                                                                                                                         |
+| Catálogos              | `/gestor/catalogos/`, `/gestor/[slug]/`                            | Coleções em cartões compactos, com ícones por categoria e ações para abrir, copiar ou compartilhar.                                                                                                                  |
+| Alterações na Shopify  | `/gestor/alteracoes/`                                              | Compara publicações sucessivas. Exibe inclusão, ausência e campos modificados. Filtra pela detecção na sincronização e mostra a data Shopify quando disponível.                                                      |
+| Estoque da Shopify     | `/gestor/estoque/`                                                 | Saldo agregado da última publicação. Classifica estoque baixo, sem estoque e indisponível conforme dados e limites configurados.                                                                                     |
+| Estoque por loja       | `/gestor/winthor/estoque-por-loja/`                                | Área reservada para saldo por filial no WinThor. A integração está pendente.                                                                                                                                         |
+| Transferências         | `/gestor/winthor/transferencias/`                                  | Área reservada para histórico de movimentações WinThor. A etapa inicial é mapear a fonte e uma amostra real.                                                                                                         |
+| Agenda e fornecedores  | `/gestor/agenda/`, `/gestor/calendario/`, `/gestor/reunioes/[id]/` | Fornecedores, compromissos, calendário e reuniões. Permite importar uma exportação HTML de fornecedores do WinThor. Videochamada depende da configuração do Jitsi.                                                   |
+| Análises Shopify       | `/gestor/analises/`, `/gestor/analises/checkouts/`                 | Submenu expansível na barra lateral com visão geral, vendas, checkouts, relatórios, atribuição e clientes, conforme as permissões e a disponibilidade na Shopify.                                                    |
+| Relatórios             | `/gestor/relatorios/`                                              | Entrada para relatórios disponíveis ao perfil autenticado.                                                                                                                                                           |
+| Sincronizações         | `/gestor/sincronizacoes/`                                          | Acompanha importação, validação e publicação do catálogo.                                                                                                                                                            |
+| Minha conta            | `/gestor/minha-conta/`                                             | Informações da sessão e ações disponíveis para a própria conta.                                                                                                                                                      |
+| Equipe                 | `/gestor/usuarios/`                                                | Gestão das contas da equipe e perfis. Acesso Admin.                                                                                                                                                                  |
+| Configurações          | `/gestor/configuracoes/`                                           | Limites de estoque e informações de acesso e integração. Acesso Admin.                                                                                                                                               |
 
 ## 3. Acesso e responsabilidades
 
 - **Admin** pode acessar os módulos de operação, gerenciar Equipe e Configurações.
 - **Gestor e Gerente de Compras** compartilham as permissões operacionais. Incluem vendas, análises, agenda e sincronização de catálogo. Os atalhos de administração são exclusivos do Admin.
 - **Atendimento** tem acesso às telas liberadas para seu perfil, sem acesso aos indicadores financeiros e módulos WinThor. A proteção é validada nas rotas e no servidor.
-- Os eventos de equipe e configuração registram ação, responsável e horário no banco. A tela de versões exibe apenas os eventos permitidos. Dados detalhados da alteração, credenciais e ações de senha ficam fora dessa visualização.
+- Os eventos de equipe e configuração registram ação, responsável e horário no banco. Esses registros ficam restritos aos fluxos administrativos; a antiga tela de versões foi removida. Credenciais não fazem parte dos registros de atividade.
 
 ## 4. Como os dados circulam
 
@@ -73,17 +73,18 @@ Pedidos, visão geral, análises, destinos e histórico de alterações usam o m
 3. A janela automática usa até 60 dias. Períodos anteriores consultam o histórico disponível no banco. O painel mostra o horário da última sincronização.
 4. Valor líquido representa recebido menos reembolsos. Pagamento, cancelamento, atendimento e modalidade de entrega são dimensões distintas.
 5. A fila Atenção agora tem escopo independente do filtro comercial. A modalidade local e a retirada exibem frete conforme o valor registrado no pedido.
-6. O cron da Vercel está declarado para 09h UTC. A ativação depende de `CRON_SECRET`; confira a resposta da rota e os logs no ambiente de produção. A ação manual e os scripts continuam disponíveis aos perfis autorizados.
+6. O cron da Vercel está declarado para 09h UTC (06h de Brasília). A ativação depende de `CRON_SECRET`; confira a resposta da rota e os logs no ambiente de produção. A rota autenticada agenda um workflow exclusivo de vendas e responde 202: isso confirma aceitação, não conclusão. O workflow continua todos os lotes com checkpoint e exclusividade no banco, espera quando outro processo possui o lote e encerra com erro visível no workflow se atingir 2.000 lotes. A ação manual e os scripts continuam disponíveis aos perfis autorizados.
+7. O ranking de clientes usa o mesmo histórico sincronizado e considera pedidos em BRL pagos ou parcialmente reembolsados, não cancelados nem de teste, com recebido maior que reembolsado e identificação Shopify do cliente. Mostra a última sincronização completa em Brasília, eventos pendentes e pedidos sem identificação. Uma sincronização ausente ou com mais de 26 horas gera aviso; esse horário não comprova conciliação integral com a Shopify. Use `npm run sales:audit-ranking -- AAAA-MM-DD AAAA-MM-DD` para comparar, somente em leitura, quantidades e valores líquidos de cada cliente. O comando retorna código 1 em divergências ou falha; não imprime nomes ou credenciais.
 
-### Alterações e versões
+### Históricos operacionais
 
-| Histórico | Unidade de registro | Data exibida |
-| --- | --- | --- |
-| Alterações na Shopify | Diferença entre snapshots do catálogo | Detecção na sincronização e última atualização Shopify quando disponível |
-| Sincronizações | Execução ou publicação de catálogo | Início e conclusão da importação |
-| Atividade administrativa | Evento de equipe ou configuração | Data e hora do evento no banco |
+| Histórico                | Unidade de registro                   | Data exibida                                                             |
+| ------------------------ | ------------------------------------- | ------------------------------------------------------------------------ |
+| Alterações na Shopify    | Diferença entre snapshots do catálogo | Detecção na sincronização e última atualização Shopify quando disponível |
+| Sincronizações           | Execução ou publicação de catálogo    | Início e conclusão da importação                                         |
+| Atividade administrativa | Evento de equipe ou configuração      | Data e hora do evento no banco                                           |
 
-O histórico de versões é editorial. Para o horário exato da publicação, consulte o deploy associado ao commit na Vercel. A atividade administrativa mostra eventos registrados a partir das ações existentes do painel.
+Para o horário exato da publicação do sistema, consulte o deploy associado ao commit na Vercel. A atividade administrativa mostra eventos registrados a partir das ações existentes do painel.
 
 ## 5. Transferências WinThor
 
@@ -91,14 +92,14 @@ O histórico de versões é editorial. Para o horário exato da publicação, co
 
 A documentação TOTVS descreve o relatório da rotina **1124 — Transferir produto entre filial/depósito**. Na aba **Relatório**, filtre filial de origem, filial de destino e período, ou localize pela nota fiscal de transferência. Confirme com a equipe quais rotinas e tipos de movimentação de fato cobrem o histórico da Pitter Pan. O formato disponível para exportação precisa ser validado na instalação. [Procedimento oficial TOTVS](https://centraldeatendimento.totvs.com/hc/pt-br/articles/1500012182141)
 
-| Dado a confirmar na fonte | Uso na Gestão Comercial |
-| --- | --- |
-| ID da transferência ou chave estável da nota, série e filial | Identificar a operação e evitar duplicidade ao reimportar |
-| Códigos de origem e destino | Mapear Floresta, América e Iririú e distinguir depósitos internos |
-| Data da movimentação e situação | Filtrar por período e exibir cancelamentos e status fornecidos |
-| Identificador da linha, código de produto, unidade e quantidade | Montar detalhes da operação e preservar linhas repetidas legítimas |
-| Como o relatório representa saída e entrada | Exibir uma transferência por operação, mesmo quando os dois movimentos aparecem |
-| Período mais antigo disponível | Definir a cobertura da carga inicial e informar lacunas |
+| Dado a confirmar na fonte                                       | Uso na Gestão Comercial                                                         |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| ID da transferência ou chave estável da nota, série e filial    | Identificar a operação e evitar duplicidade ao reimportar                       |
+| Códigos de origem e destino                                     | Mapear Floresta, América e Iririú e distinguir depósitos internos               |
+| Data da movimentação e situação                                 | Filtrar por período e exibir cancelamentos e status fornecidos                  |
+| Identificador da linha, código de produto, unidade e quantidade | Montar detalhes da operação e preservar linhas repetidas legítimas              |
+| Como o relatório representa saída e entrada                     | Exibir uma transferência por operação, mesmo quando os dois movimentos aparecem |
+| Período mais antigo disponível                                  | Definir a cobertura da carga inicial e informar lacunas                         |
 
 Para homologar, use um relatório anonimizado com duas transferências, itens e quantidades, além de uma operação cancelada se houver. Valide os totais e as filiais com o relatório original. O painel deve importar em leitura, deduplicar reenvios e manter a origem, a cobertura e o horário da carga. Depois de confirmar o formato, a mesma estrutura pode receber um serviço WinThor disponível na instalação. **Estado atual:** a tela está preparada e a leitura de dados reais depende dessa amostra ou do contrato do serviço.
 
@@ -106,37 +107,37 @@ Vendas físicas serão tratadas em outra etapa. Para conciliar a Shopify com o W
 
 ## 6. Mapa do código
 
-| Caminho | Responsabilidade |
-| --- | --- |
-| `src/app/gestor/(dashboard)/` | Rotas e composição do painel. O layout exige sessão e fornece sidebar e janelas de conferência. |
-| `src/app/api/` | Endpoints HTTP, autenticação, validação, respostas e integração de servidor. |
-| `src/shared/components/admin/` | Componentes do painel, calendário, tabelas, formulários, gráficos e conferência de pedidos. |
-| `src/shared/lib/admin/` e `src/shared/lib/agenda/` | Regras e utilitários compartilhados para filtros, períodos, estoque, links, relatórios e agenda. |
-| `src/shared/server/auth/` | Sessões, permissões, hashes de senha, limites e utilitários de autenticação. |
-| `src/shared/server/admin/` | Repositório de catálogo administrativo, indicadores e alterações. |
-| `src/shared/server/agenda/` | Consultas e persistência da agenda, fornecedores e reuniões. |
-| `src/shared/server/shopify/` | Cliente Shopify, consultas de catálogo, cache e normalização. |
-| `src/shared/server/sales/` | Configuração e sincronização de pedidos, filtros, valores, atendimento, destinos, relatórios e persistência. |
-| `src/shared/server/database/` | Pool, esquema do catálogo, importações e repositórios. |
-| `src/shared/server/sync/` e `src/shared/workflows/` | Controle e execução da sincronização longa de catálogo. |
-| `src/shared/server/http/` | Utilitários HTTP e implementação compartilhada de APIs de catálogo. |
-| `src/shared/styles/`, `public/` e `config/` | Estilos, arquivos públicos, dados locais e mapeamento de coleções. |
-| `scripts/`, `tests/`, `.github/workflows/` | Rotinas de implantação, manutenção e verificação. |
+| Caminho                                             | Responsabilidade                                                                                             |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `src/app/gestor/(dashboard)/`                       | Rotas e composição do painel. O layout exige sessão e fornece sidebar e janelas de conferência.              |
+| `src/app/api/`                                      | Endpoints HTTP, autenticação, validação, respostas e integração de servidor.                                 |
+| `src/shared/components/admin/`                      | Componentes do painel, calendário, tabelas, formulários, gráficos e conferência de pedidos.                  |
+| `src/shared/lib/admin/` e `src/shared/lib/agenda/`  | Regras e utilitários compartilhados para filtros, períodos, estoque, links, relatórios e agenda.             |
+| `src/shared/server/auth/`                           | Sessões, permissões, hashes de senha, limites e utilitários de autenticação.                                 |
+| `src/shared/server/admin/`                          | Repositório de catálogo administrativo, indicadores e alterações.                                            |
+| `src/shared/server/agenda/`                         | Consultas e persistência da agenda, fornecedores e reuniões.                                                 |
+| `src/shared/server/shopify/`                        | Cliente Shopify, consultas de catálogo, cache e normalização.                                                |
+| `src/shared/server/sales/`                          | Configuração e sincronização de pedidos, filtros, valores, atendimento, destinos, relatórios e persistência. |
+| `src/shared/server/database/`                       | Pool, esquema do catálogo, importações e repositórios.                                                       |
+| `src/shared/server/sync/` e `src/shared/workflows/` | Controle e execução da sincronização longa de catálogo.                                                      |
+| `src/shared/server/http/`                           | Utilitários HTTP e implementação compartilhada de APIs de catálogo.                                          |
+| `src/shared/styles/`, `public/` e `config/`         | Estilos, arquivos públicos, dados locais e mapeamento de coleções.                                           |
+| `scripts/`, `tests/`, `.github/workflows/`          | Rotinas de implantação, manutenção e verificação.                                                            |
 
 ### Endpoints
 
-| Endpoints | Responsabilidade |
-| --- | --- |
-| `/api/health/` | Verifica que a aplicação responde. |
-| `/api/auth/login/`, `logout/`, `password/` | Sessão e ações de senha, com validação de origem e acesso conforme a ação. |
-| `/api/admin/overview/`, `products/`, `settings/`, `users/` | Resumo administrativo, pesquisa de produtos, limites e equipe. |
-| `/api/admin/agenda/`, `agenda/video/`, `campaigns/` | Agenda, reuniões e planejamento. |
-| `/api/admin/sales/`, `sales/customers/`, `sales/fulfillment/` | Listagem e consultas de vendas, clientes e conferência de itens. |
-| `/api/admin/analytics/`, `destinations/` | Análises e destinos dos pedidos. |
-| `/api/admin/sync/` | Dispara e acompanha sincronização de catálogo. |
-| `/api/webhooks/shopify/sales/`, `/api/cron/sales/` | Entrada assinada de eventos e processamento agendado autenticado. |
-| `/api/catalogs/[slug]/`, `/api/categories/[slug]/`, `/api/catalog-banner/[slug]/`, `/api/product-image/[variant]/` | Leitura de coleções, categorias e imagens para o catálogo. |
-| `/api/cart/`, `/api/checkout/` | Operações de catálogo e checkout de acordo com o fluxo da vitrine. |
+| Endpoints                                                                                                          | Responsabilidade                                                           |
+| ------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------- |
+| `/api/health/`                                                                                                     | Verifica que a aplicação responde.                                         |
+| `/api/auth/login/`, `logout/`, `password/`                                                                         | Sessão e ações de senha, com validação de origem e acesso conforme a ação. |
+| `/api/admin/overview/`, `products/`, `settings/`, `users/`                                                         | Resumo administrativo, pesquisa de produtos, limites e equipe.             |
+| `/api/admin/agenda/`, `agenda/video/`, `campaigns/`                                                                | Agenda, reuniões e planejamento.                                           |
+| `/api/admin/sales/`, `sales/customers/`, `sales/fulfillment/`                                                      | Listagem e consultas de vendas, clientes e conferência de itens.           |
+| `/api/admin/analytics/`, `destinations/`                                                                           | Análises e destinos dos pedidos.                                           |
+| `/api/admin/sync/`                                                                                                 | Dispara e acompanha sincronização de catálogo.                             |
+| `/api/webhooks/shopify/sales/`, `/api/cron/sales/`                                                                 | Entrada assinada de eventos e processamento agendado autenticado.          |
+| `/api/catalogs/[slug]/`, `/api/categories/[slug]/`, `/api/catalog-banner/[slug]/`, `/api/product-image/[variant]/` | Leitura de coleções, categorias e imagens para o catálogo.                 |
+| `/api/cart/`, `/api/checkout/`                                                                                     | Operações de catálogo e checkout de acordo com o fluxo da vitrine.         |
 
 ## 7. Configuração, operação e publicação
 
@@ -160,3 +161,7 @@ Vendas físicas serão tratadas em outra etapa. Para conciliar a Shopify com o W
 Em Catálogos → Imagens do catálogo, administradores podem selecionar imagens, converter todas as pendentes ou tentar novamente as que falharam. O histórico compara formato, dimensões e bytes antes e depois e registra o horário do processamento. A sincronização processa as imagens pendentes após publicar o catálogo. A versão WebP usa 1000 × 1000 px, fundo branco e enquadramento sem cortes.
 
 Execute `npm run db:migrate` no PostgreSQL usado pelo catálogo e pela Gestão Comercial. A vitrine pública usa a foto convertida quando consulta o mesmo PostgreSQL em modo `postgres`. Fotos pendentes ou que falharam continuam disponíveis pelo arquivo original. O histórico consolida URLs de imagem compartilhadas entre variantes.
+
+## Auditoria de 23/11/2026
+
+Consulte [a auditoria técnica](AUDITORIA-2026-11-23.md) para evidências, correções e limitações da conferência. O Next.js está fixado em 16.4.6. A conexão PostgreSQL explicita `verify-full` quando a URL usa os aliases de verificação do pg 8 (`prefer`, `require`, `verify-ca`), preservando a validação atual de certificado. A opção explícita `uselibpqcompat=true` continua respeitada. Não registre URLs de conexão em logs.

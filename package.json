@@ -24,6 +24,7 @@
     "sales:webhooks": "node scripts/sales/webhooks.ts",
     "sales:retry": "node scripts/sales/retry.ts",
     "sales:audit": "node scripts/sales/audit.ts",
+    "sales:audit-ranking": "node scripts/sales/audit.ts --ranking",
     "test:server": "node tests/server.mjs",
     "env:import": "node scripts/import-env.ts"
   },
@@ -31,7 +32,7 @@
     "@tanstack/react-query": "^5.104.5",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.60.0",
-    "next": "^16.4.2",
+    "next": "16.4.6",
     "pg": "^8.23.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",

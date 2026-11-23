@@ -84,6 +84,73 @@ export default async function CustomerRankingPage({
         description="Compras identificadas na Shopify no período selecionado. O valor líquido desconta os reembolsos."
         filters={<CustomerRankingFilters range={range} sort={sort} />}
       />
+      {data && (
+        <section
+          className="admin-panel customer-ranking-freshness"
+          aria-labelledby="ranking-freshness-title"
+        >
+          <h2 id="ranking-freshness-title">Atualização do ranking</h2>
+          <p>
+            Última sincronização completa:{" "}
+            <strong>
+              {data.freshness.completed_at
+                ? dateTime(data.freshness.completed_at)
+                : "Ainda não concluída"}
+            </strong>{" "}
+            · Horário de Brasília
+          </p>
+          <p>
+            Base de pedidos sincronizados, sem consulta em tempo real. A
+            atualização automática consulta os últimos 60 dias; períodos
+            anteriores usam o histórico já importado.
+          </p>
+          <p>
+            {number(data.freshness.eligible_orders)} pedidos pagos com saldo
+            líquido positivo no período · {number(data.total)} clientes
+            identificados.
+          </p>
+          {(data.freshness.stale ||
+            data.freshness.in_progress ||
+            data.freshness.pending_events > 0 ||
+            data.freshness.missing_customers > 0) && (
+            <div role="status">
+              {data.freshness.stale && (
+                <p>
+                  A sincronização completa está ausente ou tem mais de 26 horas.
+                  Atualize antes de usar o ranking para decisões.
+                </p>
+              )}
+              {data.freshness.in_progress && (
+                <p>
+                  Há uma sincronização em andamento. A classificação pode mudar
+                  quando ela terminar.
+                </p>
+              )}
+              {data.freshness.pending_events > 0 && (
+                <p>
+                  {number(data.freshness.pending_events)} eventos aguardam
+                  processamento
+                  {data.freshness.failed_events > 0
+                    ? `, incluindo ${number(data.freshness.failed_events)} que atingiram o limite de tentativas`
+                    : ""}
+                  .
+                </p>
+              )}
+              {data.freshness.missing_customers > 0 && (
+                <p>
+                  {number(data.freshness.missing_customers)} pedidos pagos não
+                  têm identificação de cliente utilizável e ficam fora da
+                  classificação. Confira a integração e as permissões de
+                  clientes.
+                </p>
+              )}
+            </div>
+          )}
+          <Link href="/gestor/sincronizacoes/" prefetch={false}>
+            Conferir sincronização <ArrowUpRight size={14} aria-hidden="true" />
+          </Link>
+        </section>
+      )}
       {!data || !selected ? (
         <section className="admin-panel">
           <EmptyState

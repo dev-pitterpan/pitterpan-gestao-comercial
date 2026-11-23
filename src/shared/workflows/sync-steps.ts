@@ -46,6 +46,10 @@ export async function orders(id: string) {
   await progress(id, "orders", { orders: count.rows[0]?.n || 0 });
   return result;
 }
+export async function salesBatch() {
+  "use step";
+  return syncSalesPage();
+}
 export async function publish(id: string) {
   "use step";
   try {
