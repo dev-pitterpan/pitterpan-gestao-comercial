@@ -1,4 +1,5 @@
 import { Pool } from "pg";
+import { databaseConnectionString } from "./connection-url.ts";
 
 const globalPool = globalThis as typeof globalThis & { catalogPool?: Pool };
 /** Conexão pequena; use a URL com pooler do PostgreSQL na Vercel. TLS vem da URL. */
@@ -6,7 +7,7 @@ export function database() {
   if (!process.env.DATABASE_URL)
     throw new Error("Configure DATABASE_URL para usar o catálogo PostgreSQL.");
   return (globalPool.catalogPool ||= new Pool({
-    connectionString: process.env.DATABASE_URL,
+    connectionString: databaseConnectionString(process.env.DATABASE_URL),
     max: 3,
     connectionTimeoutMillis: 10_000,
     idleTimeoutMillis: 20_000,

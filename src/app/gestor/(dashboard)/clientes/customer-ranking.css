@@ -110,3 +110,26 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+.admin-app .customer-ranking-freshness {
+  margin-bottom: 20px;
+}
+.admin-app .customer-ranking-freshness h2 {
+  margin: 0 0 12px;
+}
+.admin-app .customer-ranking-freshness p {
+  margin: 8px 0;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.admin-app .customer-ranking-freshness [role="status"] {
+  border-left: 3px solid #c28b38;
+  padding-left: 12px;
+  margin: 12px 0;
+}
+.admin-app .customer-ranking-freshness a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+}

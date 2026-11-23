@@ -58,12 +58,23 @@ export async function readCustomerRanking(
     selected: RankedCustomer | null;
     total: number;
     page: number;
+    freshness: {
+      completed_at: string | null;
+      in_progress: boolean;
+      stale: boolean;
+      pending_events: number;
+      failed_events: number;
+      missing_customers: number;
+      eligible_orders: number;
+    };
   }>(
-    `WITH purchases AS (
+    `WITH eligible_orders AS (
       SELECT ${customerId} AS id, ${customerNameColumn}, o.processed_at, o.id AS order_id,
              o.received-o.refunded AS net
       FROM pitterpan_sales_orders o
-      WHERE ${eligible} AND ${customerId} ~ '^gid://shopify/Customer/[0-9]+$'
+      WHERE ${eligible}
+    ), purchases AS (
+      SELECT * FROM eligible_orders WHERE id ~ '^gid://shopify/Customer/[0-9]+$'
     ), grouped AS (
       SELECT id, (array_agg(customer_name ORDER BY processed_at DESC,order_id)
         FILTER (WHERE customer_name<>''))[1] AS name,
@@ -79,6 +90,15 @@ export async function readCustomerRanking(
       FROM ranked
     )
     SELECT bounds.*,
+      jsonb_build_object(
+        'completed_at',(SELECT completed_at::text FROM pitterpan_sales_sync WHERE store=$1),
+        'in_progress',COALESCE((SELECT until_at IS NOT NULL FROM pitterpan_sales_sync WHERE store=$1),false),
+        'stale',COALESCE((SELECT completed_at IS NULL OR completed_at<now()-interval '26 hours' FROM pitterpan_sales_sync WHERE store=$1),true),
+        'pending_events',(SELECT count(*)::int FROM pitterpan_sales_inbox WHERE store=$1 AND done_at IS NULL),
+        'failed_events',(SELECT count(*)::int FROM pitterpan_sales_inbox WHERE store=$1 AND done_at IS NULL AND attempts>=10),
+        'missing_customers',(SELECT count(*)::int FROM eligible_orders WHERE id IS NULL OR id !~ '^gid://shopify/Customer/[0-9]+$'),
+        'eligible_orders',(SELECT count(*)::int FROM eligible_orders)
+      ) AS freshness,
       COALESCE((SELECT jsonb_agg(to_jsonb(r) ORDER BY r.rank) FROM ranked r
         WHERE r.rank > (bounds.page-1)*$5 AND r.rank <= bounds.page*$5),'[]') AS customers,
       (SELECT to_jsonb(r) FROM ranked r WHERE r.id=$6) AS selected

@@ -1,6 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { salesReady } from "@shared/server/sales/config";
-import { syncSalesPage } from "@shared/server/sales/sync";
+import { start } from "workflow/api";
+import { salesSync } from "@shared/workflows/sales-sync";
 export const runtime = "nodejs";
 export const maxDuration = 300;
 export async function GET(request: Request) {
@@ -14,8 +15,11 @@ export async function GET(request: Request) {
   if (!salesReady())
     return new Response("Vendas não configuradas.", { status: 503 });
   try {
-    const result = await syncSalesPage();
-    return Response.json(result, { headers: { "Cache-Control": "no-store" } });
+    const run = await start(salesSync, []);
+    return Response.json(
+      { accepted: true, runId: run.runId },
+      { status: 202, headers: { "Cache-Control": "no-store" } },
+    );
   } catch {
     return new Response("Falha na atualização; repita para retomar.", {
       status: 503,

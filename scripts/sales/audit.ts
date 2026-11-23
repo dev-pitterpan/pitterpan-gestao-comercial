@@ -2,17 +2,20 @@ import { existsSync } from "node:fs";
 import { database } from "../../src/shared/server/database/client.ts";
 import { salesClient } from "../../src/shared/server/sales/config.ts";
 import { auditSalesSnapshot } from "../../src/shared/server/sales/audit.ts";
+import { auditCustomerRanking } from "../../src/shared/server/sales/ranking-audit.ts";
 import { todayDate, shiftDate } from "../../src/shared/lib/admin/date-range.ts";
 if (existsSync(".env")) process.loadEnvFile(".env");
-const end = process.argv[3] || todayDate(),
-  start = process.argv[2] || shiftDate(end, -59);
+const ranking = process.argv.includes("--ranking");
+const args = process.argv.slice(2).filter((value) => value !== "--ranking");
+const end = args[1] || todayDate(),
+  start = args[0] || shiftDate(end, ranking ? -29 : -59);
 const pool = database();
 let db;
 try {
   const client = salesClient();
   db = await pool.connect();
   await db.query("BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY");
-  const report = await auditSalesSnapshot(
+  const report = await (ranking ? auditCustomerRanking : auditSalesSnapshot)(
     db,
     client,
     client.domain,
