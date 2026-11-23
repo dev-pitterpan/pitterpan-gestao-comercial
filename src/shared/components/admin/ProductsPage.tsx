@@ -34,8 +34,10 @@ export default async function ProductsPage({
       : mode === "offers"
         ? "/gestor/ofertas/"
         : "/gestor/produtos/";
-  const pageHref = (page: number) =>
-    `${base}?${new URLSearchParams({ ...query, page: String(page) })}`;
+  const pageHref = (page: number) => {
+    const { page: _currentPage, ...filters } = query;
+    return `${base}?${new URLSearchParams({ ...filters, page: String(page) })}`;
+  };
   const offset = (result.page - 1) * ADMIN_PRODUCT_PAGE_SIZE;
   return (
     <AutoFilterForm action={base} className="admin-products-form">
