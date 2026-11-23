@@ -88,6 +88,7 @@ export default async function ProductsPage({
           </div>
         )}
         <ProductList
+          showUpdatedAt={mode === "offers"}
           resetKey={pageHref(result.page)}
           search={query.q}
           products={result.products}

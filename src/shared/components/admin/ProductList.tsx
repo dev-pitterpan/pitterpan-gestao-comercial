@@ -104,15 +104,23 @@ export function ProductOrder({ sort }: { sort: AdminQuery["sort"] }) {
   );
 }
 
+const updatedDateFormat = new Intl.DateTimeFormat("pt-BR", {
+  dateStyle: "short",
+  timeStyle: "short",
+  timeZone: "America/Sao_Paulo",
+});
+
 export default function ProductList({
   products,
   settings,
   search,
   resetKey,
+  showUpdatedAt = false,
 }: {
   products: AdminProduct[];
   search: string;
   resetKey: string;
+  showUpdatedAt?: boolean;
   settings: { low: number; high: number };
 }) {
   return (
@@ -156,6 +164,8 @@ export default function ProductList({
           </thead>
           <tbody>
             {products.map((p) => {
+              const updated = p.updatedAt ? new Date(p.updatedAt) : null;
+              const validDate = updated && Number.isFinite(updated.getTime());
               const stock = stockLabel(
                 p.inventoryQuantity,
                 settings.low,
@@ -175,6 +185,21 @@ export default function ProductList({
                       <div>
                         <strong>{p.name}</strong>
                         <small>SKU {p.sku || "não informado"}</small>
+                        {showUpdatedAt && (
+                          <small className="admin-product-updated">
+                            {validDate ? (
+                              <time
+                                dateTime={updated.toISOString()}
+                                title="Última atualização do produto na Shopify · Horário de Brasília"
+                              >
+                                Alterado em {updatedDateFormat.format(updated)}{" "}
+                                · Brasília
+                              </time>
+                            ) : (
+                              "Última alteração não informada"
+                            )}
+                          </small>
+                        )}
                       </div>
                     </div>
                   </td>

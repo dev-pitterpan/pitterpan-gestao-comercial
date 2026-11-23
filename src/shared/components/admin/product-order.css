@@ -47,3 +47,10 @@
     grid-template-columns: auto minmax(0, 1fr);
   }
 }
+
+.admin-app .admin-product-updated {
+  margin-top: 3px;
+  color: var(--admin-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: normal;
+}
