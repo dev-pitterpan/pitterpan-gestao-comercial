@@ -1,0 +1,49 @@
+.admin-app .admin-products-orderbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin-bottom: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--admin-line, #d5e1eb);
+  color: var(--admin-muted);
+  font-size: 12px;
+}
+
+.admin-app .admin-products-order {
+  display: grid;
+  grid-template-columns: auto minmax(0, 210px);
+  align-items: center;
+  gap: 5px 12px;
+  min-width: 0;
+}
+
+.admin-app .admin-products-order > label {
+  color: var(--admin-ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.admin-app .admin-products-order > small {
+  grid-column: 2;
+  font-size: 10px;
+}
+
+.admin-app .admin-products-order .admin-select,
+.admin-app .admin-products-order .admin-select-trigger {
+  width: 100%;
+  min-width: 0;
+}
+
+.admin-app .admin-products-order .admin-select-menu {
+  min-width: 100%;
+  max-width: min(260px, calc(100vw - 64px));
+}
+
+@media (max-width: 600px) {
+  .admin-app .admin-products-order {
+    width: 100%;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+}

@@ -19,7 +19,10 @@ import {
 import { getManifest, getConfig } from "../catalogs";
 import { moneyToMinor } from "../../lib/money";
 import type { Product } from "../../types/catalog";
-export type AdminProduct = Product & { inventoryQuantity: number | null };
+export type AdminProduct = Product & {
+  inventoryQuantity: number | null;
+  updatedAt?: string | null;
+};
 export type AdminSummary = {
   products: number;
   variants: number;
@@ -190,17 +193,23 @@ export const adminContext = cache(
     };
   },
 );
-export const adminQuerySchema = z.object({
-  q: z.string().trim().max(120).default(""),
-  category: z.string().max(200).default(""),
-  vendor: z.string().max(200).default(""),
-  stock: z.enum(stockFilters).default("all"),
-  offers: z.enum(["0", "1"]).default("0"),
-  page: z.coerce.number().int().min(1).max(10000).default(1),
-});
+export const adminQuerySchema = z
+  .object({
+    q: z.string().trim().max(120).default(""),
+    category: z.string().max(200).default(""),
+    vendor: z.string().max(200).default(""),
+    stock: z.enum(stockFilters).default("all"),
+    offers: z.enum(["0", "1"]).default("0"),
+    page: z.coerce.number().int().min(1).max(10000).default(1),
+    sort: z.enum(["updated_desc", "updated_asc", "name_asc"]).optional(),
+  })
+  .transform((input) => ({
+    ...input,
+    sort: input.sort ?? (input.offers === "1" ? "updated_desc" : "name_asc"),
+  }));
 export type AdminQuery = z.infer<typeof adminQuerySchema>;
 const selectProduct =
-  '\'shopify-\'||variant_id AS id,COALESCE(sku,id) AS sku,name,description,category,vendor,price::text,compare_at_price::text AS "compareAtPrice",currency,image_url AS image,inventory_quantity AS "inventoryQuantity",variant_id AS "shopifyVariantId",site_url AS "siteUrl"';
+  '\'shopify-\'||variant_id AS id,COALESCE(sku,id) AS sku,name,description,category,vendor,price::text,compare_at_price::text AS "compareAtPrice",currency,image_url AS image,inventory_quantity AS "inventoryQuantity",variant_id AS "shopifyVariantId",site_url AS "siteUrl",updated_at AS "updatedAt"';
 export const ADMIN_PRODUCT_PAGE_SIZE = 20;
 export async function adminProducts(
   input: AdminQuery,
@@ -232,6 +241,18 @@ export async function adminProducts(
           context.settings.high,
         ),
     );
+    products.sort((a, b) => {
+      if (input.sort !== "name_asc") {
+        const aTime = a.updatedAt ? Date.parse(a.updatedAt) : NaN;
+        const bTime = b.updatedAt ? Date.parse(b.updatedAt) : NaN;
+        const aKnown = Number.isFinite(aTime);
+        const bKnown = Number.isFinite(bTime);
+        if (aKnown !== bKnown) return aKnown ? -1 : 1;
+        if (aKnown && aTime !== bTime)
+          return input.sort === "updated_asc" ? aTime - bTime : bTime - aTime;
+      }
+      return a.name.localeCompare(b.name, "pt-BR") || a.id.localeCompare(b.id);
+    });
     const pages = Math.max(
       1,
       Math.ceil(products.length / ADMIN_PRODUCT_PAGE_SIZE),
@@ -268,8 +289,13 @@ export async function adminProducts(
   const total = Number(count.rows[0].total),
     pages = Math.max(1, Math.ceil(total / ADMIN_PRODUCT_PAGE_SIZE)),
     page = Math.min(input.page, pages);
+  const ordering = {
+    updated_desc: "NULLIF(updated_at, '') DESC NULLS LAST, name, variant_id",
+    updated_asc: "NULLIF(updated_at, '') ASC NULLS LAST, name, variant_id",
+    name_asc: "name, variant_id",
+  }[input.sort];
   const { rows } = await database().query<AdminProduct>(
-    `SELECT ${selectProduct} FROM catalog_items WHERE ${where} ORDER BY name,variant_id${all ? "" : ` LIMIT ${ADMIN_PRODUCT_PAGE_SIZE} OFFSET $9`}`,
+    `SELECT ${selectProduct} FROM catalog_items WHERE ${where} ORDER BY ${ordering}${all ? "" : ` LIMIT ${ADMIN_PRODUCT_PAGE_SIZE} OFFSET $9`}`,
     all ? values : [...values, (page - 1) * ADMIN_PRODUCT_PAGE_SIZE],
   );
   return {

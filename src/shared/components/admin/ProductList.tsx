@@ -80,6 +80,30 @@ export function ProductFilters({
   );
 }
 
+export function ProductOrder({ sort }: { sort: AdminQuery["sort"] }) {
+  const [value, setValue] = useState(sort);
+  useEffect(() => setValue(sort), [sort]);
+
+  return (
+    <div className="admin-products-order">
+      <label htmlFor="product-order-filter">Ordenar por</label>
+      <AdminSelect
+        id="product-order-filter"
+        name="sort"
+        value={value}
+        label="Ordenar ofertas"
+        onValueChange={(next) => setValue(next as AdminQuery["sort"])}
+        options={[
+          { value: "updated_desc", label: "Mais recentes" },
+          { value: "updated_asc", label: "Mais antigos" },
+          { value: "name_asc", label: "Nome de A a Z" },
+        ]}
+      />
+      <small>Última atualização do produto na Shopify</small>
+    </div>
+  );
+}
+
 export default function ProductList({
   products,
   settings,

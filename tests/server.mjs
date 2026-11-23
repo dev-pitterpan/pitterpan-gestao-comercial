@@ -174,6 +174,20 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
           );
         }
       }
+      const offersPage = await get("/gestor/ofertas/", { headers: { cookie } });
+      assert.equal(offersPage.status, 200);
+      const offersHtml = await offersPage.text();
+      assert.match(offersHtml, /class="admin-products-orderbar"/);
+      assert.match(offersHtml, /aria-label="Ordenar ofertas"/);
+      assert.match(offersHtml, /name="sort" value="updated_desc"/);
+      assert.equal((offersHtml.match(/name="sort"/g) || []).length, 1);
+      const alphabeticalOffers = await get("/gestor/ofertas/?sort=name_asc", {
+        headers: { cookie },
+      });
+      assert.match(
+        await alphabeticalOffers.text(),
+        /name="sort" value="name_asc"/,
+      );
       const productPage = await get("/gestor/produtos/?q=a&page=2", {
         headers: { cookie },
       });

@@ -7,7 +7,8 @@ import {
 import { DataNotice, PageHeading, number } from "./Primitives";
 import AutoFilterForm from "./AutoFilterForm";
 import TablePagination from "./TablePagination";
-import ProductList, { ProductFilters } from "./ProductList";
+import ProductList, { ProductFilters, ProductOrder } from "./ProductList";
+import "./product-order.css";
 export default async function ProductsPage({
   searchParams,
   mode = "products",
@@ -34,8 +35,10 @@ export default async function ProductsPage({
       : mode === "offers"
         ? "/gestor/ofertas/"
         : "/gestor/produtos/";
-  const pageHref = (page: number) =>
-    `${base}?${new URLSearchParams({ ...query, page: String(page) })}`;
+  const pageHref = (page: number) => {
+    const { page: _currentPage, ...filters } = query;
+    return `${base}?${new URLSearchParams({ ...filters, page: String(page) })}`;
+  };
   const offset = (result.page - 1) * ADMIN_PRODUCT_PAGE_SIZE;
   return (
     <AutoFilterForm action={base} className="admin-products-form">
@@ -78,6 +81,12 @@ export default async function ProductsPage({
         </div>
       )}
       <section className="admin-panel admin-product-panel">
+        {mode === "offers" && (
+          <div className="admin-products-orderbar">
+            <span>{number(result.total)} ofertas encontradas</span>
+            <ProductOrder sort={query.sort} />
+          </div>
+        )}
         <ProductList
           resetKey={pageHref(result.page)}
           search={query.q}
