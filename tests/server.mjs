@@ -147,6 +147,10 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
           assert.match(html, /<h1>Mapa de entregas<\/h1>/);
           assert.match(html, /aria-label="Categorias desta área"/);
           assert.match(html, /Estado de destino/);
+          assert.match(html, /aria-label="Categorias das entregas"/);
+          assert.match(html, /class="delivery-world-card"/);
+          assert.match(html, /viewBox="-8 -8 880 380"/);
+          assert.doesNotMatch(html, /Mapa pontilhado do Brasil/);
         }
         if (path === "/gestor/clientes/") {
           assert.match(html, /<h1>Ranking de clientes<\/h1>/);
@@ -226,6 +230,20 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
             /<section[^>]*class="workspace-catalog-metrics"/,
           );
         }
+      }
+      for (const view of ["cities", "destinations"]) {
+        const response = await get(`/gestor/mapa/?painel=${view}`, {
+          headers: { cookie },
+        });
+        assert.equal(response.status, 200);
+        const html = await response.text();
+        assert.doesNotMatch(html, /class="delivery-world-card"/);
+        assert.match(
+          html,
+          view === "cities"
+            ? /class="delivery-city-map-card"/
+            : /class="delivery-detail-card"/,
+        );
       }
       const offersPage = await get("/gestor/ofertas/", { headers: { cookie } });
       assert.equal(offersPage.status, 200);

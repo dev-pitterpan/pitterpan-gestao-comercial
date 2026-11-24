@@ -80,6 +80,11 @@ export const destinationFilterSchema = z
       .regex(/^[A-Z]{2}$/)
       .or(z.literal(""))
       .default(""),
+    country: z
+      .string()
+      .regex(/^[A-Z]{2}$/)
+      .or(z.literal(""))
+      .default(""),
     q: z.string().trim().max(150).default(""),
   })
   .refine((r) => dateRangeSchema.safeParse(r).success, {
@@ -121,6 +126,7 @@ export async function readDestinations(
       .toLowerCase();
   const cities = delivery.filter(
     (r) =>
+      (!f.country || r.country === f.country) &&
       (!f.state || (r.country === "BR" && r.state === f.state)) &&
       (!f.q ||
         normalize(
@@ -141,6 +147,13 @@ export async function readDestinations(
       location: municipalityLocation(r.city, r.state, r.country),
     })),
     states: [...states].map(([state, orders]) => ({ state, orders })),
+    countries: [
+      ...new Map(
+        delivery
+          .filter((row) => row.country)
+          .map((row) => [row.country!, row.country!]),
+      ).values(),
+    ].sort(),
     total: sum(cities),
     pickup: sum(rows.filter((r) => r.pickup)),
     missing: sum(cities.filter((r) => !r.city || !r.state || !r.country)),

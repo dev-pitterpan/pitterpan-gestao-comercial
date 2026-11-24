@@ -1,447 +1,764 @@
-/* Local vector geometry with SVG patterns: no map tiles, geocoder or extra library. */
-.delivery-view-toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 18px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
+/* Delivery workspace: compact global map, real destination ranking and exclusive views. */
+.delivery-command-center {
+  min-width: 0;
 }
-.delivery-view-toolbar h2 {
-  margin: 4px 0 0;
-}
-.delivery-view-switch {
-  display: flex;
-  gap: 3px;
-  padding: 4px;
-  border: 1px solid #e5eaf4;
-  border-radius: 9px;
-  background: #f5f7fc;
-}
-.delivery-view-switch > button {
+.delivery-content-tabs {
   display: flex;
   align-items: center;
-  gap: 7px;
-  min-height: 35px;
-  padding: 8px 11px;
-  border: 1px solid transparent;
-  border-radius: 6px;
-  background: none;
-  color: #7a869e;
-  font-size: 11px;
+  gap: 4px;
+  border-bottom: 1px solid #e3e7ef;
+  margin: -5px 0 20px;
+  overflow-x: auto;
+  scrollbar-width: thin;
 }
-.delivery-view-switch > button[aria-pressed="true"] {
-  background: #fff;
-  border-color: #e2e8f6;
-  color: #5b70b6;
-  box-shadow: 0 1px 3px #273b6207;
-}
-.dotted-delivery-card {
-  background: #172031;
-  background-image: radial-gradient(
-    ellipse at 35% 45%,
-    #25355455,
-    transparent 65%
-  );
-  border: 1px solid #29344b;
-  border-radius: 15px;
-  color: #dce4f3;
-  padding: 25px;
-  overflow: hidden;
-}
-.dotted-map-heading {
+.delivery-content-tabs button {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-}
-.dotted-map-heading > div > span {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 9px;
-  letter-spacing: 0.12em;
-  color: #8c9ab6;
-}
-.admin-app.workspace-shell
-  .workspace-main
-  .dotted-delivery-card
-  .dotted-map-heading
-  h3 {
-  margin: 9px 0 0;
-  color: #e0e7f4;
-  font-size: 18px;
-  font-weight: 550;
-  letter-spacing: -0.025em;
-}
-.dotted-map-country {
+  gap: 8px;
   white-space: nowrap;
-  color: #a8b4cb;
-  border: 1px solid #35415a;
-  border-radius: 7px;
-  background: #ffffff04;
-  padding: 7px 10px;
+  min-height: 45px;
+  padding: 11px 15px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: #7a8397;
   font-size: 11px;
 }
-.dotted-map-topline {
+.delivery-content-tabs button[aria-current="page"] {
+  border-bottom-color: #6572ce;
+  color: #5264b2;
+  font-weight: 600;
+}
+.delivery-content-tabs > span {
+  margin-left: auto;
+  color: #9299aa;
+  font-size: 10px;
+  white-space: nowrap;
+  padding: 0 5px 0 20px;
+}
+.delivery-query-actions {
+  display: flex;
+  align-items: start;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.delivery-advanced {
+  flex: 0 0 auto;
+  min-width: 165px;
+}
+.delivery-advanced[open] {
+  flex: 1 0 100%;
+  order: 3;
+}
+.delivery-advanced[open] > summary {
+  margin: 0 0 10px;
+}
+.delivery-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+}
+.delivery-filter-grid label {
+  display: block;
+  font-size: 11px;
+  color: #6e7a92;
+  margin-bottom: 8px;
+}
+.delivery-filter-search {
+  grid-column: 1/-1;
+  max-width: 500px;
+}
+.delivery-filter-search > div {
+  position: relative;
+}
+.delivery-filter-search svg {
+  position: absolute;
+  left: 12px;
+  top: 13px;
+  color: #8b98b2;
+}
+.delivery-filter-search input {
+  width: 100%;
+  border: 1px solid #e1e7f2;
+  border-radius: 9px;
+  background: #fff;
+  padding: 11px 12px 11px 36px;
+  font-size: 12px;
+  color: #52617e;
+}
+.delivery-filter-chips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex: 1;
+  padding-top: 7px;
+}
+.delivery-filter-chips > span {
+  font-size: 11px;
+  color: #818b9f;
+  line-height: 1.8;
+}
+.delivery-filter-chips button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 8px;
+  border: 1px solid #e0e6f4;
+  border-radius: 6px;
+  background: #f0f3fc;
+  color: #6d7ca1;
+  font-size: 10px;
+  overflow-wrap: anywhere;
+}
+.delivery-refresh {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 0 10px 10px;
+  border: 0;
+  background: none;
+  color: #7786a3;
+  font-size: 10px;
+}
+.delivery-refresh:disabled {
+  opacity: 0.65;
+}
+.delivery-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 15px;
+  margin-bottom: 22px;
+}
+.delivery-metric {
+  padding: 18px 20px;
+  background: #fff;
+  border: 1px solid #e5e9f1;
+  border-radius: 13px;
+  box-shadow: 0 2px 5px #24334d03;
+  min-width: 0;
+}
+.delivery-metric > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+  color: #7e8cad;
+}
+.delivery-metric > div > span {
+  font-size: 11px;
+  color: #737d91;
+}
+.delivery-metric.is-teal > div > svg {
+  color: #69a7a0;
+}
+.delivery-metric.is-amber > div > svg {
+  color: #c5a16b;
+}
+.delivery-metric.is-rose > div > svg {
+  color: #c48eaa;
+}
+.delivery-metric > strong {
+  display: block;
+  font-size: 28px;
+  letter-spacing: -0.05em;
+  line-height: 1.2;
+  color: #34425d;
+  font-weight: 550;
+}
+.delivery-metric > small {
+  display: block;
+  color: #7a879f;
+  font-size: 10px;
+  line-height: 1.7;
+  margin-top: 7px;
+}
+.delivery-overview-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.8fr) minmax(270px, 1fr);
+  gap: 20px;
+  align-items: stretch;
+}
+/* Like the reference, the map is a wide dot field, with countries above it and no side readout. */
+.delivery-world-card {
+  background: #1a1d20;
+  border: 1px solid #2a2e34;
+  border-radius: 14px;
+  padding: 23px 24px 18px;
+  color: #c6c7cb;
+  overflow: hidden;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.delivery-world-card > header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 15px;
-  margin-top: 26px;
 }
-.dotted-map-topline > strong {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  color: #e9eef7;
+.delivery-world-eyebrow {
+  font-size: 9px;
+  color: #899099;
+  letter-spacing: 0.1em;
+}
+.admin-app.workspace-shell .workspace-main .delivery-world-card h2 {
+  color: #ececef;
+  font-size: 19px;
   font-weight: 550;
-  letter-spacing: -0.045em;
-  font-size: 28px;
+  letter-spacing: -0.025em;
+  margin: 7px 0 0;
 }
-.dotted-map-topline > strong > span {
-  color: #8f9db7;
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: 0;
-}
-.dotted-map-topline > div {
-  display: flex;
-  gap: 9px;
-  flex-wrap: wrap;
-}
-.dotted-map-topline button {
+.delivery-world-period {
   display: flex;
   align-items: center;
   gap: 6px;
-  background: #ffffff04;
-  border: 1px solid #34415b;
-  border-radius: 6px;
-  padding: 6px 9px;
-  color: #a7b4ce;
+  color: #969da5;
   font-size: 10px;
+  white-space: nowrap;
 }
-.dotted-map-topline button i {
-  width: 5px;
-  height: 5px;
-  flex-shrink: 0;
+.delivery-world-period i {
+  width: 4px;
+  height: 4px;
   border-radius: 50%;
-  background: #8ba2df;
+  background: #889c90;
 }
-.dotted-map-topline button b {
-  color: #d0dbef;
-  font-weight: 500;
-}
-.dotted-map-topline button[aria-pressed="true"] {
-  border-color: #6ca4aa;
-  background: #a6e3df0a;
-  color: #b0d9dc;
-}
-.dotted-map-layout {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 210px;
-  gap: 28px;
-  align-items: center;
-  margin: 8px 0 12px;
-}
-.dotted-map-visual {
-  min-width: 0;
+.delivery-world-countries {
   display: flex;
-  justify-content: center;
+  align-items: center;
+  gap: 13px;
+  flex-wrap: wrap;
+  min-height: 32px;
+  margin-top: 20px;
 }
-.dotted-map-visual svg {
-  width: 100%;
-  max-width: 540px;
-  height: 380px;
+.delivery-world-countries > button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 0;
+  background: transparent;
+  color: #aaaeb6;
+  padding: 4px 0;
+  font-size: 11px;
+}
+.delivery-world-countries > button > span {
+  font-size: 13px;
+}
+.delivery-world-countries b {
+  color: #ddc6e9;
+  font-weight: 500;
+  font-size: 11px;
+}
+.delivery-world-countries > button[aria-pressed="true"] {
+  color: #d7b5ed;
+}
+.delivery-world-countries > button[aria-pressed="true"] b {
+  color: #e2c9ef;
+}
+.delivery-world-countries > span {
+  font-size: 11px;
+  line-height: 1.8;
+  color: #9ca2aa;
+}
+.delivery-world-visual {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  padding: 18px 0 10px;
+}
+.delivery-world-visual svg {
   display: block;
+  width: 100%;
+  height: auto;
+  max-height: 360px;
+  min-height: 240px;
   overflow: visible;
 }
-.dotted-map-dot--0 {
-  fill: #3a465e;
+.delivery-world-dot--0 {
+  fill: #4d5359;
 }
-.dotted-map-dot--1 {
-  fill: #52648c;
+.delivery-world-dot--1 {
+  fill: #715a82;
 }
-.dotted-map-dot--2 {
-  fill: #6b82bb;
+.delivery-world-dot--2 {
+  fill: #9668a9;
 }
-.dotted-map-dot--3 {
-  fill: #8da9e7;
+.delivery-world-dot--3 {
+  fill: #b47ccb;
 }
-.dotted-map-dot--4 {
-  fill: #b0ceff;
+.delivery-world-dot--4 {
+  fill: #d39aeb;
 }
-.dotted-map-dot--active {
-  fill: #a6e3df;
+.delivery-world-dot--active {
+  fill: #e2b2f6;
 }
-.dotted-map-region {
-  cursor: pointer;
+.delivery-world-country {
   outline: none;
 }
-.dotted-map-region path {
-  pointer-events: all;
+.delivery-world-country[role="button"] {
+  cursor: pointer;
+}
+.delivery-world-country path {
   stroke: transparent;
-  stroke-width: 0.6;
+  stroke-width: 0.5;
   stroke-linejoin: round;
 }
-.dotted-map-region.is-selected path {
-  stroke: #9cd4d866;
+.delivery-world-country.is-selected path {
+  stroke: #cd91df55;
 }
-.dotted-map-region:focus-visible path {
-  stroke: #d4e5ff;
-  stroke-width: 1.5;
+.delivery-world-country:focus-visible path {
+  stroke: #ebc6fa;
+  stroke-width: 1.2;
 }
-.dotted-map-readout {
-  min-width: 0;
-  border-left: 1px solid #303c53;
-  padding-left: 25px;
-  display: flex;
-  flex-direction: column;
-  align-items: start;
-}
-.dotted-map-readout-icon {
-  width: 39px;
-  height: 39px;
-  display: grid;
-  place-items: center;
-  background: #26334c;
-  border: 1px solid #3b4d6f;
-  border-radius: 12px;
-  color: #9bb6e6;
-  margin-bottom: 21px;
-}
-.dotted-map-overline {
-  color: #8292b1;
-  font-size: 9px;
-  font-weight: 500;
-  letter-spacing: 0.12em;
-}
-.dotted-map-readout h4 {
-  color: #c7d4ec;
-  font-size: 19px;
-  font-weight: 500;
-  letter-spacing: -0.025em;
-  margin: 7px 0 17px;
-}
-.dotted-map-readout > strong {
-  color: #dbe7fb;
-  font-size: 35px;
-  font-weight: 500;
-  letter-spacing: -0.06em;
-  line-height: 1.1;
-}
-.dotted-map-readout > strong > small {
-  color: #8597b9;
-  font-size: 11px;
-  font-weight: 400;
-  letter-spacing: 0;
-  margin-left: 9px;
-}
-.dotted-map-readout p {
-  color: #8e9fbf;
-  font-size: 11px;
-  line-height: 1.8;
-  margin: 9px 0 20px;
-}
-.dotted-map-hint {
-  display: block;
-  color: #93a2bd;
-  font-size: 10px;
-  line-height: 1.8;
-  max-width: 175px;
-}
-.dotted-map-clear {
+.delivery-world-hover {
+  position: absolute;
+  bottom: 13px;
+  left: 12px;
   display: flex;
   align-items: center;
-  gap: 6px;
-  background: none;
-  border: 0;
-  border-bottom: 1px solid #47627f;
-  padding: 0 0 5px;
-  margin-top: 17px;
-  color: #aecbdc;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 9px 12px;
+  border: 1px solid #4c3d56;
+  border-radius: 7px;
+  background: #28232de8;
+  box-shadow: 0 3px 14px #0002;
+  pointer-events: none;
+  color: #d5ccdd;
   font-size: 10px;
-  line-height: 1.8;
-  text-align: left;
 }
-.dotted-map-footer {
-  border-top: 1px solid #2c3850;
-  padding-top: 17px;
+.delivery-world-hover strong {
+  color: #e4c4f2;
+  font-weight: 550;
+}
+.delivery-world-hover small {
+  color: #b09dba;
+  font-size: 10px;
+}
+.delivery-world-card > footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 18px;
+  gap: 12px;
+  flex-wrap: wrap;
+  border-top: 1px solid #2c3036;
+  padding-top: 14px;
+  margin-top: 2px;
 }
-.dotted-map-scale {
+.delivery-world-scale {
   display: flex;
   align-items: center;
   gap: 5px;
-  flex-shrink: 0;
 }
-.dotted-map-scale > span {
-  color: #8e9eba;
+.delivery-world-scale span {
+  color: #9da3ab;
   font-size: 9px;
-  white-space: nowrap;
 }
-.dotted-map-scale > span:first-child {
+.delivery-world-scale span:first-child {
   margin-right: 5px;
 }
-.dotted-map-scale > span:last-child {
+.delivery-world-scale span:last-child {
   margin-left: 5px;
 }
-.dotted-map-scale i {
+.delivery-world-scale i {
   display: block;
-  width: 7px;
-  height: 7px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
-  background: #3a465e;
+  background: #4d5359;
 }
-.dotted-map-scale i[data-level="1"] {
-  background: #52648c;
+.delivery-world-scale i[data-level="1"] {
+  background: #715a82;
 }
-.dotted-map-scale i[data-level="2"] {
-  background: #6b82bb;
+.delivery-world-scale i[data-level="2"] {
+  background: #9668a9;
 }
-.dotted-map-scale i[data-level="3"] {
-  background: #8da9e7;
+.delivery-world-scale i[data-level="3"] {
+  background: #b47ccb;
 }
-.dotted-map-scale i[data-level="4"] {
-  background: #b0ceff;
+.delivery-world-scale i[data-level="4"] {
+  background: #d39aeb;
 }
-.dotted-map-footer p {
-  margin: 0;
-  color: #8e9eba;
+.delivery-world-card > footer > span,
+.delivery-world-card > footer > button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 9px;
+  color: #a79caf;
+  background: none;
+  border: 0;
+  padding: 0;
+}
+.delivery-world-card > footer > button {
+  color: #d3afe1;
+}
+.delivery-world-note {
   font-size: 9px;
   line-height: 1.8;
-  max-width: 440px;
+  color: #9f96a6;
+  margin: 12px 0 0;
 }
-.delivery-selected-state {
+/* Destination ranking shares the map's baseline and uses actual order proportions. */
+.delivery-leading-card,
+.delivery-detail-card,
+.delivery-city-map-card {
+  min-width: 0;
+  background: #fff;
+  border: 1px solid #e4e9f1;
+  border-radius: 14px;
+  box-shadow: 0 2px 5px #24334d03;
+}
+.delivery-leading-card {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+}
+.delivery-leading-card > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.delivery-leading-card > header > div > span,
+.delivery-detail-card > header > div > span {
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: #8a94a8;
+}
+.delivery-leading-card h2,
+.delivery-detail-card h2,
+.delivery-city-map-card h2 {
+  margin: 7px 0 0;
+  font-size: 17px;
+  color: #4d5b77;
+  font-weight: 550;
+  letter-spacing: -0.025em;
+}
+.delivery-leading-card > header > svg {
+  color: #9aa9c6;
+}
+.delivery-leading-card > p {
+  font-size: 11px;
+  color: #8090a8;
+  line-height: 1.8;
+  margin: 11px 0 18px;
+}
+.delivery-leading-card ol {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+}
+.delivery-leading-card li {
+  display: flex;
+  align-items: start;
+  gap: 12px;
+  padding: 13px 0;
+  border-bottom: 1px solid #eff2f7;
+}
+.delivery-leading-card li:last-child {
+  border-bottom: 0;
+}
+.delivery-leading-index {
+  font-size: 10px;
+  color: #a0abc1;
+  padding-top: 2px;
+}
+.delivery-leading-card li > div {
+  min-width: 0;
+  flex: 1;
+}
+.delivery-leading-card li > div > strong {
+  display: block;
+  color: #60718f;
+  font-size: 12px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.delivery-leading-card li > div > span {
+  display: block;
+  color: #8392aa;
+  font-size: 10px;
+  margin-top: 4px;
+}
+.delivery-leading-card li > div > i {
+  display: block;
+  height: 3px;
+  background: #f0f2f8;
+  border-radius: 8px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+.delivery-leading-card li > div > i > b {
+  display: block;
+  height: 100%;
+  background: #a8a1d5;
+  border-radius: 8px;
+}
+.delivery-leading-card li > strong {
+  display: flex;
+  flex-direction: column;
+  align-items: end;
+  font-weight: 500;
+  font-size: 15px;
+  color: #6d7097;
+}
+.delivery-leading-card li > strong > small {
+  font-size: 9px;
+  color: #8995ac;
+  font-weight: 400;
+  margin-top: 3px;
+}
+.delivery-leading-card > button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 9px;
+  padding: 15px 0 0;
+  margin-top: 14px;
+  color: #7384b4;
+  font-size: 11px;
+  background: none;
+  border: 0;
+  border-top: 1px solid #edf1f7;
+}
+.delivery-detail-card > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px;
+}
+.delivery-detail-card > header p {
+  color: #8090a8;
+  font-size: 11px;
+  line-height: 1.8;
+  margin: 9px 0 0;
+}
+.delivery-detail-card > header > span {
+  font-size: 11px;
+  color: #8594ae;
+}
+.delivery-detail-card .admin-table-scroll {
+  margin-inline: 24px;
+}
+.delivery-detail-card .admin-table td {
+  padding-block: 18px;
+}
+.delivery-detail-card .admin-table td > strong {
+  font-weight: 500;
+  color: #64738e;
+}
+.delivery-detail-card > .admin-table-pagination {
+  padding: 18px 24px;
+  margin: 0;
+  border-top: 1px solid #edf1f7;
+}
+.delivery-city-map-card {
+  padding: 24px;
+}
+.delivery-city-map-card > header p {
+  font-size: 11px;
+  color: #8795aa;
+  margin: 9px 0 20px;
+  line-height: 1.8;
+}
+.delivery-panel-empty {
+  min-height: 230px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #8896ad;
+  font-size: 12px;
+  line-height: 1.8;
+  text-align: center;
+  padding: 25px;
+}
+.delivery-overview-grid.is-city-view {
+  grid-template-columns: minmax(0, 1.8fr) minmax(270px, 1fr);
+}
+.delivery-context {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 18px 2px 0;
+  margin-top: 5px;
+  color: #8895aa;
+  font-size: 10px;
+}
+.delivery-context > span {
   display: flex;
   align-items: center;
   gap: 7px;
-  color: #7a87a0;
-  font-size: 11px;
-  margin: 14px 0 0;
-  flex-wrap: wrap;
+  line-height: 1.8;
 }
-.delivery-selected-state strong {
-  color: #5b70aa;
+.delivery-context > span > svg {
+  flex-shrink: 0;
 }
-.delivery-selected-state button {
-  border: 0;
-  background: #edf1fb;
-  color: #6376af;
-  border-radius: 6px;
-  padding: 6px 9px;
-  font-size: 10px;
-  margin-left: auto;
+.delivery-context > details {
+  max-width: 440px;
 }
-@media (max-width: 1250px) {
-  .dotted-map-layout {
-    grid-template-columns: minmax(0, 1fr) 175px;
-    gap: 14px;
+.delivery-context summary {
+  cursor: pointer;
+  color: #7d8baa;
+  white-space: nowrap;
+}
+.delivery-context p {
+  margin: 12px 0 0;
+  line-height: 1.8;
+}
+@media (max-width: 1350px) {
+  .delivery-overview-grid,
+  .delivery-overview-grid.is-city-view {
+    grid-template-columns: minmax(0, 1.6fr) minmax(250px, 1fr);
+    gap: 16px;
   }
-  .dotted-map-readout {
-    padding-left: 18px;
+  .delivery-leading-card {
+    padding: 20px;
   }
-  .dotted-map-footer {
+  .delivery-world-card {
+    padding: 21px 20px 17px;
+  }
+  .delivery-world-card > header {
     align-items: start;
-    flex-direction: column;
+  }
+  .delivery-world-period {
+    font-size: 9px;
+  }
+  .delivery-content-tabs > span {
+    display: none;
+  }
+}
+@media (max-width: 1100px) {
+  .delivery-overview-grid,
+  .delivery-overview-grid.is-city-view {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .delivery-world-visual svg {
+    max-height: 360px;
+    min-height: 240px;
+  }
+  .delivery-leading-card ol {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 25px;
+  }
+  .delivery-leading-card li:last-child {
+    border-bottom: 1px solid #eff2f7;
+  }
+  .delivery-leading-card > button {
+    max-width: 300px;
+  }
+  .delivery-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 12px;
   }
-  .dotted-map-visual svg {
-    height: 340px;
+  .delivery-filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 @media (max-width: 760px) {
-  .dotted-delivery-card {
+  .delivery-world-visual svg {
+    min-height: 200px;
+  }
+  .delivery-context {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .delivery-detail-card > header {
     padding: 20px;
   }
-  .dotted-map-layout {
-    grid-template-columns: minmax(0, 1fr);
+  .delivery-detail-card .admin-table-scroll {
+    margin-inline: 18px;
   }
-  .dotted-map-readout {
-    border-left: 0;
-    border-top: 1px solid #303c53;
-    padding: 18px 0 0;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px 20px;
-    align-items: baseline;
+  .delivery-detail-card > .admin-table-pagination {
+    padding: 16px 18px;
   }
-  .dotted-map-readout-icon {
-    display: none;
-  }
-  .dotted-map-overline {
-    grid-column: 1;
-  }
-  .dotted-map-readout h4 {
-    grid-column: 1;
-    margin: 0;
-    font-size: 18px;
-  }
-  .dotted-map-readout > strong {
-    grid-column: 2;
-    grid-row: 1/3;
-    align-self: center;
-    justify-self: end;
-    font-size: 30px;
-  }
-  .dotted-map-readout p {
-    grid-column: 1/-1;
-    margin: 4px 0;
-  }
-  .dotted-map-hint {
-    grid-column: 1/-1;
-    max-width: none;
-  }
-  .dotted-map-clear {
-    grid-column: 1/-1;
-    margin-top: 7px;
-    width: fit-content;
-  }
-  .dotted-map-topline {
-    flex-wrap: wrap;
-    margin-top: 20px;
-  }
-  .dotted-map-topline > div {
-    gap: 6px;
-  }
-  .dotted-map-visual svg {
-    height: 350px;
+  .delivery-city-map-card {
+    padding: 18px;
   }
 }
-@media (max-width: 460px) {
-  .dotted-delivery-card {
-    padding: 17px;
-  }
-  .dotted-map-country {
+@media (max-width: 520px) {
+  .delivery-content-tabs button {
+    padding: 10px 12px;
     font-size: 10px;
-    padding: 6px 8px;
   }
-  .admin-app.workspace-shell
-    .workspace-main
-    .dotted-delivery-card
-    .dotted-map-heading
-    h3 {
-    font-size: 16px;
+  .delivery-content-tabs button > svg {
+    width: 14px;
   }
-  .dotted-map-heading {
-    gap: 12px;
-    align-items: start;
+  .delivery-query-actions {
+    gap: 8px;
   }
-  .dotted-map-heading > div > span {
-    font-size: 8px;
+  .delivery-filter-chips {
+    flex-basis: 100%;
+    order: 3;
   }
-  .dotted-map-visual svg {
-    height: 300px;
+  .delivery-refresh {
+    margin-left: auto;
   }
-  .delivery-view-switch {
-    width: 100%;
+  .delivery-advanced[open] {
+    order: 4;
   }
-  .delivery-view-switch > button {
-    flex: 1;
-    justify-content: center;
+  .delivery-filter-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .delivery-metric {
+    padding: 15px;
+  }
+  .delivery-metric > div > span {
     font-size: 10px;
+  }
+  .delivery-metric > strong {
+    font-size: 25px;
+  }
+  .delivery-metric > small {
+    font-size: 9px;
+  }
+  .delivery-world-card {
+    padding: 19px 16px 16px;
+  }
+  .admin-app.workspace-shell .workspace-main .delivery-world-card h2 {
+    font-size: 17px;
+  }
+  .delivery-world-period {
+    max-width: 96px;
+    white-space: normal;
+    text-align: right;
+    line-height: 1.6;
+  }
+  .delivery-world-countries {
+    gap: 6px 12px;
+    margin-top: 15px;
+  }
+  .delivery-world-countries > button {
+    font-size: 10px;
+  }
+  .delivery-world-visual {
+    padding: 16px 0;
+  }
+  .delivery-world-visual svg {
+    min-height: 160px;
+  }
+  .delivery-world-hover {
+    left: 4px;
+    bottom: 5px;
+    padding: 7px 9px;
+    gap: 7px;
+    font-size: 9px;
+  }
+  .delivery-world-hover small {
+    display: none;
+  }
+  .delivery-leading-card ol {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .delivery-detail-card > header {
+    flex-wrap: wrap;
   }
 }
