@@ -1,60 +1,45 @@
 "use client";
-import { Grid2X2, MapPinned } from "lucide-react";
 import type { readDestinations } from "../../server/sales/destinations";
 import DottedDeliveryMap from "./DottedDeliveryMap";
 import DeliveryMap from "./DeliveryMap";
 export default function DeliveryMapView({
   cities,
-  state,
-  onStateChange,
+  country,
+  onCountryChange,
   view,
-  onViewChange,
+  available,
+  busy,
 }: {
   cities: Awaited<ReturnType<typeof readDestinations>>["cities"];
-  state: string;
-  onStateChange: (state: string) => void;
-  view: "regions" | "cities";
-  onViewChange: (view: "regions" | "cities") => void;
+  country: string;
+  onCountryChange: (country: string) => void;
+  view: "world" | "cities";
+  available: boolean;
+  busy: boolean;
 }) {
-  return (
-    <>
-      <div className="delivery-view-toolbar">
-        <div>
-          <span className="admin-eyebrow">ALCANCE DA LOJA</span>
-          <h2>Entregas por região</h2>
-        </div>
-        <div
-          className="delivery-view-switch"
-          role="group"
-          aria-label="Visualização do mapa de entregas"
-        >
-          <button
-            type="button"
-            aria-pressed={view === "regions"}
-            onClick={() => onViewChange("regions")}
-          >
-            <Grid2X2 size={15} />
-            Pontilhado
-          </button>
-          <button
-            type="button"
-            aria-pressed={view === "cities"}
-            onClick={() => onViewChange("cities")}
-          >
-            <MapPinned size={15} />
-            Mapa de cidades
-          </button>
-        </div>
-      </div>
-      {view === "regions" ? (
-        <DottedDeliveryMap
-          cities={cities}
-          selectedState={state}
-          onStateChange={onStateChange}
-        />
-      ) : (
+  return view === "world" ? (
+    <DottedDeliveryMap
+      cities={cities}
+      country={country}
+      onCountryChange={onCountryChange}
+      available={available}
+      busy={busy}
+    />
+  ) : (
+    <section className="delivery-city-map-card">
+      <header>
+        <h2>Mapa de cidades</h2>
+        <p>Localização aproximada dos destinos brasileiros identificados.</p>
+      </header>
+      {available ? (
         <DeliveryMap cities={cities} />
+      ) : (
+        <div className="delivery-panel-empty">
+          {busy
+            ? "Carregando destinos…"
+            : "Consulte a integração para carregar os destinos."}
+        </div>
       )}
-    </>
+    </section>
   );
 }

@@ -118,6 +118,22 @@ test("mapa contabiliza cidade, unidades, retirada, internacional e destino ausen
     assert.equal(result.international, 1);
     assert.equal(result.missing, 2);
     assert.equal(result.states.find((r) => r.state === "SC")?.orders, 3);
+    assert.deepEqual(result.countries, ["BR", "PT"]);
+    const portugal = await readDestinations(
+      db,
+      "fixture",
+      destinationFilterSchema.parse({ country: "PT" }),
+    );
+    assert.equal(portugal.total, 1);
+    assert.equal(portugal.cities[0].city, "Lisboa");
+    assert.equal(portugal.international, 1);
+    const combined = await readDestinations(
+      db,
+      "fixture",
+      destinationFilterSchema.parse({ country: "PT", state: "SC" }),
+    );
+    assert.equal(combined.total, 0);
+    assert.deepEqual(portugal.countries, ["BR", "PT"]);
     const sc = await readDestinations(
       db,
       "fixture",

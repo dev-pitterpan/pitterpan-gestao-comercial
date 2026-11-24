@@ -1,190 +1,189 @@
 "use client";
 import { useId, useMemo, useState } from "react";
-import { MapPin, ArrowUpRight, X, Globe2 } from "lucide-react";
+import { X, ArrowUpRight } from "lucide-react";
+import { worldDeliveries, countryFlag } from "../../lib/admin/world-deliveries";
 import {
-  deliveryRegions,
   deliveryRegionLevel,
   type DeliveryRegionCity,
 } from "../../lib/admin/delivery-regions";
 const number = (value: number) => value.toLocaleString("pt-BR");
 export default function DottedDeliveryMap({
   cities,
-  selectedState,
-  onStateChange,
+  country,
+  onCountryChange,
+  available = true,
+  busy = false,
 }: {
   cities: DeliveryRegionCity[];
-  selectedState: string;
-  onStateChange: (state: string) => void;
+  country: string;
+  onCountryChange: (country: string) => void;
+  available?: boolean;
+  busy?: boolean;
 }) {
   const id = useId(),
     [hovered, setHovered] = useState("");
-  const data = useMemo(() => deliveryRegions(cities), [cities]);
-  const active = data.regions.find(
-    (region) =>
-      region.state === (hovered || selectedState || data.ranking[0]?.state),
+  const data = useMemo(() => worldDeliveries(cities), [cities]);
+  const active = data.countries.find(
+    (item) => item.code === (hovered || country),
   );
-  function select(state: string) {
+  function select(code: string | null) {
+    if (!code || busy || !available) return;
     setHovered("");
-    onStateChange(state === selectedState ? "" : state);
+    onCountryChange(code === country ? "" : code);
   }
   return (
-    <div className="dotted-delivery-card">
-      <header className="dotted-map-heading">
+    <section
+      className="delivery-world-card"
+      aria-label="Distribuição mundial dos pedidos"
+      aria-busy={busy}
+    >
+      <header>
         <div>
-          <span>
-            <Globe2 size={14} />
-            DISTRIBUIÇÃO REGIONAL
-          </span>
-          <h3>Para onde vão os pedidos</h3>
+          <span className="delivery-world-eyebrow">ALCANCE DAS ENTREGAS</span>
+          <h2>Destinos das vendas</h2>
         </div>
-        <span className="dotted-map-country">🇧🇷 Brasil</span>
+        <span className="delivery-world-period">
+          {busy
+            ? "Atualizando seleção…"
+            : available
+              ? "Seleção atual"
+              : "Dados indisponíveis"}
+          <i />
+        </span>
       </header>
-      <div className="dotted-map-topline">
-        <strong>
-          {number(data.total)}
-          <span>pedidos no mapa</span>
-        </strong>
-        <div>
-          {data.ranking.slice(0, 3).map((region) => (
+      <div
+        className="delivery-world-countries"
+        aria-label="Países com mais pedidos"
+      >
+        {data.ranking.length ? (
+          data.ranking.slice(0, 4).map((item) => (
             <button
-              key={region.state}
               type="button"
-              onClick={() => select(region.state)}
-              aria-pressed={selectedState === region.state}
+              key={item.code}
+              onClick={item.orders > 0 ? () => select(item.code) : undefined}
+              aria-pressed={country === item.code}
+              disabled={busy}
             >
-              <i />
-              {region.state}
-              <b>{number(region.orders)}</b>
+              <span>{countryFlag(item.code)}</span>
+              {item.name}
+              <b>{number(item.orders)}</b>
             </button>
-          ))}
-        </div>
+          ))
+        ) : (
+          <span>
+            {available && !busy
+              ? "Nenhum país com pedidos nesta seleção."
+              : "A distribuição aparece quando os pedidos forem carregados."}
+          </span>
+        )}
       </div>
-      <div className="dotted-map-layout">
-        <div className="dotted-map-visual">
-          <svg
-            viewBox="-12 -12 540 540"
-            role="group"
-            aria-label="Mapa pontilhado do Brasil. Cada estado mostra os pedidos da seleção. Use Tab e Enter para filtrar por estado."
-          >
-            <defs>
-              {[0, 1, 2, 3, 4, "active"].map((level) => (
-                <pattern
-                  key={level}
-                  id={`${id}-dots-${level}`}
-                  width="4.6"
-                  height="4.6"
-                  patternUnits="userSpaceOnUse"
-                >
-                  <circle
-                    cx="2.3"
-                    cy="2.3"
-                    r={level === "active" ? 1.32 : 1.05}
-                    className={`dotted-map-dot dotted-map-dot--${level}`}
-                  />
-                </pattern>
-              ))}
-            </defs>
-            {data.regions.map((region) => {
-              const isSelected = region.state === selectedState;
-              const focused = region.state === hovered;
-              const level = deliveryRegionLevel(region.orders, data.max);
-              return (
-                <g
-                  key={region.state}
-                  role="button"
-                  tabIndex={0}
-                  aria-label={`${region.name}: ${number(region.orders)} pedidos e ${number(region.units)} unidades. ${isSelected ? "Remover filtro" : "Filtrar cidades deste estado"}.`}
-                  aria-pressed={isSelected}
-                  className={`dotted-map-region${isSelected ? " is-selected" : ""}`}
-                  onMouseEnter={() => setHovered(region.state)}
-                  onMouseLeave={() => setHovered("")}
-                  onFocus={() => setHovered(region.state)}
-                  onBlur={() => setHovered("")}
-                  onClick={() => select(region.state)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" || event.key === " ") {
-                      event.preventDefault();
-                      select(region.state);
-                    }
-                  }}
-                >
-                  <title>
-                    {region.name} · {number(region.orders)} pedidos
-                  </title>
-                  <path
-                    d={region.path}
-                    fill={`url(#${id}-dots-${focused || isSelected ? "active" : level})`}
-                  />
-                </g>
-              );
-            })}
-          </svg>
-        </div>
-        <aside
-          className="dotted-map-readout"
-          aria-live="polite"
-          aria-atomic="true"
+      <div className="delivery-world-visual">
+        <svg
+          viewBox="-8 -8 880 380"
+          role="group"
+          aria-label="Mapa mundial pontilhado. Os países com pedidos são destacados. Selecione um país para filtrar os destinos."
         >
-          <span className="dotted-map-readout-icon">
-            <MapPin size={21} />
-          </span>
-          <span className="dotted-map-overline">
-            {selectedState ? "ESTADO SELECIONADO" : "EXPLORE O MAPA"}
-          </span>
-          <h4>{active?.name || "Brasil"}</h4>
-          <strong>
-            {active ? number(active.orders) : number(data.total)}
-            <small>pedidos</small>
-          </strong>
-          <p>
-            {active
-              ? `${number(active.units)} unidades na seleção`
-              : "Nenhum pedido por estado brasileiro nesta seleção."}
-          </p>
-          <span className="dotted-map-hint">
-            Selecione um estado para consultar suas cidades na tabela.
-          </span>
-          {selectedState ? (
-            <button
-              type="button"
-              className="dotted-map-clear"
-              onClick={() => {
-                setHovered("");
-                onStateChange("");
-              }}
-            >
-              Limpar estado · {selectedState}
-              <X size={13} />
-            </button>
-          ) : (
-            active && (
-              <button
-                type="button"
-                className="dotted-map-clear"
-                onClick={() => select(active.state)}
+          <defs>
+            {[0, 1, 2, 3, 4, "active"].map((level) => (
+              <pattern
+                id={`${id}-${level}`}
+                key={level}
+                width="4"
+                height="4"
+                patternUnits="userSpaceOnUse"
               >
-                Ver cidades de {active.state}
-                <ArrowUpRight size={13} />
-              </button>
-            )
-          )}
-        </aside>
+                <circle
+                  cx="2"
+                  cy="2"
+                  r=".9"
+                  className={`delivery-world-dot delivery-world-dot--${level}`}
+                />
+              </pattern>
+            ))}
+          </defs>
+          {data.countries.map((item, index) => {
+            const selected = !!item.code && country === item.code;
+            const highlight = !!item.code && hovered === item.code;
+            return (
+              <g
+                key={`${item.code}-${index}`}
+                className={`delivery-world-country${selected ? " is-selected" : ""}`}
+                role={item.code && item.orders > 0 ? "button" : undefined}
+                tabIndex={
+                  item.code && item.orders > 0 && available && !busy
+                    ? 0
+                    : undefined
+                }
+                aria-label={`${item.name}: ${number(item.orders)} pedidos`}
+                aria-pressed={
+                  item.code && item.orders > 0 ? selected : undefined
+                }
+                onMouseEnter={() => setHovered(item.code || "")}
+                onMouseLeave={() => setHovered("")}
+                onFocus={() => setHovered(item.code || "")}
+                onBlur={() => setHovered("")}
+                onClick={item.orders > 0 ? () => select(item.code) : undefined}
+                onKeyDown={(event) => {
+                  if (
+                    (event.key === "Enter" || event.key === " ") &&
+                    item.orders > 0
+                  ) {
+                    event.preventDefault();
+                    select(item.code);
+                  }
+                }}
+              >
+                <title>
+                  {item.name} ·{" "}
+                  {available
+                    ? `${number(item.orders)} pedidos`
+                    : "Sem dados carregados"}
+                </title>
+                <path
+                  d={item.path}
+                  fill={`url(#${id}-${selected || highlight ? "active" : deliveryRegionLevel(item.orders, data.max)})`}
+                  fillRule="evenodd"
+                />
+              </g>
+            );
+          })}
+        </svg>
+        {active && available && (
+          <div className="delivery-world-hover" role="status">
+            <span>
+              {countryFlag(active.code)} {active.name}
+            </span>
+            <strong>{number(active.orders)} pedidos</strong>
+            <small>{number(active.units)} unidades</small>
+          </div>
+        )}
       </div>
-      <footer className="dotted-map-footer">
-        <div className="dotted-map-scale">
+      <footer>
+        <div className="delivery-world-scale">
           <span>Sem pedidos</span>
           {[0, 1, 2, 3, 4].map((level) => (
             <i key={level} data-level={level} />
           ))}
           <span>Mais pedidos</span>
         </div>
-        <p>
-          Distribuição por UF; não indica endereços de clientes.
-          {data.outside > 0
-            ? ` ${number(data.outside)} pedidos internacionais ou sem UF brasileira válida ficam fora do mapa e continuam na tabela.`
-            : ""}
-        </p>
+        {country ? (
+          <button type="button" onClick={() => onCountryChange("")}>
+            Limpar país · {country}
+            <X size={12} />
+          </button>
+        ) : (
+          <span>
+            Selecione um país para explorar
+            <ArrowUpRight size={12} />
+          </span>
+        )}
       </footer>
-    </div>
+      {data.outside > 0 && (
+        <p className="delivery-world-note">
+          {number(data.outside)} pedidos sem país ou em territórios sem contorno
+          nesta escala continuam na tabela.
+        </p>
+      )}
+    </section>
   );
 }
