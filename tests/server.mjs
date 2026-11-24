@@ -200,9 +200,13 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
         if (section === "catalogo") {
           assert.match(html, /<section[^>]*class="workspace-catalog-metrics"/);
           assert.doesNotMatch(html, /class="workspace-trend-card"/);
-          assert.doesNotMatch(html, /class="workspace-priorities"/);
+          assert.doesNotMatch(html, /class="priority-queue"/);
         } else if (section === "prioridades") {
-          assert.match(html, /class="workspace-priorities"/);
+          assert.match(html, /class="priority-queue"/);
+          assert.match(html, /Central de prioridades/);
+          assert.match(html, /aria-label="Categorias da fila de prioridades"/);
+          assert.doesNotMatch(html, /class="workspace-queue-card"/);
+          assert.doesNotMatch(html, /id="overview-pending"/);
           assert.doesNotMatch(html, /class="workspace-trend-card"/);
           assert.doesNotMatch(
             html,
@@ -210,7 +214,7 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
           );
         } else {
           assert.match(html, /class="workspace-trend-card"/);
-          assert.doesNotMatch(html, /class="workspace-priorities"/);
+          assert.doesNotMatch(html, /class="priority-queue"/);
           assert.doesNotMatch(
             html,
             /<section[^>]*class="workspace-catalog-metrics"/,

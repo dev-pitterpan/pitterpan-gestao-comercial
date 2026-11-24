@@ -200,3 +200,14 @@ O período dos pedidos continua visível. `SalesFilterPanel.tsx` reúne os demai
 `FilterDisclosure.tsx` organiza filtros densos de outras páginas. Os campos permanecem montados mesmo recolhidos, preservando os formulários automáticos e seus valores. Consultas simples, como período do ranking, busca de catálogo e período de análises, continuam diretamente acessíveis. Datas das análises são preservadas ao abrir categorias ou relatórios.
 
 `content.css` aplica superfícies claras, tipografia Geist e cores semânticas somente ao conteúdo administrativo; não altera a geometria nem os estilos da sidebar. O painel de desempenho usa quatro indicadores reais: recebido após reembolsos, pedidos pagos não cancelados, ticket desses pedidos e reembolsos dos pedidos do período. Valores de moedas diferentes permanecem separados. O calendário e a série principal continuam distinguindo ausência de dados de valores zero. Não há migração de banco nesta mudança.
+
+
+## Central de prioridades — 24/11/2026
+
+A categoria Prioridades tem componente e consulta próprios (`PrioritiesOverview.tsx` e `priority-queue.ts`), sem carregar o relatório financeiro. A antiga prévia de cinco pedidos e a repetição de indicadores foram substituídas por uma fila paginada de oito pedidos, cobrindo todo o histórico importado. As categorias Todas, A preparar e Retiradas prontas têm URLs próprias; a ordenação aceita mais antigos ou mais recentes e a paginação é recalculada quando necessário.
+
+Contagens e linhas usam a mesma regra `awaitingFulfillmentSql`: loja correta, pedidos não teste, pagos ou parcialmente reembolsados com saldo positivo, sem cancelamento e ainda não atendidos. A consulta é executada em transação de leitura com snapshot consistente. A seleção de período permanece nos links de navegação, mas não limita esta fila.
+
+O resumo compacto apresenta pedidos a preparar, retiradas prontas e a idade do pedido mais antigo. Cada linha mostra foto de um item ativo, título, quantidade de itens/unidades, cliente, data, valor original, situação, modalidade e conferência de atendimento. Ausência de imagem usa o placeholder existente. “Há N dias” mede dias de calendário em Brasília desde o pedido e não significa prazo vencido ou atraso de entrega. A sincronização ausente, antiga ou em andamento fica explícita.
+
+`priorities.css` contém layout próprio, sem posicionamento absoluto nem áreas nomeadas de grid. A antiga regra global `#overview-pending { grid-area: pending }`, que criava colunas implícitas e deslocava o card, foi restrita ao componente legado. A sidebar e os outros módulos mantêm a estrutura. Nenhuma migração ou alteração de dados é necessária.
