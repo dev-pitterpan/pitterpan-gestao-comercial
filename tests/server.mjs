@@ -171,7 +171,8 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
           assert.match(html, /Estado de destino/);
           assert.match(html, /aria-label="Categorias das entregas"/);
           assert.match(html, /class="delivery-world-card"/);
-          assert.match(html, /viewBox="-8 -8 880 380"/);
+          assert.match(html, /class="delivery-map-canvas"/);
+          assert.doesNotMatch(html, /Mapa de cidades/);
           assert.doesNotMatch(html, /Mapa pontilhado do Brasil/);
         }
         if (path === "/gestor/clientes/") {
@@ -259,13 +260,18 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
         });
         assert.equal(response.status, 200);
         const html = await response.text();
-        assert.doesNotMatch(html, /class="delivery-world-card"/);
-        assert.match(
-          html,
-          view === "cities"
-            ? /class="delivery-city-map-card"/
-            : /class="delivery-detail-card"/,
-        );
+        if (view === "cities") {
+          // Old bookmarks now open the single interactive dark map.
+          assert.match(html, /class="delivery-world-card"/);
+          assert.equal(
+            (html.match(/class="delivery-map-canvas"/g) || []).length,
+            1,
+          );
+        } else {
+          assert.doesNotMatch(html, /class="delivery-world-card"/);
+          assert.match(html, /class="delivery-detail-card"/);
+        }
+        assert.doesNotMatch(html, /class="delivery-city-map-card"/);
       }
       const offersPage = await get("/gestor/ofertas/", { headers: { cookie } });
       assert.equal(offersPage.status, 200);

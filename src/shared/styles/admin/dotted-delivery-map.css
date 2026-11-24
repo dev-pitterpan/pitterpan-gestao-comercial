@@ -270,14 +270,7 @@
   min-width: 0;
   padding: 18px 0 10px;
 }
-.delivery-world-visual svg {
-  display: block;
-  width: 100%;
-  height: auto;
-  max-height: 360px;
-  min-height: 240px;
-  overflow: visible;
-}
+
 .delivery-world-dot--0 {
   fill: #4d5359;
 }
@@ -640,10 +633,7 @@
   .delivery-overview-grid.is-city-view {
     grid-template-columns: minmax(0, 1fr);
   }
-  .delivery-world-visual svg {
-    max-height: 360px;
-    min-height: 240px;
-  }
+
   .delivery-leading-card ol {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -664,9 +654,6 @@
   }
 }
 @media (max-width: 760px) {
-  .delivery-world-visual svg {
-    min-height: 200px;
-  }
   .delivery-context {
     flex-direction: column;
     gap: 12px;
@@ -742,9 +729,7 @@
   .delivery-world-visual {
     padding: 16px 0;
   }
-  .delivery-world-visual svg {
-    min-height: 160px;
-  }
+
   .delivery-world-hover {
     left: 4px;
     bottom: 5px;
@@ -761,4 +746,102 @@
   .delivery-detail-card > header {
     flex-wrap: wrap;
   }
+}
+
+/* One map, from country overview to city detail. Keep Leaflet scoped to this dark card. */
+.delivery-world-visual {
+  display: block;
+}
+.delivery-world-card .delivery-map {
+  width: 100%;
+}
+.delivery-world-card .delivery-map-toolbar {
+  color: #c9c4d2;
+  padding: 0 20px 12px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.delivery-world-card .delivery-map-toolbar .admin-button {
+  background: #25272e;
+  border-color: #42404b;
+  color: #e5d8f1;
+}
+.delivery-world-card .delivery-map-stage {
+  border: 0;
+  border-radius: 0;
+}
+.delivery-world-card .delivery-map-canvas {
+  height: 420px;
+  min-height: 320px;
+  background: #1a1d20;
+}
+.delivery-world-card .leaflet-bar a {
+  background: #25272e;
+  color: #eee4f7;
+  border-color: #45404c;
+}
+.delivery-world-card .leaflet-control-attribution {
+  background: #1a1d20dd;
+  color: #b8b2c0;
+  font-size: 9px;
+}
+.delivery-world-card .leaflet-control-scale-line {
+  background: #1a1d20cc;
+  border-color: #9e96aa;
+  color: #d8cfdf;
+}
+.delivery-world-card .delivery-map-pin > span {
+  background: #bd88dc;
+  color: #20172b;
+  border-color: #e4c6f5;
+  box-shadow: 0 0 0 6px #ba83d52b;
+}
+.delivery-world-card .delivery-map-pin > span.is-cluster {
+  background: #66c7b4;
+  border-color: #acf0df;
+  color: #102e2b;
+}
+.delivery-world-card .delivery-map-hover {
+  background: #24242e;
+  color: #f0e8f7;
+  border-color: #776086;
+}
+.delivery-world-card .delivery-map-hover::before {
+  border-top-color: #776086;
+}
+.delivery-world-card .delivery-map-hover strong,
+.delivery-world-card .delivery-map-hover span,
+.delivery-world-card .delivery-map-city-list b {
+  color: inherit;
+}
+.delivery-world-card .delivery-map-overlay,
+.delivery-world-card .delivery-map-empty {
+  background: #23232ee8;
+  color: #e9dfef;
+}
+.delivery-world-card .delivery-map-legend,
+.delivery-world-card .delivery-map-note {
+  color: #bfb6cc;
+  padding-inline: 20px;
+}
+.delivery-world-card .delivery-map-legend i {
+  background: #bd88dc;
+}
+.delivery-world-card .delivery-map-legend i.is-group {
+  background: #66c7b4;
+}
+@media (max-width: 760px) {
+  .delivery-world-card .delivery-map-canvas {
+    height: 360px;
+  }
+}
+.delivery-world-card .delivery-map .leaflet-tooltip.delivery-map-hover {
+  background: #24242e;
+  color: #f0e8f7;
+}
+.delivery-world-card .delivery-map-toolbar > span {
+  color: #c9c4d2;
+}
+.delivery-world-card .delivery-map .leaflet-control-zoom a {
+  color: #eee4f7;
 }

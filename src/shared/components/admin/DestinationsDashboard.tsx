@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   Globe2,
-  MapPinned,
   ListFilter,
   SlidersHorizontal,
   ChevronDown,
@@ -38,7 +37,7 @@ import {
 } from "../../lib/admin/world-deliveries";
 import type { readDestinations } from "../../server/sales/destinations";
 type Data = Awaited<ReturnType<typeof readDestinations>>;
-type Section = "world" | "cities" | "destinations";
+type Section = "world" | "destinations";
 const number = (value: number) => value.toLocaleString("pt-BR");
 const defaultRange = (days = 30) => {
   const end = todayDate();
@@ -60,11 +59,7 @@ export default function DestinationsDashboard() {
         ),
   );
   const [section, setSection] = useState<Section>(
-    params.get("painel") === "cities"
-      ? "cities"
-      : params.get("painel") === "destinations"
-        ? "destinations"
-        : "world",
+    params.get("painel") === "destinations" ? "destinations" : "world",
   );
   const [delivery, setDelivery] = useState(
     deliveryFilterKinds.includes(
@@ -232,8 +227,7 @@ export default function DestinationsDashboard() {
         aria-label="Categorias das entregas"
       >
         {[
-          { id: "world", label: "Mapa mundial", icon: Globe2 },
-          { id: "cities", label: "Mapa de cidades", icon: MapPinned },
+          { id: "world", label: "Mapa de entregas", icon: Globe2 },
           {
             id: "destinations",
             label: "Destinos detalhados",
@@ -433,14 +427,11 @@ export default function DestinationsDashboard() {
         })}
       </section>
       {section !== "destinations" ? (
-        <div
-          className={`delivery-overview-grid${section === "cities" ? " is-city-view" : ""}`}
-        >
+        <div className="delivery-overview-grid">
           <DeliveryMapView
             cities={cities}
             country={country}
             onCountryChange={selectCountry}
-            view={section}
             available={!!data}
             busy={busy}
           />
