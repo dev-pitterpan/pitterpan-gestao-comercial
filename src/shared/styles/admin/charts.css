@@ -1,0 +1,199 @@
+/* Refinements for charts backed by real values. No ornamental/fictitious series. */
+.admin-app .sales-trend {
+  --trend-color: var(--admin-blue);
+}
+.admin-app .sales-trend--refunds {
+  --trend-color: var(--admin-coral);
+}
+.admin-app .sales-trend-head {
+  margin-bottom: 18px;
+}
+.admin-app .sales-trend-head h2 {
+  font-size: 16px;
+  font-weight: 550;
+}
+.admin-app .sales-trend-head strong {
+  font-size: clamp(27px, 3vw, 35px);
+  font-weight: 550;
+  letter-spacing: -0.05em;
+  margin-top: 5px;
+}
+.admin-app .sales-trend-head span {
+  color: var(--admin-muted);
+}
+.admin-app .sales-trend-caption {
+  background: none;
+  padding: 0 0 12px;
+  gap: 10px;
+}
+.admin-app .sales-trend-value {
+  min-height: 25px;
+  color: var(--admin-muted);
+  font-size: 10px;
+}
+.admin-app .sales-trend-value b {
+  color: var(--admin-blue);
+}
+.admin-app .sales-trend-segments {
+  background: #f2f6fa;
+  border: 1px solid var(--admin-line);
+  border-radius: 9px;
+  padding: 3px;
+}
+.admin-app .sales-trend-segments button {
+  color: #60778c;
+  font-weight: 500;
+  min-height: 31px;
+}
+.admin-app .sales-trend-segments button[aria-pressed="true"] {
+  color: var(--admin-blue);
+  border-color: #dce6ee;
+  background: #fff;
+  box-shadow: 0 1px 3px #20344d09;
+}
+.admin-app .sales-trend-plot {
+  border: 0;
+  border-radius: 0;
+  padding-top: 5px;
+}
+.admin-app .sales-trend-plot svg {
+  height: 218px;
+  overflow: visible;
+}
+.admin-app .sales-trend-plot svg text {
+  fill: #5c7187;
+  font-size: 10px;
+}
+.admin-app .sales-trend-gridline {
+  stroke: #e8eef3;
+  stroke-dasharray: 3 5;
+}
+.admin-app .sales-trend-zero {
+  stroke: #dce5ee;
+}
+.admin-app .sales-trend-line {
+  stroke-width: 2.5px;
+}
+.admin-app .sales-trend-halo {
+  fill: none;
+  stroke: var(--trend-color);
+  stroke-width: 8px;
+  opacity: 0.045;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.admin-app .sales-trend-column {
+  fill: var(--trend-color);
+  opacity: 0.065;
+}
+.admin-app .sales-trend-dot-halo {
+  fill: var(--trend-color);
+  opacity: 0.14;
+}
+.admin-app .sales-trend-dot {
+  stroke-width: 2.5px;
+}
+.admin-app .sales-trend-guide {
+  stroke: var(--trend-color);
+  opacity: 0.4;
+  stroke-dasharray: 3 4;
+}
+.admin-app .sales-trend-previous {
+  stroke: #a0afbd;
+  stroke-width: 1.5px;
+}
+.admin-app .analytics-revenue-chart text {
+  fill: #5c7187;
+}
+.admin-app .analytics-revenue-chart > g > line {
+  stroke: #e8eef3;
+  stroke-dasharray: 3 5;
+}
+.admin-app .analytics-chart-readout {
+  color: var(--admin-muted);
+  font-size: 11px;
+  margin-bottom: 14px;
+}
+.admin-app .analytics-chart-readout b {
+  color: var(--admin-blue);
+}
+.admin-app .analytics-legend i {
+  background: var(--admin-blue);
+}
+.admin-app .overview-stock-ring svg {
+  filter: none;
+}
+.admin-app .overview-stock-ring strong,
+.admin-app .finance-donut-value {
+  color: var(--admin-ink);
+  fill: var(--admin-ink);
+  font-weight: 550;
+  letter-spacing: -0.04em;
+}
+.admin-app .overview-stock-ring circle[role="button"],
+.admin-app .finance-donut-layout circle[role="button"] {
+  transition:
+    stroke-width 150ms,
+    opacity 150ms;
+  cursor: pointer;
+}
+.admin-app .overview-stock-legend button {
+  border-radius: 9px;
+  padding: 10px;
+  font-size: 11px;
+}
+.admin-app .overview-stock-legend button[aria-pressed="true"] {
+  background: #f2f7fb;
+  border-color: #dce8f2;
+}
+.admin-app .party-chart-rows {
+  padding: 0;
+  gap: 16px;
+}
+.admin-app .party-chart-toolbar {
+  margin-bottom: 18px;
+}
+.admin-app .party-chart-label {
+  font-size: 12px;
+  padding-right: 0;
+}
+.admin-app .party-chart-label strong {
+  font-weight: 600;
+  color: var(--admin-ink);
+}
+.admin-app .party-chart-track {
+  height: 9px;
+  border: 0;
+  border-radius: 6px;
+  background: #f0f4f8;
+  overflow: hidden;
+}
+.admin-app .party-chart-bar {
+  border-radius: 6px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--bar-color) 70%, white),
+    var(--bar-color)
+  );
+  box-shadow: none;
+}
+.admin-app .party-chart-mechanism {
+  padding: 0;
+  margin-top: 7px;
+  min-height: 9px;
+  grid-template-columns: minmax(0, 1fr);
+}
+.admin-app .party-chart-reel,
+.admin-app .party-chart-cord {
+  display: none;
+}
+.admin-app .party-chart-caption {
+  margin-top: 20px;
+  color: var(--admin-muted);
+  font-size: 10px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .admin-app :is(.overview-stock-ring circle, .finance-donut-layout circle) {
+    transition: none;
+  }
+}

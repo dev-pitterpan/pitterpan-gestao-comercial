@@ -23,7 +23,7 @@ const labels: Record<string, string> = {
 const colors: Record<string, string> = {
   PAID: "#2659a4",
   PENDING: "#f2c43d",
-  AUTHORIZED: "#8a75d7",
+  AUTHORIZED: "#138797",
   PARTIALLY_PAID: "#49a699",
   PARTIALLY_REFUNDED: "#ee9862",
   REFUNDED: "#d76a89",

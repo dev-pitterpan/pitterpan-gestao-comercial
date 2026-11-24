@@ -90,7 +90,7 @@ const categoryArt = [
   {
     match: /adornos|decor/,
     icon: Ribbon,
-    color: "#7953ae",
+    color: "#138797",
   },
   {
     match: /utilidad/,

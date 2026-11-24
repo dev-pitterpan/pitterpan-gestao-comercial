@@ -75,7 +75,7 @@ export default async function Overview({
       value: s?.offers,
       detail: "Preço menor que o preço anterior",
       icon: BadgePercent,
-      tone: "violet",
+      tone: "teal",
       href: "/gestor/ofertas/",
     },
     {

@@ -165,3 +165,14 @@ Execute `npm run db:migrate` no PostgreSQL usado pelo catálogo e pela Gestão C
 ## Auditoria de 23/11/2026
 
 Consulte [a auditoria técnica](AUDITORIA-2026-11-23.md) para evidências, correções e limitações da conferência. O Next.js está fixado em 16.4.6. A conexão PostgreSQL explicita `verify-full` quando a URL usa os aliases de verificação do pg 8 (`prefer`, `require`, `verify-ca`), preservando a validação atual de certificado. A opção explícita `uselibpqcompat=true` continua respeitada. Não registre URLs de conexão em logs.
+
+## Identidade visual do painel — 24/11/2026
+
+A Gestão usa uma base clara inspirada na organização do painel Healthy e no tratamento de gráficos do Insighta, adaptados para a identidade Pitter Pan. O tema não usa lilás: fundo cinza frio, cards brancos, azul principal, turquesa complementar, verde positivo, âmbar de atenção e coral para devoluções/alertas. Rótulos e valores acompanham as cores; o significado não depende só da cor.
+
+- `src/shared/styles/admin/theme.css`: tokens semânticos, tipografia, navegação, superfícies, indicadores, controles e tabelas. Importado no layout autenticado depois dos estilos funcionais existentes.
+- `src/shared/styles/admin/charts.css`: acabamento dos gráficos, grades discretas, seleção e barras. Mantém controles por teclado e redução de movimento.
+- `src/shared/lib/admin/chart-style.ts`: paleta de séries e interpolação monotônica compartilhada. As curvas passam pelos pontos reais, sem criar picos/vales entre amostras. Valores ausentes continuam separando os trechos; um gráfico bonito não deve sugerir continuidade onde não há informação.
+- `geist/font/sans`: fonte variável Geist distribuída pelo pacote oficial e servida localmente no build, sem requisição ao Google Fonts. A variável fica disponível no documento; a família é aplicada no tema administrativo.
+
+No desktop, sidebar e conteúdo têm moldura discreta, sem faixa colorida superior. Em larguras menores, o tema preserva o menu móvel e remove a moldura para aproveitar a tela. Não altera regras financeiras, fontes de dados, permissões ou sincronização. A prévia temporária de teste usa somente dados fictícios locais; nenhum dado de demonstração é publicado ou gravado no banco da operação.

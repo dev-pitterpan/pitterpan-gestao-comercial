@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { shortDate, numberValue } from "./AnalyticsCharts";
+import { monotonePath } from "../../lib/admin/chart-style";
 
 type Point = { day: string; value: number | null };
 
@@ -52,7 +53,7 @@ export default function SalesTrendChart({
   }, [hasData]);
 
   const active = selected === null ? undefined : rows[selected];
-  const height = 174;
+  const height = 218;
   const left = width < 380 ? 40 : 48;
   const right = Math.max(left + 1, width - 14);
   const top = 12;
@@ -181,15 +182,25 @@ export default function SalesTrendChart({
             }}
           >
             <defs>
-              <linearGradient id={id} x2="0" y2="1">
-                <stop stopColor="var(--trend-color)" stopOpacity=".19" />
+              <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
+                <stop stopColor="var(--trend-color)" stopOpacity=".22" />
                 <stop
                   offset="1"
                   stopColor="var(--trend-color)"
-                  stopOpacity=".025"
+                  stopOpacity=".015"
                 />
               </linearGradient>
             </defs>
+            {active && selected !== null && (
+              <rect
+                className="sales-trend-column"
+                x={x(selected) - Math.min(increment, 32) / 2}
+                y={top}
+                width={Math.min(increment, 32)}
+                height={bottom - top}
+                rx="8"
+              />
+            )}
             {grid.map((value, index) => (
               <g key={index}>
                 <line
@@ -235,18 +246,19 @@ export default function SalesTrendChart({
               : segments.map((segment) => {
                   const first = segment[0];
                   const last = segment.at(-1)!;
-                  const line = segment
-                    .map(
-                      ({ index, value }, i) =>
-                        `${i ? "L" : "M"}${x(index)},${y(value)}`,
-                    )
-                    .join(" ");
+                  const line = monotonePath(
+                    segment.map(({ index, value }) => ({
+                      x: x(index),
+                      y: y(value),
+                    })),
+                  );
                   return (
                     <g key={first.index}>
                       <path
                         d={`${line}L${x(last.index)},${y(0)}L${x(first.index)},${y(0)}Z`}
                         fill={`url(#${id})`}
                       />
+                      <path className="sales-trend-halo" d={line} />
                       <path className="sales-trend-line" d={line} />
                       {segment.length === 1 && (
                         <circle
@@ -285,12 +297,20 @@ export default function SalesTrendChart({
                   y2={bottom}
                 />
                 {active.value !== null && (
-                  <circle
-                    className="sales-trend-dot"
-                    cx={x(selected)}
-                    cy={y(active.value)}
-                    r="4"
-                  />
+                  <g>
+                    <circle
+                      className="sales-trend-dot-halo"
+                      cx={x(selected)}
+                      cy={y(active.value)}
+                      r="9"
+                    />
+                    <circle
+                      className="sales-trend-dot"
+                      cx={x(selected)}
+                      cy={y(active.value)}
+                      r="4"
+                    />
+                  </g>
                 )}
               </g>
             )}
