@@ -136,6 +136,12 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
         assert.match(response.headers.get("x-robots-tag"), /noindex/);
         const html = await response.text();
         assert.doesNotMatch(html, /class="party-section-scene/);
+        if (path !== "/gestor/natal/") {
+          assert.match(html, /id="workspace-navigation"/);
+          assert.match(html, /aria-label="Áreas da gestão"/);
+          assert.match(html, /aria-label="Buscar rotina na gestão"/);
+          assert.doesNotMatch(html, /class="admin-sidebar"/);
+        }
         if (path === "/gestor/clientes/") {
           assert.match(html, /<h1>Ranking de clientes<\/h1>/);
           assert.match(html, /Ordenar clientes/);

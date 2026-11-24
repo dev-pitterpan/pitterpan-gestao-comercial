@@ -9,6 +9,7 @@ import CommercialOverview, {
 } from "@shared/components/admin/CommercialOverview";
 import "./commercial-overview.css";
 import CommercialPeriod from "@shared/components/admin/CommercialPeriod";
+import SalesActivity from "@shared/components/admin/SalesActivity";
 import StockOverview from "@shared/components/admin/StockOverview";
 import PartyChart from "@shared/components/admin/PartyChart";
 import Link from "next/link";
@@ -18,11 +19,11 @@ import {
   Boxes,
   ArrowUpRight,
   ArrowDownRight,
-  ArrowRight,
   BookOpen,
   CircleCheck,
   Clock3,
   RefreshCw,
+  ArrowRight,
 } from "lucide-react";
 import { adminContext } from "@shared/server/admin/repository";
 import { requireSession } from "@shared/server/auth/session";
@@ -31,7 +32,6 @@ import {
   PageHeading,
   dateTime,
   number,
-  statusLabels,
 } from "@shared/components/admin/Primitives";
 export default async function Overview({
   searchParams,
@@ -43,7 +43,7 @@ export default async function Overview({
   }>;
 }) {
   const { periodo: period, start, end } = await searchParams;
-  const days = period === "1" ? 1 : period === "30" ? 30 : 7;
+  const days = period === "1" ? 1 : period === "7" ? 7 : 30;
   const today = todayDate();
   const parsed = dateRangeSchema.safeParse({ start, end });
   const range =
@@ -96,12 +96,22 @@ export default async function Overview({
     },
   ];
   return (
-    <>
+    <div className="workspace-overview">
       <PageHeading
+        eyebrow="SEU CENTRO DE OPERAÇÃO"
         title="Visão geral"
         description={`Olá, ${user.name.split(" ")[0]}. Acompanhe vendas, catálogo e prioridades da operação.`}
         filters={canViewSales ? <CommercialPeriod range={range} /> : undefined}
       />
+      <nav
+        className="workspace-overview-tabs"
+        aria-label="Seções da visão geral"
+      >
+        {canViewSales && <a href="#workspace-performance">Desempenho</a>}
+        <a href="#workspace-catalog">Catálogo e estoque</a>
+        {canViewSales && <a href="#overview-pending">Prioridades</a>}
+        <span>Uma operação. Todas as perspectivas.</span>
+      </nav>
       <DataNotice context={context} />
       {canViewSales && (
         <CommercialOverview
@@ -110,12 +120,24 @@ export default async function Overview({
           admin={user.role === "admin"}
         />
       )}
-      <section className="admin-stats" aria-label="Indicadores do catálogo">
+      <div className="workspace-section-heading" id="workspace-catalog">
+        <div>
+          <span className="workspace-overline">CATÁLOGO & DISPONIBILIDADE</span>
+          <h2>O mix que movimenta sua loja</h2>
+        </div>
+        <Link href="/gestor/produtos/">
+          Ver produtos <ArrowUpRight size={15} />
+        </Link>
+      </div>
+      <section
+        className="workspace-catalog-metrics"
+        aria-label="Indicadores do catálogo"
+      >
         {stats.map(({ label, value, detail, icon: Icon, tone, href }) => (
           <Link
             href={href}
             key={label}
-            className={`admin-stat admin-stat--${tone}${value == null ? " is-unavailable" : ""}`}
+            className={`workspace-catalog-metric workspace-catalog-metric--${tone}${value == null ? " is-unavailable" : ""}`}
           >
             <div>
               <span className={`admin-stat-icon ${tone}`}>
@@ -131,14 +153,17 @@ export default async function Overview({
           </Link>
         ))}
       </section>
-      <div className="admin-overview-grid overview-insights-grid">
-        <section className="admin-panel">
+
+      <div
+        className={`workspace-business-grid${canViewSales ? "" : " is-catalog-only"}`}
+      >
+        <section className="admin-panel workspace-mix-card">
           <header>
             <div>
-              <span className="admin-eyebrow">MIX DA LOJA</span>
-              <h2>{sales ? "Produtos" : "Produtos por categoria"}</h2>
+              <span className="workspace-overline">COMPOSIÇÃO DO MIX</span>
+              <h2>Produtos em perspectiva</h2>
             </div>
-            {!sales && <span className="admin-subtle">Variantes</span>}
+            <Package size={18} />
           </header>
           <PartyChart
             categories={context.categories}
@@ -154,94 +179,81 @@ export default async function Overview({
             soldHref={`/gestor/vendas/?${new URLSearchParams(range)}#sold-products`}
           />
         </section>
-        <div className="overview-insights-stack">
-          <section className="admin-panel admin-changes-panel">
-            <header>
-              <div>
-                <span className="admin-eyebrow">CATÁLOGO EM MOVIMENTO</span>
-                <h2>O que mudou?</h2>
-              </div>
-              <RefreshCw size={19} />
-            </header>
-            <p>
-              Mudanças nos produtos da Shopify detectadas entre as duas últimas
-              sincronizações.
-            </p>
-            <div className="admin-change-metrics">
-              <div>
-                <span className="green">
-                  <ArrowUpRight size={18} /> Entraram
-                </span>
-                <strong>{number(context.changes?.added)}</strong>
-              </div>
-              <div>
-                <span className="rose">
-                  <ArrowDownRight size={18} /> Saíram
-                </span>
-                <strong>{number(context.changes?.removed)}</strong>
-              </div>
-              <div>
-                <span className="blue">
-                  <RefreshCw size={17} /> Mudaram
-                </span>
-                <strong>{number(context.changes?.changed)}</strong>
-              </div>
+        <section className="admin-panel workspace-stock-card">
+          <header>
+            <div>
+              <span className="workspace-overline">DISPONIBILIDADE</span>
+              <h2>Saúde do estoque</h2>
             </div>
-            {!context.previous && (
-              <p className="admin-inline-note">
-                O histórico começa a comparar mudanças a partir da segunda
-                publicação.
-              </p>
-            )}
-            <Link className="admin-text-link" href="/gestor/alteracoes/">
-              Ver alterações na Shopify <ArrowRight size={16} />
-            </Link>
-          </section>
-          <section className="admin-panel overview-stock-panel">
-            <header>
-              <div>
-                <span className="admin-eyebrow">RESUMO DO CATÁLOGO</span>
-                <h2>Como está o estoque?</h2>
-              </div>
-              <Boxes size={19} />
-            </header>
-            <StockOverview summary={s} low={context.settings.low} />
-          </section>
-        </div>
-      </div>
-      <div className="admin-overview-bottom">
-        <section className="admin-panel admin-sync-card">
-          <div className={`admin-sync-icon${last ? "" : " is-pending"}`}>
-            {last ? <CircleCheck size={25} /> : <Clock3 size={25} />}
-          </div>
-          <span className="admin-eyebrow">ÚLTIMA PUBLICAÇÃO</span>
-          <h2>
-            {last
-              ? dateTime(last.completed_at)
-              : "A próxima etapa da sua gestão"}
-          </h2>
-          <p>
-            {last
-              ? `${number(last.report.variants)} variantes · ${statusLabels[last.status] || last.status}`
-              : "Publique uma importação para acompanhar sua loja com dados completos."}
-          </p>
-          <Link className="admin-text-link" href="/gestor/sincronizacoes/">
-            Ver sincronizações <ArrowUpRight size={16} />
-          </Link>
+            <Boxes size={18} />
+          </header>
+          <StockOverview summary={s} low={context.settings.low} />
         </section>
-        <Link className="admin-share-card" href="/gestor/catalogos/">
-          <BookOpen size={26} />
-          <span>UMA SELEÇÃO. UM LINK.</span>
-          <h2>
-            O catálogo certo,
-            <br />
-            para cada cliente.
-          </h2>
-          <span>
-            Escolher e compartilhar <ArrowUpRight size={16} />
-          </span>
-        </Link>
+        {canViewSales &&
+          (sales ? (
+            <SalesActivity sales={sales.sales} />
+          ) : (
+            <section className="admin-panel workspace-activity-card">
+              <span className="workspace-overline">RITMO DA OPERAÇÃO</span>
+              <h2>Calendário de vendas</h2>
+              <p>Os pedidos por dia aparecem após a sincronização.</p>
+              <Link
+                className="workspace-card-link"
+                href="/gestor/sincronizacoes/"
+              >
+                Conferir sincronização <ArrowUpRight size={14} />
+              </Link>
+            </section>
+          ))}
       </div>
-    </>
+      <section className="workspace-changes-strip">
+        <div>
+          <span className="workspace-overline">MOVIMENTAÇÕES DO CATÁLOGO</span>
+          <h2>O que mudou na loja?</h2>
+          <p>
+            {context.previous
+              ? "Comparação entre as duas últimas publicações."
+              : "Comparativo disponível a partir da segunda publicação."}
+          </p>
+        </div>
+        <div className="workspace-change-count">
+          <span className="is-green">
+            <ArrowUpRight size={14} /> Entraram
+          </span>
+          <strong>{number(context.changes?.added)}</strong>
+        </div>
+        <div className="workspace-change-count">
+          <span className="is-coral">
+            <ArrowDownRight size={14} /> Saíram
+          </span>
+          <strong>{number(context.changes?.removed)}</strong>
+        </div>
+        <div className="workspace-change-count">
+          <span>
+            <RefreshCw size={13} /> Mudaram
+          </span>
+          <strong>{number(context.changes?.changed)}</strong>
+        </div>
+        <Link href="/gestor/alteracoes/" className="workspace-card-link">
+          Ver histórico <ArrowRight size={14} />
+        </Link>
+      </section>
+      <section className="workspace-publish-note">
+        <div>
+          {last ? <CircleCheck size={17} /> : <Clock3 size={17} />}
+          <span>
+            {last
+              ? `Catálogo publicado em ${dateTime(last.completed_at)} · ${number(last.report.variants)} variantes`
+              : "Publique uma importação para acompanhar o catálogo completo."}
+          </span>
+        </div>
+        <Link href="/gestor/sincronizacoes/">
+          Sincronizações <ArrowUpRight size={14} />
+        </Link>
+        <Link href="/gestor/catalogos/">
+          Compartilhar catálogo <BookOpen size={14} />
+        </Link>
+      </section>
+    </div>
   );
 }

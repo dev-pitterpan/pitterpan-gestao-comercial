@@ -176,3 +176,14 @@ A Gestão usa uma base clara inspirada na organização do painel Healthy e no t
 - `geist/font/sans`: fonte variável Geist distribuída pelo pacote oficial e servida localmente no build, sem requisição ao Google Fonts. A variável fica disponível no documento; a família é aplicada no tema administrativo.
 
 No desktop, sidebar e conteúdo têm moldura discreta, sem faixa colorida superior. Em larguras menores, o tema preserva o menu móvel e remove a moldura para aproveitar a tela. Não altera regras financeiras, fontes de dados, permissões ou sincronização. A prévia temporária de teste usa somente dados fictícios locais; nenhum dado de demonstração é publicado ou gravado no banco da operação.
+
+
+## Ambiente de trabalho — reformulação estrutural de 24/11/2026
+
+A navegação administrativa usa dois níveis: uma barra fixa de módulos e um painel contextual de rotinas, recolhível no desktop e apresentado como gaveta no celular. A pesquisa localiza rotinas entre todos os módulos permitidos ao usuário. As permissões continuam centralizadas no servidor; itens futuros permanecem identificados como “Em breve”.
+
+A visão geral usa 30 dias por padrão e separa indicadores comerciais, desempenho, fila de atendimento, prioridades e catálogo. O gráfico principal permite alternar linha e barras; a distribuição de estoque usa um semicírculo. O calendário mostra até 35 dias de pedidos pagos do período selecionado, com links para o dia e indicação explícita de dias sem cobertura confirmada. Não são usados valores demonstrativos em produção.
+
+Arquivos estruturais: `workspace-navigation.ts` define os módulos e as regras de seleção; `WorkspaceNavigation.tsx` apresenta as duas camadas; `DashboardShell.tsx` controla a navegação e o foco; `workspace.css` contém o layout e seus pontos de quebra. `SalesActivity.tsx` apresenta o calendário. `document-theme.ts` preserva as classes de fontes e acessibilidade ao trocar os temas do catálogo.
+
+Validação: testes automatizados de permissões, rotas, filtros e preservação de classes; compilação de produção e verificação HTTP. A homologação visual em navegadores e dispositivos reais continua necessária.

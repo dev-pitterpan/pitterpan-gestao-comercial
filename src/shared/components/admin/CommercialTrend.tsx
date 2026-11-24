@@ -42,8 +42,14 @@ export default function CommercialTrend({
     rows.push(
       daily.get(day) ?? {
         day,
-        net: day < completedDay ? "0" : null,
-        paid: day < completedDay ? "0" : null,
+        net:
+          day >= shiftDate(completedDay || day, -59) && day < completedDay
+            ? "0"
+            : null,
+        paid:
+          day >= shiftDate(completedDay || day, -59) && day < completedDay
+            ? "0"
+            : null,
       },
     );
   }
@@ -71,6 +77,7 @@ export default function CommercialTrend({
   return (
     <SalesTrendChart
       key={currency}
+      height={260}
       title="Evolução das vendas"
       label={label}
       total={format.format(Number(total?.[metric] ?? 0))}

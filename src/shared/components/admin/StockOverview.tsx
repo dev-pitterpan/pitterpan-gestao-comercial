@@ -55,9 +55,9 @@ export default function StockOverview({
   return (
     <>
       <div className="overview-stock-chart">
-        <div className="overview-stock-ring">
+        <div className="overview-stock-ring is-semicircle">
           <svg
-            viewBox="0 0 240 240"
+            viewBox="0 0 240 150"
             role="group"
             aria-label="Distribuição das variantes por situação do estoque"
           >
@@ -67,6 +67,9 @@ export default function StockOverview({
               r="86"
               fill="none"
               stroke="#edf2f8"
+              pathLength="100"
+              strokeDasharray="50 50"
+              transform="rotate(-180 120 120)"
               strokeWidth="28"
             />
             {segments.map((segment, index) => {
@@ -84,9 +87,9 @@ export default function StockOverview({
                     stroke={segment.color}
                     strokeWidth={selected === index ? 34 : 28}
                     pathLength="100"
-                    strokeDasharray={`${Math.max(0, share - 0.7)} ${100 - Math.max(0, share - 0.7)}`}
-                    strokeDashoffset={-start}
-                    transform="rotate(-90 120 120)"
+                    strokeDasharray={`${Math.max(0, share / 2 - 0.45)} ${100 - Math.max(0, share / 2 - 0.45)}`}
+                    strokeDashoffset={-start / 2}
+                    transform="rotate(-180 120 120)"
                     tabIndex={0}
                     role="button"
                     aria-label={`${segment.label}: ${number(segment.value)} variantes`}
