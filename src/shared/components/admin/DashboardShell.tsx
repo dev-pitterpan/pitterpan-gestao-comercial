@@ -17,6 +17,7 @@ import {
   ChevronDown,
   CircleDollarSign,
   ReceiptText,
+  FileCheck2,
   Medal,
   CalendarDays,
   ShieldCheck,
@@ -89,6 +90,12 @@ function PitterPanNavMark({ size, "aria-hidden": hidden }: NavMarkProps) {
 }
 
 const links = [
+  {
+    href: "/gestor/notas-fiscais/",
+    label: "Notas fiscais",
+    icon: FileCheck2,
+    financial: true,
+  },
   { href: "/gestor/", label: "Visão geral", icon: LayoutDashboard },
   {
     href: "/gestor/vendas/",
@@ -215,6 +222,11 @@ const navigationGroups = [
       "/gestor/clientes/",
       "/gestor/winthor/balcao/",
     ],
+  },
+  {
+    label: "Fiscal",
+    icon: FileCheck2,
+    paths: ["/gestor/notas-fiscais/"],
   },
   {
     label: "Produtos e catálogos",
