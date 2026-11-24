@@ -1,4 +1,6 @@
 import Link from "next/link";
+import ContentCategories from "./ContentCategories";
+import FilterDisclosure from "./FilterDisclosure";
 import {
   ArrowUpRight,
   Database,
@@ -17,27 +19,37 @@ export function PageHeading({
   description,
   action,
   filters,
+  compactFilters = true,
 }: {
   eyebrow?: string;
   title: string;
   description?: string;
   action?: React.ReactNode;
   filters?: React.ReactNode;
+  compactFilters?: boolean;
 }) {
   return (
-    <header className="admin-page-heading">
-      <div className="admin-page-heading-copy">
-        {eyebrow && <span className="admin-eyebrow">{eyebrow}</span>}
-        <h1>{title}</h1>
-        {description && <p>{description}</p>}
-      </div>
-      {(filters || action) && (
-        <div className="admin-page-heading-controls">
-          {filters}
-          {action}
+    <>
+      <header className="admin-page-heading">
+        <div className="admin-page-heading-copy">
+          {eyebrow && <span className="admin-eyebrow">{eyebrow}</span>}
+          <h1>{title}</h1>
+          {description && <p>{description}</p>}
         </div>
-      )}
-    </header>
+        {(filters || action) && (
+          <div className="admin-page-heading-controls">
+            {filters &&
+              (compactFilters ? (
+                <FilterDisclosure>{filters}</FilterDisclosure>
+              ) : (
+                filters
+              ))}
+            {action}
+          </div>
+        )}
+      </header>
+      <ContentCategories />
+    </>
   );
 }
 export function DataNotice({ context }: { context: AdminContext }) {

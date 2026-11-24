@@ -2,7 +2,7 @@
 import { PageHeading } from "./Primitives";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   ArrowUpRight,
@@ -19,7 +19,6 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { salesLink } from "../../lib/admin/sales-links";
-import AdminSelect from "./AdminSelect";
 import DateRangePicker from "./DateRangePicker";
 import PitterSpinner from "./PitterSpinner";
 import FinanceOverview from "./FinanceOverview";
@@ -29,7 +28,7 @@ import {
   reportCategories,
   shopifyReports,
 } from "../../lib/admin/shopify-reports";
-import type { DateRange } from "../../lib/admin/date-range";
+import { dateRangeSchema, type DateRange } from "../../lib/admin/date-range";
 import type { readShopifyOverview } from "../../server/sales/reports";
 import ShopifyReportDetail from "./ShopifyReportDetail";
 type Overview = Awaited<ReturnType<typeof readShopifyOverview>>;
@@ -91,19 +90,44 @@ export default function AnalyticsDashboard({
   reportId: string;
 }) {
   const router = useRouter();
-  const [days, setDays] = useState("30"),
-    [range, setRange] = useState<DateRange>({ start: "", end: "" }),
+  const currentParams = useSearchParams();
+  const initialRange = dateRangeSchema.safeParse({
+    start: currentParams.get("start") || "",
+    end: currentParams.get("end") || "",
+  });
+  const [days, setDays] = useState(
+      ["1", "7", "30", "60"].includes(currentParams.get("days") || "")
+        ? currentParams.get("days")!
+        : "30",
+    ),
+    [range, setRange] = useState<DateRange>(
+      initialRange.success ? initialRange.data : { start: "", end: "" },
+    ),
     [revision, setRevision] = useState(0),
     [search, setSearch] = useState(""),
     [data, setData] = useState<Overview | null>(null),
     [busy, setBusy] = useState(true),
     [error, setError] = useState("");
-  const setReportId = (id: string) =>
-    router.push(
-      id
-        ? `?secao=relatorios&relatorio=${encodeURIComponent(id)}`
-        : "?secao=relatorios",
-    );
+  const setReportId = (id: string) => {
+    const query = new URLSearchParams({ secao: "relatorios", days });
+    if (range.start && range.end) {
+      query.set("start", range.start);
+      query.set("end", range.end);
+    }
+    if (id) query.set("relatorio", id);
+    router.push(`?${query}`);
+  };
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (days !== "30") url.searchParams.set("days", days);
+    else url.searchParams.delete("days");
+    for (const [key, value] of Object.entries(range)) {
+      if (value) url.searchParams.set(key, value);
+      else url.searchParams.delete(key);
+    }
+    if (url.href !== window.location.href)
+      window.history.replaceState(null, "", url);
+  }, [days, range]);
   const [homeChart, setHomeChart] = useState("line");
   const heading = useRef<HTMLHeadingElement>(null);
   const params = new URLSearchParams({
@@ -150,25 +174,16 @@ export default function AnalyticsDashboard({
         eyebrow="Análises Shopify"
         title={title}
         description={description}
+        compactFilters={false}
         filters={
           <div className="insights-filters">
-            <AdminSelect
-              label="Período das análises"
-              value={days}
-              onValueChange={(v) => {
-                setDays(v);
-                setRange({ start: "", end: "" });
-              }}
-              options={[
-                { value: "1", label: "Hoje" },
-                { value: "7", label: "Últimos 7 dias" },
-                { value: "30", label: "Últimos 30 dias" },
-                { value: "60", label: "Últimos 60 dias" },
-              ]}
-            />
             <DateRangePicker
               value={range.start ? range : (data?.window ?? range)}
-              onChange={setRange}
+              resetLabel="Voltar aos últimos 30 dias"
+              onChange={(value) => {
+                if (!value.start) setDays("30");
+                setRange(value);
+              }}
             />
             <button
               className="admin-button"
