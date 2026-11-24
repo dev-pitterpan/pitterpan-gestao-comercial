@@ -21,7 +21,7 @@ import {
 import {
   visibleWorkspaces,
   workspaceForRoute,
-  routineActive,
+  activeRoutine,
 } from "../../lib/admin/workspace-navigation";
 import { WorkspaceMenu, WorkspaceRail } from "./WorkspaceNavigation";
 import PartyExperience from "./PartyExperience";
@@ -63,10 +63,8 @@ export default function DashboardShell({
   const sidebarRef = useRef<HTMLElement>(null);
   const currentModule =
     modules.find((module) => module.id === selected) || activeModule;
-  const title =
-    activeModule.items.find((item) =>
-      routineActive(item, pathname, new URLSearchParams(params)),
-    )?.label || "Central de gestão";
+  const routine = activeRoutine(modules, pathname, new URLSearchParams(params));
+  const title = routine?.label || "Central de gestão";
   useEffect(() => {
     // Remove only catalog-specific classes; never erase the Next.js Geist font class.
     for (const element of [document.documentElement, document.body])
@@ -215,7 +213,17 @@ export default function DashboardShell({
               <span>
                 Pitter Pan <ChevronRight size={11} /> {activeModule.label}
               </span>
-              <strong>{title}</strong>
+              <strong>
+                {routine && (
+                  <span
+                    className="workspace-header-code"
+                    aria-label={`Rotina ${routine.code}`}
+                  >
+                    {routine.code}
+                  </span>
+                )}
+                {title}
+              </strong>
             </div>
           </div>
           <div className="workspace-header-actions">

@@ -1,7 +1,7 @@
 "use client";
 import Link, { useLinkStatus } from "next/link";
 import { useId } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   ShoppingCart,
@@ -174,6 +174,8 @@ export function WorkspaceMenu({
   setQuery: (value: string) => void;
   close: () => void;
 }) {
+  const router = useRouter();
+  const searchHelp = useId();
   const pathname = usePathname() || "/gestor/",
     params = new URLSearchParams(useSearchParams());
   const results = query.trim() ? searchRoutines(modules, query) : null;
@@ -188,10 +190,20 @@ export function WorkspaceMenu({
         onClick={close}
         className={`workspace-routine${active ? " is-active" : ""}`}
         aria-current={active ? "page" : undefined}
+        aria-label={`Rotina ${item.code}: ${item.label}`}
+        title={`Rotina ${item.code} · ${item.label}`}
       >
         <Icon size={17} strokeWidth={1.6} aria-hidden="true" />
         <span>
-          <strong>{item.label}</strong>
+          <strong className="workspace-routine-label">
+            <span
+              className="workspace-routine-code"
+              aria-label={`Rotina ${item.code}`}
+            >
+              {item.code}
+            </span>
+            <span>{item.label}</span>
+          </strong>
           {context && <small>{context}</small>}
         </span>
         {item.planned && <small className="workspace-planned">Em breve</small>}
@@ -211,9 +223,17 @@ export function WorkspaceMenu({
         <Search size={15} aria-hidden="true" />
         <input
           aria-label="Buscar rotina na gestão"
-          placeholder="Buscar rotina…"
+          placeholder="Nome ou nº da rotina…"
+          aria-describedby={searchHelp}
           value={query}
           onChange={(event) => setQuery(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" && results?.length === 1) {
+              event.preventDefault();
+              router.push(routineHref(results[0], params));
+              close();
+            }
+          }}
         />
         {query && (
           <button
@@ -225,6 +245,10 @@ export function WorkspaceMenu({
           </button>
         )}
       </div>
+      <span id={searchHelp} className="admin-sr-only">
+        Busque por nome ou código. Pressione Enter para abrir quando houver um
+        único resultado.
+      </span>
       <nav
         className="workspace-routines"
         aria-label={
@@ -244,7 +268,7 @@ export function WorkspaceMenu({
             {results.map((item) => entry(item, item.module))}
             {!results.length && (
               <p className="workspace-search-empty">
-                Tente outro nome de rotina ou área.
+                Tente outro nome, número de rotina ou área.
               </p>
             )}
           </>

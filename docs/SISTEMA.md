@@ -229,3 +229,10 @@ O mapa mundial usa um card horizontal escuro, países/bandeiras e quantidades no
 Ao fixar uma janela de conferência à esquerda, a navegação atual (`workspace-navigation`) acompanha o mesmo deslocamento `--fulfillment-left-width` usado pela aplicação. A regra anterior abrangia somente a sidebar legada e deixava o menu atual atrás da janela. O deslocamento continua restrito ao modo de encaixe desktop, a partir de 1100px, e desaparece ao soltar ou fechar a janela. O cabeçalho atual também participa da quebra de linha usada quando há painéis fixados.
 
 As larguras continuam sendo calculadas pelo gerenciador de janelas, inclusive durante redimensionamento e com painéis dos dois lados. Nenhuma mudança de dados, permissões ou migração foi necessária.
+
+
+## Códigos permanentes de rotinas — 24/11/2026
+
+Todas as entradas da navegação têm código explícito e único: faixas 1000 Início, 2000 Comercial, 3000 Catálogo, 4000 Estoque, 5000 Agenda, 6000 Análises e 7000 Sistema. O catálogo completo está em `docs/ROTINAS.md`. IDs são independentes do WinThor, da ordem de exibição e do perfil; rotinas planejadas mantêm a indicação de funcionalidade futura. Novos itens precisam de código livre e códigos retirados não devem ser reutilizados.
+
+O mesmo registro alimenta menu, pesquisa, identificação do cabeçalho e badge junto ao título. Números usam Geist Mono, enquanto os textos mantêm Geist Sans. A pesquisa aceita código, prefixo, nome e combinações; Enter abre um único resultado permitido ao perfil, usando os links existentes e preservando as regras de contexto comercial. `activeRoutine` centraliza a identificação de rotas e subvisões. Não foram alterados caminhos, regras de acesso ou banco de dados.

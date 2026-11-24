@@ -3,6 +3,8 @@ import { reportById } from "./shopify-reports.ts";
 import { salesPageLink } from "./sales-links.ts";
 
 export type Routine = {
+  /** Permanent internal ID. Never derive from order/role or reuse retired IDs. */
+  code: string;
   href: string;
   label: string;
   icon: string;
@@ -27,12 +29,14 @@ export const workspaces: Workspace[] = [
     icon: "dashboard",
     items: [
       {
+        code: "1001",
         href: "/gestor/",
         label: "Visão geral",
         icon: "dashboard",
         section: "Acompanhar",
       },
       {
+        code: "1002",
         href: "/gestor/minha-conta/",
         label: "Minha conta",
         icon: "user",
@@ -48,6 +52,7 @@ export const workspaces: Workspace[] = [
     icon: "cart",
     items: [
       {
+        code: "2001",
         href: "/gestor/vendas/resumo/",
         label: "Resumo Shopify",
         icon: "dashboard",
@@ -55,6 +60,7 @@ export const workspaces: Workspace[] = [
         access: "operations",
       },
       {
+        code: "2002",
         href: "/gestor/vendas/",
         label: "Vendas Shopify",
         icon: "shopify",
@@ -62,6 +68,7 @@ export const workspaces: Workspace[] = [
         access: "operations",
       },
       {
+        code: "2003",
         href: "/gestor/vendas/atendimento/",
         label: "Atendimento de pedidos",
         icon: "package",
@@ -69,6 +76,7 @@ export const workspaces: Workspace[] = [
         access: "operations",
       },
       {
+        code: "2004",
         href: "/gestor/vendas/recebimentos/",
         label: "Recebimentos",
         icon: "wallet",
@@ -76,6 +84,7 @@ export const workspaces: Workspace[] = [
         access: "operations",
       },
       {
+        code: "2005",
         href: "/gestor/vendas/reembolsos/",
         label: "Estornos e reembolsos",
         icon: "receipt",
@@ -83,6 +92,7 @@ export const workspaces: Workspace[] = [
         access: "operations",
       },
       {
+        code: "2006",
         href: "/gestor/clientes/",
         label: "Ranking de clientes",
         icon: "medal",
@@ -90,6 +100,7 @@ export const workspaces: Workspace[] = [
         access: "operations",
       },
       {
+        code: "2007",
         href: "/gestor/mapa/",
         label: "Mapa de entregas",
         icon: "map",
@@ -97,6 +108,7 @@ export const workspaces: Workspace[] = [
         access: "operations",
       },
       {
+        code: "2008",
         href: "/gestor/winthor/balcao/",
         label: "Vendas Loja",
         icon: "store",
@@ -114,18 +126,21 @@ export const workspaces: Workspace[] = [
     icon: "package",
     items: [
       {
+        code: "3001",
         href: "/gestor/produtos/",
         label: "Todos os produtos",
         icon: "package",
         section: "Seu mix",
       },
       {
+        code: "3002",
         href: "/gestor/ofertas/",
         label: "Ofertas",
         icon: "offer",
         section: "Seu mix",
       },
       {
+        code: "3003",
         href: "/gestor/produtos-vendidos/",
         label: "Produtos mais vendidos",
         icon: "chart",
@@ -133,12 +148,14 @@ export const workspaces: Workspace[] = [
         access: "operations",
       },
       {
+        code: "3004",
         href: "/gestor/catalogos/",
         label: "Catálogos",
         icon: "book",
         section: "Publicação",
       },
       {
+        code: "3005",
         href: "/gestor/catalogos/imagens/",
         label: "Imagens do catálogo",
         icon: "image",
@@ -146,6 +163,7 @@ export const workspaces: Workspace[] = [
         access: "admin",
       },
       {
+        code: "3006",
         href: "/gestor/alteracoes/",
         label: "Alterações na Shopify",
         icon: "transfer",
@@ -161,12 +179,14 @@ export const workspaces: Workspace[] = [
     icon: "boxes",
     items: [
       {
+        code: "4001",
         href: "/gestor/estoque/",
         label: "Estoque da Shopify",
         icon: "shopify",
         section: "Disponibilidade",
       },
       {
+        code: "4002",
         href: "/gestor/winthor/estoque-por-loja/",
         label: "Estoque por loja",
         icon: "store",
@@ -175,6 +195,7 @@ export const workspaces: Workspace[] = [
         planned: true,
       },
       {
+        code: "4003",
         href: "/gestor/winthor/transferencias/",
         label: "Transferências",
         icon: "transfer",
@@ -192,6 +213,7 @@ export const workspaces: Workspace[] = [
     icon: "calendar",
     items: [
       {
+        code: "5001",
         href: "/gestor/agenda/",
         label: "Agenda e fornecedores",
         icon: "calendar",
@@ -208,6 +230,7 @@ export const workspaces: Workspace[] = [
     icon: "chart",
     items: [
       {
+        code: "6001",
         href: "/gestor/analises/",
         label: "Análises Shopify",
         icon: "dashboard",
@@ -215,6 +238,7 @@ export const workspaces: Workspace[] = [
         access: "operations",
       },
       {
+        code: "6002",
         href: "/gestor/analises/?secao=vendas",
         label: "Vendas",
         icon: "cart",
@@ -222,6 +246,7 @@ export const workspaces: Workspace[] = [
         access: "operations",
       },
       {
+        code: "6003",
         href: "/gestor/analises/checkouts/",
         label: "Checkouts abandonados",
         icon: "cart",
@@ -229,6 +254,7 @@ export const workspaces: Workspace[] = [
         access: "operations",
       },
       {
+        code: "6004",
         href: "/gestor/analises/?secao=clientes",
         label: "Visão de clientes",
         icon: "users",
@@ -236,6 +262,7 @@ export const workspaces: Workspace[] = [
         access: "operations",
       },
       {
+        code: "6005",
         href: "/gestor/analises/?secao=atribuicao",
         label: "Atribuição",
         icon: "chart",
@@ -243,6 +270,7 @@ export const workspaces: Workspace[] = [
         access: "operations",
       },
       {
+        code: "6006",
         href: "/gestor/analises/?secao=relatorios",
         label: "Relatórios Shopify",
         icon: "report",
@@ -250,6 +278,7 @@ export const workspaces: Workspace[] = [
         access: "operations",
       },
       {
+        code: "6007",
         href: "/gestor/relatorios/",
         label: "Relatórios",
         icon: "report",
@@ -265,12 +294,14 @@ export const workspaces: Workspace[] = [
     icon: "settings",
     items: [
       {
+        code: "7001",
         href: "/gestor/sincronizacoes/",
         label: "Sincronizações",
         icon: "sync",
         section: "Dados da loja",
       },
       {
+        code: "7002",
         href: "/gestor/usuarios/",
         label: "Equipe",
         icon: "users",
@@ -278,6 +309,7 @@ export const workspaces: Workspace[] = [
         access: "admin",
       },
       {
+        code: "7003",
         href: "/gestor/configuracoes/",
         label: "Configurações",
         icon: "settings",
@@ -357,14 +389,33 @@ export function searchRoutines(modules: Workspace[], query: string) {
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
       .toLocaleLowerCase("pt-BR");
-  const text = normalize(query.trim());
+  const text = normalize(query.trim())
+    .replace(/^rotina\s*/, "")
+    .replace(/^#\s*/, "");
+  const tokens = text.split(/\s+/).filter(Boolean);
   return modules.flatMap((module) =>
     module.items
-      .filter((item) =>
-        normalize(`${module.title} ${item.section} ${item.label}`).includes(
-          text,
-        ),
-      )
+      .filter((item) => {
+        const target = normalize(
+          `${item.code} ${item.label} ${module.title} ${item.section}`,
+        );
+        return tokens.every((token) =>
+          /^\d+$/.test(token)
+            ? item.code.startsWith(token)
+            : target.includes(token),
+        );
+      })
       .map((item) => ({ ...item, module: module.label })),
   );
+}
+
+/** One resolver is shared by page headings and the shell header. */
+export function activeRoutine(
+  modules: Workspace[],
+  pathname: string,
+  params: URLSearchParams,
+) {
+  return modules
+    .flatMap((module) => module.items)
+    .find((item) => routineActive(item, pathname, params));
 }
