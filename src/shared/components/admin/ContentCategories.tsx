@@ -33,6 +33,7 @@ export default function ContentCategories() {
         <Link
           key={item.href}
           href={item.href}
+          title={`Rotina ${item.code} · ${item.label}`}
           aria-current={item.active ? "page" : undefined}
           scroll={false}
         >

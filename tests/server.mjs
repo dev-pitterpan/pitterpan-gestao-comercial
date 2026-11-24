@@ -142,6 +142,28 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
           assert.match(html, /aria-label="Áreas da gestão"/);
           assert.match(html, /aria-label="Buscar rotina na gestão"/);
           assert.doesNotMatch(html, /class="admin-sidebar"/);
+          const code = {
+            "/gestor/": "1001",
+            "/gestor/vendas/": "2002",
+            "/gestor/vendas/recebimentos/": "2004",
+            "/gestor/analises/": "6001",
+            "/gestor/produtos/": "3001",
+            "/gestor/clientes/": "2006",
+            "/gestor/mapa/": "2007",
+          }[path];
+          if (code) {
+            assert.match(
+              html,
+              new RegExp(`class="workspace-header-code"[^>]*>${code}<`),
+            );
+            assert.match(
+              html,
+              new RegExp(
+                `class="admin-routine-identifier"[^>]*>Rotina <b>${code}</b>`,
+              ),
+            );
+          }
+          assert.match(html, /class="workspace-routine-code"/);
         }
         if (path === "/gestor/mapa/") {
           assert.match(html, /<h1>Mapa de entregas<\/h1>/);

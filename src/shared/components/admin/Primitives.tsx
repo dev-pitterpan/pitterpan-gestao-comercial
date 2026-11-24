@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ContentCategories from "./ContentCategories";
+import RoutineIdentifier from "./RoutineIdentifier";
 import FilterDisclosure from "./FilterDisclosure";
 import {
   ArrowUpRight,
@@ -33,7 +34,10 @@ export function PageHeading({
       <header className="admin-page-heading">
         <div className="admin-page-heading-copy">
           {eyebrow && <span className="admin-eyebrow">{eyebrow}</span>}
-          <h1>{title}</h1>
+          <div className="admin-page-title-row">
+            <h1>{title}</h1>
+            <RoutineIdentifier />
+          </div>
           {description && <p>{description}</p>}
         </div>
         {(filters || action) && (
