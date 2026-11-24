@@ -26,6 +26,7 @@ import {
 import { WorkspaceMenu, WorkspaceRail } from "./WorkspaceNavigation";
 import PartyExperience from "./PartyExperience";
 import ProfilePhoto from "./ProfilePhoto";
+import { ContentAccess } from "./ContentCategories";
 import { catalogDocumentClasses } from "../../lib/catalog/document-theme";
 
 const roleLabels = {
@@ -269,7 +270,9 @@ export default function DashboardShell({
           </p>
         )}
         <main className="admin-content" id="admin-main" tabIndex={-1}>
-          {children}
+          <ContentAccess.Provider value={user.role}>
+            {children}
+          </ContentAccess.Provider>
         </main>
         <footer className="workspace-footer">
           <span>Pitter Pan Festas · Gestão Comercial</span>

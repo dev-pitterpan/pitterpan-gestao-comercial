@@ -187,3 +187,16 @@ A visão geral usa 30 dias por padrão e separa indicadores comerciais, desempen
 Arquivos estruturais: `workspace-navigation.ts` define os módulos e as regras de seleção; `WorkspaceNavigation.tsx` apresenta as duas camadas; `DashboardShell.tsx` controla a navegação e o foco; `workspace.css` contém o layout e seus pontos de quebra. `SalesActivity.tsx` apresenta o calendário. `document-theme.ts` preserva as classes de fontes e acessibilidade ao trocar os temas do catálogo.
 
 Validação: testes automatizados de permissões, rotas, filtros e preservação de classes; compilação de produção e verificação HTTP. A homologação visual em navegadores e dispositivos reais continua necessária.
+
+
+## Categorias de conteúdo e filtros — 24/11/2026
+
+A visão geral agora renderiza exclusivamente a categoria selecionada em `secao`: desempenho, catálogo ou prioridades. As categorias são URLs reais, preservam o período e funcionam com recarga e histórico do navegador. Atendimento recebe somente a categoria catálogo. A publicação e o estoque são consultados na categoria catálogo; indicadores comerciais e pendências permanecem nas categorias permitidas.
+
+`content-categories.ts` centraliza seleção, permissões e links entre as rotinas comerciais, produtos/catálogos/estoque, clientes, análises e administração. `ContentCategories.tsx` apresenta essa navegação abaixo do título. A sidebar mantém sua estrutura. A agenda continua renderizando uma área de cada vez, agora com sua navegação no conteúdo.
+
+O período dos pedidos continua visível. `SalesFilterPanel.tsx` reúne os demais critérios em pagamento, atendimento, entrega e produto; apenas um assunto aparece por vez, com navegação por teclado, critérios removíveis e limpeza da seleção. A pesquisa textual de situação foi preservada dentro de pagamento. O status implícito de recebimentos/reembolsos não é transportado para outra rotina.
+
+`FilterDisclosure.tsx` organiza filtros densos de outras páginas. Os campos permanecem montados mesmo recolhidos, preservando os formulários automáticos e seus valores. Consultas simples, como período do ranking, busca de catálogo e período de análises, continuam diretamente acessíveis. Datas das análises são preservadas ao abrir categorias ou relatórios.
+
+`content.css` aplica superfícies claras, tipografia Geist e cores semânticas somente ao conteúdo administrativo; não altera a geometria nem os estilos da sidebar. O painel de desempenho usa quatro indicadores reais: recebido após reembolsos, pedidos pagos não cancelados, ticket desses pedidos e reembolsos dos pedidos do período. Valores de moedas diferentes permanecem separados. O calendário e a série principal continuam distinguindo ausência de dados de valores zero. Não há migração de banco nesta mudança.

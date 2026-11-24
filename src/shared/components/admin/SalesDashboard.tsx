@@ -1,11 +1,7 @@
 "use client";
 import { PageHeading } from "./Primitives";
-import {
-  fulfillmentLabels,
-  fulfillmentFilters,
-  fulfillmentFilterLabels,
-  type FulfillmentFilter,
-} from "../../lib/admin/fulfillment";
+import SalesFilterPanel from "./SalesFilterPanel";
+import { fulfillmentLabels } from "../../lib/admin/fulfillment";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import SalesTrendChart, { salesTrendPoints } from "./SalesTrendChart";
@@ -29,22 +25,14 @@ import {
   RefreshCw,
   ShoppingCart,
 } from "lucide-react";
-import OrderStatusSearch from "./OrderStatusSearch";
-import SalesStatusSelect from "./SalesStatusSelect";
 import OrderCustomer from "./OrderCustomer";
 import OrderCustomerRefresh from "./OrderCustomerRefresh";
 import ShippingCharge from "./ShippingCharge";
 import DeliveryMark from "./DeliveryMark";
 import DragScroll from "./DragScroll";
-import {
-  deliveryFilterKinds,
-  deliveryLabels,
-  type DeliveryKind,
-} from "../../lib/admin/delivery";
 import PitterSpinner from "./PitterSpinner";
 import { shiftDate, todayDate } from "../../lib/admin/date-range";
 import type { SalesFilters } from "../../server/sales/filters";
-import AdminSelect from "./AdminSelect";
 import DateRangePicker from "./DateRangePicker";
 import type { readSales } from "../../server/sales/repository";
 type Data = Awaited<ReturnType<typeof readSales>>;
@@ -410,6 +398,7 @@ export default function SalesDashboard({
         eyebrow="Vendas Shopify"
         title={title}
         description={description}
+        compactFilters={false}
         filters={
           <div className="sales-toolbar">
             <div className="sales-period-field">
@@ -424,92 +413,6 @@ export default function SalesDashboard({
                 }}
               />
             </div>
-            {!finance && !showSummary && (
-              <div>
-                <label htmlFor="sales-status">Situação do pagamento</label>
-                <SalesStatusSelect
-                  id="sales-status"
-                  value={filters.status}
-                  onChange={(status) => {
-                    resetList();
-                    setFilters((old) => ({ ...old, status }));
-                  }}
-                />
-              </div>
-            )}
-            {!finance && !showSummary && (
-              <div>
-                <label htmlFor="sales-fulfillment">
-                  Situação do atendimento
-                </label>
-                <AdminSelect
-                  id="sales-fulfillment"
-                  label="Situação do atendimento"
-                  value={filters.fulfillment || "all"}
-                  options={fulfillmentFilters.map((value) => ({
-                    value,
-                    label: fulfillmentFilterLabels[value],
-                  }))}
-                  onValueChange={(fulfillment) => {
-                    resetList();
-                    setFilters((old) => ({
-                      ...old,
-                      fulfillment: fulfillment as FulfillmentFilter,
-                    }));
-                  }}
-                />
-              </div>
-            )}
-            {!showSummary && (
-              <div>
-                <label htmlFor="sales-delivery-filter">
-                  Modalidade de entrega
-                </label>
-                <AdminSelect
-                  id="sales-delivery-filter"
-                  label="Modalidade de entrega"
-                  value={filters.delivery || "all"}
-                  onValueChange={(delivery) => {
-                    resetList();
-                    setFilters((old) => ({
-                      ...old,
-                      delivery: delivery as DeliveryKind | "all",
-                    }));
-                  }}
-                  options={[
-                    { value: "all", label: "Todas as modalidades" },
-                    ...deliveryFilterKinds.map((kind) => ({
-                      value: kind,
-                      label: deliveryLabels[kind],
-                      icon: (
-                        <span aria-hidden="true">
-                          <DeliveryMark kind={kind} label={false} />
-                        </span>
-                      ),
-                      count: data
-                        ? count(
-                            data.deliveries.find((item) => item.kind === kind)
-                              ?.orders ?? 0,
-                          )
-                        : undefined,
-                    })),
-                  ]}
-                />
-              </div>
-            )}
-            {!showSummary && (
-              <div className="sales-category-filter">
-                <label htmlFor="sales-category">Categoria do produto</label>
-                <input
-                  id="sales-category"
-                  type="search"
-                  maxLength={200}
-                  value={categoryDraft}
-                  onChange={(event) => setCategoryDraft(event.target.value)}
-                  placeholder="Buscar qualquer categoria…"
-                />
-              </div>
-            )}
             {showSummary && (
               <button
                 type="button"
@@ -523,6 +426,17 @@ export default function SalesDashboard({
             )}
           </div>
         }
+      />
+      <SalesFilterPanel
+        filters={filters}
+        categoryDraft={categoryDraft}
+        onCategoryChange={setCategoryDraft}
+        finance={finance}
+        deliveries={data?.deliveries}
+        onChange={(patch) => {
+          resetList();
+          setFilters((old) => ({ ...old, ...patch }));
+        }}
       />
       {(finance || showSummary) && (
         <details className="sales-methodology">
@@ -850,32 +764,6 @@ export default function SalesDashboard({
                 <ShoppingCart size={22} />
               </header>
               <div className="sales-orders-tools">
-                {!finance && (
-                  <div className="sales-orders-status-filter">
-                    <label htmlFor="recent-orders-status">
-                      Buscar pagamento ou cancelamento
-                    </label>
-                    <OrderStatusSearch
-                      value={filters.status}
-                      onChange={(status) => {
-                        resetList(true);
-                        setFilters((old) => ({ ...old, status }));
-                      }}
-                    />
-                    {filters.status === "REFUNDS" && (
-                      <small>
-                        Inclui estornos totais e parciais com valor reembolsado,
-                        mesmo em pedidos cancelados.
-                      </small>
-                    )}
-                    {filters.status === "CANCELLED" && (
-                      <small>
-                        Inclui pedidos cancelados com ou sem reembolso. Confira
-                        as colunas Recebido e Estornado.
-                      </small>
-                    )}
-                  </div>
-                )}
                 <OrderCustomerRefresh
                   orders={data.orders}
                   onUpdate={updateCustomers}

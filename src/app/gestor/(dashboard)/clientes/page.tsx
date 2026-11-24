@@ -82,6 +82,7 @@ export default async function CustomerRankingPage({
       <PageHeading
         title="Ranking de clientes"
         description="Compras identificadas na Shopify no período selecionado. O valor líquido desconta os reembolsos."
+        compactFilters={false}
         filters={<CustomerRankingFilters range={range} sort={sort} />}
       />
       {data && (

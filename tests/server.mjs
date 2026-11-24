@@ -150,15 +150,24 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
           assert.match(html, /href="http:\/\/127\.0\.0\.1:3000\/"/);
           assert.doesNotMatch(html, /href="\/gestor\/versoes\/"/);
         }
+        if (path === "/gestor/vendas/") {
+          assert.match(html, /aria-label="Categorias desta área"/);
+          assert.match(html, /aria-label="Assuntos dos filtros"/);
+          assert.match(html, /class="content-filter-workspace" hidden=""/);
+          assert.equal(
+            (html.match(/id="recent-orders-status"/g) || []).length,
+            1,
+          );
+        }
         if (path === "/gestor/vendas/recebimentos/")
           assert.match(
             html,
-            /<header class="admin-page-heading">.*?<h1>Recebimentos<\/h1>.*?Período dos pedidos.*?Modalidade de entrega.*?<\/header>/s,
+            /<header class="admin-page-heading">.*?<h1>Recebimentos<\/h1>.*?Período dos pedidos.*?<\/header>/s,
           );
         if (path === "/gestor/analises/")
           assert.match(
             html,
-            /<header class="admin-page-heading">.*?<h1>Visão geral da loja<\/h1>.*?Período das análises.*?<\/header>/s,
+            /<header class="admin-page-heading">.*?<h1>Visão geral da loja<\/h1>.*?class="admin-date-range".*?<\/header>/s,
           );
         if (path === "/gestor/produtos/") {
           assert.match(
@@ -177,6 +186,34 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
           assert.match(
             html,
             /<nav class="admin-table-pagination" aria-label="Páginas de produtos"/,
+          );
+        }
+      }
+      for (const section of ["desempenho", "catalogo", "prioridades"]) {
+        const response = await get(`/gestor/?secao=${section}`, {
+          headers: { cookie },
+        });
+        assert.equal(response.status, 200);
+        const html = await response.text();
+        assert.match(html, new RegExp(`content-overview--${section}`));
+        assert.match(html, /aria-label="Seções da visão geral"/);
+        if (section === "catalogo") {
+          assert.match(html, /<section[^>]*class="workspace-catalog-metrics"/);
+          assert.doesNotMatch(html, /class="workspace-trend-card"/);
+          assert.doesNotMatch(html, /class="workspace-priorities"/);
+        } else if (section === "prioridades") {
+          assert.match(html, /class="workspace-priorities"/);
+          assert.doesNotMatch(html, /class="workspace-trend-card"/);
+          assert.doesNotMatch(
+            html,
+            /<section[^>]*class="workspace-catalog-metrics"/,
+          );
+        } else {
+          assert.match(html, /class="workspace-trend-card"/);
+          assert.doesNotMatch(html, /class="workspace-priorities"/);
+          assert.doesNotMatch(
+            html,
+            /<section[^>]*class="workspace-catalog-metrics"/,
           );
         }
       }

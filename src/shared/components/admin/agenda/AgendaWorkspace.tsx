@@ -103,25 +103,8 @@ export default function AgendaWorkspace() {
       <PageHeading
         title="Agenda e fornecedores"
         description="Planeje reuniões, consulte contatos e acompanhe tarefas."
-        filters={
+        action={
           <div className="agenda-topline">
-            <nav
-              className="agenda-tabs"
-              aria-label="Área de agenda e fornecedores"
-            >
-              {tabs.map(({ id, label, icon: Icon }) => (
-                <button
-                  type="button"
-                  key={id}
-                  aria-current={tab === id ? "page" : undefined}
-                  disabled={busy}
-                  onClick={() => setTab(id)}
-                >
-                  <Icon size={18} />
-                  {label}
-                </button>
-              ))}
-            </nav>
             <button
               className="admin-text-link"
               disabled={loading || busy}
@@ -132,6 +115,23 @@ export default function AgendaWorkspace() {
           </div>
         }
       />
+      <nav
+        className="content-categories content-agenda-categories"
+        aria-label="Área de agenda e fornecedores"
+      >
+        {tabs.map(({ id, label, icon: Icon }) => (
+          <button
+            type="button"
+            key={id}
+            aria-current={tab === id ? "page" : undefined}
+            disabled={busy}
+            onClick={() => setTab(id)}
+          >
+            <Icon size={18} />
+            {label}
+          </button>
+        ))}
+      </nav>
       {error && (
         <div className="agenda-feedback is-error" role="alert">
           {error}

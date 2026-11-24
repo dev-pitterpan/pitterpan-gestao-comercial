@@ -1,11 +1,11 @@
 /** Shared business colors: color always complements a label or a value. */
 export const chartColors = {
-  blue: "#285b8f",
-  teal: "#138797",
-  green: "#278366",
-  amber: "#c38a28",
-  coral: "#c56259",
-  slate: "#8c9dae",
+  blue: "#6273dd",
+  teal: "#28a4ae",
+  green: "#3aa87f",
+  amber: "#e3b252",
+  coral: "#d87b8a",
+  slate: "#a8b1c8",
 };
 export const chartPalette = [
   chartColors.blue,
