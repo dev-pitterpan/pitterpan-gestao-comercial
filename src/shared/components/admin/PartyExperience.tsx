@@ -12,7 +12,13 @@ const MotionContext = createContext(true);
 export const usePartyMotion = () => useContext(MotionContext);
 
 /** A single preference controls the decorative layer; it never wraps business handlers. */
-export default function PartyExperience({ children }: { children: ReactNode }) {
+export default function PartyExperience({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   const [motion, setMotion] = useState(true);
   useEffect(() => {
     try {
@@ -34,7 +40,10 @@ export default function PartyExperience({ children }: { children: ReactNode }) {
   }
   return (
     <MotionContext.Provider value={motion}>
-      <div className="admin-app" data-party-motion={motion ? "on" : "off"}>
+      <div
+        className={`admin-app ${className}`}
+        data-party-motion={motion ? "on" : "off"}
+      >
         {children}
         <button
           className="party-motion-control"

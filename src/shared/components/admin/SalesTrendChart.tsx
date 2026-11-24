@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { shortDate, numberValue } from "./AnalyticsCharts";
+import { ChartColumn, ChartSpline } from "lucide-react";
 import { monotonePath } from "../../lib/admin/chart-style";
 
 type Point = { day: string; value: number | null };
@@ -21,6 +22,7 @@ export default function SalesTrendChart({
   controls,
   previous,
   refunds = false,
+  height = 218,
 }: {
   title: string;
   label: string;
@@ -30,12 +32,14 @@ export default function SalesTrendChart({
   controls?: ReactNode;
   previous?: number[];
   refunds?: boolean;
+  height?: number;
 }) {
   const id = useId();
   const plot = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(620);
   const [selected, setSelected] = useState<number | null>(null);
   const [compare, setCompare] = useState(false);
+  const [chartType, setChartType] = useState<"area" | "bars">("area");
   const comparison = compare ? previous : undefined;
   const known = rows.flatMap(({ value }) => (value === null ? [] : [value]));
   const hasData = known.length > 0;
@@ -53,7 +57,6 @@ export default function SalesTrendChart({
   }, [hasData]);
 
   const active = selected === null ? undefined : rows[selected];
-  const height = 218;
   const left = width < 380 ? 40 : 48;
   const right = Math.max(left + 1, width - 14);
   const top = 12;
@@ -106,7 +109,35 @@ export default function SalesTrendChart({
           <span>{label}</span>
           <strong>{total}</strong>
         </div>
-        {controls && <div className="sales-trend-controls">{controls}</div>}
+        <div className="sales-trend-controls">
+          {controls}
+          {!refunds && (
+            <div
+              className="workspace-chart-type"
+              role="group"
+              aria-label="Tipo de gráfico"
+            >
+              <button
+                type="button"
+                onClick={() => setChartType("area")}
+                aria-pressed={chartType === "area"}
+                aria-label="Visualizar como linha"
+                title="Gráfico de linha"
+              >
+                <ChartSpline size={16} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setChartType("bars")}
+                aria-pressed={chartType === "bars"}
+                aria-label="Visualizar como barras"
+                title="Gráfico de barras"
+              >
+                <ChartColumn size={16} />
+              </button>
+            </div>
+          )}
+        </div>
       </header>
       <div className="sales-trend-caption">
         <div className="sales-trend-key">
@@ -243,34 +274,49 @@ export default function SalesTrendChart({
                       </g>
                     ),
                 )
-              : segments.map((segment) => {
-                  const first = segment[0];
-                  const last = segment.at(-1)!;
-                  const line = monotonePath(
-                    segment.map(({ index, value }) => ({
-                      x: x(index),
-                      y: y(value),
-                    })),
-                  );
-                  return (
-                    <g key={first.index}>
-                      <path
-                        d={`${line}L${x(last.index)},${y(0)}L${x(first.index)},${y(0)}Z`}
+              : chartType === "bars"
+                ? rows.map(({ value }, index) =>
+                    value === null ? null : (
+                      <rect
+                        key={index}
+                        className={`workspace-chart-bar${selected === index ? " is-selected" : ""}`}
+                        x={x(index) - Math.min(22, increment * 0.62) / 2}
+                        y={Math.min(y(value), y(0))}
+                        width={Math.min(22, increment * 0.62)}
+                        height={Math.max(1, Math.abs(y(value) - y(0)))}
+                        rx="4"
                         fill={`url(#${id})`}
                       />
-                      <path className="sales-trend-halo" d={line} />
-                      <path className="sales-trend-line" d={line} />
-                      {segment.length === 1 && (
-                        <circle
-                          className="sales-trend-dot"
-                          cx={x(first.index)}
-                          cy={y(first.value)}
-                          r="4"
+                    ),
+                  )
+                : segments.map((segment) => {
+                    const first = segment[0];
+                    const last = segment.at(-1)!;
+                    const line = monotonePath(
+                      segment.map(({ index, value }) => ({
+                        x: x(index),
+                        y: y(value),
+                      })),
+                    );
+                    return (
+                      <g key={first.index}>
+                        <path
+                          d={`${line}L${x(last.index)},${y(0)}L${x(first.index)},${y(0)}Z`}
+                          fill={`url(#${id})`}
                         />
-                      )}
-                    </g>
-                  );
-                })}
+                        <path className="sales-trend-halo" d={line} />
+                        <path className="sales-trend-line" d={line} />
+                        {segment.length === 1 && (
+                          <circle
+                            className="sales-trend-dot"
+                            cx={x(first.index)}
+                            cy={y(first.value)}
+                            r="4"
+                          />
+                        )}
+                      </g>
+                    );
+                  })}
             {ticks.map((index) => (
               <text
                 key={index}
@@ -314,6 +360,23 @@ export default function SalesTrendChart({
                 )}
               </g>
             )}
+            {active?.value !== null &&
+              active?.value !== undefined &&
+              selected !== null && (
+                <g
+                  className="workspace-chart-tooltip"
+                  aria-hidden="true"
+                  transform={`translate(${Math.max(left, Math.min(right - 136, x(selected) - 68))},${Math.max(top, Math.min(bottom - 44, y(active.value) - 54))})`}
+                >
+                  <rect width="136" height="42" rx="9" />
+                  <text x="12" y="15">
+                    {shortDate(active.day)}
+                  </text>
+                  <text x="12" y="31" className="workspace-chart-tooltip-value">
+                    {format(active.value)}
+                  </text>
+                </g>
+              )}
           </svg>
         </div>
       ) : (

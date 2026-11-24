@@ -1,4 +1,5 @@
 "use client";
+import { catalogDocumentClasses } from "../lib/catalog/document-theme";
 
 import type { CatalogPageData } from "../types/catalog";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -98,12 +99,21 @@ function CatalogPage({
     setCartOpen(false);
   }, [pathname]);
   useEffect(() => {
-    document.documentElement.className = catalog
-      ? `theme-${catalog.slug}-root`
-      : "";
-    document.body.className = catalog
-      ? `theme-${catalog.slug}${isClient ? " client-page" : ""}${menuOpen ? " sidebar-is-open" : ""}${cartOpen ? " quote-cart-open" : ""}`
-      : "";
+    document.documentElement.className = catalogDocumentClasses(
+      document.documentElement.className,
+      catalog ? [`theme-${catalog.slug}-root`] : [],
+    );
+    document.body.className = catalogDocumentClasses(
+      document.body.className,
+      catalog
+        ? [
+            `theme-${catalog.slug}`,
+            isClient ? "client-page" : "",
+            menuOpen ? "sidebar-is-open" : "",
+            cartOpen ? "quote-cart-open" : "",
+          ]
+        : [],
+    );
     document.title = catalog
       ? `${catalog.name} | Pitter Pan Festas`
       : isClient
