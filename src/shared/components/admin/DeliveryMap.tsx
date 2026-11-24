@@ -48,7 +48,7 @@ export default function DeliveryMap({
         const map = L.map(container.current, {
           scrollWheelZoom: true,
           zoomControl: true,
-          minZoom: 1,
+          minZoom: 0,
           maxZoom: 16,
           zoomSnap: 0.25,
           maxBounds: [
