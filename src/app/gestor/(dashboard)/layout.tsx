@@ -10,6 +10,8 @@ import "@shared/styles/admin/dashboard.css";
 import "@shared/styles/admin/sales.css";
 import "@shared/styles/admin/analytics.css";
 import "@shared/styles/admin/date-range.css";
+import "@shared/styles/admin/theme.css";
+import "@shared/styles/admin/charts.css";
 export const metadata = { title: "Central de gestão" };
 async function RecoveryLabel() {
   return (await pendingPasswordRequests()).length > 0

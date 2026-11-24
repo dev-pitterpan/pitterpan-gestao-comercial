@@ -104,7 +104,7 @@ export default function CommercialOverview({
         {
           label: "Retiradas prontas",
           icon: Store,
-          tone: "violet",
+          tone: "teal",
           value: number(Number(data.queue.ready)),
           href: operationsHref,
           hint: "Aguardando retirada do cliente",

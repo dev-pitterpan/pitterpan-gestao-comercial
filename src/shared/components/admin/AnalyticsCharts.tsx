@@ -2,6 +2,7 @@
 import { useId, useState } from "react";
 import { ChevronDown, ChevronUp, TrendingUp } from "lucide-react";
 import type { AnalyticsTable } from "../../server/sales/analytics";
+import { chartColors, monotonePath } from "../../lib/admin/chart-style";
 export const numberValue = (v: unknown) =>
   v !== null && v !== undefined && v !== "" && Number.isFinite(Number(v))
     ? Number(v)
@@ -129,8 +130,12 @@ export function RevenueChart({
       >
         <defs>
           <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="#397bc4" stopOpacity=".25" />
-            <stop offset="100%" stopColor="#397bc4" stopOpacity=".015" />
+            <stop offset="0%" stopColor={chartColors.blue} stopOpacity=".25" />
+            <stop
+              offset="100%"
+              stopColor={chartColors.blue}
+              stopOpacity=".015"
+            />
           </linearGradient>
         </defs>
         {[0, 1, 2, 3, 4].map((i) => {
@@ -182,9 +187,7 @@ export function RevenueChart({
           />
         )}
         {segments.map((s, i) => {
-          const path = s
-            .map((p, j) => `${j ? "L" : "M"}${x(p.i)},${y(p.v)}`)
-            .join(" ");
+          const path = monotonePath(s.map((p) => ({ x: x(p.i), y: y(p.v) })));
           return (
             <g key={i}>
               <path
@@ -194,13 +197,18 @@ export function RevenueChart({
               <path
                 d={path}
                 fill="none"
-                stroke="#356fb3"
+                stroke={chartColors.blue}
                 strokeWidth="3"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               />
               {s.length === 1 && (
-                <circle cx={x(s[0].i)} cy={y(s[0].v)} r="4" fill="#356fb3" />
+                <circle
+                  cx={x(s[0].i)}
+                  cy={y(s[0].v)}
+                  r="4"
+                  fill={chartColors.blue}
+                />
               )}
             </g>
           );
@@ -232,8 +240,8 @@ export function RevenueChart({
                 cx={x(active)}
                 cy={y(values[active]!)}
                 r="6"
-                fill="#ffd51a"
-                stroke="#2f5597"
+                fill={chartColors.amber}
+                stroke={chartColors.blue}
                 strokeWidth="3"
               />
             )}

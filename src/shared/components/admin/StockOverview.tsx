@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { chartColors } from "../../lib/admin/chart-style";
 import { useState } from "react";
 import type { AdminSummary } from "../../server/admin/repository";
 
@@ -26,25 +27,25 @@ export default function StockOverview({
         0,
         summary.variants - summary.low - summary.out - summary.unknown,
       ),
-      color: "#354ba7",
+      color: chartColors.blue,
       href: "/gestor/estoque/?stock=above",
     },
     {
       label: "Estoque baixo",
       value: summary.low,
-      color: "#efbd37",
+      color: chartColors.amber,
       href: "/gestor/estoque/?stock=low",
     },
     {
       label: "Sem estoque",
       value: summary.out,
-      color: "#e65b69",
+      color: chartColors.coral,
       href: "/gestor/estoque/?stock=out",
     },
     {
       label: "Não informado",
       value: summary.unknown,
-      color: "#a8bacd",
+      color: chartColors.slate,
       href: "/gestor/estoque/?stock=unknown",
     },
   ];

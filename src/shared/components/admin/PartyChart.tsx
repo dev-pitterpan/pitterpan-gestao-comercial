@@ -3,17 +3,11 @@
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import AdminSelect from "./AdminSelect";
+import { chartPalette } from "../../lib/admin/chart-style";
 import { Pause, Play, RotateCcw, Sparkles } from "lucide-react";
 
 type Category = { id?: string; name: string; count: number; detail?: string };
-const colors = [
-  "#354ba7",
-  "#efbd37",
-  "#e65b69",
-  "#608aca",
-  "#9b79ca",
-  "#48a695",
-];
+const colors = chartPalette;
 const number = (n: number) => new Intl.NumberFormat("pt-BR").format(n);
 
 /** A small vector balloon, shared by the chart and section illustrations. */
