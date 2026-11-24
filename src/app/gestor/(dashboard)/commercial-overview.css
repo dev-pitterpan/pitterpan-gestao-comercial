@@ -30,7 +30,7 @@
 .commercial-overview-trend {
   grid-area: trend;
 }
-#overview-pending {
+.commercial-overview-grid > .commercial-overview-alert {
   grid-area: pending;
   scroll-margin-top: 90px;
 }

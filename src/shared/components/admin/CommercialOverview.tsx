@@ -2,10 +2,7 @@ import Link from "next/link";
 import {
   ArrowRight,
   ChartNoAxesCombined,
-  BellRing,
-  Package,
   ShoppingCart,
-  Store,
   Wallet,
   ArrowUpRight,
   ArrowDownLeft,
@@ -13,7 +10,6 @@ import {
 import { database } from "../../server/database/client";
 import { salesConfig, salesReady } from "../../server/sales/config";
 import { readCommercialOverview } from "../../server/sales/repository";
-import { fulfillmentLabels } from "../../lib/admin/fulfillment";
 import { salesPageLink } from "../../lib/admin/sales-links";
 import { number, dateTime } from "./Primitives";
 import CommercialTrend from "./CommercialTrend";
@@ -23,7 +19,6 @@ import {
   todayDate,
   type DateRange,
 } from "../../lib/admin/date-range";
-import OrderFulfillmentDetails from "./OrderFulfillmentDetails";
 
 export async function loadOverview(range: DateRange) {
   if (!salesReady()) return null;
@@ -50,18 +45,15 @@ export default function CommercialOverview({
   range,
   data,
   admin,
-  view = "performance",
 }: {
   range: DateRange;
   admin: boolean;
-  view?: "performance" | "priorities";
   data: Awaited<ReturnType<typeof loadOverview>>;
 }) {
   const syncedAt = data?.sales.state?.completed_at;
   const stale = syncedAt && Date.now() - Date.parse(syncedAt) > 86_400_000;
   const filters = new URLSearchParams(range);
   const salesHref = salesPageLink("/gestor/vendas/resumo/", filters);
-  const operationsHref = salesPageLink("/gestor/vendas/atendimento/", filters);
   const cards = data
     ? [
         {
@@ -99,22 +91,6 @@ export default function CommercialOverview({
           }),
           hint: "Recebimentos menos reembolsos",
         },
-        {
-          label: "Pedidos a preparar",
-          icon: Package,
-          tone: "amber",
-          value: number(Number(data.queue.preparing)),
-          href: operationsHref,
-          hint: "Atendimentos em aberto, exceto retiradas prontas",
-        },
-        {
-          label: "Retiradas prontas",
-          icon: Store,
-          tone: "teal",
-          value: number(Number(data.queue.ready)),
-          href: operationsHref,
-          hint: "Aguardando retirada do cliente",
-        },
       ]
     : [];
   const moneyMetric = (key: string) =>
@@ -148,30 +124,17 @@ export default function CommercialOverview({
       hint: "Reembolsos dos pedidos do período",
     },
   ].filter(Boolean);
-  const orderedCards =
-    view === "priorities"
-      ? cards.slice(2)
-      : admin
-        ? performanceCards
-        : [
-            performanceCards[1],
-            performanceCards[0],
-            ...performanceCards.slice(2),
-          ];
-  const preparing = Number(data?.queue.preparing || 0);
-  const ready = Number(data?.queue.ready || 0);
-  const awaiting = preparing + ready;
+  const orderedCards = admin
+    ? performanceCards
+    : [performanceCards[1], performanceCards[0], ...performanceCards.slice(2)];
   return (
     <section
       aria-label="Resumo comercial Shopify"
-      className={`commercial-overview workspace-commercial content-commercial--${view}`}
+      className="commercial-overview workspace-commercial content-commercial--performance"
     >
       <header className="workspace-commercial-heading">
         <span className="workspace-source-label">
-          <ShoppingCart size={14} />{" "}
-          {view === "priorities"
-            ? "PRIORIDADES DA OPERAÇÃO"
-            : "DESEMPENHO SHOPIFY"}
+          <ShoppingCart size={14} /> DESEMPENHO SHOPIFY
         </span>
         <span className="workspace-sync-label">
           {syncedAt
@@ -192,13 +155,12 @@ export default function CommercialOverview({
               {data.sales.state?.until_at && "Sincronização em andamento."}
             </p>
           )}
-          {view === "performance" &&
-            range.start < shiftDate(todayDate(), -59) && (
-              <p className="admin-inline-note">
-                O início do período está fora da janela automática de 60 dias.
-                Os indicadores usam o histórico disponível.
-              </p>
-            )}
+          {range.start < shiftDate(todayDate(), -59) && (
+            <p className="admin-inline-note">
+              O início do período está fora da janela automática de 60 dias. Os
+              indicadores usam o histórico disponível.
+            </p>
+          )}
           {stale && (
             <p className="admin-data-notice">
               A última sincronização de vendas foi há mais de 24 horas.
@@ -206,68 +168,43 @@ export default function CommercialOverview({
           )}
         </>
       )}
-      {view === "priorities" && (
-        <p className="content-priorities-description">
-          Pendências atuais de todo o histórico importado, independentemente do
-          período das análises.
-        </p>
-      )}
       <div className="workspace-metrics">
         {(data
           ? orderedCards
-          : view === "priorities"
-            ? [
-                {
-                  label: "Pedidos a preparar",
-                  icon: Package,
-                  tone: "amber",
-                  value: "—",
-                  href: operationsHref,
-                  hint: "Aguardando sincronização",
-                },
-                {
-                  label: "Retiradas prontas",
-                  icon: Store,
-                  tone: "teal",
-                  value: "—",
-                  href: operationsHref,
-                  hint: "Aguardando sincronização",
-                },
-              ]
-            : [
-                {
-                  label: "Recebido após reembolsos",
-                  icon: Wallet,
-                  tone: "green",
-                  value: "—",
-                  href: salesHref,
-                  hint: "Aguardando sincronização",
-                },
-                {
-                  label: "Pedidos pagos",
-                  icon: ShoppingCart,
-                  tone: "blue",
-                  value: "—",
-                  href: salesHref,
-                  hint: "Aguardando sincronização",
-                },
-                {
-                  label: "Ticket dos pedidos pagos",
-                  icon: ArrowUpRight,
-                  tone: "teal",
-                  value: "—",
-                  href: salesHref,
-                  hint: "Aguardando sincronização",
-                },
-                {
-                  label: "Estornos e reembolsos",
-                  icon: ArrowDownLeft,
-                  tone: "rose",
-                  value: "—",
-                  href: salesHref,
-                  hint: "Aguardando sincronização",
-                },
-              ]
+          : [
+              {
+                label: "Recebido após reembolsos",
+                icon: Wallet,
+                tone: "green",
+                value: "—",
+                href: salesHref,
+                hint: "Aguardando sincronização",
+              },
+              {
+                label: "Pedidos pagos",
+                icon: ShoppingCart,
+                tone: "blue",
+                value: "—",
+                href: salesHref,
+                hint: "Aguardando sincronização",
+              },
+              {
+                label: "Ticket dos pedidos pagos",
+                icon: ArrowUpRight,
+                tone: "teal",
+                value: "—",
+                href: salesHref,
+                hint: "Aguardando sincronização",
+              },
+              {
+                label: "Estornos e reembolsos",
+                icon: ArrowDownLeft,
+                tone: "rose",
+                value: "—",
+                href: salesHref,
+                hint: "Aguardando sincronização",
+              },
+            ]
         ).map(({ label, icon: Icon, tone, value, href, hint }) => (
           <Link
             key={label}
@@ -286,150 +223,53 @@ export default function CommercialOverview({
           </Link>
         ))}
       </div>
-      {view === "performance" ? (
-        <div
-          className="workspace-performance-grid content-performance-grid"
-          id="workspace-performance"
-        >
-          <section className="workspace-trend-card">
-            <div className="workspace-chart-eyebrow">
-              <span>
-                <i /> PERFORMANCE
-              </span>
-              <Link href={salesHref}>
-                Explorar vendas <ArrowRight size={14} />
+
+      <div
+        className="workspace-performance-grid content-performance-grid"
+        id="workspace-performance"
+      >
+        <section className="workspace-trend-card">
+          <div className="workspace-chart-eyebrow">
+            <span>
+              <i /> PERFORMANCE
+            </span>
+            <Link href={salesHref}>
+              Explorar vendas <ArrowRight size={14} />
+            </Link>
+          </div>
+          {data ? (
+            <CommercialTrend
+              key={`${range.start}-${range.end}`}
+              sales={data.sales}
+              previousDaily={data.previousDaily}
+            />
+          ) : (
+            <div className="workspace-chart-empty">
+              <ChartNoAxesCombined size={38} />
+              <h2>Seu desempenho começa aqui</h2>
+              <p>
+                Sincronize os pedidos para acompanhar a evolução das vendas com
+                dados reais.
+              </p>
+              <Link href="/gestor/sincronizacoes/">
+                Conferir sincronização <ArrowRight size={15} />
               </Link>
             </div>
-            {data ? (
-              <CommercialTrend
-                key={`${range.start}-${range.end}`}
-                sales={data.sales}
-                previousDaily={data.previousDaily}
-              />
-            ) : (
-              <div className="workspace-chart-empty">
-                <ChartNoAxesCombined size={38} />
-                <h2>Seu desempenho começa aqui</h2>
-                <p>
-                  Sincronize os pedidos para acompanhar a evolução das vendas
-                  com dados reais.
-                </p>
-                <Link href="/gestor/sincronizacoes/">
-                  Conferir sincronização <ArrowRight size={15} />
-                </Link>
-              </div>
-            )}
-            <p className="workspace-chart-footnote">
-              Recebimentos e reembolsos pela data de processamento do pedido ·
-              Horário de Brasília
-            </p>
-          </section>
-          {data ? (
-            <SalesActivity sales={data.sales} />
-          ) : (
-            <section className="admin-panel content-calendar-empty">
-              <h2>Calendário de vendas</h2>
-              <p>Os pedidos por dia aparecem após a sincronização.</p>
-            </section>
           )}
-        </div>
-      ) : (
-        <div className="workspace-operations content-priorities-grid">
-          <section
-            className="workspace-queue-card"
-            aria-labelledby="workspace-queue-heading"
-          >
-            <header>
-              <h2 id="workspace-queue-heading">Fila de atendimento</h2>
-              <Package size={17} />
-            </header>
-            <div className="workspace-queue-numbers">
-              <div>
-                <strong>{data ? number(preparing) : "—"}</strong>
-                <span>
-                  <i /> A preparar
-                </span>
-              </div>
-              <div>
-                <strong>{data ? number(ready) : "—"}</strong>
-                <span>
-                  <i /> Retiradas prontas
-                </span>
-              </div>
-            </div>
-            <div className="workspace-queue-track" aria-hidden="true">
-              <span
-                style={{
-                  width: `${awaiting ? (preparing / awaiting) * 100 : 0}%`,
-                }}
-              />
-              <span
-                style={{ width: `${awaiting ? (ready / awaiting) * 100 : 0}%` }}
-              />
-            </div>
-            <Link href={operationsHref}>
-              Abrir atendimento <ArrowRight size={13} />
-            </Link>
+          <p className="workspace-chart-footnote">
+            Recebimentos e reembolsos pela data de processamento do pedido ·
+            Horário de Brasília
+          </p>
+        </section>
+        {data ? (
+          <SalesActivity sales={data.sales} />
+        ) : (
+          <section className="admin-panel content-calendar-empty">
+            <h2>Calendário de vendas</h2>
+            <p>Os pedidos por dia aparecem após a sincronização.</p>
           </section>
-          <section className="workspace-priorities" id="overview-pending">
-            <header>
-              <h2>
-                <BellRing size={17} /> Atenção agora
-              </h2>
-              <span>
-                {data ? `${number(awaiting)} em aberto` : "Sem confirmação"}
-              </span>
-            </header>
-            <p>
-              Até cinco pendências mais antigas do histórico importado,
-              independentemente do período.
-            </p>
-            {data?.pending.length ? (
-              <ul
-                className="sales-operations-orders"
-                tabIndex={0}
-                aria-label="Lista de pendências de atendimento"
-              >
-                {data.pending.map((order) => (
-                  <li key={order.id}>
-                    <div>
-                      <a
-                        href={`https://${data.store}/admin/orders/${order.id.split("/").at(-1)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {order.name}
-                      </a>
-                      <span className="sales-operations-customer">
-                        {order.customer_name || "Nome do cliente indisponível"}
-                      </span>
-                      <small>
-                        {dateTime(order.processed_at)} ·{" "}
-                        {fulfillmentLabels[order.fulfillment_status] ??
-                          order.fulfillment_status}
-                      </small>
-                    </div>
-                    <OrderFulfillmentDetails
-                      id={order.id}
-                      name={order.name}
-                      storedStatus={order.fulfillment_status}
-                    />
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="workspace-no-pending">
-                {data
-                  ? "Nenhuma pendência encontrada no histórico importado."
-                  : "Sincronize os pedidos para conferir as pendências."}
-              </p>
-            )}
-            <Link href={salesPageLink("/gestor/vendas/", filters)}>
-              Ver todos os pedidos <ArrowRight size={13} />
-            </Link>
-          </section>
-        </div>
-      )}
+        )}
+      </div>
     </section>
   );
 }

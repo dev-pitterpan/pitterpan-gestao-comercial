@@ -7,6 +7,10 @@ import { allowed } from "@shared/server/auth/crypto";
 import CommercialOverview, {
   loadOverview,
 } from "@shared/components/admin/CommercialOverview";
+import PrioritiesOverview, {
+  loadPriorities,
+} from "@shared/components/admin/PrioritiesOverview";
+import { prioritySelection } from "@shared/lib/admin/priorities";
 import OverviewCatalog from "@shared/components/admin/OverviewCatalog";
 import CommercialPeriod from "@shared/components/admin/CommercialPeriod";
 import { adminContext } from "@shared/server/admin/repository";
@@ -44,8 +48,13 @@ export default async function Overview({
   const canViewSales = allowed(user.role, ["admin", "gestor"]);
   const context = section === "catalogo" ? await adminContext() : null;
   const sales =
-    section !== "catalogo" && canViewSales
+    section === "desempenho" && canViewSales
       ? await loadOverview(range).catch(() => null)
+      : null;
+  const priorityInput = prioritySelection(params);
+  const priorities =
+    section === "prioridades" && canViewSales
+      ? await loadPriorities(priorityInput).catch(() => null)
       : null;
   const source = new URLSearchParams(range);
   const active = overviewSections.find((item) => item.id === section)!;
@@ -89,12 +98,17 @@ export default async function Overview({
             <DataNotice context={context} />
             <OverviewCatalog context={context} />
           </>
+        ) : section === "prioridades" ? (
+          <PrioritiesOverview
+            data={priorities}
+            selection={priorityInput}
+            source={source}
+          />
         ) : (
           <CommercialOverview
             range={range}
             data={sales}
             admin={user.role === "admin"}
-            view={section === "prioridades" ? "priorities" : "performance"}
           />
         )}
       </section>
