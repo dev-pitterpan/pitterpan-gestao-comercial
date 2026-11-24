@@ -124,6 +124,7 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
         "/gestor/analises/",
         "/gestor/produtos/",
         "/gestor/clientes/",
+        "/gestor/mapa/",
         "/gestor/natal/",
       ]) {
         const response = await get(path, { headers: { cookie } });
@@ -141,6 +142,11 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
           assert.match(html, /aria-label="Áreas da gestão"/);
           assert.match(html, /aria-label="Buscar rotina na gestão"/);
           assert.doesNotMatch(html, /class="admin-sidebar"/);
+        }
+        if (path === "/gestor/mapa/") {
+          assert.match(html, /<h1>Mapa de entregas<\/h1>/);
+          assert.match(html, /aria-label="Categorias desta área"/);
+          assert.match(html, /Estado de destino/);
         }
         if (path === "/gestor/clientes/") {
           assert.match(html, /<h1>Ranking de clientes<\/h1>/);
