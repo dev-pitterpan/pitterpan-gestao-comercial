@@ -6,12 +6,14 @@ import DateRangePicker from "./DateRangePicker";
 import type { DateRange } from "../../lib/admin/date-range";
 import PitterSpinner from "./PitterSpinner";
 import DeliveryMark from "./DeliveryMark";
-import DeliveryMap from "./DeliveryMap";
+import DeliveryMapView from "./DeliveryMapView";
+import TablePagination from "./TablePagination";
 import { deliveryLabels } from "../../lib/admin/delivery";
 import type { readDestinations } from "../../server/sales/destinations";
 type Data = Awaited<ReturnType<typeof readDestinations>>;
 const number = (n: number) => new Intl.NumberFormat("pt-BR").format(n);
 export default function DestinationsDashboard() {
+  const [mapView, setMapView] = useState<"regions" | "cities">("regions");
   const [range, setRange] = useState<DateRange>({ start: "", end: "" });
   const [days, setDays] = useState("30"),
     [delivery, setDelivery] = useState("all"),
@@ -19,7 +21,7 @@ export default function DestinationsDashboard() {
     [state, setState] = useState(""),
     [q, setQ] = useState(""),
     [search, setSearch] = useState(""),
-    [limit, setLimit] = useState(10),
+    [cityPage, setCityPage] = useState(1),
     [data, setData] = useState<Data | null>(null),
     [busy, setBusy] = useState(true),
     [error, setError] = useState("");
@@ -32,7 +34,7 @@ export default function DestinationsDashboard() {
     setBusy(true);
     setData(null);
     setError("");
-    setLimit(10);
+    setCityPage(1);
     const params = new URLSearchParams({
       days,
       start: range.start,
@@ -171,13 +173,21 @@ export default function DestinationsDashboard() {
           )}
           <div className="delivery-destinations-layout">
             <section className="admin-panel">
-              <header>
-                <div>
-                  <span className="admin-eyebrow">ALCANCE DA LOJA</span>
-                  <h2>Entregas pelo Brasil</h2>
-                </div>
-              </header>
-              <DeliveryMap cities={data.cities} />
+              <DeliveryMapView
+                cities={data.cities}
+                state={state}
+                onStateChange={setState}
+                view={mapView}
+                onViewChange={setMapView}
+              />
+              {state && (
+                <p className="delivery-selected-state" role="status">
+                  Estado selecionado: <strong>{state}</strong>
+                  <button type="button" onClick={() => setState("")}>
+                    Ver todos os estados
+                  </button>
+                </p>
+              )}
             </section>
             <section className="admin-panel">
               <header>
@@ -193,20 +203,26 @@ export default function DestinationsDashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {data.cities.slice(0, limit).map((row, i) => (
-                      <tr key={`${row.country}-${row.state}-${row.city}-${i}`}>
-                        <td>
-                          <strong>{row.city || "Cidade não informada"}</strong>
-                          <small>
-                            {[row.state, row.country]
-                              .filter(Boolean)
-                              .join(" · ") || "Destino não informado"}
-                          </small>
-                        </td>
-                        <td>{number(row.orders)}</td>
-                        <td>{number(row.units)}</td>
-                      </tr>
-                    ))}
+                    {data.cities
+                      .slice((cityPage - 1) * 8, cityPage * 8)
+                      .map((row, i) => (
+                        <tr
+                          key={`${row.country}-${row.state}-${row.city}-${i}`}
+                        >
+                          <td>
+                            <strong>
+                              {row.city || "Cidade não informada"}
+                            </strong>
+                            <small>
+                              {[row.state, row.country]
+                                .filter(Boolean)
+                                .join(" · ") || "Destino não informado"}
+                            </small>
+                          </td>
+                          <td>{number(row.orders)}</td>
+                          <td>{number(row.units)}</td>
+                        </tr>
+                      ))}
                     {!data.cities.length && (
                       <tr>
                         <td colSpan={3}>Nenhum destino nesta seleção.</td>
@@ -215,15 +231,18 @@ export default function DestinationsDashboard() {
                   </tbody>
                 </table>
               </div>
-              {limit < data.cities.length && (
-                <div className="sales-pagination">
-                  <button
-                    className="admin-button"
-                    onClick={() => setLimit((n) => n + 10)}
-                  >
-                    Mostrar mais 10 cidades
-                  </button>
-                </div>
+              {data.cities.length > 0 && (
+                <TablePagination
+                  label="Páginas de cidades de destino"
+                  page={cityPage}
+                  pages={Math.max(1, Math.ceil(data.cities.length / 8))}
+                  range={`${number((cityPage - 1) * 8 + 1)}–${number(Math.min(cityPage * 8, data.cities.length))} de ${number(data.cities.length)} cidades`}
+                  hasNext={cityPage * 8 < data.cities.length}
+                  onPrevious={() =>
+                    setCityPage((page) => Math.max(1, page - 1))
+                  }
+                  onNext={() => setCityPage((page) => page + 1)}
+                />
               )}
               {delivery !== "all" && (
                 <div className="sales-pagination">

@@ -1,0 +1,439 @@
+/* Local vector geometry with SVG patterns: no map tiles, geocoder or extra library. */
+.delivery-view-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+.delivery-view-toolbar h2 {
+  margin: 4px 0 0;
+}
+.delivery-view-switch {
+  display: flex;
+  gap: 3px;
+  padding: 4px;
+  border: 1px solid #e5eaf4;
+  border-radius: 9px;
+  background: #f5f7fc;
+}
+.delivery-view-switch > button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 35px;
+  padding: 8px 11px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: none;
+  color: #7a869e;
+  font-size: 11px;
+}
+.delivery-view-switch > button[aria-pressed="true"] {
+  background: #fff;
+  border-color: #e2e8f6;
+  color: #5b70b6;
+  box-shadow: 0 1px 3px #273b6207;
+}
+.dotted-delivery-card {
+  background: #172031;
+  background-image: radial-gradient(
+    ellipse at 35% 45%,
+    #25355455,
+    transparent 65%
+  );
+  border: 1px solid #29344b;
+  border-radius: 15px;
+  color: #dce4f3;
+  padding: 25px;
+  overflow: hidden;
+}
+.dotted-map-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+.dotted-map-heading > div > span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  color: #8c9ab6;
+}
+.admin-app .dotted-map-heading h3 {
+  margin: 9px 0 0;
+  color: #e0e7f4;
+  font-size: 18px;
+  font-weight: 550;
+  letter-spacing: -0.025em;
+}
+.dotted-map-country {
+  white-space: nowrap;
+  color: #a8b4cb;
+  border: 1px solid #35415a;
+  border-radius: 7px;
+  background: #ffffff04;
+  padding: 7px 10px;
+  font-size: 11px;
+}
+.dotted-map-topline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-top: 26px;
+}
+.dotted-map-topline > strong {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  color: #e9eef7;
+  font-weight: 550;
+  letter-spacing: -0.045em;
+  font-size: 28px;
+}
+.dotted-map-topline > strong > span {
+  color: #8f9db7;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.dotted-map-topline > div {
+  display: flex;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+.dotted-map-topline button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff04;
+  border: 1px solid #34415b;
+  border-radius: 6px;
+  padding: 6px 9px;
+  color: #a7b4ce;
+  font-size: 10px;
+}
+.dotted-map-topline button i {
+  width: 5px;
+  height: 5px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: #8ba2df;
+}
+.dotted-map-topline button b {
+  color: #d0dbef;
+  font-weight: 500;
+}
+.dotted-map-topline button[aria-pressed="true"] {
+  border-color: #6ca4aa;
+  background: #a6e3df0a;
+  color: #b0d9dc;
+}
+.dotted-map-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 210px;
+  gap: 28px;
+  align-items: center;
+  margin: 8px 0 12px;
+}
+.dotted-map-visual {
+  min-width: 0;
+  display: flex;
+  justify-content: center;
+}
+.dotted-map-visual svg {
+  width: 100%;
+  max-width: 540px;
+  height: 380px;
+  display: block;
+  overflow: visible;
+}
+.dotted-map-dot--0 {
+  fill: #3a465e;
+}
+.dotted-map-dot--1 {
+  fill: #52648c;
+}
+.dotted-map-dot--2 {
+  fill: #6b82bb;
+}
+.dotted-map-dot--3 {
+  fill: #8da9e7;
+}
+.dotted-map-dot--4 {
+  fill: #b0ceff;
+}
+.dotted-map-dot--active {
+  fill: #a6e3df;
+}
+.dotted-map-region {
+  cursor: pointer;
+  outline: none;
+}
+.dotted-map-region path {
+  pointer-events: all;
+  stroke: transparent;
+  stroke-width: 0.6;
+  stroke-linejoin: round;
+}
+.dotted-map-region.is-selected path {
+  stroke: #9cd4d866;
+}
+.dotted-map-region:focus-visible path {
+  stroke: #d4e5ff;
+  stroke-width: 1.5;
+}
+.dotted-map-readout {
+  min-width: 0;
+  border-left: 1px solid #303c53;
+  padding-left: 25px;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+}
+.dotted-map-readout-icon {
+  width: 39px;
+  height: 39px;
+  display: grid;
+  place-items: center;
+  background: #26334c;
+  border: 1px solid #3b4d6f;
+  border-radius: 12px;
+  color: #9bb6e6;
+  margin-bottom: 21px;
+}
+.dotted-map-overline {
+  color: #8292b1;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+}
+.dotted-map-readout h4 {
+  color: #c7d4ec;
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: -0.025em;
+  margin: 7px 0 17px;
+}
+.dotted-map-readout > strong {
+  color: #dbe7fb;
+  font-size: 35px;
+  font-weight: 500;
+  letter-spacing: -0.06em;
+  line-height: 1.1;
+}
+.dotted-map-readout > strong > small {
+  color: #8597b9;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 0;
+  margin-left: 9px;
+}
+.dotted-map-readout p {
+  color: #8e9fbf;
+  font-size: 11px;
+  line-height: 1.8;
+  margin: 9px 0 20px;
+}
+.dotted-map-hint {
+  display: block;
+  color: #93a2bd;
+  font-size: 10px;
+  line-height: 1.8;
+  max-width: 175px;
+}
+.dotted-map-clear {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid #47627f;
+  padding: 0 0 5px;
+  margin-top: 17px;
+  color: #aecbdc;
+  font-size: 10px;
+  line-height: 1.8;
+  text-align: left;
+}
+.dotted-map-footer {
+  border-top: 1px solid #2c3850;
+  padding-top: 17px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+.dotted-map-scale {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+.dotted-map-scale > span {
+  color: #8e9eba;
+  font-size: 9px;
+  white-space: nowrap;
+}
+.dotted-map-scale > span:first-child {
+  margin-right: 5px;
+}
+.dotted-map-scale > span:last-child {
+  margin-left: 5px;
+}
+.dotted-map-scale i {
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #3a465e;
+}
+.dotted-map-scale i[data-level="1"] {
+  background: #52648c;
+}
+.dotted-map-scale i[data-level="2"] {
+  background: #6b82bb;
+}
+.dotted-map-scale i[data-level="3"] {
+  background: #8da9e7;
+}
+.dotted-map-scale i[data-level="4"] {
+  background: #b0ceff;
+}
+.dotted-map-footer p {
+  margin: 0;
+  color: #8e9eba;
+  font-size: 9px;
+  line-height: 1.8;
+  max-width: 440px;
+}
+.delivery-selected-state {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #7a87a0;
+  font-size: 11px;
+  margin: 14px 0 0;
+  flex-wrap: wrap;
+}
+.delivery-selected-state strong {
+  color: #5b70aa;
+}
+.delivery-selected-state button {
+  border: 0;
+  background: #edf1fb;
+  color: #6376af;
+  border-radius: 6px;
+  padding: 6px 9px;
+  font-size: 10px;
+  margin-left: auto;
+}
+@media (max-width: 1250px) {
+  .dotted-map-layout {
+    grid-template-columns: minmax(0, 1fr) 175px;
+    gap: 14px;
+  }
+  .dotted-map-readout {
+    padding-left: 18px;
+  }
+  .dotted-map-footer {
+    align-items: start;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .dotted-map-visual svg {
+    height: 340px;
+  }
+}
+@media (max-width: 760px) {
+  .dotted-delivery-card {
+    padding: 20px;
+  }
+  .dotted-map-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .dotted-map-readout {
+    border-left: 0;
+    border-top: 1px solid #303c53;
+    padding: 18px 0 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px 20px;
+    align-items: baseline;
+  }
+  .dotted-map-readout-icon {
+    display: none;
+  }
+  .dotted-map-overline {
+    grid-column: 1;
+  }
+  .dotted-map-readout h4 {
+    grid-column: 1;
+    margin: 0;
+    font-size: 18px;
+  }
+  .dotted-map-readout > strong {
+    grid-column: 2;
+    grid-row: 1/3;
+    align-self: center;
+    justify-self: end;
+    font-size: 30px;
+  }
+  .dotted-map-readout p {
+    grid-column: 1/-1;
+    margin: 4px 0;
+  }
+  .dotted-map-hint {
+    grid-column: 1/-1;
+    max-width: none;
+  }
+  .dotted-map-clear {
+    grid-column: 1/-1;
+    margin-top: 7px;
+    width: fit-content;
+  }
+  .dotted-map-topline {
+    flex-wrap: wrap;
+    margin-top: 20px;
+  }
+  .dotted-map-topline > div {
+    gap: 6px;
+  }
+  .dotted-map-visual svg {
+    height: 350px;
+  }
+}
+@media (max-width: 460px) {
+  .dotted-delivery-card {
+    padding: 17px;
+  }
+  .dotted-map-country {
+    font-size: 10px;
+    padding: 6px 8px;
+  }
+  .admin-app .dotted-map-heading h3 {
+    font-size: 16px;
+  }
+  .dotted-map-heading {
+    gap: 12px;
+    align-items: start;
+  }
+  .dotted-map-heading > div > span {
+    font-size: 8px;
+  }
+  .dotted-map-visual svg {
+    height: 300px;
+  }
+  .delivery-view-switch {
+    width: 100%;
+  }
+  .delivery-view-switch > button {
+    flex: 1;
+    justify-content: center;
+    font-size: 10px;
+  }
+}

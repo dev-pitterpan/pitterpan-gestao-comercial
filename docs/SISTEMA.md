@@ -211,3 +211,12 @@ Contagens e linhas usam a mesma regra `awaitingFulfillmentSql`: loja correta, pe
 O resumo compacto apresenta pedidos a preparar, retiradas prontas e a idade do pedido mais antigo. Cada linha mostra foto de um item ativo, título, quantidade de itens/unidades, cliente, data, valor original, situação, modalidade e conferência de atendimento. Ausência de imagem usa o placeholder existente. “Há N dias” mede dias de calendário em Brasília desde o pedido e não significa prazo vencido ou atraso de entrega. A sincronização ausente, antiga ou em andamento fica explícita.
 
 `priorities.css` contém layout próprio, sem posicionamento absoluto nem áreas nomeadas de grid. A antiga regra global `#overview-pending { grid-area: pending }`, que criava colunas implícitas e deslocava o card, foi restrita ao componente legado. A sidebar e os outros módulos mantêm a estrutura. Nenhuma migração ou alteração de dados é necessária.
+
+
+## Mapa pontilhado de entregas — 24/11/2026
+
+A área Mapa de entregas abre na visualização regional pontilhada do Brasil. Ela reutiliza a geometria local dos 27 estados (`brazil-states.json`) com padrões SVG, sem nova biblioteca, tiles ou geocodificação. `delivery-regions.ts` agrega os pedidos/unidades por UF a partir das mesmas cidades filtradas da tabela. A cor representa intensidade relativa ao maior total da seleção; zero é exibido em cinza e não são criados dados demonstrativos.
+
+`DottedDeliveryMap.tsx` mostra total mapeado, estados com mais pedidos, legenda e leitura por estado. Clique, Enter ou Espaço aplicam o filtro de UF; selecionar a UF novamente ou limpar remove o filtro. O estado e os demais critérios continuam sendo aplicados pela consulta existente, e um filtro de UF reduz também os dados exibidos no mapa. Pedidos internacionais, sem país ou sem UF brasileira válida são explicitamente contabilizados fora do mapa e permanecem na tabela quando correspondem aos filtros. O mapa indica distribuição por estado, nunca endereço individual.
+
+`DeliveryMapView.tsx` alterna Pontilhado e Mapa de cidades; o segundo preserva o Leaflet existente. A escolha permanece durante a alteração de filtros. A tabela passa a paginar oito cidades por vez. `dotted-delivery-map.css` contém a apresentação responsiva do card escuro, com cores azul e ciano. Não há alteração no banco, no sincronizador nem nas permissões. A inspeção visual em navegador e dispositivos reais permanece necessária.
