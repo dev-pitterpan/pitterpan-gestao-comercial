@@ -1,11 +1,9 @@
 "use client";
-import { useId, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { X, ArrowUpRight } from "lucide-react";
 import { worldDeliveries, countryFlag } from "../../lib/admin/world-deliveries";
-import {
-  deliveryRegionLevel,
-  type DeliveryRegionCity,
-} from "../../lib/admin/delivery-regions";
+import DeliveryMap from "./DeliveryMap";
+import type { readDestinations } from "../../server/sales/destinations";
 const number = (value: number) => value.toLocaleString("pt-BR");
 export default function DottedDeliveryMap({
   cities,
@@ -14,21 +12,15 @@ export default function DottedDeliveryMap({
   available = true,
   busy = false,
 }: {
-  cities: DeliveryRegionCity[];
+  cities: Awaited<ReturnType<typeof readDestinations>>["cities"];
   country: string;
   onCountryChange: (country: string) => void;
   available?: boolean;
   busy?: boolean;
 }) {
-  const id = useId(),
-    [hovered, setHovered] = useState("");
   const data = useMemo(() => worldDeliveries(cities), [cities]);
-  const active = data.countries.find(
-    (item) => item.code === (hovered || country),
-  );
   function select(code: string | null) {
     if (!code || busy || !available) return;
-    setHovered("");
     onCountryChange(code === country ? "" : code);
   }
   return (
@@ -78,85 +70,12 @@ export default function DottedDeliveryMap({
         )}
       </div>
       <div className="delivery-world-visual">
-        <svg
-          viewBox="-8 -8 880 380"
-          role="group"
-          aria-label="Mapa mundial pontilhado. Os países com pedidos são destacados. Selecione um país para filtrar os destinos."
-        >
-          <defs>
-            {[0, 1, 2, 3, 4, "active"].map((level) => (
-              <pattern
-                id={`${id}-${level}`}
-                key={level}
-                width="4"
-                height="4"
-                patternUnits="userSpaceOnUse"
-              >
-                <circle
-                  cx="2"
-                  cy="2"
-                  r=".9"
-                  className={`delivery-world-dot delivery-world-dot--${level}`}
-                />
-              </pattern>
-            ))}
-          </defs>
-          {data.countries.map((item, index) => {
-            const selected = !!item.code && country === item.code;
-            const highlight = !!item.code && hovered === item.code;
-            return (
-              <g
-                key={`${item.code}-${index}`}
-                className={`delivery-world-country${selected ? " is-selected" : ""}`}
-                role={item.code && item.orders > 0 ? "button" : undefined}
-                tabIndex={
-                  item.code && item.orders > 0 && available && !busy
-                    ? 0
-                    : undefined
-                }
-                aria-label={`${item.name}: ${number(item.orders)} pedidos`}
-                aria-pressed={
-                  item.code && item.orders > 0 ? selected : undefined
-                }
-                onMouseEnter={() => setHovered(item.code || "")}
-                onMouseLeave={() => setHovered("")}
-                onFocus={() => setHovered(item.code || "")}
-                onBlur={() => setHovered("")}
-                onClick={item.orders > 0 ? () => select(item.code) : undefined}
-                onKeyDown={(event) => {
-                  if (
-                    (event.key === "Enter" || event.key === " ") &&
-                    item.orders > 0
-                  ) {
-                    event.preventDefault();
-                    select(item.code);
-                  }
-                }}
-              >
-                <title>
-                  {item.name} ·{" "}
-                  {available
-                    ? `${number(item.orders)} pedidos`
-                    : "Sem dados carregados"}
-                </title>
-                <path
-                  d={item.path}
-                  fill={`url(#${id}-${selected || highlight ? "active" : deliveryRegionLevel(item.orders, data.max)})`}
-                  fillRule="evenodd"
-                />
-              </g>
-            );
-          })}
-        </svg>
-        {active && available && (
-          <div className="delivery-world-hover" role="status">
-            <span>
-              {countryFlag(active.code)} {active.name}
-            </span>
-            <strong>{number(active.orders)} pedidos</strong>
-            <small>{number(active.units)} unidades</small>
-          </div>
-        )}
+        <DeliveryMap
+          cities={cities}
+          country={country}
+          onCountryChange={onCountryChange}
+          busy={busy}
+        />
       </div>
       <footer>
         <div className="delivery-world-scale">
@@ -168,7 +87,7 @@ export default function DottedDeliveryMap({
         </div>
         {country ? (
           <button type="button" onClick={() => onCountryChange("")}>
-            Limpar país · {country}
+            Voltar ao mapa mundial
             <X size={12} />
           </button>
         ) : (
