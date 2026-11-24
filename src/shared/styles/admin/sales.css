@@ -913,7 +913,9 @@
   body:has(.fulfillment-window[data-dock="left"]) .admin-app {
     margin-left: var(--fulfillment-left-width);
   }
-  body:has(.fulfillment-window[data-dock="left"]) .admin-sidebar {
+  /* Both navigation shells must follow the same dock offset as the application. */
+  body:has(.fulfillment-window[data-dock="left"])
+    :is(.admin-sidebar, .workspace-navigation) {
     left: var(--fulfillment-left-width);
   }
   body:has(.fulfillment-window[data-dock="right"]) .admin-app {
@@ -929,7 +931,8 @@
   body:has(.fulfillment-window[data-dock]) .sales-operations-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  body:has(.fulfillment-window[data-dock]) .admin-topbar {
+  body:has(.fulfillment-window[data-dock])
+    :is(.admin-topbar, .workspace-header) {
     height: auto;
     min-height: 77px;
     padding-inline: 16px;

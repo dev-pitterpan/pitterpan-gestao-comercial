@@ -222,3 +222,10 @@ O mapa mundial usa um card horizontal escuro, países/bandeiras e quantidades no
 `world-countries.json` contém contornos locais derivados da base Natural Earth 1:110m; fonte, transformação e limitações estão em `docs/data/world-map.md`. `world-deliveries.ts` agrega os países. Territórios pequenos sem contorno e pedidos sem país permanecem contabilizados na tabela e são identificados no card. O mapa indica distribuição por país, sem endereço individual. A imagem da geometria foi conferida com uma renderização estática de teste; a inspeção do aplicativo em navegador e dispositivos reais continua necessária.
 
 `DeliveryMapView.tsx` preserva o Leaflet existente na categoria Mapa de cidades. `DestinationsDashboard.tsx` apresenta a organização completa da seção e mantém os filtros e os estados de carregamento/erro. O mapa mundial não depende de tiles, geocodificação, chaves ou novas bibliotecas. O filtro `country` é validado pela API e aplicado sobre o mesmo conjunto de destinos usado nos demais indicadores. Não há migração nem mudança de permissões.
+
+
+## Atendimento fixado e navegação — 24/11/2026
+
+Ao fixar uma janela de conferência à esquerda, a navegação atual (`workspace-navigation`) acompanha o mesmo deslocamento `--fulfillment-left-width` usado pela aplicação. A regra anterior abrangia somente a sidebar legada e deixava o menu atual atrás da janela. O deslocamento continua restrito ao modo de encaixe desktop, a partir de 1100px, e desaparece ao soltar ou fechar a janela. O cabeçalho atual também participa da quebra de linha usada quando há painéis fixados.
+
+As larguras continuam sendo calculadas pelo gerenciador de janelas, inclusive durante redimensionamento e com painéis dos dois lados. Nenhuma mudança de dados, permissões ou migração foi necessária.
