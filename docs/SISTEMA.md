@@ -342,3 +342,5 @@ Todos os pontos de entrada que exibem gráficos na Gestão compartilham a famíl
 `BentoRevenueChart`, `BentoComposition`, `SalesTrendChart`, `RevenueChart`, `InteractiveColumns`, `PartyChart`, `StockOverview` e `FinanceOverview` consomem essa base. O agrupamento Dia/Semana e a distinção entre dados desconhecidos e zero do Resumo continuam preservados. Fontes, consultas, permissões, moedas, filtros, exportações e critérios financeiros não são alterados por esta reformulação. Nenhuma migração ou nova dependência é necessária.
 
 Validação: 141 testes unitários, tipos, build e rotas HTTP; prévia dos gráficos com teclado, troca de estilo, participação, paginação, valores negativos, ausência de dados e largura de celular de 390 px, sem transbordamento horizontal. Dados da prévia são fictícios e não integram o código de produção.
+
+A conferência online também removeu o limite legado de 740 px da seção de recebimentos: o gráfico financeiro usa toda a largura do módulo, sem moldura externa duplicada. Havendo várias moedas, cada gráfico continua separado e a grade adapta o número de colunas à largura disponível.
