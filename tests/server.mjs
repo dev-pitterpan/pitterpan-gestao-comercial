@@ -121,6 +121,9 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
         "/gestor/",
         "/gestor/vendas/",
         "/gestor/vendas/recebimentos/",
+        "/gestor/vendas/reembolsos/",
+        "/gestor/vendas/atendimento/",
+        "/gestor/vendas/resumo/",
         "/gestor/analises/",
         "/gestor/produtos/",
         "/gestor/clientes/",
@@ -165,9 +168,22 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
           }
           assert.match(html, /class="workspace-routine-code"/);
         }
+        if (path.startsWith("/gestor/vendas/")) {
+          assert.match(html, /Rotina 2002: Pedidos/);
+          assert.match(html, /Rotina 2004: Financeiro/);
+          assert.doesNotMatch(
+            html,
+            /aria-label="Rotina 2003:|aria-label="Rotina 2005:/,
+          );
+        }
+        if (path === "/gestor/vendas/resumo/") {
+          assert.match(html, /<h1>Visão geral comercial<\/h1>/);
+          assert.doesNotMatch(html, /id="sales-status"/);
+          assert.doesNotMatch(html, /aria-label="Opções do módulo"/);
+        }
         if (path === "/gestor/mapa/") {
           assert.match(html, /<h1>Mapa de entregas<\/h1>/);
-          assert.match(html, /aria-label="Categorias desta área"/);
+          assert.doesNotMatch(html, /aria-label="Opções do módulo"/);
           assert.match(html, /Estado de destino/);
           assert.match(html, /aria-label="Filtros de destinos"/);
           assert.doesNotMatch(html, /Refinar consulta|delivery-advanced/);
@@ -186,7 +202,8 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
           assert.doesNotMatch(html, /href="\/gestor\/versoes\/"/);
         }
         if (path === "/gestor/vendas/") {
-          assert.match(html, /aria-label="Categorias desta área"/);
+          assert.match(html, /aria-label="Opções do módulo"/);
+          assert.match(html, /<h1>Pedidos<\/h1>/);
           assert.match(html, /aria-label="Filtros de vendas"/);
           assert.doesNotMatch(
             html,
@@ -207,7 +224,7 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
         if (path === "/gestor/vendas/recebimentos/") {
           assert.match(
             html,
-            /<header class="admin-page-heading">.*?<h1>Recebimentos<\/h1>.*?Período dos pedidos.*?<\/header>/s,
+            /<header class="admin-page-heading">.*?<h1>Financeiro<\/h1>.*?Período dos pedidos.*?<\/header>/s,
           );
           assert.match(html, /id="sales-delivery-filter"/);
           assert.match(html, /id="sales-category"/);
@@ -238,6 +255,23 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
           );
         }
       }
+      const filteredSummary = await get(
+        "/gestor/vendas/resumo/?category=baloes&status=PAID",
+        { headers: { cookie } },
+      );
+      assert.equal(filteredSummary.status, 200);
+      const filteredSummaryHtml = await filteredSummary.text();
+      assert.match(filteredSummaryHtml, /aria-label="Filtros de vendas"/);
+      assert.match(filteredSummaryHtml, /Remover Categoria: baloes/);
+      assert.match(filteredSummaryHtml, /Remover Pagamento: Pago/);
+      const scopedFinance = await get(
+        "/gestor/vendas/recebimentos/?fulfillment=AWAITING&category=baloes",
+        { headers: { cookie } },
+      );
+      assert.equal(scopedFinance.status, 200);
+      const scopedFinanceHtml = await scopedFinance.text();
+      assert.match(scopedFinanceHtml, /Remover Categoria: baloes/);
+      assert.doesNotMatch(scopedFinanceHtml, /Remover Atendimento:/);
       for (const section of ["desempenho", "catalogo", "prioridades"]) {
         const response = await get(`/gestor/?secao=${section}`, {
           headers: { cookie },

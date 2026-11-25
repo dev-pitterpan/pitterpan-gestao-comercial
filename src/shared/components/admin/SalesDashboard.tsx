@@ -1,6 +1,7 @@
 "use client";
 import { PageHeading } from "./Primitives";
 import SalesFilterPanel from "./SalesFilterPanel";
+import ShopifySummary from "./ShopifySummary";
 import { fulfillmentLabels } from "../../lib/admin/fulfillment";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -16,15 +17,7 @@ import OrderFulfillmentDetails from "./OrderFulfillmentDetails";
 import SalesOperations from "./SalesOperations";
 import SoldProductsHistory from "./SoldProductsHistory";
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  ArrowDownLeft,
-  ArrowUpRight,
-  BadgeCheck,
-  CircleDollarSign,
-  Package,
-  RefreshCw,
-  ShoppingCart,
-} from "lucide-react";
+import { ArrowUpRight, Package, RefreshCw, ShoppingCart } from "lucide-react";
 import OrderCustomer from "./OrderCustomer";
 import OrderCustomerRefresh from "./OrderCustomerRefresh";
 import ShippingCharge from "./ShippingCharge";
@@ -191,7 +184,7 @@ export default function SalesDashboard({
         const params = new URLSearchParams({
           days: String(days),
           ranking: "0",
-          daily: finance ? "1" : "0",
+          daily: finance || showSummary ? "1" : "0",
           start: filters.start || "",
           end: filters.end || "",
           status: filters.status,
@@ -233,7 +226,7 @@ export default function SalesDashboard({
           setLoading(false);
       }
     },
-    [days, filters, finance],
+    [days, filters, finance, showSummary],
   );
   useEffect(() => {
     if (productsOnly) {
@@ -370,9 +363,6 @@ export default function SalesDashboard({
     fulfillment: filters.fulfillment || "all",
     status: filters.status,
   });
-  const ordersPath = "/gestor/vendas/";
-  const receiptsPath = "/gestor/vendas/recebimentos/";
-  const refundsPath = "/gestor/vendas/reembolsos/";
   const chartEnd = filters.end || todayDate();
   const chartStart = filters.start || shiftDate(chartEnd, 1 - days);
   const chartDates: string[] = [];
@@ -395,7 +385,13 @@ export default function SalesDashboard({
   return (
     <div className="sales-dashboard">
       <PageHeading
-        eyebrow="Vendas Shopify"
+        eyebrow={
+          finance
+            ? "Módulo financeiro · Shopify"
+            : showSummary
+              ? "Visão geral · Shopify"
+              : "Módulo de pedidos · Shopify"
+        }
         title={title}
         description={description}
         compactFilters={false}
@@ -418,27 +414,34 @@ export default function SalesDashboard({
                 type="button"
                 className="admin-button"
                 onClick={sync}
+                title="Processar a próxima etapa de importação dos pedidos"
                 disabled={syncing}
               >
                 <RefreshCw size={16} className={syncing ? "sales-spin" : ""} />
-                {syncing ? "Atualizando…" : "Atualizar uma etapa"}
+                {syncing ? "Sincronizando…" : "Sincronizar pedidos"}
               </button>
             )}
           </div>
         }
       />
-      <SalesFilterPanel
-        filters={filters}
-        categoryDraft={categoryDraft}
-        onCategoryChange={setCategoryDraft}
-        finance={finance}
-        deliveries={data?.deliveries}
-        onChange={(patch) => {
-          resetList();
-          setFilters((old) => ({ ...old, ...patch }));
-        }}
-      />
-      {(finance || showSummary) && (
+      {(!showSummary ||
+        filters.status !== "all" ||
+        filters.category ||
+        (filters.delivery && filters.delivery !== "all") ||
+        (filters.fulfillment && filters.fulfillment !== "all")) && (
+        <SalesFilterPanel
+          filters={filters}
+          categoryDraft={categoryDraft}
+          onCategoryChange={setCategoryDraft}
+          finance={finance}
+          deliveries={data?.deliveries}
+          onChange={(patch) => {
+            resetList();
+            setFilters((old) => ({ ...old, ...patch }));
+          }}
+        />
+      )}
+      {finance && (
         <details className="sales-methodology">
           <summary>Como os valores são calculados</summary>
           <p className="sales-definition">
@@ -486,25 +489,6 @@ export default function SalesDashboard({
               importação dos demais pedidos continua funcionando.
             </p>
           )}
-          {showSummary && (
-            <div className="sales-health">
-              <span>
-                <BadgeCheck size={16} />{" "}
-                {data.state?.completed_at
-                  ? `Última conferência: ${new Date(data.state.completed_at).toLocaleString("pt-BR")}`
-                  : "Importação inicial ainda não concluída"}
-              </span>
-              <span>{data.pending} eventos aguardando processamento</span>
-              {data.oldestPendingAt && (
-                <span>
-                  Evento mais antigo na fila:{" "}
-                  {new Date(data.oldestPendingAt).toLocaleString("pt-BR", {
-                    timeZone: "America/Sao_Paulo",
-                  })}
-                </span>
-              )}
-            </div>
-          )}
           {data.state?.until_at && (
             <p className="admin-inline-note">
               Importação em andamento: os indicadores representam apenas os
@@ -512,140 +496,15 @@ export default function SalesDashboard({
               janela.
             </p>
           )}
-          {showSummary &&
-            data.totals.map((t) => (
-              <section
-                key={t.currency}
-                aria-label={`Indicadores em ${t.currency}`}
-              >
-                <div className="sales-currency">
-                  MOEDA DA LOJA · {t.currency}
-                </div>
-                <div className="sales-stats">
-                  <Link
-                    href={salesPageLink(receiptsPath, linkParams, {
-                      metric: "net",
-                    })}
-                    className="sales-metric sales-metric--hero sales-metric-link"
-                  >
-                    <span>
-                      <CircleDollarSign size={19} aria-hidden="true" /> Líquido
-                      após estornos
-                    </span>
-                    <strong>{money(t.net, t.currency)}</strong>
-                    <small>Recebido menos reembolsado</small>
-                  </Link>
-                  {[
-                    {
-                      label: "Recebido confirmado",
-                      tone: "received",
-                      href: salesPageLink(receiptsPath, linkParams),
-                      value: money(t.received, t.currency),
-                      detail: "Valores recebidos informados pela Shopify",
-                      icon: CircleDollarSign,
-                    },
-                    {
-                      label: "Pagos não cancelados",
-                      tone: "paid",
-                      href: salesPageLink(ordersPath, linkParams, {
-                        status: "PAID_ACTIVE",
-                      }),
-                      value: count(t.paid),
-                      detail: `${money(t.paid_value, t.currency)} em pedidos pagos e não cancelados`,
-                      icon: ShoppingCart,
-                    },
-                    {
-                      label: "Ticket dos pedidos pagos",
-                      tone: "ticket",
-                      href: salesPageLink(ordersPath, linkParams, {
-                        status: "PAID_ACTIVE",
-                      }),
-                      value: money(t.ticket, t.currency),
-                      detail: "Total médio dos pedidos com status pago",
-                      icon: ArrowUpRight,
-                    },
-                    {
-                      label: "Estornos / reembolsos",
-                      tone: "refunds",
-                      href: salesPageLink(refundsPath, linkParams),
-                      value: money(t.refunded, t.currency),
-                      detail: `${count(t.refunded_orders)} pedidos com reembolso total ou parcial`,
-                      icon: ArrowDownLeft,
-                    },
-                  ].map(({ label, value, detail, icon: Icon, tone, href }) => (
-                    <Link
-                      href={href}
-                      className={`sales-metric sales-metric--${tone} sales-metric-link`}
-                      key={label}
-                    >
-                      <span>
-                        <Icon size={16} aria-hidden="true" /> {label}
-                      </span>
-                      <strong>{value}</strong>
-                      <small>{detail}</small>
-                    </Link>
-                  ))}
-                </div>
-                <h3 className="sales-status-heading">Situação dos pedidos</h3>
-                <div className="sales-status-values">
-                  {[
-                    {
-                      label: Number(t.outstanding_estimated)
-                        ? "Saldo não pago (parte calculada)"
-                        : "Saldo não pago · Shopify",
-                      count: t.pending,
-                      value: t.outstanding,
-                      status: "OPEN_BALANCE",
-                    },
-                    {
-                      label: "Expirados",
-                      count: t.expired,
-                      value: t.expired_value,
-                      status: "EXPIRED",
-                    },
-                    {
-                      label: "Anulados",
-                      count: t.voided,
-                      value: t.voided_value,
-                      status: "VOIDED",
-                    },
-                    {
-                      label: "Cancelados",
-                      count: t.cancelled,
-                      value: t.cancelled_value,
-                      status: "CANCELLED",
-                    },
-                  ].map((s) => (
-                    <Link
-                      key={s.status}
-                      data-status={s.status}
-                      href={salesPageLink(ordersPath, linkParams, {
-                        status: s.status,
-                      })}
-                    >
-                      <span>
-                        {s.label} · {count(s.count)}
-                      </span>
-                      <strong>{money(s.value, t.currency)}</strong>
-                    </Link>
-                  ))}
-                </div>
-                {Number(t.inconsistent) > 0 && (
-                  <p className="admin-data-notice">
-                    Há {t.inconsistent} pedidos com divergência entre os campos
-                    financeiros da Shopify. O líquido exibido usa recebido menos
-                    estornado; sincronize para conferir.
-                  </p>
-                )}
-                <p className="sales-definition">
-                  {count(t.pending)} pedidos aguardando pagamento/conclusão ·{" "}
-                  {count(t.cancelled)} cancelados. Expirados e anulados mostram
-                  o valor dos pedidos, não dinheiro recebido. Cancelamentos são
-                  uma situação independente do pagamento: não some esses
-                  quadros.
-                </p>
-              </section>
-            ))}
+          {showSummary && (
+            <ShopifySummary
+              data={data}
+              params={linkParams}
+              start={chartStart}
+              end={chartEnd}
+              loading={loading}
+            />
+          )}
           {showSummary && !data.totals.length && (
             <div className="admin-panel sales-empty">
               <Package size={36} />
@@ -655,28 +514,6 @@ export default function SalesDashboard({
                 escolhidos. Experimente outra situação, categoria ou período.
               </p>
             </div>
-          )}
-          {showSummary && (
-            <nav className="sales-workspace-links" aria-label="Telas de vendas">
-              <Link
-                className="admin-button"
-                href={salesPageLink(ordersPath, linkParams)}
-              >
-                Pedidos recentes <ArrowUpRight size={15} />
-              </Link>
-              <Link
-                className="admin-button"
-                href={salesPageLink("/gestor/vendas/atendimento/", linkParams)}
-              >
-                Atendimento de pedidos <ArrowUpRight size={15} />
-              </Link>
-              <Link
-                className="admin-button"
-                href={salesPageLink("/gestor/produtos-vendidos/", linkParams)}
-              >
-                Produtos mais vendidos <ArrowUpRight size={15} />
-              </Link>
-            </nav>
           )}
           {finance && (
             <section className="admin-panel sales-finance-panel">

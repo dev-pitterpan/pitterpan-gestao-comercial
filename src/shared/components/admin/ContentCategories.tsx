@@ -3,6 +3,7 @@ import { createContext, useContext } from "react";
 import Link, { useLinkStatus } from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { ArrowUpRight, LoaderCircle } from "lucide-react";
+import { commercialModule } from "../../lib/admin/commercial-modules";
 import type { Role } from "../../server/auth/permissions";
 import { contentCategories } from "../../lib/admin/content-categories";
 export const ContentAccess = createContext<Role | null>(null);
@@ -28,7 +29,14 @@ export default function ContentCategories() {
   );
   if (categories.length < 2) return null;
   return (
-    <nav className="content-categories" aria-label="Categorias desta área">
+    <nav
+      className="content-categories"
+      aria-label={
+        commercialModule(pathname)
+          ? "Opções do módulo"
+          : "Categorias desta área"
+      }
+    >
       {categories.map((item) => (
         <Link
           key={item.href}

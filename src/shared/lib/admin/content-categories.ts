@@ -6,6 +6,11 @@ import {
   type Routine,
 } from "./workspace-navigation.ts";
 
+import {
+  commercialModule,
+  commercialModuleLink,
+} from "./commercial-modules.ts";
+
 export const overviewSections = [
   { id: "desempenho", label: "Desempenho", icon: "chart" },
   { id: "catalogo", label: "Catálogo e estoque", icon: "package" },
@@ -53,16 +58,23 @@ export function contentCategories(
   let candidates: Routine[] = [];
   if (catalogPaths.includes(pathname))
     candidates = items.filter((item) => catalogPaths.includes(item.href));
-  else if (customerPaths.includes(pathname))
-    candidates = items.filter((item) => customerPaths.includes(item.href));
-  else if (pathname.startsWith("/gestor/vendas/"))
-    candidates =
-      modules
-        .find((module) => module.id === "sales")
-        ?.items.filter(
-          (item) => item.href.startsWith("/gestor/vendas/") && !item.planned,
-        ) || [];
-  else if (pathname.startsWith("/gestor/analises/"))
+  else if (commercialModule(pathname)) {
+    const group = commercialModule(pathname)!;
+    candidates = items.filter((item) =>
+      group.paths.some((path) => path === item.href),
+    );
+    return candidates.map((item) => ({
+      ...item,
+      label:
+        item.href === "/gestor/vendas/"
+          ? "Lista de pedidos"
+          : item.href === "/gestor/vendas/atendimento/"
+            ? "Atendimento"
+            : item.label,
+      active: routineActive(item, pathname, source),
+      href: commercialModuleLink(item.href, source),
+    }));
+  } else if (pathname.startsWith("/gestor/analises/"))
     candidates =
       modules
         .find((module) => module.id === "analytics")

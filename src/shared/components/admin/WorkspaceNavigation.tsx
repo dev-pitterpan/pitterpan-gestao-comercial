@@ -34,6 +34,12 @@ import {
   type Workspace,
   type Routine,
 } from "../../lib/admin/workspace-navigation";
+import {
+  commercialMenu,
+  commercialModule,
+  commercialModuleLink,
+} from "../../lib/admin/commercial-modules";
+
 type NavMarkProps = {
   size: number;
   strokeWidth: number;
@@ -179,13 +185,25 @@ export function WorkspaceMenu({
   const pathname = usePathname() || "/gestor/",
     params = new URLSearchParams(useSearchParams());
   const results = query.trim() ? searchRoutines(modules, query) : null;
+  const menuItems =
+    module.id === "sales" ? commercialMenu(module.items) : module.items;
   function entry(item: Routine, context?: string) {
     const Icon = icons[item.icon as keyof typeof icons] || Package;
-    const active = routineActive(item, pathname, params);
+    const group =
+      !context && module.id === "sales"
+        ? commercialModule(item.href)
+        : undefined;
+    const active = group
+      ? group.id === commercialModule(pathname)?.id
+      : routineActive(item, pathname, params);
     return (
       <Link
         key={item.href}
-        href={routineHref(item, params)}
+        href={
+          group && active
+            ? commercialModuleLink(pathname, params)
+            : routineHref(item, params)
+        }
         prefetch={false}
         onClick={close}
         className={`workspace-routine${active ? " is-active" : ""}`}
@@ -273,16 +291,14 @@ export function WorkspaceMenu({
             )}
           </>
         ) : (
-          [...new Set(module.items.map((item) => item.section))].map(
-            (section) => (
-              <section className="workspace-routine-section" key={section}>
-                <h3>{section}</h3>
-                {module.items
-                  .filter((item) => item.section === section)
-                  .map((item) => entry(item))}
-              </section>
-            ),
-          )
+          [...new Set(menuItems.map((item) => item.section))].map((section) => (
+            <section className="workspace-routine-section" key={section}>
+              <h3>{section}</h3>
+              {menuItems
+                .filter((item) => item.section === section)
+                .map((item) => entry(item))}
+            </section>
+          ))
         )}
       </nav>
       <Link

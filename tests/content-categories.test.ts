@@ -52,13 +52,15 @@ test("categorias comerciais preservam o período e não transportam status finan
       (item) => !item.href.includes("cursor") && !item.href.includes("page="),
     ),
   );
-  const orders = categories.find((item) =>
-    item.href.startsWith("/gestor/vendas/?"),
-  )!;
-  const destination = new URL(orders.href, "https://example.test");
+  assert.deepEqual(
+    categories.map((item) => item.code),
+    ["2004", "2005"],
+  );
+  const refunds = categories.find((item) => item.code === "2005")!;
+  const destination = new URL(refunds.href, "https://example.test");
   assert.equal(destination.searchParams.get("start"), "2026-11-01");
   assert.equal(destination.searchParams.has("status"), false);
-  assert.equal(destination.searchParams.has("category"), false);
+  assert.equal(destination.searchParams.get("category"), "balões");
   assert.equal(
     contentCategories("/gestor/vendas/", params, "atendimento").length,
     0,
