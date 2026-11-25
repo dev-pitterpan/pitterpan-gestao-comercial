@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import SalesTrendChart, { salesTrendPoints } from "./SalesTrendChart";
 import AdminSelect from "./AdminSelect";
+import FinancialFlowChart from "./FinancialFlowChart";
 import { summaryDailyRows } from "../../lib/admin/sales-summary";
 import { salesPageLink } from "../../lib/admin/sales-links";
 import type { readSales } from "../../server/sales/repository";
@@ -73,14 +74,6 @@ export default function ShopifySummary({
   });
   const kpis = [
     {
-      label: "Líquido após reembolsos",
-      value: money(total.net),
-      detail: "Recebido menos reembolsado",
-      href: receipts("net"),
-      icon: Wallet,
-      tone: "net",
-    },
-    {
       label: "Recebido confirmado",
       value: money(total.received),
       detail: "Inclui frete e impostos",
@@ -107,7 +100,7 @@ export default function ShopifySummary({
   ];
   return (
     <section
-      className="shopify-summary"
+      className="shopify-summary summary-patterns"
       aria-label="Resumo comercial da Shopify"
       aria-busy={loading}
     >
@@ -129,6 +122,15 @@ export default function ShopifySummary({
           />
         )}
       </div>
+      <FinancialFlowChart
+        received={total.received}
+        refunded={total.refunded}
+        net={total.net}
+        currency={currency}
+        receiptsHref={receipts()}
+        netHref={receipts("net")}
+        refundsHref={refunds}
+      />
       <div className="summary-kpis">
         {kpis.map(({ label, value, detail, href, icon: Icon, tone }) => (
           <Link
@@ -165,6 +167,7 @@ export default function ShopifySummary({
             rows={salesTrendPoints(rows, metric)}
             format={money}
             height={248}
+            combined
             controls={
               <div
                 className="summary-metric-toggle"

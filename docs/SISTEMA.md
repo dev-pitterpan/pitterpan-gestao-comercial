@@ -303,3 +303,14 @@ A revisão anterior ainda permitia fundos rosados em estados de reembolso/cancel
 Classes legadas `rose`, `violet`, `green` e `amber` permanecem como identificadores de estados, mas já não definem rosa, lilás, verde ou amarelo. `brand.css` também cobre os aliases do CSS administrativo de base, sem alterar login. Ícones do catálogo e de entrega seguem a mesma paleta; fotos de produtos, logotipo e bandeiras preservam suas imagens reais. Não há alteração de filtros, valores, status, permissões ou navegação. Sem dependências ou migração.
 
 Validação: 136 testes de domínio, TypeScript e build de produção passaram; testes HTTP conferem rotas e isolamento. A revisão estática cobriu todos os estilos de `styles/admin`, exceto o tema separado de login, e as cores inline dos ícones administrativos. Prévia isolada confirmou que reembolsos têm fundo RGB(248,248,248) e cancelamentos RGB(251,251,251), ambos neutros, com detalhes em azul/coral. Não foram alterados dados ou imagens reais de produtos.
+
+
+### Padrões financeiros de gráficos — 25/11/2026
+
+O resumo comercial adapta a referência de fluxo, anel e evolução com barras/linha à identidade azul, quase preto, grafite, cinza e coral avermelhado. `FinancialFlowChart` mostra recebido menos reembolsado e líquido na mesma moeda/filtros. As linhas de fluxo são ilustração da relação financeira; as proporções estão no anel e nos percentuais explícitos. Os valores permanecem os do servidor e os cartões abrem as respectivas consultas financeiras. Não são apresentados lucro, margem, CAC, metas ou previsões sem dados que sustentem esses indicadores.
+
+`financialComposition` admite anel somente com base recebida positiva, valores válidos e reembolso entre zero e recebido. Sem base, valores inválidos, líquido divergente ou reembolso superior ao recebido, a proporção não é desenhada; as mensagens explicam a situação. `SalesTrendChart` ganha opção combinada no resumo: barras e curva representam o mesmo indicador diário, declarado na legenda. Linha/barras isoladas e alternância recebido/líquido permanecem disponíveis. As outras telas mantêm a apresentação anterior. Dias desconhecidos e valores negativos preservam o tratamento existente.
+
+O fluxo usa SVG decorativo com valores em HTML e links acessíveis. Em celular, as linhas decorativas cedem lugar ao anel e aos valores em blocos legíveis. Sem novas dependências, alteração de dados ou migração.
+
+Validação: 137 testes, TypeScript e build, incluindo composição integral, parcial, sem recebimento, reembolso excedente e dados inválidos. Prévia isolada dos componentes reais conferiu desktop e viewport de 390px sem overflow horizontal, presença simultânea de barras e curva no modo combinado, alternância recebido/líquido e consulta por setas do teclado. Os testes HTTP preservam as rotas/permissões do painel; não houve alteração de pedidos ou pagamentos.

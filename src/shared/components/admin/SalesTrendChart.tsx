@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { shortDate, numberValue } from "./AnalyticsCharts";
-import { ChartColumn, ChartSpline } from "lucide-react";
+import { ChartColumn, ChartSpline, ChartNoAxesCombined } from "lucide-react";
 import { monotonePath } from "../../lib/admin/chart-style";
 
 type Point = { day: string; value: number | null };
@@ -23,6 +23,7 @@ export default function SalesTrendChart({
   previous,
   refunds = false,
   height = 218,
+  combined = false,
 }: {
   title: string;
   label: string;
@@ -33,13 +34,16 @@ export default function SalesTrendChart({
   previous?: number[];
   refunds?: boolean;
   height?: number;
+  combined?: boolean;
 }) {
   const id = useId();
   const plot = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(620);
   const [selected, setSelected] = useState<number | null>(null);
   const [compare, setCompare] = useState(false);
-  const [chartType, setChartType] = useState<"area" | "bars">("area");
+  const [chartType, setChartType] = useState<"area" | "bars" | "combo">(
+    combined ? "combo" : "area",
+  );
   const comparison = compare ? previous : undefined;
   const known = rows.flatMap(({ value }) => (value === null ? [] : [value]));
   const hasData = known.length > 0;
@@ -135,6 +139,17 @@ export default function SalesTrendChart({
               >
                 <ChartColumn size={16} />
               </button>
+              {combined && (
+                <button
+                  type="button"
+                  onClick={() => setChartType("combo")}
+                  aria-pressed={chartType === "combo"}
+                  aria-label="Visualizar barras com linha"
+                  title="Barras com linha"
+                >
+                  <ChartNoAxesCombined size={16} />
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -143,7 +158,11 @@ export default function SalesTrendChart({
         <div className="sales-trend-key">
           <span>
             <i />
-            {refunds ? "Dias com reembolso" : "Valores diários"}
+            {refunds
+              ? "Dias com reembolso"
+              : chartType === "combo"
+                ? "Mesmo indicador em barras e linha"
+                : "Valores diários"}
           </span>
           {previous && (
             <label>
@@ -258,6 +277,22 @@ export default function SalesTrendChart({
                   .join(" ")}
               />
             )}
+            {chartType === "combo" &&
+              !refunds &&
+              rows.map(({ value }, index) =>
+                value === null ? null : (
+                  <rect
+                    key={index}
+                    className={`workspace-chart-bar${selected === index ? " is-selected" : ""}`}
+                    x={x(index) - Math.min(22, increment * 0.62) / 2}
+                    y={Math.min(y(value), y(0))}
+                    width={Math.min(22, increment * 0.62)}
+                    height={Math.max(1, Math.abs(y(value) - y(0)))}
+                    rx="4"
+                    fill={`url(#${id})`}
+                  />
+                ),
+              )}
             {refunds
               ? rows.map(
                   ({ value }, index) =>
@@ -300,10 +335,12 @@ export default function SalesTrendChart({
                     );
                     return (
                       <g key={first.index}>
-                        <path
-                          d={`${line}L${x(last.index)},${y(0)}L${x(first.index)},${y(0)}Z`}
-                          fill={`url(#${id})`}
-                        />
+                        {chartType !== "combo" && (
+                          <path
+                            d={`${line}L${x(last.index)},${y(0)}L${x(first.index)},${y(0)}Z`}
+                            fill={`url(#${id})`}
+                          />
+                        )}
                         <path className="sales-trend-halo" d={line} />
                         <path className="sales-trend-line" d={line} />
                         {segment.length === 1 && (
