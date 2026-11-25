@@ -8,14 +8,14 @@
   --admin-bg: #f4f7fa;
   --admin-surface: #fff;
   --admin-blue-soft: #e8f0f8;
-  --admin-teal: #138797;
-  --admin-teal-soft: #e8f5f5;
-  --admin-green: #278366;
-  --admin-green-soft: #eaf5ef;
-  --admin-amber: #9c6b17;
-  --admin-amber-soft: #fcf4e5;
-  --admin-coral: #b8544e;
-  --admin-coral-soft: #fcf0ed;
+  --admin-teal: #023661;
+  --admin-teal-soft: #eeeeee;
+  --admin-green: #023661;
+  --admin-green-soft: #f0f0f0;
+  --admin-amber: #c4473d;
+  --admin-amber-soft: #f0f0f0;
+  --admin-coral: #c4473d;
+  --admin-coral-soft: #f4f4f4;
   --admin-radius: 14px;
   --admin-shadow: 0 2px 8px #20344d03;
   --admin-shadow-raised: 0 8px 24px #20344d0b;
@@ -404,19 +404,19 @@
   font-size: 10px;
 }
 .admin-app .admin-panel.commercial-overview-alert {
-  background: linear-gradient(135deg, #fffaf1, #fff);
-  border: 1px solid #ead9b8;
-  border-left: 3px solid #c38a28;
+  background: linear-gradient(135deg, #f8f8f8, #fff);
+  border: 1px solid #d1d1d1;
+  border-left: 3px solid #c4473d;
 }
 .admin-app .commercial-overview-alert-count {
-  color: #805712;
-  background: #f8ebcd;
+  color: #c4473d;
+  background: #e2e2e2;
 }
 .admin-app .commercial-overview-alert .sales-operations-orders {
-  scrollbar-color: #cfb37b transparent;
+  scrollbar-color: #c4473d transparent;
 }
 .admin-app .commercial-overview-alert .sales-operations-orders li {
-  border-color: #efe4cf;
+  border-color: #dfdfdf;
 }
 .admin-app .commercial-overview-controls [aria-pressed="true"] {
   background: var(--admin-blue);
@@ -441,11 +441,11 @@
 }
 .admin-app .analytics-change.is-up {
   background: var(--admin-green-soft);
-  color: #226d56;
+  color: #023661;
 }
 .admin-app .analytics-change.is-down {
   background: var(--admin-coral-soft);
-  color: #a24d47;
+  color: #c4473d;
 }
 .admin-app .party-motion-control {
   color: #60788e;
@@ -547,7 +547,7 @@
 
 .admin-app .analytics-dashboard {
   --analytics-blue: var(--admin-blue);
-  --analytics-gold: #c38a28;
-  --analytics-rose: #c56259;
+  --analytics-gold: #c4473d;
+  --analytics-rose: #c4473d;
   --analytics-teal: var(--admin-teal);
 }

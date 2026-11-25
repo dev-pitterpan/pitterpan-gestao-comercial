@@ -8,7 +8,7 @@
 }
 .sales-toolbar label {
   display: block;
-  color: #667393;
+  color: #023661;
   font-size: 11px;
   margin-bottom: 7px;
 }
@@ -19,11 +19,11 @@
   border: 1px solid #d9e2f1;
   border-radius: 11px;
   background: white;
-  color: #2f3f91;
+  color: #023661;
 }
 .sales-definition {
   font-size: 12px;
-  color: #73809b;
+  color: #76828e;
   line-height: 1.7;
   margin: 12px 0 20px;
   max-width: 900px;
@@ -33,7 +33,7 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 12px;
-  color: #637394;
+  color: #023661;
   font-size: 11px;
   margin: 22px 0;
 }
@@ -43,13 +43,13 @@
   gap: 7px;
 }
 .sales-health svg {
-  color: #389786;
+  color: #023661;
 }
 .sales-currency {
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.13em;
-  color: #8391b2;
+  color: #76828e;
   margin: 20px 0 12px;
 }
 .sales-stats {
@@ -106,18 +106,18 @@
   font-size: clamp(25px, 3vw, 38px);
 }
 .sales-metric--received {
-  --sales-accent: #287967;
+  --sales-accent: #023661;
 }
 .sales-metric--paid {
   --sales-accent: #34699f;
 }
 .sales-metric--ticket {
-  --sales-accent: #6748a4;
+  --sales-accent: #023661;
 }
 .sales-metric--refunds {
-  --sales-accent: #9e4458;
-  background: #fff6f7;
-  border-color: #eed7dd;
+  --sales-accent: #c4473d;
+  background: #fbfbfb;
+  border-color: #e2e2e2;
 }
 .sales-status-heading {
   margin: 17px 0 7px;
@@ -140,10 +140,10 @@
   overflow-wrap: anywhere;
 }
 .sales-status-values > [data-status="OPEN_BALANCE"] {
-  border-left-color: #c58a2b;
+  border-left-color: #c4473d;
 }
 .sales-status-values > [data-status="CANCELLED"] {
-  border-left-color: #bd6877;
+  border-left-color: #c4473d;
 }
 .sales-status-values span {
   font-size: 11px;
@@ -175,15 +175,15 @@
   padding: 40px !important;
 }
 .sales-empty > svg {
-  color: #677ec5;
+  color: #76828e;
 }
 .sales-empty h2 {
-  color: #2f3f91;
+  color: #023661;
   margin: 14px 0 8px;
 }
 .sales-empty p {
   font-size: 13px;
-  color: #7a87a1;
+  color: #76828e;
 }
 .sales-delivery {
   position: relative;
@@ -195,7 +195,7 @@
   margin: 25px 0;
   border-radius: 23px;
   border: 1px solid #dce5f3;
-  background: linear-gradient(120deg, #f4f7ff, #fff9e5);
+  background: linear-gradient(120deg, #fafafa, #f2f2f2);
   box-shadow:
     inset 0 2px 0 #fff,
     0 6px 0 -3px #e2e8f3;
@@ -203,13 +203,13 @@
 .sales-delivery strong {
   display: block;
   font-size: 18px;
-  color: #2f3f91;
+  color: #023661;
   margin-top: 8px;
 }
 .sales-delivery p {
   font-size: 12px;
   line-height: 1.6;
-  color: #7785a3;
+  color: #76828e;
   max-width: 530px;
 }
 .sales-delivery > a {
@@ -219,7 +219,7 @@
   position: relative;
   height: 100px;
   pointer-events: none;
-  border-bottom: 3px solid #dbe3f3;
+  border-bottom: 3px solid #e7e7e7;
 }
 .sales-delivery-destination {
   position: absolute;
@@ -229,14 +229,14 @@
   align-items: center;
   flex-direction: column;
   gap: 5px;
-  background: #3d53a7;
-  border: 1px solid #7187cc;
+  background: #023661;
+  border: 1px solid #76828e;
   border-radius: 15px;
   padding: 12px;
   color: #fff;
   box-shadow:
     inset 0 2px 0 #ffffff40,
-    4px 5px 0 #2c3b85;
+    4px 5px 0 #023661;
   font-size: 10px;
 }
 .sales-cart {
@@ -245,15 +245,15 @@
   left: 25%;
   width: 60px;
   height: 75px;
-  color: #334d9d;
-  filter: drop-shadow(0 5px 2px #2e42761c);
+  color: #023661;
+  filter: drop-shadow(0 5px 2px #0236611c);
 }
 .sales-cart > svg:first-child {
   display: block;
   margin-left: 17px;
   margin-bottom: -10px;
-  color: #dfac24;
-  fill: #ffe18a;
+  color: #c4473d;
+  fill: #c4c4c4;
 }
 .sales-cart.is-moving {
   animation: sales-cart-delivery 4s ease-in-out both;
@@ -277,9 +277,9 @@
   height: 29px;
   flex-shrink: 0;
   border-radius: 10px;
-  color: #4b62a3;
-  background: linear-gradient(#f5f7ff, #e6edfb);
-  box-shadow: 0 3px 0 #dce4f4;
+  color: #023661;
+  background: linear-gradient(#fafafa, #e6edfb);
+  box-shadow: 0 3px 0 #e8e8e8;
   font-size: 11px;
   font-weight: 800;
 }
@@ -290,7 +290,7 @@
 .sales-ranking strong {
   display: block;
   font-size: 12px;
-  color: #4a5c81;
+  color: #023661;
   overflow-wrap: anywhere;
 }
 .sales-ranking small {
@@ -300,7 +300,7 @@
   margin-top: 4px;
 }
 .sales-ranking li > b {
-  color: #2f3f91;
+  color: #023661;
   font-size: 15px;
   text-align: right;
   white-space: nowrap;
@@ -376,13 +376,13 @@
   border: 1px solid #dbe3f2;
   border-radius: 12px;
   background: #fff;
-  color: #304577;
+  color: #023661;
   padding: 10px 13px;
   font: inherit;
   font-size: 13px;
 }
 .sales-category-filter input:focus-visible {
-  outline: 3px solid #5168c6;
+  outline: 3px solid #76828e;
   outline-offset: 3px;
 }
 .sales-pagination {
@@ -393,13 +393,13 @@
   gap: 12px;
   padding-top: 20px;
   margin-top: 14px;
-  border-top: 1px solid #edf0f7;
+  border-top: 1px solid #f2f2f2;
   font-size: 12px;
-  color: #73809b;
+  color: #76828e;
 }
 .sales-pagination p {
   flex-basis: 100%;
-  color: #b74754;
+  color: #c4473d;
   text-align: center;
 }
 .sales-pagination .admin-button-primary .pitter-loading {
@@ -420,7 +420,7 @@
   gap: 7px;
   font-size: 11px;
   font-weight: 600;
-  color: #435b98;
+  color: #023661;
   line-height: 1.3;
 }
 .delivery-mark > svg {
@@ -433,13 +433,13 @@
   width: 42px;
 }
 .delivery-mark--motoboy {
-  color: #354ba7;
+  color: #023661;
 }
 .delivery-mark--pickup {
-  color: #31846c;
+  color: #023661;
 }
 .delivery-mark--unknown {
-  color: #8791a6;
+  color: #76828e;
 }
 .delivery-mark > b {
   font-variant-numeric: tabular-nums;
@@ -455,7 +455,7 @@
   height: 52px;
   overflow: visible;
   background: white;
-  border: 1px solid #edf0f7;
+  border: 1px solid #f2f2f2;
   border-radius: 12px;
   box-shadow: none;
 }
@@ -477,8 +477,8 @@
   margin: 0;
   border: 2px solid white;
   border-radius: 6px;
-  background: #eaf0ff;
-  color: #40569a;
+  background: #f4f4f4;
+  color: #023661;
   font-size: 9px;
 }
 .sales-ranking li > .sales-product-deliveries {
@@ -491,7 +491,7 @@
 .sales-product-deliveries > b {
   text-align: right;
   font-size: 15px;
-  color: #2f3f91;
+  color: #023661;
 }
 .sales-product-deliveries > b small {
   display: inline;
@@ -987,7 +987,7 @@
   cursor: pointer;
 }
 .fulfillment-window :focus-visible {
-  outline: 2px solid #435bc6;
+  outline: 2px solid #023661;
   outline-offset: 2px;
 }
 
@@ -1122,10 +1122,10 @@
 .fulfillment-dialog-refunds {
   margin: 12px 0;
   padding: 9px 12px;
-  border: 1px solid #efd9a9;
+  border: 1px solid #cccccc;
   border-radius: 10px;
-  background: #fff7e6;
-  color: #6a4c1b;
+  background: #f2f2f2;
+  color: #c4473d;
   font-size: 12px;
 }
 .fulfillment-dialog-refunds p {
@@ -1222,7 +1222,7 @@
 .sales-period-label {
   display: block;
   margin-bottom: 7px;
-  color: #667393;
+  color: #023661;
   font-size: 11px;
 }
 .sales-finance-panel {
@@ -1289,7 +1289,7 @@
   color: #172e46;
 }
 .sales-trend--refunds {
-  --trend-color: #a95136;
+  --trend-color: #c4473d;
 }
 .sales-trend .sales-trend-head {
   display: flex;

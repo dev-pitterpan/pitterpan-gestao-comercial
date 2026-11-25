@@ -21,17 +21,17 @@
   border: 0;
   border-bottom: 2px solid transparent;
   background: none;
-  color: #7a8397;
+  color: #76828e;
   font-size: 11px;
 }
 .delivery-content-tabs button[aria-current="page"] {
-  border-bottom-color: #6572ce;
-  color: #5264b2;
+  border-bottom-color: #76828e;
+  color: #023661;
   font-weight: 600;
 }
 .delivery-content-tabs > span {
   margin-left: auto;
-  color: #9299aa;
+  color: #76828e;
   font-size: 10px;
   white-space: nowrap;
   padding: 0 5px 0 20px;
@@ -82,7 +82,7 @@
 .delivery-metric {
   padding: 18px 20px;
   background: #fff;
-  border: 1px solid #e5e9f1;
+  border: 1px solid #ebebeb;
   border-radius: 13px;
   box-shadow: 0 2px 5px #24334d03;
   min-width: 0;
@@ -93,20 +93,20 @@
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 12px;
-  color: #7e8cad;
+  color: #76828e;
 }
 .delivery-metric > div > span {
   font-size: 11px;
-  color: #737d91;
+  color: #023661;
 }
 .delivery-metric.is-teal > div > svg {
-  color: #69a7a0;
+  color: #76828e;
 }
 .delivery-metric.is-amber > div > svg {
-  color: #c5a16b;
+  color: #c4473d;
 }
 .delivery-metric.is-rose > div > svg {
-  color: #c48eaa;
+  color: #a9a9a9;
 }
 .delivery-metric > strong {
   display: block;
@@ -195,15 +195,15 @@
   font-size: 13px;
 }
 .delivery-world-countries b {
-  color: #ddc6e9;
+  color: #d8d8d8;
   font-weight: 500;
   font-size: 11px;
 }
 .delivery-world-countries > button[aria-pressed="true"] {
-  color: #d7b5ed;
+  color: #d1d1d1;
 }
 .delivery-world-countries > button[aria-pressed="true"] b {
-  color: #e2c9ef;
+  color: #dcdcdc;
 }
 .delivery-world-countries > span {
   font-size: 11px;
@@ -223,19 +223,19 @@
   fill: #4d5359;
 }
 .delivery-world-dot--1 {
-  fill: #715a82;
+  fill: #023661;
 }
 .delivery-world-dot--2 {
-  fill: #9668a9;
+  fill: #76828e;
 }
 .delivery-world-dot--3 {
-  fill: #b47ccb;
+  fill: #76828e;
 }
 .delivery-world-dot--4 {
-  fill: #d39aeb;
+  fill: #c2c2c2;
 }
 .delivery-world-dot--active {
-  fill: #e2b2f6;
+  fill: #d4d4d4;
 }
 .delivery-world-country {
   outline: none;
@@ -249,10 +249,10 @@
   stroke-linejoin: round;
 }
 .delivery-world-country.is-selected path {
-  stroke: #cd91df55;
+  stroke: #b8b8b855;
 }
 .delivery-world-country:focus-visible path {
-  stroke: #ebc6fa;
+  stroke: #e0e0e0;
   stroke-width: 1.2;
 }
 .delivery-world-hover {
@@ -264,20 +264,20 @@
   gap: 12px;
   flex-wrap: wrap;
   padding: 9px 12px;
-  border: 1px solid #4c3d56;
+  border: 1px solid #023661;
   border-radius: 7px;
-  background: #28232de8;
+  background: #023661e8;
   box-shadow: 0 3px 14px #0002;
   pointer-events: none;
-  color: #d5ccdd;
+  color: #d4d4d4;
   font-size: 10px;
 }
 .delivery-world-hover strong {
-  color: #e4c4f2;
+  color: #dbdbdb;
   font-weight: 550;
 }
 .delivery-world-hover small {
-  color: #b09dba;
+  color: #acacac;
   font-size: 10px;
 }
 .delivery-world-card > footer {
@@ -313,16 +313,16 @@
   background: #4d5359;
 }
 .delivery-world-scale i[data-level="1"] {
-  background: #715a82;
+  background: #023661;
 }
 .delivery-world-scale i[data-level="2"] {
-  background: #9668a9;
+  background: #76828e;
 }
 .delivery-world-scale i[data-level="3"] {
-  background: #b47ccb;
+  background: #76828e;
 }
 .delivery-world-scale i[data-level="4"] {
-  background: #d39aeb;
+  background: #c2c2c2;
 }
 .delivery-world-card > footer > span,
 .delivery-world-card > footer > button {
@@ -330,13 +330,13 @@
   align-items: center;
   gap: 6px;
   font-size: 9px;
-  color: #a79caf;
+  color: #76828e;
   background: none;
   border: 0;
   padding: 0;
 }
 .delivery-world-card > footer > button {
-  color: #d3afe1;
+  color: #c8c8c8;
 }
 .delivery-world-note {
   font-size: 9px;
@@ -407,7 +407,7 @@
 }
 .delivery-leading-index {
   font-size: 10px;
-  color: #a0abc1;
+  color: #b0b0b0;
   padding-top: 2px;
 }
 .delivery-leading-card li > div {
@@ -430,7 +430,7 @@
 .delivery-leading-card li > div > i {
   display: block;
   height: 3px;
-  background: #f0f2f8;
+  background: #f4f4f4;
   border-radius: 8px;
   margin-top: 10px;
   overflow: hidden;
@@ -438,7 +438,7 @@
 .delivery-leading-card li > div > i > b {
   display: block;
   height: 100%;
-  background: #a8a1d5;
+  background: #bbbbbb;
   border-radius: 8px;
 }
 .delivery-leading-card li > strong {
@@ -447,7 +447,7 @@
   align-items: end;
   font-weight: 500;
   font-size: 15px;
-  color: #6d7097;
+  color: #023661;
 }
 .delivery-leading-card li > strong > small {
   font-size: 9px;
@@ -462,7 +462,7 @@
   gap: 9px;
   padding: 15px 0 0;
   margin-top: 14px;
-  color: #7384b4;
+  color: #76828e;
   font-size: 11px;
   background: none;
   border: 0;
@@ -547,7 +547,7 @@
 }
 .delivery-context summary {
   cursor: pointer;
-  color: #7d8baa;
+  color: #76828e;
   white-space: nowrap;
 }
 .delivery-context p {
@@ -690,15 +690,15 @@
   width: 100%;
 }
 .delivery-world-card .delivery-map-toolbar {
-  color: #c9c4d2;
+  color: #cbcbcb;
   padding: 0 20px 12px;
   flex-wrap: wrap;
   gap: 10px;
 }
 .delivery-world-card .delivery-map-toolbar .admin-button {
-  background: #25272e;
+  background: #023661;
   border-color: #42404b;
-  color: #e5d8f1;
+  color: #e4e4e4;
 }
 .delivery-world-card .delivery-map-stage {
   border: 0;
@@ -710,38 +710,38 @@
   background: #1a1d20;
 }
 .delivery-world-card .leaflet-bar a {
-  background: #25272e;
-  color: #eee4f7;
+  background: #023661;
+  color: #eeeeee;
   border-color: #45404c;
 }
 .delivery-world-card .leaflet-control-attribution {
   background: #1a1d20dd;
-  color: #b8b2c0;
+  color: #b9b9b9;
   font-size: 9px;
 }
 .delivery-world-card .leaflet-control-scale-line {
   background: #1a1d20cc;
-  border-color: #9e96aa;
-  color: #d8cfdf;
+  border-color: #76828e;
+  color: #d7d7d7;
 }
 .delivery-world-card .delivery-map-pin > span {
-  background: #bd88dc;
-  color: #20172b;
-  border-color: #e4c6f5;
-  box-shadow: 0 0 0 6px #ba83d52b;
+  background: #b2b2b2;
+  color: #023661;
+  border-color: #dedede;
+  box-shadow: 0 0 0 6px #acacac2b;
 }
 .delivery-world-card .delivery-map-pin > span.is-cluster {
-  background: #66c7b4;
-  border-color: #acf0df;
-  color: #102e2b;
+  background: #76828e;
+  border-color: #cecece;
+  color: #023661;
 }
 .delivery-world-card .delivery-map-hover {
-  background: #24242e;
-  color: #f0e8f7;
-  border-color: #776086;
+  background: #023661;
+  color: #f0f0f0;
+  border-color: #023661;
 }
 .delivery-world-card .delivery-map-hover::before {
-  border-top-color: #776086;
+  border-top-color: #023661;
 }
 .delivery-world-card .delivery-map-hover strong,
 .delivery-world-card .delivery-map-hover span,
@@ -750,19 +750,19 @@
 }
 .delivery-world-card .delivery-map-overlay,
 .delivery-world-card .delivery-map-empty {
-  background: #23232ee8;
-  color: #e9dfef;
+  background: #023661e8;
+  color: #e7e7e7;
 }
 .delivery-world-card .delivery-map-legend,
 .delivery-world-card .delivery-map-note {
-  color: #bfb6cc;
+  color: #c1c1c1;
   padding-inline: 20px;
 }
 .delivery-world-card .delivery-map-legend i {
-  background: #bd88dc;
+  background: #b2b2b2;
 }
 .delivery-world-card .delivery-map-legend i.is-group {
-  background: #66c7b4;
+  background: #76828e;
 }
 @media (max-width: 760px) {
   .delivery-world-card .delivery-map-canvas {
@@ -770,12 +770,12 @@
   }
 }
 .delivery-world-card .delivery-map .leaflet-tooltip.delivery-map-hover {
-  background: #24242e;
-  color: #f0e8f7;
+  background: #023661;
+  color: #f0f0f0;
 }
 .delivery-world-card .delivery-map-toolbar > span {
-  color: #c9c4d2;
+  color: #cbcbcb;
 }
 .delivery-world-card .delivery-map .leaflet-control-zoom a {
-  color: #eee4f7;
+  color: #eeeeee;
 }

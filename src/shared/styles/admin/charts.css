@@ -170,11 +170,7 @@
 }
 .admin-app .party-chart-bar {
   border-radius: 6px;
-  background: linear-gradient(
-    90deg,
-    color-mix(in srgb, var(--bar-color) 70%, white),
-    var(--bar-color)
-  );
+  background: var(--bar-color);
   box-shadow: none;
 }
 .admin-app .party-chart-mechanism {

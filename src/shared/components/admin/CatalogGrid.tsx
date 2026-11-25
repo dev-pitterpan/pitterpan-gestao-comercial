@@ -35,11 +35,11 @@ const categoryArt = [
   {
     match: /halloween|terror/,
     icon: Ghost,
-    color: "#6245a2",
+    color: "#023661",
   },
-  { match: /natal/, icon: TreePine, color: "#256b52" },
-  { match: /pascoa/, icon: Egg, color: "#8d478f" },
-  { match: /junina/, icon: Flag, color: "#a24e2c" },
+  { match: /natal/, icon: TreePine, color: "#023661" },
+  { match: /pascoa/, icon: Egg, color: "#023661" },
+  { match: /junina/, icon: Flag, color: "#c4473d" },
   {
     match: /criancas|brinqued/,
     icon: ToyBrick,
@@ -48,49 +48,49 @@ const categoryArt = [
   {
     match: /copa|futebol/,
     icon: Trophy,
-    color: "#387345",
+    color: "#023661",
   },
-  { match: /patrick/, icon: Clover, color: "#287354" },
+  { match: /patrick/, icon: Clover, color: "#023661" },
   {
     match: /carnaval|fantasia|maquiagem/,
     icon: Drama,
-    color: "#813fa1",
+    color: "#023661",
   },
   {
     match: /artesanato|papelaria/,
     icon: Palette,
-    color: "#a24861",
+    color: "#c4473d",
   },
   {
     match: /datas|ocasioes/,
     icon: CalendarHeart,
-    color: "#974278",
+    color: "#c4473d",
   },
   {
     match: /ofertas|promoc/,
     icon: Tags,
-    color: "#a64b30",
+    color: "#c4473d",
   },
   {
     match: /chocolate/,
     icon: Croissant,
-    color: "#874e36",
+    color: "#c4473d",
   },
   {
     match: /confeitaria|bolo/,
     icon: Cake,
-    color: "#93477a",
+    color: "#023661",
   },
   {
     match: /gulo|doces/,
     icon: Candy,
-    color: "#944587",
+    color: "#023661",
   },
-  { match: /embalag/, icon: Gift, color: "#32786d" },
+  { match: /embalag/, icon: Gift, color: "#023661" },
   {
     match: /adornos|decor/,
     icon: Ribbon,
-    color: "#138797",
+    color: "#023661",
   },
   {
     match: /utilidad/,
@@ -102,11 +102,11 @@ const categoryArt = [
     icon: PartyPopper,
     color: "#305fa4",
   },
-  { match: /todos/, icon: Layers3, color: "#3f5ea1" },
+  { match: /todos/, icon: Layers3, color: "#023661" },
 ];
 const fallbackArt = {
   icon: Sparkles,
-  color: "#4d579d",
+  color: "#023661",
 };
 
 import type { CatalogSummary } from "../../types/catalog";
