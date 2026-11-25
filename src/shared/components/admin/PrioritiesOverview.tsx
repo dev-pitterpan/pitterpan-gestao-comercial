@@ -10,6 +10,8 @@ import {
   RefreshCw,
   AlertCircle,
 } from "lucide-react";
+import { fillQueueLivePhotos } from "../../server/sales/product-photos";
+import { cachedShopifyClient } from "../../server/shopify/cached-client";
 import { database } from "../../server/database/client";
 import { salesConfig, salesReady } from "../../server/sales/config";
 import { readPriorityQueue } from "../../server/sales/priority-queue";
@@ -31,21 +33,36 @@ import PriorityControls from "./PriorityControls";
 export async function loadPriorities(selection: PrioritySelection) {
   if (!salesReady()) return null;
   const db = await database().connect();
+  const store = salesConfig().SHOPIFY_SALES_STORE_DOMAIN;
+  let result: Awaited<ReturnType<typeof readPriorityQueue>>;
   try {
     await db.query("BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY");
-    const data = await readPriorityQueue(
-      db,
-      salesConfig().SHOPIFY_SALES_STORE_DOMAIN,
-      selection,
-    );
+    result = await readPriorityQueue(db, store, selection);
     await db.query("COMMIT");
-    return data;
   } catch (error) {
     await db.query("ROLLBACK");
     throw error;
   } finally {
     db.release();
   }
+  // Release the database transaction before any optional network request.
+  if (
+    result.orders.some((order) => !order.image_url) &&
+    process.env.CATALOG_DATA_SOURCE === "shopify" &&
+    process.env.SHOPIFY_STORE_DOMAIN === store
+  ) {
+    try {
+      await fillQueueLivePhotos(
+        result.orders,
+        cachedShopifyClient({ timeoutMs: 2500 }),
+      );
+    } catch {
+      console.warn(
+        "Fotos da fila: catálogo Shopify indisponível; exibindo imagens já importadas.",
+      );
+    }
+  }
+  return result;
 }
 export default function PrioritiesOverview({
   data,

@@ -2,7 +2,7 @@ import { unstable_cache } from "next/cache.js";
 import { getShopifyClient } from "./client.ts";
 
 /** Cache por página GraphQL, evitando guardar o catálogo inteiro em uma entrada. */
-export function cachedShopifyClient() {
+export function cachedShopifyClient(options: { timeoutMs?: number } = {}) {
   const client = getShopifyClient();
   const version = process.env.SHOPIFY_API_VERSION || "2026-07";
   return {
@@ -14,7 +14,7 @@ export function cachedShopifyClient() {
       if (!/^\s*(query\b|\{)/.test(query))
         throw new Error("O cache do catálogo aceita somente consultas.");
       return unstable_cache(
-        async () => client.query<T>(query, variables),
+        async () => client.query<T>(query, variables, options),
         [
           "shopify-catalog-query-v1",
           client.domain,
