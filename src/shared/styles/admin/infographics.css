@@ -545,3 +545,13 @@
 .bento-infographic .infographic-readout > strong {
   font-size: 20px;
 }
+/* The retired trend had a 740px cap; the shared canvas fills its module. */
+.admin-app .sales-finance-panel {
+  width: 100%;
+  justify-self: stretch;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+}
