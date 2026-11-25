@@ -48,6 +48,7 @@ export async function readPriorityQueue(
     total: string;
     currency: string;
     image_url: string | null;
+    fallback_image_url?: string | null;
     variant_id: string | null;
     product_id: string | null;
     item_title: string | null;

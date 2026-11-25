@@ -47,7 +47,7 @@ export async function loadPriorities(selection: PrioritySelection) {
   }
   // Release the database transaction before any optional network request.
   if (
-    result.orders.some((order) => !order.image_url) &&
+    result.orders.some((order) => order.variant_id || order.product_id) &&
     process.env.CATALOG_DATA_SOURCE === "shopify" &&
     process.env.SHOPIFY_STORE_DOMAIN === store
   ) {
@@ -236,7 +236,10 @@ export default function PrioritiesOverview({
                   <li key={order.id} className="priority-order-row">
                     <div className="priority-order-product">
                       <div className="priority-thumbnail">
-                        <ProductThumbnail src={order.image_url} />
+                        <ProductThumbnail
+                          src={order.image_url}
+                          fallbackSrc={order.fallback_image_url}
+                        />
                       </div>
                       <div>
                         <a
@@ -255,6 +258,7 @@ export default function PrioritiesOverview({
                             ? `${number(Number(order.item_count))} ${Number(order.item_count) === 1 ? "item" : "itens"} · ${number(Number(order.units))} un.`
                             : "Confira os itens para consultar o conteúdo"}
                         </small>
+                        {!order.image_url && <small>Sem foto disponível</small>}
                       </div>
                     </div>
                     <div className="priority-order-customer">

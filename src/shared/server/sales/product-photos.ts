@@ -6,6 +6,7 @@ export type QueuePhoto = {
   variant_id: string | null;
   product_id: string | null;
   image_url: string | null;
+  fallback_image_url?: string | null;
 };
 type PhotoClient = {
   query<T>(query: string, variables?: Record<string, unknown>): Promise<T>;
@@ -15,14 +16,16 @@ const variantId = (value: string | null) =>
 const productId = (value: string | null) =>
   /^gid:\/\/shopify\/Product\/[1-9]\d*$/.test(value || "");
 
-/** Historical orders may predate photo import. Only use the active catalog of the same store. */
+/** Historical photos may be missing or point to removed files. Only use the active catalog of the same store. */
 export async function fillQueueCatalogPhotos(
   db: SqlClient,
   store: string,
   rows: QueuePhoto[],
 ) {
-  const missing = rows.filter((row) => !shopifyImageUrl(row.image_url));
-  if (!missing.length) return;
+  const candidates = rows.filter(
+    (row) => variantId(row.variant_id) || productId(row.product_id),
+  );
+  if (!candidates.length) return;
   const available = await db.query<{ exists: boolean }>(
     "SELECT to_regclass('catalog_items') IS NOT NULL AND to_regclass('catalog_state') IS NOT NULL AND to_regclass('catalog_imports') IS NOT NULL AS exists",
   );
@@ -37,7 +40,7 @@ export async function fillQueueCatalogPhotos(
      WHERE ci.image_url IS NOT NULL ORDER BY x.id,ci.variant_id`,
     [
       JSON.stringify(
-        missing.map(({ id, variant_id, product_id }) => ({
+        candidates.map(({ id, variant_id, product_id }) => ({
           id,
           variant_id,
           product_id,
@@ -46,24 +49,27 @@ export async function fillQueueCatalogPhotos(
       store,
     ],
   );
-  for (const row of missing) {
-    row.image_url =
+  for (const row of candidates) {
+    const image =
       photos.rows
         .filter((photo) => photo.id === row.id)
         .map((photo) => shopifyImageUrl(photo.image_url))
         .find(Boolean) || null;
+    preferCurrentPhoto(row, image);
   }
 }
 
-/** Read just this page's products, never match by title/SKU or scan the whole catalog. */
+/** Refresh this page's photos even when historical URLs are populated. Never match by title/SKU. */
 export async function fillQueueLivePhotos(
   rows: QueuePhoto[],
   client: PhotoClient,
 ) {
-  const missing = rows.filter((row) => !shopifyImageUrl(row.image_url));
+  const candidates = rows.filter(
+    (row) => variantId(row.variant_id) || productId(row.product_id),
+  );
   const ids = [
     ...new Set(
-      missing
+      candidates
         .flatMap((row) => [
           variantId(row.variant_id) ? row.variant_id! : "",
           productId(row.product_id) ? row.product_id! : "",
@@ -74,12 +80,15 @@ export async function fillQueueLivePhotos(
   if (!ids.length) return;
   type Photo = {
     id: string;
-    image?: { url: string } | null;
-    featuredImage?: { url: string } | null;
-    product?: { id: string; featuredImage: { url: string } | null };
+    media?: { nodes: { image?: { url: string } | null }[] };
+    featuredMedia?: { image?: { url: string } | null } | null;
+    product?: {
+      id: string;
+      featuredMedia: { image?: { url: string } | null } | null;
+    };
   };
   const { nodes } = await client.query<{ nodes: (Photo | null)[] }>(
-    `query QueueProductPhotos($ids:[ID!]!){nodes(ids:$ids){... on ProductVariant{id image{url} product{id featuredImage{url}}} ... on Product{id featuredImage{url}}}}`,
+    `query QueueProductPhotosV2($ids:[ID!]!){nodes(ids:$ids){... on ProductVariant{id media(first:10){nodes{... on MediaImage{image{url}}}} product{id featuredMedia{... on MediaImage{image{url}}}}} ... on Product{id featuredMedia{... on MediaImage{image{url}}}}}}`,
     { ids },
   );
   const byId = new Map(
@@ -87,16 +96,28 @@ export async function fillQueueLivePhotos(
       .filter((node): node is Photo => !!node)
       .map((node) => [node.id, node]),
   );
-  for (const row of missing) {
+  for (const row of candidates) {
     const variant = row.variant_id ? byId.get(row.variant_id) : null;
     const product = row.product_id ? byId.get(row.product_id) : null;
     const matches =
       variant && (!row.product_id || variant.product?.id === row.product_id);
-    row.image_url =
+    const image =
       (matches &&
-        (shopifyImageUrl(variant.image?.url) ||
-          shopifyImageUrl(variant.product?.featuredImage?.url))) ||
-      shopifyImageUrl(product?.featuredImage?.url) ||
+        (variant.media?.nodes
+          .map((media) => shopifyImageUrl(media.image?.url))
+          .find(Boolean) ||
+          shopifyImageUrl(variant.product?.featuredMedia?.image?.url))) ||
+      shopifyImageUrl(product?.featuredMedia?.image?.url) ||
       null;
+    preferCurrentPhoto(row, image);
   }
+}
+
+/** A populated historical URL may already be broken. Keep it only as a secondary candidate. */
+function preferCurrentPhoto(row: QueuePhoto, current: string | null) {
+  if (!current) return;
+  const previous = shopifyImageUrl(row.image_url);
+  if (previous && previous !== current && !row.fallback_image_url)
+    row.fallback_image_url = previous;
+  row.image_url = current;
 }
