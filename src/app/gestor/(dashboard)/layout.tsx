@@ -16,6 +16,7 @@ import "@shared/styles/admin/workspace.css";
 import "@shared/styles/admin/content.css";
 import "@shared/styles/admin/priorities.css";
 import "@shared/styles/admin/routines.css";
+import "@shared/styles/admin/brand.css";
 export const metadata = { title: "Central de gestão" };
 async function RecoveryLabel() {
   return (await pendingPasswordRequests()).length > 0

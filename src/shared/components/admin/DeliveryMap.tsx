@@ -1,4 +1,5 @@
 "use client";
+import { destinationColors } from "../../lib/admin/brand-colors";
 import { useEffect, useRef, useState } from "react";
 import { LocateFixed, MapPin } from "lucide-react";
 import PitterSpinner from "./PitterSpinner";
@@ -65,7 +66,7 @@ export default function DeliveryMap({
           ...countryGeometry(item.path),
         }));
         const shapes = geometry.map((item) => new Path2D(item.path));
-        const colors = ["#4d5359", "#715a82", "#9668a9", "#b47ccb", "#d39aeb"];
+        const colors = destinationColors;
         const DottedLayer = L.GridLayer.extend({
           createTile(coords: { x: number; y: number; z: number }) {
             const tile = document.createElement("canvas");
@@ -86,7 +87,7 @@ export default function DeliveryMap({
               const total = summary.countries[i].orders;
               ctx.fillStyle =
                 item.code && item.code === latest.current.country
-                  ? "#e2b2f6"
+                  ? "#d7eafb"
                   : colors[deliveryRegionLevel(total, summary.max)];
               ctx.fill(shapes[i], "evenodd");
             });
