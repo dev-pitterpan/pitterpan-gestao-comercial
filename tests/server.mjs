@@ -169,6 +169,8 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
           assert.match(html, /<h1>Mapa de entregas<\/h1>/);
           assert.match(html, /aria-label="Categorias desta área"/);
           assert.match(html, /Estado de destino/);
+          assert.match(html, /aria-label="Filtros de destinos"/);
+          assert.doesNotMatch(html, /Refinar consulta|delivery-advanced/);
           assert.match(html, /aria-label="Categorias das entregas"/);
           assert.match(html, /class="delivery-world-card"/);
           assert.match(html, /class="delivery-map-canvas"/);
@@ -185,18 +187,32 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
         }
         if (path === "/gestor/vendas/") {
           assert.match(html, /aria-label="Categorias desta área"/);
-          assert.match(html, /aria-label="Assuntos dos filtros"/);
-          assert.match(html, /class="content-filter-workspace" hidden=""/);
-          assert.equal(
-            (html.match(/id="recent-orders-status"/g) || []).length,
-            1,
+          assert.match(html, /aria-label="Filtros de vendas"/);
+          assert.doesNotMatch(
+            html,
+            /Refinar consulta|content-filter-workspace|recent-orders-status/,
           );
+          for (const id of [
+            "sales-status",
+            "sales-fulfillment",
+            "sales-delivery-filter",
+            "sales-category",
+          ]) {
+            assert.equal(
+              (html.match(new RegExp(`id="${id}"`, "g")) || []).length,
+              1,
+            );
+          }
         }
-        if (path === "/gestor/vendas/recebimentos/")
+        if (path === "/gestor/vendas/recebimentos/") {
           assert.match(
             html,
             /<header class="admin-page-heading">.*?<h1>Recebimentos<\/h1>.*?Período dos pedidos.*?<\/header>/s,
           );
+          assert.match(html, /id="sales-delivery-filter"/);
+          assert.match(html, /id="sales-category"/);
+          assert.doesNotMatch(html, /id="sales-status"|id="sales-fulfillment"/);
+        }
         if (path === "/gestor/analises/")
           assert.match(
             html,

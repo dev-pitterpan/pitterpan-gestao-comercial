@@ -272,164 +272,6 @@
   justify-content: flex-start;
   flex-wrap: wrap;
 }
-.content-sales-filters {
-  margin: -6px 0 22px;
-}
-.content-filter-bar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.content-filter-trigger {
-  flex-shrink: 0;
-}
-.content-active-filters {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-  flex: 1;
-  min-width: 150px;
-}
-.content-active-filters > span {
-  color: #737c91;
-  font-size: 11px;
-}
-.content-active-filters > button {
-  display: inline-flex;
-  gap: 8px;
-  align-items: center;
-  border: 1px solid #dfe5f7;
-  background: #edf1ff;
-  color: #5364a5;
-  border-radius: 7px;
-  padding: 6px 8px;
-  font-size: 10px;
-  max-width: 100%;
-  overflow-wrap: anywhere;
-}
-.content-active-filters > button:hover {
-  background: #e4eaff;
-}
-.content-clear-filters {
-  border: 0;
-  background: none;
-  color: #7c8397;
-  font-size: 10px;
-  padding: 6px;
-}
-.content-filter-workspace {
-  display: grid;
-  grid-template-columns: 170px minmax(0, 1fr);
-  margin-top: 12px;
-  border: 1px solid #e2e7f2;
-  border-radius: 13px;
-  background: #fff;
-  overflow: visible;
-}
-.content-filter-workspace[hidden],
-.content-filter-fields[hidden] {
-  display: none !important;
-}
-.content-filter-groups {
-  background: #f9faff;
-  border-right: 1px solid #e9edf5;
-  padding: 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  border-top-left-radius: 13px;
-}
-.content-filter-groups > button {
-  display: flex;
-  gap: 9px;
-  align-items: center;
-  text-align: left;
-  color: #798199;
-  border: 1px solid transparent;
-  background: transparent;
-  border-radius: 7px;
-  padding: 10px;
-  min-height: 38px;
-  font-size: 11px;
-}
-.content-filter-groups > button[aria-selected="true"] {
-  color: #5263bc;
-  background: #eef1ff;
-  border-color: #e3e9ff;
-  font-weight: 600;
-}
-.content-filter-fields {
-  display: flex;
-  gap: 24px;
-  align-items: start;
-  padding: 24px;
-  min-width: 0;
-}
-.content-filter-fields > div {
-  flex: 1;
-  min-width: 0;
-  max-width: 420px;
-}
-.content-filter-fields label {
-  display: block;
-  margin-bottom: 8px;
-  font-size: 11px;
-  color: #626d87;
-}
-.content-filter-fields p {
-  color: #737c91;
-  font-size: 11px;
-  line-height: 1.8;
-  flex: 1;
-  max-width: 300px;
-  margin-top: 25px;
-}
-.content-filter-fields input {
-  width: 100%;
-  min-height: 40px;
-  border: 1px solid #dfe5f0;
-  border-radius: 8px;
-  padding: 10px 12px;
-  font-size: 12px;
-  color: #46516f;
-}
-.content-filter-fields .sales-status-search-field {
-  min-width: 0;
-}
-.content-filter-fields .sales-status-search-field input {
-  padding-left: 35px;
-}
-.content-filter-fields small {
-  display: block;
-  font-size: 10px;
-  color: #737c91;
-  line-height: 1.6;
-  margin-top: 7px;
-}
-.content-filter-workspace > footer {
-  grid-column: 1/-1;
-  padding: 11px 16px;
-  border-top: 1px solid #e9edf5;
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  justify-content: space-between;
-  color: #737c91;
-  font-size: 10px;
-}
-.content-filter-workspace > footer button {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  border: 0;
-  background: #f2f4fb;
-  border-radius: 6px;
-  padding: 7px 10px;
-  font-size: 10px;
-  color: #58699a;
-}
 /* Executive content uses light cards with distinct semantic accents. */
 .admin-app.workspace-shell .workspace-main .workspace-commercial {
   gap: 22px;
@@ -861,26 +703,6 @@
   .admin-app.workspace-shell .workspace-main .admin-panel {
     padding: 18px;
   }
-  .content-filter-workspace {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  .content-filter-groups {
-    flex-direction: row;
-    overflow-x: auto;
-    border: 0;
-    border-bottom: 1px solid #e9edf5;
-    padding: 8px;
-  }
-  .content-filter-groups > button {
-    flex-shrink: 0;
-    padding-inline: 12px;
-  }
-  .content-filter-fields {
-    padding: 18px;
-  }
-  .content-filter-workspace > footer {
-    flex-wrap: wrap;
-  }
   .content-filter-body {
     padding: 16px;
   }
@@ -907,16 +729,6 @@
   }
   .admin-app.workspace-shell .workspace-main .workspace-catalog-metric {
     padding: 14px;
-  }
-  .content-active-filters {
-    flex-basis: 100%;
-    order: 3;
-  }
-  .content-clear-filters {
-    margin-left: auto;
-  }
-  .content-filter-trigger {
-    min-height: 42px;
   }
 }
 @media (prefers-reduced-motion: reduce) {

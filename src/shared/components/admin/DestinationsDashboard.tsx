@@ -5,8 +5,6 @@ import { useSearchParams } from "next/navigation";
 import {
   Globe2,
   ListFilter,
-  SlidersHorizontal,
-  ChevronDown,
   X,
   ArrowUpRight,
   Package,
@@ -18,6 +16,7 @@ import {
   Info,
 } from "lucide-react";
 import AdminSelect from "./AdminSelect";
+import "../../styles/admin/query-filters.css";
 import DateRangePicker from "./DateRangePicker";
 import {
   dateRangeSchema,
@@ -249,126 +248,146 @@ export default function DestinationsDashboard() {
         })}
         <span>Uma seleção. Todos os destinos.</span>
       </nav>
-      <div className="delivery-query-actions">
-        <details className="content-filter-disclosure delivery-advanced">
-          <summary>
-            <SlidersHorizontal size={15} />
-            <span>Refinar consulta</span>
-            {active.length > 0 && <b>{active.length}</b>}
-            <ChevronDown size={14} />
-          </summary>
-          <div className="content-filter-body delivery-filter-grid">
+      <section className="query-filters" aria-label="Filtros de destinos">
+        <div className="query-filters-heading">
+          <strong>Filtrar destinos</strong>
+          <span>
+            Escolha o local e a entrega. Os resultados atualizam
+            automaticamente.
+          </span>
+        </div>
+        <div className="query-filters-grid query-filters-destinations">
+          <div>
+            <label htmlFor="destination-country">País de destino</label>
+            <AdminSelect
+              id="destination-country"
+              label="País de destino"
+              value={country}
+              onValueChange={selectCountry}
+              options={[
+                { value: "", label: "Todos os países" },
+                ...countryOptions.map((code) => ({
+                  value: code,
+                  label: `${countryFlag(code)} ${deliveryCountryName(code)}`,
+                })),
+              ]}
+            />
+          </div>
+          <div>
+            <label htmlFor="destination-state">Estado de destino</label>
+            <AdminSelect
+              id="destination-state"
+              label="Estado de destino"
+              value={state}
+              onValueChange={(value) => {
+                setState(value);
+                if (value) setCountry("BR");
+              }}
+              options={[
+                { value: "", label: "Todas as UFs brasileiras" },
+                ..."AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO RR SC SP SE TO"
+                  .split(" ")
+                  .map((uf) => ({ value: uf, label: uf })),
+              ]}
+            />
+          </div>
+          <div>
+            <label htmlFor="destination-delivery">Modalidade</label>
+            <AdminSelect
+              id="destination-delivery"
+              label="Entrega"
+              value={delivery}
+              onValueChange={setDelivery}
+              options={[
+                { value: "all", label: "Todas as entregas" },
+                ...deliveryFilterKinds.map((kind) => ({
+                  value: kind,
+                  label: deliveryLabels[kind],
+                })),
+              ]}
+            />
+          </div>
+          <div>
+            <label htmlFor="destination-fulfillment">Atendimento</label>
+            <AdminSelect
+              id="destination-fulfillment"
+              label="Situação do atendimento"
+              value={fulfillment}
+              onValueChange={setFulfillment}
+              options={[
+                { value: "all", label: "Todas as situações" },
+                { value: "FULFILLED", label: "Atendimento concluído" },
+                {
+                  value: "PARTIALLY_FULFILLED",
+                  label: "Atendimento parcial",
+                },
+                { value: "UNFULFILLED", label: "Atendimento pendente" },
+              ]}
+            />
+          </div>
+          <div className="delivery-filter-search">
+            <label htmlFor="delivery-search">Buscar destino</label>
             <div>
-              <label>País de destino</label>
-              <AdminSelect
-                label="País de destino"
-                value={country}
-                onValueChange={selectCountry}
-                options={[
-                  { value: "", label: "Todos os países" },
-                  ...countryOptions.map((code) => ({
-                    value: code,
-                    label: `${countryFlag(code)} ${deliveryCountryName(code)}`,
-                  })),
-                ]}
+              <Search size={15} />
+              <input
+                id="delivery-search"
+                aria-label="Buscar cidade ou estado"
+                value={q}
+                maxLength={150}
+                onChange={(event) => setQ(event.target.value)}
+                placeholder="Cidade, estado ou país…"
               />
-            </div>
-            <div>
-              <label>Estado de destino</label>
-              <AdminSelect
-                label="Estado de destino"
-                value={state}
-                onValueChange={(value) => {
-                  setState(value);
-                  if (value) setCountry("BR");
-                }}
-                options={[
-                  { value: "", label: "Todas as UFs brasileiras" },
-                  ..."AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO RR SC SP SE TO"
-                    .split(" ")
-                    .map((uf) => ({ value: uf, label: uf })),
-                ]}
-              />
-            </div>
-            <div>
-              <label>Modalidade</label>
-              <AdminSelect
-                label="Entrega"
-                value={delivery}
-                onValueChange={setDelivery}
-                options={[
-                  { value: "all", label: "Todas as entregas" },
-                  ...deliveryFilterKinds.map((kind) => ({
-                    value: kind,
-                    label: deliveryLabels[kind],
-                  })),
-                ]}
-              />
-            </div>
-            <div>
-              <label>Atendimento</label>
-              <AdminSelect
-                label="Situação do atendimento"
-                value={fulfillment}
-                onValueChange={setFulfillment}
-                options={[
-                  { value: "all", label: "Todas as situações" },
-                  { value: "FULFILLED", label: "Atendimento concluído" },
-                  {
-                    value: "PARTIALLY_FULFILLED",
-                    label: "Atendimento parcial",
-                  },
-                  { value: "UNFULFILLED", label: "Atendimento pendente" },
-                ]}
-              />
-            </div>
-            <div className="delivery-filter-search">
-              <label htmlFor="delivery-search">Buscar destino</label>
-              <div>
-                <Search size={15} />
-                <input
-                  id="delivery-search"
-                  aria-label="Buscar cidade ou estado"
-                  value={q}
-                  maxLength={150}
-                  onChange={(event) => setQ(event.target.value)}
-                  placeholder="Cidade, estado ou país…"
-                />
-              </div>
             </div>
           </div>
-        </details>
-        <div
-          className="delivery-filter-chips"
-          aria-label="Filtros de entrega aplicados"
-        >
-          {active.length ? (
-            active.map((item) => (
-              <button
-                type="button"
-                key={item.key}
-                onClick={item.clear}
-                aria-label={`Remover ${item.label}`}
-              >
-                {item.label}
-                <X size={12} />
-              </button>
-            ))
-          ) : (
-            <span>Todos os destinos do período</span>
-          )}
         </div>
-        <button
-          type="button"
-          className="delivery-refresh"
-          onClick={() => setRevision((value) => value + 1)}
-          disabled={busy}
-          aria-label="Atualizar destinos"
-        >
-          <RefreshCw size={15} className={busy ? "sales-spin" : ""} />
-          {busy ? "Consultando…" : "Atualizar"}
-        </button>
-      </div>
+        <div className="query-filters-summary">
+          <div
+            className="query-filter-chips"
+            aria-label="Filtros de entrega aplicados"
+          >
+            {active.length ? (
+              active.map((item) => (
+                <button
+                  type="button"
+                  key={item.key}
+                  onClick={item.clear}
+                  aria-label={`Remover ${item.label}`}
+                >
+                  {item.label}
+                  <X size={12} />
+                </button>
+              ))
+            ) : (
+              <span>Todos os destinos do período</span>
+            )}
+          </div>
+          {(active.length > 0 || q) && (
+            <button
+              type="button"
+              className="query-filters-clear"
+              onClick={() => {
+                setCountry("");
+                setState("");
+                setDelivery("all");
+                setFulfillment("all");
+                setQ("");
+              }}
+            >
+              Limpar filtros
+            </button>
+          )}
+          <button
+            type="button"
+            className="delivery-refresh"
+            onClick={() => setRevision((value) => value + 1)}
+            disabled={busy}
+            aria-label="Atualizar destinos"
+          >
+            <RefreshCw size={15} className={busy ? "sales-spin" : ""} />
+            {busy ? "Consultando…" : "Atualizar"}
+          </button>
+        </div>
+      </section>
       {error && (
         <p className="admin-data-notice" role="alert">
           {error}
