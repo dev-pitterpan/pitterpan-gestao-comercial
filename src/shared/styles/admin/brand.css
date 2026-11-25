@@ -8,9 +8,9 @@
   --brand-slate: #76828e;
   --brand-muted: #596877;
   --brand-accent: #c4473d;
-  --brand-accent-soft: #fff1ed;
+  --brand-accent-soft: #f6f6f6;
   --brand-line: #dfe6ee;
-  --brand-canvas: #f4f6fa;
+  --brand-canvas: #f7f7f7;
 }
 .admin-app.workspace-shell,
 .admin-app.workspace-shell .workspace-main {
@@ -20,10 +20,10 @@
   --admin-blue-soft: var(--brand-blue-soft);
   --admin-teal: #286da8;
   --admin-teal-soft: #edf3fa;
-  --admin-green: #247a59;
-  --admin-green-soft: #eef7f1;
-  --admin-amber: #99651e;
-  --admin-amber-soft: #fff7e8;
+  --admin-green: #023661;
+  --admin-green-soft: #f2f2f2;
+  --admin-amber: #c4473d;
+  --admin-amber-soft: #f3f3f3;
   --admin-coral: var(--brand-accent);
   --admin-coral-soft: var(--brand-accent-soft);
   --admin-line: var(--brand-line);
@@ -184,7 +184,7 @@
   > span.is-cluster {
   background: var(--brand-accent);
   color: #fff;
-  border-color: #f5b4a9;
+  border-color: #cfcfcf;
 }
 .admin-app.workspace-shell .delivery-world-card .delivery-map-legend i {
   background: #8bbde1;
@@ -194,4 +194,27 @@
   .delivery-map-legend
   i.is-group {
   background: var(--brand-accent);
+}
+
+/* Legacy tone names describe business states, never separate color palettes. */
+.admin-app.workspace-shell :is(.blue, .green, .violet) {
+  color: #023661 !important;
+}
+.admin-app.workspace-shell :is(.rose, .amber, .admin-form-error) {
+  color: #c4473d !important;
+}
+.admin-app.workspace-shell .neutral {
+  color: #76828e !important;
+}
+.admin-app.workspace-shell
+  :is(
+    .admin-badge.rose,
+    .admin-badge.green,
+    .admin-stat-icon.violet,
+    .admin-stat-icon.rose,
+    .admin-stat-icon.amber,
+    .admin-stat-icon.green
+  ) {
+  background: #f4f5f7;
+  border-color: #dfe6ee;
 }

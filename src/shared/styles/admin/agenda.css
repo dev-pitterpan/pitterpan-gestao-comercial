@@ -82,16 +82,16 @@
 }
 .admin-app .agenda-feedback {
   padding: 14px 18px;
-  border: 1px solid #c9e3da;
+  border: 1px solid #d6d6d6;
   border-radius: 12px;
-  background: #f0faf6;
+  background: #f5f5f5;
   font-size: 12px;
-  color: #367b65;
+  color: #023661;
 }
 .admin-app .agenda-feedback.is-error {
-  border-color: #ebc8cf;
-  background: #fff5f6;
-  color: #a04b60;
+  border-color: #dadada;
+  background: #fafafa;
+  color: #c4473d;
 }
 .admin-app .agenda-loading {
   display: grid;
@@ -206,9 +206,9 @@
   margin-right: 5px;
 }
 .admin-app .agenda-event.completed {
-  background: #edf8f2;
-  border-color: #64a88d;
-  color: #48826d;
+  background: #f2f2f2;
+  border-color: #76828e;
+  color: #023661;
 }
 .admin-app .agenda-more {
   border: 0;
@@ -402,9 +402,9 @@
   background: #edf3fb;
 }
 .admin-app .agenda-whatsapp-link {
-  color: #319279;
-  background: #f1faf7;
-  border-color: #d4e9e2;
+  color: #023661;
+  background: #f5f5f5;
+  border-color: #dedede;
 }
 .admin-app .agenda-whatsapp {
   margin-top: 24px;
@@ -418,11 +418,11 @@
   gap: 8px;
   align-items: center;
   margin: 0;
-  color: #3c8e77;
+  color: #023661;
 }
 .admin-app .agenda-whatsapp-button {
-  background: #368d76;
-  border-color: #368d76;
+  background: #023661;
+  border-color: #023661;
   color: white;
 }
 .admin-app .agenda-list-footer {
@@ -464,7 +464,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #478c77;
+  color: #023661;
   font-size: 13px;
 }
 .admin-app .agenda-note-list {
@@ -479,7 +479,7 @@
   gap: 12px;
   border: 1px solid #e3ecf6;
   border-radius: 12px;
-  background: #fcfdff;
+  background: #fefefe;
   text-align: left;
   padding: 16px;
   color: #527494;
@@ -647,18 +647,18 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #879bc4;
+  background: #76828e;
 }
 .admin-app .agenda-calendar-legend i.holiday {
-  background: #6ba891;
+  background: #76828e;
 }
 .admin-app .agenda-calendar-legend i.commercial {
-  background: #e4b452;
+  background: #c4473d;
 }
 .admin-app .agenda-occasion {
   border: 0;
-  border-left: 3px solid #8b9cc5;
-  background: #f0f2fb;
+  border-left: 3px solid #a8a8a8;
+  background: #f5f5f5;
   color: #667da2;
   border-radius: 5px;
   padding: 6px;
@@ -671,14 +671,14 @@
   white-space: nowrap;
 }
 .admin-app .agenda-occasion.holiday {
-  background: #ecf6f1;
-  border-color: #6ba891;
-  color: #4e8b75;
+  background: #f1f1f1;
+  border-color: #76828e;
+  color: #023661;
 }
 .admin-app .agenda-occasion.commercial {
-  background: #fff7e6;
-  border-color: #e4b452;
-  color: #9c7d3c;
+  background: #f2f2f2;
+  border-color: #c4473d;
+  color: #c4473d;
 }
 .admin-app .agenda-occasion.is-hidden {
   opacity: 0.5;
@@ -737,10 +737,10 @@
   color: #8c9eaf;
 }
 .admin-app .agenda-occasion-label.holiday {
-  color: #4e8b75;
+  color: #023661;
 }
 .admin-app .agenda-occasion-label.commercial {
-  color: #9c7d3c;
+  color: #c4473d;
 }
 .admin-app .agenda-date-title {
   border: 0;

@@ -1,19 +1,19 @@
 /* Content system: only the working canvas changes. Sidebar geometry and styling stay in workspace.css. */
 .admin-app.workspace-shell .workspace-main {
-  --admin-blue: #5263d6;
-  --admin-blue-soft: #edf0ff;
-  --admin-teal: #168b91;
-  --admin-teal-soft: #e8f6f7;
-  --admin-green: #258561;
-  --admin-green-soft: #eaf7f0;
-  --admin-coral: #c45b67;
-  --admin-coral-soft: #fff0f2;
-  --admin-amber: #a6741d;
-  --admin-amber-soft: #fff6e6;
-  --admin-ink: #262c3e;
-  --admin-muted: #70778b;
-  --admin-line: #e7e9f0;
-  --admin-bg: #f7f8fc;
+  --admin-blue: #76828e;
+  --admin-blue-soft: #f6f6f6;
+  --admin-teal: #023661;
+  --admin-teal-soft: #f0f0f0;
+  --admin-green: #023661;
+  --admin-green-soft: #f0f0f0;
+  --admin-coral: #c4473d;
+  --admin-coral-soft: #f8f8f8;
+  --admin-amber: #c4473d;
+  --admin-amber-soft: #f2f2f2;
+  --admin-ink: #023661;
+  --admin-muted: #023661;
+  --admin-line: #ececec;
+  --admin-bg: #fafafa;
   background: var(--admin-bg);
   color: var(--admin-ink);
 }
@@ -30,7 +30,7 @@
   align-items: center;
 }
 .admin-app.workspace-shell .workspace-main .admin-page-heading h1 {
-  color: #272d40;
+  color: #023661;
   font-size: clamp(25px, 2.25vw, 33px);
   font-weight: 600;
   letter-spacing: -0.055em;
@@ -43,7 +43,7 @@
   max-width: 620px;
 }
 .admin-app.workspace-shell .workspace-main .admin-eyebrow {
-  color: #6e77a6;
+  color: #76828e;
   font-size: 9px;
   letter-spacing: 0.13em;
   font-weight: 650;
@@ -55,7 +55,7 @@
   background: #fff;
   border: 1px solid var(--admin-line);
   border-radius: 16px;
-  box-shadow: 0 2px 5px #25335205;
+  box-shadow: 0 2px 5px #02366105;
 }
 .admin-app.workspace-shell .workspace-main .admin-panel {
   padding: 24px;
@@ -68,38 +68,38 @@
   :is(.admin-panel, .workspace-section-heading)
   h2 {
   font-size: 16px;
-  color: #30364b;
+  color: #023661;
   font-weight: 600;
   letter-spacing: -0.035em;
 }
 .admin-app.workspace-shell .workspace-main .admin-panel h3 {
-  color: #4d556c;
+  color: #023661;
   font-size: 14px;
 }
 .admin-app.workspace-shell .workspace-main .admin-button {
-  box-shadow: 0 1px 2px #202c4808;
-  border-color: #e0e4ef;
-  color: #4b5683;
+  box-shadow: 0 1px 2px #02366108;
+  border-color: #e8e8e8;
+  color: #023661;
   min-height: 38px;
   border-radius: 9px;
   font-size: 11px;
 }
 .admin-app.workspace-shell .workspace-main .admin-button-primary {
   color: #fff;
-  background: #5263d6;
-  border-color: #5263d6;
+  background: #76828e;
+  border-color: #76828e;
 }
 .admin-app.workspace-shell .workspace-main .admin-button-primary:hover {
-  background: #4253c3;
+  background: #023661;
 }
 .admin-app.workspace-shell .workspace-main .admin-table {
   font-size: 12px;
 }
 .admin-app.workspace-shell .workspace-main .admin-table th {
-  background: #f8f9fc;
-  color: #727a90;
+  background: #fafafa;
+  color: #023661;
   font-size: 10px;
-  border-color: #eceef5;
+  border-color: #f0f0f0;
   letter-spacing: 0.035em;
   font-weight: 550;
 }
@@ -107,7 +107,7 @@
   border-color: #edf0f5;
 }
 .admin-app.workspace-shell .workspace-main .admin-table tbody tr:hover {
-  background: #f9faff;
+  background: #fcfcfc;
 }
 .admin-app.workspace-shell .workspace-main .admin-badge {
   border-radius: 6px;
@@ -124,13 +124,13 @@
   :is(.admin-mini-stats > div, .sales-metric) {
   border-radius: 14px;
   border: 1px solid var(--admin-line);
-  box-shadow: 0 2px 5px #25335205;
+  box-shadow: 0 2px 5px #02366105;
   background: #fff;
 }
 .admin-app.workspace-shell .workspace-main .sales-metric--hero {
-  background: linear-gradient(125deg, #edf1ff, #f7f8ff);
-  border-color: #e1e6ff;
-  color: #394a9c;
+  background: linear-gradient(125deg, #f6f6f6, #fbfbfb);
+  border-color: #f0f0f0;
+  color: #023661;
 }
 /* Actual category navigation: each URL renders its own page or section. */
 .content-categories {
@@ -139,9 +139,9 @@
   align-items: center;
   padding: 5px;
   margin: 0 0 24px;
-  border: 1px solid #e4e7f0;
+  border: 1px solid #eaeaea;
   border-radius: 12px;
-  background: #eef1f7;
+  background: #f2f2f2;
   overflow-x: auto;
   scrollbar-width: thin;
   max-width: 100%;
@@ -155,7 +155,7 @@
   border: 1px solid transparent;
   border-radius: 8px;
   padding: 9px 15px;
-  color: #6b7389;
+  color: #023661;
   text-decoration: none;
   font-size: 11px;
   font-weight: 500;
@@ -166,13 +166,13 @@
 }
 .content-categories > a:hover {
   background: #ffffff80;
-  color: #4859c0;
+  color: #023661;
 }
 .content-categories > a[aria-current="page"] {
   background: #fff;
-  color: #4255bc;
-  border-color: #e4e8f3;
-  box-shadow: 0 2px 4px #25345b07;
+  color: #023661;
+  border-color: #ececec;
+  box-shadow: 0 2px 4px #02366107;
   font-weight: 650;
 }
 .content-overview-categories > a {
@@ -201,11 +201,11 @@
   display: flex;
   gap: 8px;
   align-items: center;
-  border: 1px solid #dfe4ef;
+  border: 1px solid #e7e7e7;
   border-radius: 9px;
   padding: 10px 13px;
   background: #fff;
-  color: #525d7f;
+  color: #023661;
   font-size: 11px;
   font-weight: 550;
   min-height: 39px;
@@ -224,8 +224,8 @@
 }
 .content-filter-disclosure > summary b,
 .content-filter-trigger b {
-  background: #eef0fe;
-  color: #5263d6;
+  background: #f6f6f6;
+  color: #76828e;
   padding: 2px 6px;
   border-radius: 5px;
   font-size: 10px;
@@ -248,7 +248,7 @@
   margin-bottom: 10px;
 }
 .content-filter-body {
-  border: 1px solid #e5e9f2;
+  border: 1px solid #ececec;
   background: #fff;
   padding: 20px;
   border-radius: 13px;
@@ -261,11 +261,11 @@
   gap: 4px;
 }
 .content-filter-intro strong {
-  color: #47516c;
+  color: #023661;
   font-size: 13px;
 }
 .content-filter-intro span {
-  color: #737c91;
+  color: #023661;
   font-size: 11px;
 }
 .content-filter-body :is(.admin-filter-bar, .sales-toolbar, .insights-filters) {
@@ -280,11 +280,11 @@
   margin-bottom: 0;
 }
 .admin-app.workspace-shell .workspace-main .workspace-source-label {
-  color: #6a77a1;
+  color: #76828e;
   font-size: 10px;
 }
 .admin-app.workspace-shell .workspace-main .workspace-sync-label {
-  color: #737c91;
+  color: #023661;
   font-size: 10px;
 }
 .admin-app.workspace-shell .workspace-main .workspace-metrics {
@@ -292,8 +292,8 @@
 }
 .admin-app.workspace-shell .workspace-main .workspace-metric {
   background: #fff;
-  border: 1px solid #e6e9f1;
-  box-shadow: 0 2px 5px #25335205;
+  border: 1px solid #ececec;
+  box-shadow: 0 2px 5px #02366105;
   border-radius: 15px;
   padding: 20px;
   min-height: 178px;
@@ -308,47 +308,47 @@
   width: 35px;
   height: 35px;
   border-radius: 11px;
-  background: #edf0ff;
-  color: #6270d4;
+  background: #f6f6f6;
+  color: #76828e;
 }
 .admin-app.workspace-shell
   .workspace-main
   .workspace-metric--green
   .workspace-metric-top
   > span {
-  background: #eaf7f1;
-  color: #42a078;
+  background: #f0f0f0;
+  color: #023661;
 }
 .admin-app.workspace-shell
   .workspace-main
   .workspace-metric--teal
   .workspace-metric-top
   > span {
-  background: #e9f8f8;
-  color: #3aa0a2;
+  background: #f0f0f0;
+  color: #023661;
 }
 .admin-app.workspace-shell
   .workspace-main
   .workspace-metric--amber
   .workspace-metric-top
   > span {
-  background: #fff6e7;
-  color: #bf933d;
+  background: #f3f3f3;
+  color: #c4473d;
 }
 .admin-app.workspace-shell
   .workspace-main
   .workspace-metric--rose
   .workspace-metric-top
   > span {
-  background: #fff0f2;
-  color: #d27a8b;
+  background: #f8f8f8;
+  color: #a6a6a6;
 }
 .admin-app.workspace-shell .workspace-main .workspace-metric-label {
-  color: #737c91;
+  color: #023661;
   font-size: 11px;
 }
 .admin-app.workspace-shell .workspace-main .workspace-metric > strong {
-  color: #30364a;
+  color: #023661;
   font-weight: 550;
   font-size: clamp(23px, 2vw, 33px);
   letter-spacing: -0.05em;
@@ -357,7 +357,7 @@
   overflow-wrap: anywhere;
 }
 .admin-app.workspace-shell .workspace-main .workspace-metric > small {
-  color: #737c91;
+  color: #023661;
   font-size: 10px;
   margin-top: 8px;
   line-height: 1.5;
@@ -368,31 +368,31 @@
 }
 .admin-app.workspace-shell .workspace-main .workspace-trend-card {
   background-image: none;
-  color: #30364a;
+  color: #023661;
   padding: 25px;
 }
 .admin-app.workspace-shell .workspace-main .workspace-chart-eyebrow > span {
-  color: #737c91;
+  color: #023661;
   font-size: 9px;
   letter-spacing: 0.13em;
 }
 .admin-app.workspace-shell .workspace-main .workspace-chart-eyebrow > a {
-  color: #6474bd;
+  color: #76828e;
   font-size: 11px;
 }
 .admin-app.workspace-shell .workspace-main .workspace-chart-eyebrow i {
-  background: #6c7bd6;
+  background: #76828e;
 }
 .admin-app.workspace-shell .workspace-main .workspace-trend-card .sales-trend {
-  --trend-color: #6570df;
-  color: #30364a;
+  --trend-color: #76828e;
+  color: #023661;
 }
 .admin-app.workspace-shell
   .workspace-main
   .workspace-trend-card
   .sales-trend-head
   h2 {
-  color: #3d4358;
+  color: #023661;
   font-size: 16px;
 }
 .admin-app.workspace-shell
@@ -400,14 +400,14 @@
   .workspace-trend-card
   .sales-trend-head
   span {
-  color: #737c91;
+  color: #023661;
 }
 .admin-app.workspace-shell
   .workspace-main
   .workspace-trend-card
   .sales-trend-head
   strong {
-  color: #30364a;
+  color: #023661;
   font-size: clamp(29px, 2.5vw, 38px);
   font-weight: 550;
 }
@@ -415,15 +415,15 @@
   .workspace-main
   .workspace-trend-card
   .sales-trend-segments {
-  background: #f5f6fc;
-  border-color: #e8ebf5;
+  background: #f9f9f9;
+  border-color: #eeeeee;
 }
 .admin-app.workspace-shell
   .workspace-main
   .workspace-trend-card
   .sales-trend-segments
   button {
-  color: #737c91;
+  color: #023661;
 }
 .admin-app.workspace-shell
   .workspace-main
@@ -431,22 +431,22 @@
   .sales-trend-segments
   button[aria-pressed="true"] {
   background: #fff;
-  color: #5666c0;
-  border-color: #e4e7f3;
-  box-shadow: 0 1px 3px #25335206;
+  color: #76828e;
+  border-color: #ececec;
+  box-shadow: 0 1px 3px #02366106;
 }
 .admin-app.workspace-shell
   .workspace-main
   .workspace-trend-card
   :is(.sales-trend-caption, .sales-trend-value) {
-  color: #737c91;
+  color: #023661;
 }
 .admin-app.workspace-shell
   .workspace-main
   .workspace-trend-card
   .sales-trend-value
   b {
-  color: #5765b7;
+  color: #76828e;
 }
 .admin-app.workspace-shell
   .workspace-main
@@ -454,19 +454,19 @@
   .sales-trend-plot
   svg
   text {
-  fill: #737c91;
+  fill: #023661;
 }
 .admin-app.workspace-shell
   .workspace-main
   .workspace-trend-card
   .sales-trend-gridline {
-  stroke: #e9ecf5;
+  stroke: #efefef;
 }
 .admin-app.workspace-shell
   .workspace-main
   .workspace-trend-card
   .sales-trend-zero {
-  stroke: #dde2ee;
+  stroke: #e6e6e6;
 }
 .admin-app.workspace-shell
   .workspace-main
@@ -490,41 +490,41 @@
   .workspace-main
   .workspace-trend-card
   .sales-trend-column {
-  fill: #6570df;
+  fill: #76828e;
   opacity: 0.06;
 }
 .admin-app.workspace-shell .workspace-main .workspace-chart-type {
-  background: #f5f6fc;
-  border-color: #e8ebf5;
+  background: #f9f9f9;
+  border-color: #eeeeee;
 }
 .admin-app.workspace-shell .workspace-main .workspace-chart-type button {
-  color: #737c91;
+  color: #023661;
 }
 .admin-app.workspace-shell
   .workspace-main
   .workspace-chart-type
   button[aria-pressed="true"] {
   background: #fff;
-  color: #5666c0;
+  color: #76828e;
 }
 .admin-app.workspace-shell .workspace-main .workspace-chart-footnote {
-  color: #737c91;
-  border-color: #edf0f6;
+  color: #023661;
+  border-color: #f2f2f2;
   font-size: 10px;
 }
 .admin-app.workspace-shell .workspace-main .workspace-chart-empty {
-  color: #67728e;
+  color: #023661;
 }
 .admin-app.workspace-shell .workspace-main .workspace-chart-empty h2 {
-  color: #4a5675;
+  color: #023661;
 }
 .admin-app.workspace-shell .workspace-main .workspace-chart-empty p {
-  color: #737c91;
+  color: #023661;
 }
 .admin-app.workspace-shell .workspace-main .workspace-chart-empty a {
-  background: #eef1fc;
-  border-color: #e0e6f5;
-  color: #6272bc;
+  background: #f5f5f5;
+  border-color: #ebebeb;
+  color: #76828e;
 }
 .admin-app.workspace-shell .workspace-main .content-priorities-grid {
   display: grid;
@@ -538,8 +538,8 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 .admin-app.workspace-shell .workspace-main .workspace-priorities > header {
-  background: #fffbf2;
-  border-bottom: 1px solid #f2ead5;
+  background: #f8f8f8;
+  border-bottom: 1px solid #e3e3e3;
 }
 .admin-app.workspace-shell
   .workspace-main
@@ -548,54 +548,54 @@
   max-height: 450px;
 }
 .admin-app.workspace-shell .workspace-main .workspace-priorities {
-  border-color: #f0e5c9;
+  border-color: #dcdcdc;
 }
 .admin-app.workspace-shell .workspace-main .workspace-priorities > p {
-  color: #a29579;
+  color: #c4473d;
 }
 .admin-app.workspace-shell .workspace-main .workspace-queue-card {
   padding: 24px;
 }
 .admin-app.workspace-shell .workspace-main .workspace-queue-card h2 {
-  color: #59627b;
+  color: #023661;
   font-size: 15px;
 }
 .admin-app.workspace-shell .workspace-main .workspace-queue-numbers strong {
   font-size: 34px;
-  color: #485b8c;
+  color: #023661;
 }
 .admin-app.workspace-shell .workspace-main .workspace-activity-card {
   min-width: 0;
 }
 .admin-app.workspace-shell .workspace-main .workspace-activity-total strong {
-  color: #405279;
+  color: #023661;
 }
 .admin-app.workspace-shell
   .workspace-main
   .workspace-calendar-days
   [data-level="1"] {
-  background: #e7ecff;
-  color: #7b87bb;
+  background: #f3f3f3;
+  color: #76828e;
 }
 .admin-app.workspace-shell
   .workspace-main
   .workspace-calendar-days
   [data-level="2"] {
-  background: #c7d0ff;
-  color: #52629f;
+  background: #e3e3e3;
+  color: #023661;
 }
 .admin-app.workspace-shell
   .workspace-main
   .workspace-calendar-days
   [data-level="3"] {
-  background: #9daef2;
+  background: #c8c8c8;
   color: #fff;
 }
 .admin-app.workspace-shell
   .workspace-main
   .workspace-calendar-days
   [data-level="4"] {
-  background: #697fdb;
+  background: #76828e;
   color: #fff;
 }
 .admin-app.workspace-shell
@@ -618,8 +618,8 @@
 .admin-app.workspace-shell .workspace-main .workspace-catalog-metric {
   background: #fff;
   border-radius: 14px;
-  border: 1px solid #e6e9f1;
-  box-shadow: 0 2px 5px #25335205;
+  border: 1px solid #ececec;
+  box-shadow: 0 2px 5px #02366105;
   padding: 20px;
 }
 .admin-app.workspace-shell .workspace-main .workspace-catalog-metrics {
@@ -629,13 +629,13 @@
   gap: 16px;
 }
 .admin-app.workspace-shell .workspace-main .workspace-catalog-metric > strong {
-  color: #343e57;
+  color: #023661;
   font-size: 30px;
 }
 .admin-app.workspace-shell .workspace-main .workspace-changes-strip {
   background: #fff;
   border-radius: 14px;
-  border-color: #e6e9f1;
+  border-color: #ececec;
 }
 @media (max-width: 1250px) {
   .admin-app.workspace-shell .workspace-main .content-performance-grid {
@@ -747,7 +747,7 @@
   border: 1px solid transparent;
   border-radius: 8px;
   background: none;
-  color: #6b7389;
+  color: #023661;
   padding: 10px 15px;
   min-height: 39px;
   font-size: 11px;
@@ -755,9 +755,9 @@
 }
 .content-agenda-categories > button[aria-current="page"] {
   background: #fff;
-  color: #4255bc;
-  border-color: #e4e8f3;
-  box-shadow: 0 2px 4px #25345b07;
+  color: #023661;
+  border-color: #ececec;
+  box-shadow: 0 2px 4px #02366107;
   font-weight: 650;
 }
 .content-agenda-categories > button:disabled {
@@ -766,7 +766,7 @@
 
 .content-priorities-description {
   margin: 0;
-  color: #768096;
+  color: #76828e;
   font-size: 12px;
   line-height: 1.7;
 }

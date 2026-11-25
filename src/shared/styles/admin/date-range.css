@@ -162,7 +162,7 @@
   box-shadow: inset 0 0 0 1px #8cabc9;
 }
 .admin-calendar-grid > button:focus-visible {
-  outline: 2px solid #e2b431;
+  outline: 2px solid #c4473d;
   outline-offset: 1px;
 }
 .admin-date-popover > footer {
@@ -190,7 +190,7 @@
 }
 .admin-date-error {
   font-size: 11px;
-  color: #b85b70;
+  color: #c4473d;
 }
 @media (max-width: 600px) {
   .admin-date-popover {

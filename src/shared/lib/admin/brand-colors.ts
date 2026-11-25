@@ -7,9 +7,9 @@ export const brandColors = {
   charcoal: "#3f3a42",
   slate: "#76828e",
   coral: "#c4473d",
-  coralLight: "#df867a",
-  warning: "#a77326",
-  success: "#247a59",
+  coralLight: "#3f3a42",
+  warning: "#c4473d",
+  success: "#023661",
 };
 export const destinationColors = [
   "#505e6c",

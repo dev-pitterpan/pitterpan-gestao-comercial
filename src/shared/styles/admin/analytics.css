@@ -1,9 +1,9 @@
 /* Análises: superfícies, tipografia e cores da central Pitter Pan. */
 .analytics-dashboard {
   --analytics-blue: #356fb3;
-  --analytics-gold: #e8b943;
-  --analytics-rose: #da8195;
-  --analytics-teal: #3d928a;
+  --analytics-gold: #c4473d;
+  --analytics-rose: #c4473d;
+  --analytics-teal: #023661;
 }
 
 .analytics-eyebrow {
@@ -66,7 +66,7 @@
   height: 36px;
   border-radius: 12px;
   color: var(--kpi-accent);
-  background: color-mix(in srgb, var(--kpi-accent) 10%, white);
+  background: #f4f5f7;
   flex-shrink: 0;
 }
 .analytics-kpi > strong {
@@ -96,12 +96,12 @@
   border-radius: 6px;
 }
 .analytics-change.is-up {
-  color: #277966;
-  background: #e8f4ef;
+  color: #023661;
+  background: #eeeeee;
 }
 .analytics-change.is-down {
-  color: #aa5365;
-  background: #fbecf0;
+  color: #c4473d;
+  background: #f3f3f3;
 }
 .analytics-kpi small {
   font-size: 10px;
@@ -267,14 +267,14 @@
   flex-shrink: 0;
 }
 .analytics-financial-dot--gross_sales {
-  background: #e7bd51;
+  background: #c4473d;
 }
 .analytics-financial-dot--net_sales {
   background: #4f94bc;
 }
 .analytics-financial-dot--discounts,
 .analytics-financial-dot--returns {
-  background: #db99a6;
+  background: #bababa;
 }
 .analytics-financial-total {
   display: grid;
@@ -324,8 +324,8 @@
   flex-shrink: 0;
 }
 .analytics-ranking li:first-child .analytics-rank-number {
-  background: #fff6dc;
-  color: #b58a21;
+  background: #eeeeee;
+  color: #c4473d;
 }
 .analytics-ranking li > div {
   min-width: 0;
@@ -363,10 +363,10 @@
   border-radius: inherit;
 }
 .analytics-ranking li:first-child .analytics-bar-track > span {
-  background: linear-gradient(90deg, #e6b63e, #f3d775);
+  background: linear-gradient(90deg, #c4473d, #b4b4b4);
 }
 .analytics-bar-track > span.is-negative {
-  background: #c48092;
+  background: #c4473d;
 }
 .analytics-ranking small {
   display: block;
@@ -434,11 +434,11 @@
   margin-top: 9px;
 }
 .analytics-journey > div:last-child {
-  background: linear-gradient(130deg, #f3faf7, #fff);
-  border-color: #dbece5;
+  background: linear-gradient(130deg, #f6f6f6, #fff);
+  border-color: #e3e3e3;
 }
 .analytics-journey > div:last-child .analytics-bar-track > span {
-  background: #58a18b;
+  background: #023661;
 }
 .analytics-session-note {
   color: #8394a6;
@@ -464,7 +464,7 @@
 .analytics-source i {
   width: 6px;
   height: 6px;
-  background: #6b9f8b;
+  background: #76828e;
   border-radius: 50%;
 }
 .analytics-source p {
@@ -503,7 +503,7 @@
   text-align: center;
 }
 .delivery-mark--other {
-  color: #31846c;
+  color: #023661;
 }
 @media (max-width: 1200px) {
   .analytics-kpis {
@@ -698,16 +698,16 @@
   background: #e9f1fb;
 }
 .shopify-category-card--1 .shopify-category-icon {
-  color: #ba922f;
-  background: #fff6db;
+  color: #c4473d;
+  background: #ededed;
 }
 .shopify-category-card--2 .shopify-category-icon {
-  color: #b47b8e;
-  background: #faeef3;
+  color: #c4473d;
+  background: #f4f4f4;
 }
 .shopify-category-card--3 .shopify-category-icon {
-  color: #579385;
-  background: #eaf5f0;
+  color: #023661;
+  background: #f0f0f0;
 }
 .shopify-category-copy {
   display: grid;
@@ -1055,12 +1055,12 @@
   flex-shrink: 0;
 }
 .analytics-question-card:nth-child(3n + 2) > svg:first-child {
-  color: #b47e0e;
-  background: #fff8e5;
+  color: #c4473d;
+  background: #f2f2f2;
 }
 .analytics-question-card:nth-child(3n) > svg:first-child {
-  color: #c35b80;
-  background: #fff0f5;
+  color: #c4473d;
+  background: #f8f8f8;
 }
 .analytics-all-reports {
   border: 1px solid #e2e9f0;
@@ -1168,7 +1168,7 @@
   font-size: 12px;
 }
 .sync-last-update svg {
-  color: #418b73;
+  color: #023661;
 }
 .sync-progress {
   margin-top: 22px;
@@ -1207,7 +1207,7 @@
   background: #d9eaff;
 }
 .sync-progress li.is-done {
-  color: #318368;
+  color: #023661;
 }
 .sync-progress p,
 .sync-control .admin-footnote {
@@ -1219,7 +1219,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #278166;
+  color: #023661;
   font-size: 14px;
   padding-top: 12px;
 }
@@ -1290,7 +1290,7 @@
   border: 1px solid #dfe9f4;
   border-radius: 20px;
   background:
-    radial-gradient(ellipse at 95% 5%, #fef4db 0, transparent 44%),
+    radial-gradient(ellipse at 95% 5%, #ececec 0, transparent 44%),
     radial-gradient(ellipse at 5% 25%, #edf5ff 0, transparent 65%), #fff;
   padding: 24px 20px 16px;
   overflow: hidden;
@@ -1314,7 +1314,7 @@
   border-radius: 3px;
   width: 9px;
   height: 9px;
-  box-shadow: 3px -2px 0 #f4c34e;
+  box-shadow: 3px -2px 0 #c4473d;
 }
 .pitter-depth-readout > strong {
   font-size: 24px;
@@ -1438,31 +1438,31 @@
   transform-origin: left;
 }
 .pitter-depth-tone-1 {
-  background: linear-gradient(90deg, #f8d567, #dfad31);
+  background: linear-gradient(90deg, #b0b0b0, #c4473d);
 }
 .pitter-depth-tone-1:before {
-  background: #ffe8a1;
+  background: #d0d0d0;
 }
 .pitter-depth-tone-1:after {
-  background: #bd8d20;
+  background: #c4473d;
 }
 .pitter-depth-tone-2 {
-  background: linear-gradient(90deg, #ed95b7, #c55d89);
+  background: linear-gradient(90deg, #c1c1c1, #c4473d);
 }
 .pitter-depth-tone-2:before {
-  background: #ffc3da;
+  background: #e1e1e1;
 }
 .pitter-depth-tone-2:after {
-  background: #a84871;
+  background: #c4473d;
 }
 .pitter-depth-tone-3 {
-  background: linear-gradient(90deg, #71baa9, #3b8c7b);
+  background: linear-gradient(90deg, #76828e, #023661);
 }
 .pitter-depth-tone-3:before {
-  background: #a5dfd1;
+  background: #c2c2c2;
 }
 .pitter-depth-tone-3:after {
-  background: #287263;
+  background: #023661;
 }
 .pitter-depth-column.is-active .pitter-depth-body {
   filter: brightness(1.13);
@@ -1667,15 +1667,15 @@
 }
 .finance-kpi--rose > strong,
 .finance-kpi--rose svg {
-  color: #bd567b;
+  color: #c4473d;
 }
 .finance-kpi--teal > strong,
 .finance-kpi--teal svg {
-  color: #2f8879;
+  color: #023661;
 }
 .finance-kpi--gold > strong,
 .finance-kpi--gold svg {
-  color: #a37e23;
+  color: #c4473d;
 }
 .finance-chart-grid {
   display: grid;

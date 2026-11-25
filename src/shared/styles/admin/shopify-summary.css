@@ -24,8 +24,8 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #3d9475;
-  box-shadow: 0 0 0 4px #e6f3ed;
+  background: #023661;
+  box-shadow: 0 0 0 4px #ececec;
   margin-right: 3px;
 }
 .shopify-summary-context .admin-select {
@@ -53,7 +53,7 @@
 }
 .summary-kpi:hover {
   border-color: #8aafd0;
-  box-shadow: 0 5px 18px #254c5810;
+  box-shadow: 0 5px 18px #02366110;
 }
 .summary-kpi > div {
   display: flex;
@@ -113,7 +113,7 @@
   color: #527bad;
 }
 .summary-kpi--ticket .summary-kpi-icon {
-  background: #fff1ed;
+  background: #f6f6f6;
   color: var(--brand-accent, #c4473d);
 }
 .summary-analysis-grid {
@@ -245,8 +245,8 @@
   justify-content: space-between;
   align-items: center;
   gap: 8px;
-  background: #fdf4f2;
-  color: #a76f64;
+  background: #f8f8f8;
+  color: #c4473d;
   padding: 11px;
   border-radius: 8px;
   font-size: 11px;
@@ -273,7 +273,7 @@
   text-decoration: none;
 }
 .summary-primary-link:hover {
-  background: #b33d34;
+  background: #c4473d;
 }
 .summary-reconciliation > p {
   color: #8b9aa2;
@@ -321,17 +321,17 @@
   text-decoration: none;
 }
 .summary-operation--amber {
-  background: #fff5f1;
-  border-color: #f0dcd5;
-  color: #b94338;
+  background: #f8f8f8;
+  border-color: #e2e2e2;
+  color: #c4473d;
 }
 .summary-operation--rose {
-  background: #fff8f6;
-  border-color: #f2e2df;
-  color: #b78479;
+  background: #fbfbfb;
+  border-color: #e8e8e8;
+  color: #c4473d;
 }
 .summary-operation--neutral {
-  background: #f8f9fc;
+  background: #fafafa;
   border-color: #e5eaf1;
   color: #8393ac;
 }
@@ -473,7 +473,7 @@
   color: #fff;
 }
 .shopify-summary .summary-refund-link {
-  color: #a76f64;
+  color: #c4473d;
 }
 .admin-app .shopify-summary .sales-trend {
   --trend-color: #286da8;

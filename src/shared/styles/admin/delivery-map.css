@@ -90,14 +90,14 @@
   font-variant-numeric: tabular-nums;
 }
 .delivery-map-pin > .is-cluster {
-  background: #2f4b87;
-  border-color: #ffe383;
+  background: #023661;
+  border-color: #c1c1c1;
   box-shadow:
-    0 0 0 6px #ffd51a33,
+    0 0 0 6px #02366133,
     0 4px 12px #294a7750;
 }
 .delivery-map-pin:focus-visible {
-  outline: 3px solid #f0b928;
+  outline: 3px solid #c4473d;
   outline-offset: 6px;
   border-radius: 50%;
 }
@@ -142,8 +142,8 @@
   box-shadow: 0 0 0 3px #e3edf8;
 }
 .delivery-map-legend .is-group {
-  background: #2f4b87;
-  box-shadow: 0 0 0 3px #fff0b3;
+  background: #023661;
+  box-shadow: 0 0 0 3px #d9d9d9;
 }
 .delivery-map-note {
   color: #8092a4;
@@ -153,10 +153,10 @@
 }
 .delivery-map-warning {
   font-size: 12px;
-  color: #8f6c2b;
+  color: #c4473d;
   padding: 12px;
   border-radius: 10px;
-  background: #fff7e4;
+  background: #f2f2f2;
 }
 .delivery-map .leaflet-control-zoom {
   border: 1px solid #d6e1ed;
@@ -206,7 +206,7 @@
 }
 .delivery-map-pin > .is-cluster {
   box-shadow:
-    0 0 0 4px #ffd51a33,
+    0 0 0 4px #02366133,
     0 3px 8px #294a7740;
 }
 .delivery-map-hover {
