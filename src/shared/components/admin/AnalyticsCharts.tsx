@@ -1,17 +1,11 @@
 "use client";
-import { useId, useState } from "react";
-import { ChevronDown, ChevronUp, TrendingUp } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 import type { AnalyticsTable } from "../../server/sales/analytics";
-import { chartColors, monotonePath } from "../../lib/admin/chart-style";
-export const numberValue = (v: unknown) =>
-  v !== null && v !== undefined && v !== "" && Number.isFinite(Number(v))
-    ? Number(v)
-    : null;
-export const shortDate = (v: unknown) => {
-  const text = String(v ?? "");
-  const match = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  return match ? `${match[3]}/${match[2]}` : text || "Sem data";
-};
+import { chartNumber, chartDate } from "../../lib/admin/infographic";
+import InfographicTimeline from "./InfographicTimeline";
+import InfographicRanking from "./InfographicRanking";
+export const numberValue = chartNumber;
+export const shortDate = chartDate;
 type Format = (n: number | null) => string;
 export function RevenueChart({
   table,
@@ -32,240 +26,39 @@ export function RevenueChart({
   showTable?: boolean;
   comparison?: { label: string; values: number[] };
 }) {
-  const id = useId().replace(/:/g, "");
-  const [selectedIndex, setActive] = useState<number | null>(null);
-  const rows = table.rows;
-  const active =
-    selectedIndex !== null && selectedIndex < rows.length
-      ? selectedIndex
-      : null;
-  const values = rows.map((r) => numberValue(r[metricKey]));
-  const valid = values.filter((v): v is number => v !== null);
-  if (!valid.length)
-    return (
-      <p className="analytics-empty">
-        Não há valores disponíveis para este indicador no período.
-      </p>
-    );
-  const comparisonValues = comparison?.values ?? [];
-  const min = Math.min(0, ...valid, ...comparisonValues),
-    max = Math.max(0, ...valid, ...comparisonValues),
-    span = max - min || 1;
-  const x = (i: number) => 78 + (i * 648) / Math.max(1, rows.length - 1);
-  const y = (n: number) => 232 - ((n - min) * 188) / span;
-  const segments: { i: number; v: number }[][] = [];
-  values.forEach((v, i) => {
-    if (v === null) return;
-    if (i === 0 || values[i - 1] === null) segments.push([]);
-    segments.at(-1)!.push({ i, v });
-  });
-  const chosen = active === null ? null : rows[active];
-  const ticks = [
-    ...new Set(
-      Array.from({ length: 7 }, (_, i) =>
-        Math.round((i * Math.max(0, rows.length - 1)) / 6),
-      ),
-    ),
-  ];
   return (
-    <div className="analytics-chart-wrap">
-      <div className="analytics-chart-readout" aria-live="polite">
-        <span className="analytics-legend">
-          <i /> {metricLabel}
-          {comparison && <span> · Linha tracejada: {comparison.label}</span>}
-        </span>
-        <span>
-          {chosen ? (
-            <>
-              <b>{shortDate(chosen.day)}</b> ·{" "}
-              {money(numberValue(chosen[metricKey]))}
-              {active !== null && comparison && (
-                <> · Anterior: {money(comparison.values[active] ?? null)}</>
-              )}
-            </>
-          ) : (
-            "Passe pelo gráfico para explorar"
-          )}
-        </span>
-      </div>
-      <svg
-        viewBox="0 0 760 280"
-        className="analytics-revenue-chart"
-        role="group"
-        tabIndex={0}
-        aria-label={`${metricLabel} por dia. Use as setas esquerda e direita para consultar os valores.`}
-        onKeyDown={(e) => {
-          if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
-            e.preventDefault();
-            setActive((i) =>
-              Math.max(
-                0,
-                Math.min(
-                  rows.length - 1,
-                  (i ?? (e.key === "ArrowRight" ? -1 : rows.length)) +
-                    (e.key === "ArrowRight" ? 1 : -1),
-                ),
-              ),
-            );
-          }
-          if (e.key === "Escape") setActive(null);
-        }}
-        onPointerMove={(e) => {
-          const rect = e.currentTarget.getBoundingClientRect();
-          const position = ((e.clientX - rect.left) * 760) / rect.width;
-          setActive(
-            Math.max(
-              0,
-              Math.min(
-                rows.length - 1,
-                Math.round(
-                  ((position - 78) / 648) * Math.max(1, rows.length - 1),
-                ),
-              ),
-            ),
-          );
-        }}
-        onPointerLeave={() => setActive(null)}
-        onBlur={() => setActive(null)}
-      >
-        <defs>
-          <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={chartColors.blue} stopOpacity=".25" />
-            <stop
-              offset="100%"
-              stopColor={chartColors.blue}
-              stopOpacity=".015"
-            />
-          </linearGradient>
-        </defs>
-        {[0, 1, 2, 3, 4].map((i) => {
-          const v = min + (span * i) / 4;
-          return (
-            <g key={i}>
-              <line
-                x1="78"
-                x2="726"
-                y1={y(v)}
-                y2={y(v)}
-                stroke="#e1e9f2"
-                strokeDasharray="4 6"
-              />
-              <text x="66" y={y(v) + 4} textAnchor="end">
-                {new Intl.NumberFormat("pt-BR", {
-                  notation: "compact",
-                  maximumFractionDigits: 1,
-                }).format(v)}
-              </text>
-            </g>
-          );
-        })}
-        <text x="78" y="22">
-          {axisLabel || `Valores em ${currency}`}
-        </text>
-        {min < 0 && (
-          <line x1="78" x2="726" y1={y(0)} y2={y(0)} stroke="#9eafc5" />
-        )}
-        {comparisonValues.length > 1 && (
-          <polyline
-            fill="none"
-            stroke="#617e9b"
-            strokeWidth="2"
-            strokeDasharray="6 5"
-            points={comparisonValues
-              .map((value, index) => `${x(index)},${y(value)}`)
-              .join(" ")}
-          />
-        )}
-        {comparisonValues.length === 1 && (
-          <circle
-            cx={x(0)}
-            cy={y(comparisonValues[0])}
-            r="5"
-            fill="none"
-            stroke="#617e9b"
-            strokeWidth="2"
-          />
-        )}
-        {segments.map((s, i) => {
-          const path = monotonePath(s.map((p) => ({ x: x(p.i), y: y(p.v) })));
-          return (
-            <g key={i}>
-              <path
-                d={`${path} L${x(s.at(-1)!.i)},${y(0)} L${x(s[0].i)},${y(0)} Z`}
-                fill={`url(#${id})`}
-              />
-              <path
-                d={path}
-                fill="none"
-                stroke={chartColors.blue}
-                strokeWidth="3"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              {s.length === 1 && (
-                <circle
-                  cx={x(s[0].i)}
-                  cy={y(s[0].v)}
-                  r="4"
-                  fill={chartColors.blue}
-                />
-              )}
-            </g>
-          );
-        })}
-        {ticks.map((i) => (
-          <text
-            key={i}
-            x={x(i)}
-            y="262"
-            textAnchor={
-              i === 0 ? "start" : i === rows.length - 1 ? "end" : "middle"
-            }
-          >
-            {shortDate(rows[i].day)}
-          </text>
-        ))}
-        {active !== null && (
-          <g>
-            <line
-              x1={x(active)}
-              x2={x(active)}
-              y1="38"
-              y2="232"
-              stroke="#829bbd"
-              strokeDasharray="4 4"
-            />
-            {values[active] !== null && (
-              <circle
-                cx={x(active)}
-                cy={y(values[active]!)}
-                r="6"
-                fill={chartColors.amber}
-                stroke={chartColors.blue}
-                strokeWidth="3"
-              />
-            )}
-          </g>
-        )}
-      </svg>
+    <div className="infographic-revenue">
+      <InfographicTimeline
+        rows={table.rows.map((row) => ({
+          day: String(row.day ?? ""),
+          value: numberValue(row[metricKey]),
+        }))}
+        label={axisLabel ?? `${metricLabel} · ${currency}`}
+        format={money}
+        initial="area"
+        previous={comparison?.values}
+      />
+      {comparison && (
+        <p className="infographic-note">Comparação: {comparison.label}</p>
+      )}
       {showTable && (
         <details className="analytics-daily-values">
-          <summary>Consultar tabela de vendas diárias</summary>
+          <summary>Consultar valores diários</summary>
           <div className="analytics-table-scroll">
             <table className="admin-table">
               <thead>
                 <tr>
                   <th>Data</th>
-                  <th>Vendas</th>
+                  <th>{metricLabel}</th>
                   <th>Pedidos</th>
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r, i) => (
+                {table.rows.map((row, i) => (
                   <tr key={i}>
-                    <td>{shortDate(r.day)}</td>
-                    <td>{money(numberValue(r[metricKey]))}</td>
-                    <td>{numberValue(r.orders) ?? "—"}</td>
+                    <td>{shortDate(row.day)}</td>
+                    <td>{money(numberValue(row[metricKey]))}</td>
+                    <td>{numberValue(row.orders) ?? "—"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -285,57 +78,19 @@ export function RankedBars({
   dimension: string;
   money: Format;
 }) {
-  const [expanded, setExpanded] = useState(false);
-  const rows = table.rows;
-  const max =
-    Math.max(
-      0,
-      ...rows.map((r) => Math.abs(numberValue(r.total_sales) ?? 0)),
-    ) || 1;
   return (
-    <>
-      <ol className="analytics-ranking">
-        {rows.slice(0, expanded ? rows.length : 5).map((r, i) => {
-          const n = numberValue(r.total_sales);
-          return (
-            <li key={i}>
-              <span className="analytics-rank-number">
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <div>
-                <div className="analytics-rank-caption">
-                  <span title={String(r[dimension] ?? "Não informado")}>
-                    {String(r[dimension] ?? "Não informado")}
-                  </span>
-                  <strong>{money(n)}</strong>
-                </div>
-                <div className="analytics-bar-track" aria-hidden="true">
-                  <span
-                    className={n !== null && n < 0 ? "is-negative" : ""}
-                    style={{ width: `${(Math.abs(n ?? 0) / max) * 100}%` }}
-                  />
-                </div>
-                {dimension === "product_title" && (
-                  <small>
-                    {numberValue(r.net_items_sold) ?? "—"} unidades líquidas
-                  </small>
-                )}
-              </div>
-            </li>
-          );
-        })}
-      </ol>
-      {rows.length > 5 && (
-        <button
-          className="analytics-expand"
-          onClick={() => setExpanded(!expanded)}
-          aria-expanded={expanded}
-        >
-          {expanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}{" "}
-          {expanded ? "Mostrar menos" : `Ver os ${rows.length} resultados`}
-        </button>
-      )}
-    </>
+    <InfographicRanking
+      label="Comparação dos grupos"
+      items={table.rows.map((row) => ({
+        label: String(row[dimension] ?? "Não informado"),
+        value: numberValue(row.total_sales),
+        detail:
+          dimension === "product_title"
+            ? `${numberValue(row.net_items_sold) ?? "—"} unidades líquidas`
+            : undefined,
+      }))}
+      format={money}
+    />
   );
 }
 export function SessionJourney({ table }: { table: AnalyticsTable }) {
@@ -345,33 +100,64 @@ export function SessionJourney({ table }: { table: AnalyticsTable }) {
     ["sessions_that_reached_checkout", "Chegaram ao checkout"],
     ["sessions_that_completed_checkout", "Concluíram a compra"],
   ];
-  const total = numberValue(table.rows[0]?.sessions);
+  const values = stages.map(([key]) => numberValue(table.rows[0]?.[key])),
+    base = values[0];
+  const largest = Math.max(
+    1,
+    ...values.flatMap((v) => (v === null ? [] : [v])),
+  );
+  const consistent = values.every(
+    (v, i) =>
+      v === null ||
+      (v >= 0 && (i === 0 || values[i - 1] === null || v <= values[i - 1]!)),
+  );
   return (
-    <div className="analytics-journey">
-      {stages.map(([key, label], i) => {
-        const n = numberValue(table.rows[0]?.[key]);
-        const percent =
-          total !== null && total > 0 && n !== null ? (n / total) * 100 : null;
+    <div
+      className="infographic-funnel"
+      role="group"
+      aria-label="Funil de conversão das sessões"
+    >
+      <div className="infographic-tools">
+        <span className="infographic-kicker">JORNADA ATÉ A COMPRA</span>
+        <span>Base: sessões</span>
+      </div>
+      {stages.map(([, label], i) => {
+        const value = values[i],
+          percent =
+            base !== null && base > 0 && value !== null && value >= 0
+              ? (100 * value) / base
+              : null;
         return (
-          <div key={key}>
-            <span className="analytics-step">0{i + 1}</span>
-            <span>{label}</span>
-            <strong>{n === null ? "—" : n.toLocaleString("pt-BR")}</strong>
-            <div className="analytics-bar-track" aria-hidden="true">
-              <span
-                style={{
-                  width: `${Math.min(100, Math.max(0, percent ?? 0))}%`,
-                }}
-              />
+          <div className="infographic-funnel-stage" key={label}>
+            <span className="infographic-rank-index">0{i + 1}</span>
+            <div>
+              <div className="infographic-rank-title">
+                <span>{label}</span>
+                <strong>
+                  {value === null ? "—" : value.toLocaleString("pt-BR")}
+                </strong>
+              </div>
+              <div className="infographic-funnel-track" aria-hidden="true">
+                <span
+                  style={{
+                    width: `${(Math.max(0, value ?? 0) / largest) * 100}%`,
+                  }}
+                />
+              </div>
             </div>
-            <small>
+            <b>
               {percent === null
-                ? "Proporção indisponível"
-                : `${percent.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}% das sessões`}
-            </small>
+                ? "—"
+                : `${percent.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%`}
+            </b>
           </div>
         );
       })}
+      <p className="infographic-note">
+        {consistent
+          ? "Proporções em relação ao total de sessões, conforme o Shopify Analytics."
+          : "A fonte retornou etapas fora da sequência esperada. Os valores foram preservados; confira a tabela antes de interpretar a conversão."}
+      </p>
     </div>
   );
 }

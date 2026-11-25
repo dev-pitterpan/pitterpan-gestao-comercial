@@ -1,15 +1,9 @@
 "use client";
-
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import AdminSelect from "./AdminSelect";
-import { chartPalette } from "../../lib/admin/chart-style";
-import { Pause, Play, RotateCcw, Sparkles } from "lucide-react";
-
+import InfographicRanking from "./InfographicRanking";
 type Category = { id?: string; name: string; count: number; detail?: string };
-const colors = chartPalette;
-const number = (n: number) => new Intl.NumberFormat("pt-BR").format(n);
-
 /** A small vector balloon, shared by the chart and section illustrations. */
 export function PartyHelper() {
   return (
@@ -53,191 +47,72 @@ export default function PartyChart({
   soldProducts?: Category[];
   soldHref?: string;
 }) {
-  const [products, setProducts] = useState(false);
+  const [products, setProducts] = useState(false),
+    [sort, setSort] = useState("largest");
   const showSold = products && soldProducts !== undefined;
-  const dataset = showSold ? soldProducts : categories;
-  const [sort, setSort] = useState("largest");
-  const [paused, setPaused] = useState(false);
-  const [scene, setScene] = useState(0);
-  const [running, setRunning] = useState(true);
-  const signature = JSON.stringify(dataset);
-  const previous = useRef(signature);
-  // Only animate on arrival, explicit replay, sorting or actual data changes.
-  useEffect(() => {
-    if (previous.current !== signature) {
-      previous.current = signature;
-      setScene((n) => n + 1);
-      setRunning(true);
-    }
-  }, [signature]);
-  useEffect(() => {
-    if (!running || paused) return;
-    const timer = window.setTimeout(() => setRunning(false), 2800);
-    return () => window.clearTimeout(timer);
-  }, [scene, running, paused]);
-  const rows = [...dataset].sort((a, b) =>
+  const rows = [...(showSold ? soldProducts : categories)].sort((a, b) =>
     sort === "name" ? a.name.localeCompare(b.name, "pt-BR") : b.count - a.count,
   );
-  const max = Math.max(1, ...rows.map((c) => c.count));
-  const replay = () => {
-    setScene((n) => n + 1);
-    setRunning(true);
-  };
   return (
-    <div
-      className={`party-chart${paused ? " is-paused" : ""}${running ? " is-running" : ""}`}
-    >
-      {soldProducts && (
-        <div
-          className="commercial-overview-controls"
-          role="group"
-          aria-label="Visão de produtos"
-        >
-          <button
-            type="button"
-            className="admin-button"
-            aria-pressed={!showSold}
-            onClick={() => setProducts(false)}
+    <div className="infographic-catalog">
+      <div className="infographic-catalog-toolbar">
+        {soldProducts && (
+          <div
+            className="infographic-switch"
+            role="group"
+            aria-label="Visão de produtos"
           >
-            Por categoria
-          </button>
-          <button
-            type="button"
-            className="admin-button"
-            aria-pressed={showSold}
-            onClick={() => setProducts(true)}
-          >
-            Mais vendidos
-          </button>
-        </div>
-      )}
-      <div className="party-chart-toolbar">
-        <label>
-          Organizar por{" "}
-          <AdminSelect
-            value={sort}
-            label={
-              showSold ? "Organizar produtos vendidos" : "Organizar categorias"
-            }
-            onValueChange={(value) => {
-              setSort(value);
-              replay();
-            }}
-            options={[
-              { value: "largest", label: "Maior quantidade" },
-              {
-                value: "name",
-                label: showSold ? "Nome do produto" : "Nome da categoria",
-              },
-            ]}
-          />
-        </label>
-        <div>
-          <button
-            type="button"
-            onClick={replay}
-            aria-label="Repetir animação do gráfico"
-            title="Repetir animação"
-          >
-            <RotateCcw size={16} />
-          </button>
-          <button
-            type="button"
-            onClick={() => setPaused((v) => !v)}
-            aria-pressed={paused}
-            aria-label={
-              paused
-                ? "Retomar animações do gráfico"
-                : "Pausar animações do gráfico"
-            }
-            title={paused ? "Retomar" : "Pausar"}
-          >
-            {paused ? <Play size={16} /> : <Pause size={16} />}
-          </button>
-        </div>
-      </div>
-      {rows.length ? (
-        <div
-          key={scene}
-          className="party-chart-rows"
-          role="list"
-          aria-label={
-            showSold
-              ? "Unidades vendidas por produto"
-              : "Quantidade de variantes por categoria"
-          }
-        >
-          {rows.map((c, i) => (
-            <div
-              className="party-chart-row"
-              role="listitem"
-              key={c.id ?? c.name}
-              style={
-                {
-                  "--bar-size": `${(c.count / max) * 100}%`,
-                  "--bar-color": colors[i % colors.length],
-                  "--bar-delay": `${Math.min(i, 5) * 70}ms`,
-                } as CSSProperties
-              }
+            <button
+              type="button"
+              aria-pressed={!showSold}
+              onClick={() => setProducts(false)}
             >
-              <div className="party-chart-label">
-                {showSold ? (
-                  <span>{c.name}</span>
-                ) : (
-                  <Link
-                    href={`/gestor/produtos/?${new URLSearchParams({ category: c.name })}`}
-                    className="admin-text-link"
-                  >
-                    {c.name}
-                  </Link>
-                )}
-                <strong>{number(c.count)}</strong>
-              </div>
-              {c.detail && <small className="admin-subtle">{c.detail}</small>}
-              <div className="party-chart-mechanism">
-                <div className="party-chart-track">
-                  <div className="party-chart-bar" />
-                  <span className="party-chart-cord" aria-hidden="true" />
-                </div>
-                {c.count > 0 && (
-                  <div className="party-chart-reel">
-                    <PartyHelper />
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="party-chart-empty">
-          <PartyHelper />
-          <strong>
-            {showSold
-              ? "Sem produtos vendidos no período"
-              : "Preparando o palco para seus produtos"}
-          </strong>
-          <p>
-            {showSold
-              ? "Escolha outro período no calendário."
-              : "As categorias aparecem após a primeira importação publicada."}
-          </p>
-        </div>
-      )}
-      {!showSold && (
-        <p className="party-chart-caption">
-          <Sparkles size={14} />
-          Selecione uma das seis maiores categorias para abrir seus produtos.
-        </p>
-      )}
-      {showSold && soldHref ? (
-        <Link className="admin-text-link" href={soldHref}>
-          Ver produtos vendidos
-        </Link>
-      ) : (
-        <Link className="admin-text-link" href="/gestor/produtos/">
-          Explorar todos os produtos
-        </Link>
-      )}
+              Categorias
+            </button>
+            <button
+              type="button"
+              aria-pressed={showSold}
+              onClick={() => setProducts(true)}
+            >
+              Mais vendidos
+            </button>
+          </div>
+        )}
+        <AdminSelect
+          value={sort}
+          label="Organizar categorias e produtos"
+          onValueChange={setSort}
+          options={[
+            { value: "largest", label: "Maior quantidade" },
+            { value: "name", label: "Nome" },
+          ]}
+        />
+      </div>
+      <InfographicRanking
+        key={`${showSold}-${sort}`}
+        label={
+          showSold
+            ? "Unidades vendidas por produto"
+            : "Variantes nas categorias exibidas"
+        }
+        items={rows.map((row) => ({
+          label: row.name,
+          value: row.count,
+          detail: row.detail,
+          href: showSold
+            ? undefined
+            : `/gestor/produtos/?${new URLSearchParams({ category: row.name })}`,
+        }))}
+        format={(value) =>
+          value === null ? "—" : value.toLocaleString("pt-BR")
+        }
+      />
+      <Link
+        className="admin-text-link"
+        href={showSold && soldHref ? soldHref : "/gestor/produtos/"}
+      >
+        {showSold ? "Ver produtos vendidos" : "Explorar todos os produtos"} →
+      </Link>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import InfographicRadial from "./InfographicRadial";
 import { chartColors } from "../../lib/admin/chart-style";
 import { useState } from "react";
 import type { AdminSummary } from "../../server/admin/repository";
@@ -27,13 +28,13 @@ export default function StockOverview({
         0,
         summary.variants - summary.low - summary.out - summary.unknown,
       ),
-      color: chartColors.blue,
+      color: "#6999bd",
       href: "/gestor/estoque/?stock=above",
     },
     {
       label: "Estoque baixo",
       value: summary.low,
-      color: chartColors.amber,
+      color: "#286da8",
       href: "/gestor/estoque/?stock=low",
     },
     {
@@ -49,101 +50,17 @@ export default function StockOverview({
       href: "/gestor/estoque/?stock=unknown",
     },
   ];
-  const total = summary.variants;
   const current = selected === null ? null : segments[selected];
-  let offset = 0;
   return (
-    <>
-      <div className="overview-stock-chart">
-        <div className="overview-stock-ring is-semicircle">
-          <svg
-            viewBox="0 0 240 150"
-            role="group"
-            aria-label="Distribuição das variantes por situação do estoque"
-          >
-            <circle
-              cx="120"
-              cy="120"
-              r="86"
-              fill="none"
-              stroke="#edf2f8"
-              pathLength="100"
-              strokeDasharray="50 50"
-              transform="rotate(-180 120 120)"
-              strokeWidth="28"
-            />
-            {segments.map((segment, index) => {
-              const share = total ? (segment.value / total) * 100 : 0;
-              const start = offset;
-              offset += share;
-              return (
-                share > 0 && (
-                  <circle
-                    key={segment.label}
-                    cx="120"
-                    cy="120"
-                    r="86"
-                    fill="none"
-                    stroke={segment.color}
-                    strokeWidth={selected === index ? 34 : 28}
-                    pathLength="100"
-                    strokeDasharray={`${Math.max(0, share / 2 - 0.45)} ${100 - Math.max(0, share / 2 - 0.45)}`}
-                    strokeDashoffset={-start / 2}
-                    transform="rotate(-180 120 120)"
-                    tabIndex={0}
-                    role="button"
-                    aria-label={`${segment.label}: ${number(segment.value)} variantes`}
-                    aria-pressed={selected === index}
-                    onPointerEnter={() => setSelected(index)}
-                    onFocus={() => setSelected(index)}
-                    onClick={() => setSelected(index)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" || event.key === " ") {
-                        event.preventDefault();
-                        setSelected(index);
-                      }
-                    }}
-                  />
-                )
-              );
-            })}
-          </svg>
-          <div aria-live="polite">
-            {current && <small>{current.label}</small>}
-            <strong>{number(current?.value ?? total)}</strong>
-            <span>
-              {current
-                ? `${total ? ((current.value / total) * 100).toLocaleString("pt-BR", { maximumFractionDigits: 1 }) : 0}% do total`
-                : "variantes"}
-            </span>
-          </div>
-        </div>
-        <div className="overview-stock-legend">
-          {segments.map((segment, index) => (
-            <button
-              type="button"
-              key={segment.label}
-              aria-pressed={selected === index}
-              onPointerEnter={() => setSelected(index)}
-              onFocus={() => setSelected(index)}
-              onClick={() => setSelected(index)}
-            >
-              <i style={{ background: segment.color }} />
-              <span>{segment.label}</span>
-              <b>{number(segment.value)}</b>
-            </button>
-          ))}
-        </div>
-      </div>
-      {selected !== null && (
-        <button
-          type="button"
-          className="admin-text-link overview-stock-reset"
-          onClick={() => setSelected(null)}
-        >
-          Ver total de variantes
-        </button>
-      )}
+    <div className="infographic-stock">
+      <InfographicRadial
+        items={segments}
+        total={summary.variants}
+        label="Distribuição das variantes por situação do estoque"
+        format={(value) => (value === null ? "—" : number(value))}
+        selected={selected}
+        onSelect={setSelected}
+      />
       <p className="admin-inline-note">
         Baixo: de 1 a {low} unidades por variante. Quantidades da última
         publicação do catálogo.
@@ -157,6 +74,6 @@ export default function StockOverview({
           : "Explorar estoque completo"}{" "}
         →
       </Link>
-    </>
+    </div>
   );
 }
