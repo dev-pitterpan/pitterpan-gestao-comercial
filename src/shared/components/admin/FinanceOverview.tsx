@@ -9,6 +9,8 @@ import { salesLink, salesPageLink } from "../../lib/admin/sales-links";
 import Link from "next/link";
 import { shiftDate } from "../../lib/admin/date-range";
 type Data = Awaited<ReturnType<typeof readSalesFinance>>;
+import { brandColors } from "../../lib/admin/brand-colors";
+
 const labels: Record<string, string> = {
   PAID: "Pago",
   PENDING: "Pendente",
@@ -21,14 +23,14 @@ const labels: Record<string, string> = {
   UNKNOWN: "Não informado",
 };
 const colors: Record<string, string> = {
-  PAID: "#2659a4",
-  PENDING: "#f2c43d",
-  AUTHORIZED: "#138797",
-  PARTIALLY_PAID: "#49a699",
-  PARTIALLY_REFUNDED: "#ee9862",
-  REFUNDED: "#d76a89",
-  EXPIRED: "#93a4ba",
-  VOIDED: "#626d82",
+  PAID: brandColors.navy,
+  PENDING: brandColors.warning,
+  AUTHORIZED: brandColors.blue,
+  PARTIALLY_PAID: brandColors.steel,
+  PARTIALLY_REFUNDED: brandColors.coralLight,
+  REFUNDED: brandColors.coral,
+  EXPIRED: brandColors.slate,
+  VOIDED: brandColors.charcoal,
   UNKNOWN: "#bac7d6",
 };
 export default function FinanceOverview({

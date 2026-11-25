@@ -1,11 +1,12 @@
-/** Shared business colors: color always complements a label or a value. */
+import { brandColors } from "./brand-colors.ts";
+/** Series use the management identity; labels preserve their business meaning. */
 export const chartColors = {
-  blue: "#6273dd",
-  teal: "#28a4ae",
-  green: "#3aa87f",
-  amber: "#e3b252",
-  coral: "#d87b8a",
-  slate: "#a8b1c8",
+  blue: brandColors.navy,
+  teal: brandColors.blue,
+  green: brandColors.steel,
+  amber: brandColors.warning,
+  coral: brandColors.coral,
+  slate: brandColors.slate,
 };
 export const chartPalette = [
   chartColors.blue,
