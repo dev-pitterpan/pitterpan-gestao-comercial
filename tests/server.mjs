@@ -296,7 +296,8 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
             /<section[^>]*class="workspace-catalog-metrics"/,
           );
         } else {
-          assert.match(html, /class="workspace-trend-card"/);
+          assert.match(html, /aria-label="Desempenho comercial em bento"/);
+          assert.doesNotMatch(html, /class="workspace-trend-card"/);
           assert.doesNotMatch(html, /class="priority-queue"/);
           assert.doesNotMatch(
             html,
