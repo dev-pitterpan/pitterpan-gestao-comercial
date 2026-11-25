@@ -344,3 +344,18 @@ Todos os pontos de entrada que exibem gráficos na Gestão compartilham a famíl
 Validação: 141 testes unitários, tipos, build e rotas HTTP; prévia dos gráficos com teclado, troca de estilo, participação, paginação, valores negativos, ausência de dados e largura de celular de 390 px, sem transbordamento horizontal. Dados da prévia são fictícios e não integram o código de produção.
 
 A conferência online também removeu o limite legado de 740 px da seção de recebimentos: o gráfico financeiro usa toda a largura do módulo, sem moldura externa duplicada. Havendo várias moedas, cada gráfico continua separado e a grade adapta o número de colunas à largura disponível.
+
+
+### Geometria da referência de infográficos — 25/11/2026
+
+A segunda revisão segue mais de perto a linguagem visual da referência enviada: fundo grafite pontilhado, divisórias finas, ícones centrais, rótulos com linhas de chamada e gráficos em SVG próprios. A estrutura da sidebar e a paleta azul/grafite/coral permanecem. O novo `reference-charts.css`, após a base de gráficos, controla a apresentação compacta; não altera catálogos públicos nem login.
+
+`InfographicRadial` oferece três desenhos: leque de setores de ângulo constante e área proporcional ao valor para categorias, círculos segmentados para composição financeira e arcos espessos sobrepostos para estoque. Ícones e rótulos são decorativos ou descritivos; percentuais são calculados da base informada. A seleção por clique ou teclado preserva os links para os produtos da categoria e os filtros de estoque. Valores negativos, base zero e dados incompletos continuam sem proporção artificial.
+
+`InfographicPeaks` compara até seis grupos por página com triângulos de base constante e altura proporcional ao valor. A escala é definida sobre todos os grupos retornados, permanecendo constante entre páginas; o leque também mantém o mesmo máximo. `reference-geometry.ts` concentra o desenho dos setores, a escala por área dos leques e os picos assinados. Os testes verificam proporcionalidade de área, setores pequenos e de 360 graus, zero e negativos.
+
+`InfographicJourney` desenha as etapas de conversão em arcos sobrepostos com a mesma base de sessões. As etapas não são somadas nem tratadas como fatias exclusivas; valores inconsistentes preservam os números e recebem aviso.
+
+A evolução temporal agora abre em picos triangulares, com opção de colunas e área, mantendo as datas, agrupamento semanal quando disponível e as lacunas desconhecidas. O valor inicial destacado é o maior valor real da série, identificado pela data; a seleção passa a mostrar o dia consultado. O calendário de intensidade conserva seus dados e passa a usar marcadores circulares. A composição bento do Resumo e da Visão Geral usa os novos desenhos. A mudança não cria dados, dependências ou migrações.
+
+Verificação: 143 testes unitários, TypeScript, formatação, build e testes HTTP; prévia desktop e largura de celular de 390 px sem rolagem horizontal, seleção dos setores, paginação, consulta dos picos por teclado, estados sem base e dados ausentes. As figuras de teste usam dados fictícios fora do repositório.

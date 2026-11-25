@@ -228,7 +228,7 @@ export default function FinanceOverview({
             </Link>
           ))}
         </div>
-        <div className="finance-chart-grid">
+        <div className="finance-chart-grid reference-chart-sheet">
           <section className="admin-panel finance-line-panel">
             <header>
               <h2>Evolução diária</h2>
@@ -351,7 +351,7 @@ export default function FinanceOverview({
           </article>
         ))}
       </div>
-      <div className="finance-chart-grid">
+      <div className="finance-chart-grid reference-chart-sheet">
         <section className="admin-panel finance-line-panel">
           <header>
             <div>
@@ -393,6 +393,7 @@ export default function FinanceOverview({
             </span>
           </header>
           <InfographicRadial
+            variant="segments"
             label="Distribuição de pedidos por situação do pagamento"
             total={total}
             items={statuses.map((s) => ({

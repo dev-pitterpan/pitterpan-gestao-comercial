@@ -25,7 +25,7 @@ export default function BentoRevenueChart({
   return (
     <section
       className="bento-tile bento-revenue bento-infographic"
-      aria-label="Evolução financeira em colunas"
+      aria-label="Evolução financeira do período"
     >
       <header>
         <div>

@@ -1,6 +1,7 @@
 "use client";
 import { useId, useLayoutEffect, useRef, useState } from "react";
-import { ChartColumn, Mountain } from "lucide-react";
+import { ChartColumn, Mountain, Triangle } from "lucide-react";
+import { peakPolygon } from "../../lib/admin/reference-geometry";
 import { chartDate, chartDomain } from "../../lib/admin/infographic";
 export type TimelinePoint = { day: string; value: number | null };
 export default function InfographicTimeline({
@@ -8,14 +9,14 @@ export default function InfographicTimeline({
   format,
   label,
   previous,
-  initial = "columns",
+  initial = "peaks",
   coral = false,
 }: {
   rows: TimelinePoint[];
   format: (value: number | null) => string;
   label: string;
   previous?: (number | null)[];
-  initial?: "columns" | "area";
+  initial?: "columns" | "area" | "peaks";
   coral?: boolean;
 }) {
   const [mode, setMode] = useState(initial),
@@ -51,6 +52,12 @@ export default function InfographicTimeline({
     maximumFractionDigits: 1,
   });
   const chosen = active === null ? undefined : rows[active];
+  const peak = rows.reduce<TimelinePoint | undefined>(
+    (best, row) =>
+      row.value !== null && (!best || row.value > best.value!) ? row : best,
+    undefined,
+  );
+  const reading = chosen ?? peak;
   const paths = (points: (number | null)[]) => {
     const segments: { index: number; value: number }[][] = [];
     points.forEach((value, index) => {
@@ -68,7 +75,9 @@ export default function InfographicTimeline({
     ),
   ].filter((i) => i >= 0);
   return (
-    <div className={`infographic-timeline${coral ? " is-coral" : ""}`}>
+    <div
+      className={`infographic-timeline reference-timeline${coral ? " is-coral" : ""}`}
+    >
       <div className="infographic-tools">
         <span className="infographic-kicker">{label}</span>
         <div
@@ -76,6 +85,14 @@ export default function InfographicTimeline({
           role="group"
           aria-label="Forma do gráfico"
         >
+          <button
+            type="button"
+            aria-pressed={mode === "peaks"}
+            onClick={() => setMode("peaks")}
+          >
+            <Triangle size={14} />
+            Picos
+          </button>
           <button
             type="button"
             aria-pressed={mode === "columns"}
@@ -95,9 +112,15 @@ export default function InfographicTimeline({
         </div>
       </div>
       <div className="infographic-readout" aria-live="polite">
-        <span>{chosen ? chartDate(chosen.day) : "LEITURA DO PERÍODO"}</span>
+        <span>
+          {chosen
+            ? chartDate(chosen.day)
+            : peak
+              ? `Maior valor · ${chartDate(peak.day)}`
+              : "LEITURA DO PERÍODO"}
+        </span>
         <strong>
-          {chosen ? format(chosen.value) : "Explore os resultados"}
+          {reading ? format(reading.value) : "Sem valores disponíveis"}
         </strong>
         <small>
           {chosen && comparison && active !== null
@@ -204,68 +227,97 @@ export default function InfographicTimeline({
               y2={y(0)}
               className="infographic-zero"
             />
-            {mode === "columns"
-              ? rows.map((r, i) =>
-                  r.value === null ? (
-                    <circle
-                      key={i}
-                      cx={x(i)}
-                      cy={y(0) - 4}
-                      r="2"
-                      fill="#76828e"
+            {mode === "peaks"
+              ? rows.map((row, index) => {
+                  const shape =
+                    row.value === null
+                      ? ""
+                      : peakPolygon(x(index), y(0), y(row.value), step * 0.82);
+                  return shape ? (
+                    <polygon
+                      key={index}
+                      points={shape}
+                      fill={
+                        row.value! < 0 || coral
+                          ? "#c4473d"
+                          : index % 3 === 0
+                            ? "#6999bd"
+                            : "#286da8"
+                      }
+                      opacity={active === null || active === index ? 1 : 0.35}
                     />
                   ) : (
-                    <g key={i}>
-                      <rect
-                        x={x(i) - Math.min(20, step * 0.6) / 2}
-                        width={Math.min(20, step * 0.6)}
-                        y={Math.min(y(0), y(r.value))}
-                        height={Math.abs(y(r.value) - y(0))}
-                        rx="4"
-                        fill={r.value < 0 ? "#c4473d" : `url(#${id})`}
-                        opacity={active === null || active === i ? 1 : 0.45}
-                      />
-                      {r.value !== 0 && (
-                        <circle
-                          cx={x(i)}
-                          cy={y(r.value)}
-                          r={active === i ? 4 : 2}
-                          fill={r.value < 0 || coral ? "#c4473d" : "#a1ceeb"}
-                        />
-                      )}
-                    </g>
-                  ),
-                )
-              : paths(rows.map((r) => r.value)).map((s, i) => {
-                  const line = s
-                    .map(
-                      (p, j) => `${j ? "L" : "M"}${x(p.index)},${y(p.value)}`,
-                    )
-                    .join(" ");
-                  return (
-                    <g key={i}>
-                      <path
-                        d={`${line} L${x(s.at(-1)!.index)},${y(0)} L${x(s[0].index)},${y(0)} Z`}
-                        fill={`url(#${id})`}
-                        opacity=".65"
-                      />
-                      <path
-                        d={line}
-                        fill="none"
-                        stroke={coral ? "#c4473d" : "#a1ceeb"}
-                        strokeWidth="2"
-                      />
-                      {s.length === 1 && (
-                        <circle
-                          cx={x(s[0].index)}
-                          cy={y(s[0].value)}
-                          r="3"
-                          fill="#a1ceeb"
-                        />
-                      )}
-                    </g>
+                    <circle
+                      key={index}
+                      cx={x(index)}
+                      cy={y(0)}
+                      r={row.value === null ? 2 : 0}
+                      fill="#76828e"
+                    />
                   );
-                })}
+                })
+              : mode === "columns"
+                ? rows.map((r, i) =>
+                    r.value === null ? (
+                      <circle
+                        key={i}
+                        cx={x(i)}
+                        cy={y(0) - 4}
+                        r="2"
+                        fill="#76828e"
+                      />
+                    ) : (
+                      <g key={i}>
+                        <rect
+                          x={x(i) - Math.min(20, step * 0.6) / 2}
+                          width={Math.min(20, step * 0.6)}
+                          y={Math.min(y(0), y(r.value))}
+                          height={Math.abs(y(r.value) - y(0))}
+                          rx="0"
+                          fill={r.value < 0 ? "#c4473d" : `url(#${id})`}
+                          opacity={active === null || active === i ? 1 : 0.45}
+                        />
+                        {r.value !== 0 && (
+                          <circle
+                            cx={x(i)}
+                            cy={y(r.value)}
+                            r={active === i ? 4 : 2}
+                            fill={r.value < 0 || coral ? "#c4473d" : "#a1ceeb"}
+                          />
+                        )}
+                      </g>
+                    ),
+                  )
+                : paths(rows.map((r) => r.value)).map((s, i) => {
+                    const line = s
+                      .map(
+                        (p, j) => `${j ? "L" : "M"}${x(p.index)},${y(p.value)}`,
+                      )
+                      .join(" ");
+                    return (
+                      <g key={i}>
+                        <path
+                          d={`${line} L${x(s.at(-1)!.index)},${y(0)} L${x(s[0].index)},${y(0)} Z`}
+                          fill={coral ? "#c4473d" : "#286da8"}
+                          opacity=".75"
+                        />
+                        <path
+                          d={line}
+                          fill="none"
+                          stroke={coral ? "#c4473d" : "#a1ceeb"}
+                          strokeWidth="2"
+                        />
+                        {s.length === 1 && (
+                          <circle
+                            cx={x(s[0].index)}
+                            cy={y(s[0].value)}
+                            r="3"
+                            fill="#a1ceeb"
+                          />
+                        )}
+                      </g>
+                    );
+                  })}
             {comparison &&
               paths(comparison).map((s, i) => (
                 <polyline
@@ -308,6 +360,22 @@ export default function InfographicTimeline({
                     stroke="#0a0c12"
                     strokeWidth="2"
                   />
+                )}
+                {chosen.value !== null && (
+                  <g
+                    aria-hidden="true"
+                    transform={`translate(${Math.max(left, Math.min(right - 64, x(active) - 32))},${Math.max(1, Math.min(bottom - 25, y(chosen.value) - 29))})`}
+                  >
+                    <rect width="64" height="21" fill="#edf0f3" />
+                    <text
+                      x="32"
+                      y="15"
+                      textAnchor="middle"
+                      className="reference-callout"
+                    >
+                      {axis.format(chosen.value)}
+                    </text>
+                  </g>
                 )}
               </g>
             )}

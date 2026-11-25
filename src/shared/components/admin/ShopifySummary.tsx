@@ -66,7 +66,7 @@ export default function ShopifySummary({
     Number(total.orders) > 0 ? Number(total.paid) / Number(total.orders) : null;
   return (
     <section
-      className="bento-summary"
+      className="bento-summary reference-sheet"
       aria-label="Resumo comercial da Shopify"
       aria-busy={loading}
     >

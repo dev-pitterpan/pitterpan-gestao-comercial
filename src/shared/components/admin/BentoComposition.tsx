@@ -43,6 +43,7 @@ export default function BentoComposition({
         </Link>
       </header>
       <InfographicRadial
+        variant="segments"
         label="Composição do recebido"
         items={[
           { label: "Líquido", value: Number(net), color: "#6999bd" },

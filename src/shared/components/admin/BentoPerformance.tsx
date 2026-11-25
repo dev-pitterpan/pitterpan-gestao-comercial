@@ -44,7 +44,7 @@ export default function BentoPerformance({
   const receipts = salesPageLink("/gestor/vendas/recebimentos/", params);
   return (
     <section
-      className="bento-summary"
+      className="bento-summary reference-sheet"
       aria-label="Desempenho comercial em bento"
       id="workspace-performance"
     >

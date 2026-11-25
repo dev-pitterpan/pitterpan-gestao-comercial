@@ -3,8 +3,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { infographicPalette as chartPalette } from "../../lib/admin/infographic";
-import { chartDomain, distribution } from "../../lib/admin/infographic";
+import { distribution, chartDomain } from "../../lib/admin/infographic";
 import InfographicRadial from "./InfographicRadial";
+import InfographicPeaks from "./InfographicPeaks";
 export type RankingItem = {
   label: string;
   value: number | null;
@@ -15,7 +16,7 @@ export default function InfographicRanking({
   items,
   label,
   format,
-  initial = "comparison",
+  initial = "share",
   participation = true,
 }: {
   items: RankingItem[];
@@ -30,9 +31,8 @@ export default function InfographicRanking({
     safePage = Math.min(page, pages - 1),
     start = safePage * 6,
     rows = items.slice(start, start + 6);
-  const { low, high } = chartDomain(items.map((r) => r.value)),
-    position = (n: number) => ((n - low) / (high - low)) * 100,
-    shares = distribution(items.map((r) => r.value));
+  const shares = distribution(items.map((r) => r.value));
+  const isShare = participation && mode === "share" && shares.valid;
   return (
     <div className="infographic-ranking" role="group" aria-label={label}>
       <div className="infographic-tools">
@@ -45,79 +45,73 @@ export default function InfographicRanking({
           >
             <button
               type="button"
-              aria-pressed={mode === "comparison"}
+              aria-pressed={!isShare}
               onClick={() => setMode("comparison")}
             >
-              Comparar
+              Picos
             </button>
             <button
               type="button"
-              aria-pressed={mode === "share"}
+              aria-pressed={isShare}
               onClick={() => setMode("share")}
               disabled={!shares.valid}
             >
-              Participação
+              Leque
             </button>
           </div>
         )}
       </div>
       {!items.length ? (
         <p className="infographic-empty">Nenhum resultado disponível.</p>
-      ) : mode === "share" && shares.valid ? (
+      ) : isShare ? (
         <InfographicRadial
-          items={rows}
+          items={rows.map((item, index) => ({
+            ...item,
+            color: chartPalette[(start + index) % chartPalette.length],
+          }))}
+          variant="fan"
+          extent={Math.max(0, ...items.map((item) => item.value ?? 0))}
           total={shares.total}
           label="Participação nos grupos retornados"
           format={format}
         />
       ) : (
-        <ol className="infographic-lollipops" start={start + 1}>
-          {rows.map((item, i) => (
-            <li key={`${start + i}-${item.label}`}>
-              <span className="infographic-rank-index">
-                {String(start + i + 1).padStart(2, "0")}
-              </span>
-              <div>
-                <div className="infographic-rank-title">
-                  {item.href ? (
-                    <Link href={item.href}>{item.label}</Link>
-                  ) : (
-                    <span>{item.label}</span>
-                  )}
-                  <strong>{format(item.value)}</strong>
+        <div>
+          <InfographicPeaks
+            key={start}
+            items={rows}
+            format={format}
+            offset={start}
+            domain={chartDomain(items.map((item) => item.value))}
+          />
+          <ol className="reference-peak-legend" start={start + 1}>
+            {rows.map((item, i) => (
+              <li key={`${start + i}-${item.label}`}>
+                <span className="infographic-rank-index">
+                  {String(start + i + 1).padStart(2, "0")}
+                </span>
+                <div>
+                  <div className="infographic-rank-title">
+                    {item.href ? (
+                      <Link href={item.href}>{item.label}</Link>
+                    ) : (
+                      <span>{item.label}</span>
+                    )}
+                    <strong>{format(item.value)}</strong>
+                  </div>
+                  <small>
+                    {item.detail ??
+                      (item.value === null
+                        ? "Sem dados"
+                        : shares.shares[start + i] === null
+                          ? "Valor informado"
+                          : `${shares.shares[start + i]!.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}% dos grupos retornados`)}
+                  </small>
                 </div>
-                <div className="infographic-lollipop-track" aria-hidden="true">
-                  <i
-                    className="infographic-lollipop-zero"
-                    style={{ left: `${position(0)}%` }}
-                  />
-                  {item.value !== null && (
-                    <span
-                      style={{
-                        left: `${Math.min(position(0), position(item.value))}%`,
-                        width: `${Math.abs(position(item.value) - position(0))}%`,
-                        background:
-                          item.value < 0
-                            ? "#c4473d"
-                            : chartPalette[(start + i) % chartPalette.length],
-                      }}
-                    >
-                      <b style={{ [item.value < 0 ? "left" : "right"]: 0 }} />
-                    </span>
-                  )}
-                </div>
-                <small>
-                  {item.detail ??
-                    (item.value === null
-                      ? "Sem dados"
-                      : shares.shares[start + i] === null
-                        ? "Valor informado"
-                        : `${shares.shares[start + i]!.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}% dos grupos retornados`)}
-                </small>
-              </div>
-            </li>
-          ))}
-        </ol>
+              </li>
+            ))}
+          </ol>
+        </div>
       )}
       {items.length > 6 && (
         <div className="infographic-pagination">
@@ -147,7 +141,9 @@ export default function InfographicRanking({
       )}
       <p className="infographic-note">
         {participation
-          ? "Percentuais usam somente os grupos retornados nesta consulta. Não representam todo o catálogo ou outras páginas da fonte."
+          ? isShare
+            ? "A área de cada setor representa o valor. Percentuais usam todos os grupos retornados, não o catálogo inteiro nem outras páginas da fonte."
+            : "Picos comparados na mesma escala entre páginas. Percentuais usam todos os grupos retornados nesta consulta."
           : "Comprimentos comparados na mesma escala; valores ausentes não são zero."}
       </p>
     </div>

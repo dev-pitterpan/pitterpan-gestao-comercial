@@ -94,7 +94,7 @@ export default function OverviewCatalog({
         ))}
       </section>
 
-      <div className="workspace-business-grid is-catalog-only">
+      <div className="workspace-business-grid is-catalog-only reference-catalog-sheet">
         <section className="admin-panel workspace-mix-card">
           <header>
             <div>
