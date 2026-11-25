@@ -1,9 +1,10 @@
 "use client";
-import { useEffect, useState, useId } from "react";
+import { useEffect, useState } from "react";
 import { ArrowDownLeft, ArrowUpRight, Wallet, Undo2 } from "lucide-react";
 import type { readSalesFinance } from "../../server/sales/repository";
 import { RevenueChart, numberValue } from "./AnalyticsCharts";
 import AdminSelect from "./AdminSelect";
+import InfographicRadial from "./InfographicRadial";
 import PitterSpinner from "./PitterSpinner";
 import { salesLink, salesPageLink } from "../../lib/admin/sales-links";
 import Link from "next/link";
@@ -23,7 +24,7 @@ const labels: Record<string, string> = {
   UNKNOWN: "Não informado",
 };
 const colors: Record<string, string> = {
-  PAID: brandColors.navy,
+  PAID: brandColors.steel,
   PENDING: brandColors.warning,
   AUTHORIZED: brandColors.blue,
   PARTIALLY_PAID: brandColors.steel,
@@ -46,7 +47,6 @@ export default function FinanceOverview({
     [currency, setCurrency] = useState("BRL"),
     [metric, setMetric] = useState("net"),
     [active, setActive] = useState<string | null>(null);
-  const id = useId();
   useEffect(() => {
     const controller = new AbortController();
     setBusy(true);
@@ -113,13 +113,6 @@ export default function FinanceOverview({
   const statuses = data.statuses.filter((s) => s.currency === currency),
     total = Number(totals.orders),
     selected = statuses.find((s) => s.status === active);
-  let offset = 0;
-  const sectors = statuses.map((s) => {
-    const size = (100 * Number(s.orders)) / total,
-      sector = { ...s, size, offset };
-    offset += size;
-    return sector;
-  });
   const daily = new Map(
     data.daily.filter((r) => r.currency === currency).map((r) => [r.day, r]),
   );
@@ -399,89 +392,31 @@ export default function FinanceOverview({
               {total.toLocaleString("pt-BR")} pedidos
             </span>
           </header>
-          <div className="finance-donut-layout">
-            <svg viewBox="0 0 240 240" role="group" aria-labelledby={id}>
-              <title id={id}>
-                Distribuição de pedidos por situação do pagamento
-              </title>
-              <circle
-                cx="120"
-                cy="120"
-                r="86"
-                fill="none"
-                stroke="#edf2f8"
-                strokeWidth="28"
-              />
-              {sectors.map((s) => (
-                <circle
-                  key={s.status}
-                  cx="120"
-                  cy="120"
-                  r="86"
-                  fill="none"
-                  stroke={colors[s.status] || colors.UNKNOWN}
-                  strokeWidth={active === s.status ? 34 : 28}
-                  pathLength="100"
-                  strokeDasharray={`${s.size} ${100 - s.size}`}
-                  strokeDashoffset={-s.offset}
-                  transform="rotate(-90 120 120)"
-                  tabIndex={0}
-                  role="button"
-                  aria-label={`${labels[s.status] || s.status}: ${s.orders} pedidos. Valor dos pedidos: ${money(s.order_value)}.`}
-                  onPointerEnter={() => setActive(s.status)}
-                  onFocus={() => setActive(s.status)}
-                  onClick={() => setActive(s.status)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      setActive(s.status);
-                    }
-                  }}
-                />
-              ))}
-              <text
-                x="120"
-                y="114"
-                textAnchor="middle"
-                className="finance-donut-value"
-              >
-                {selected ? selected.orders : total.toLocaleString("pt-BR")}
-              </text>
-              <text
-                x="120"
-                y="137"
-                textAnchor="middle"
-                className="finance-donut-label"
-              >
-                {selected
-                  ? labels[selected.status] || selected.status
-                  : "pedidos"}
-              </text>
-            </svg>
-            <div className="finance-donut-legend">
-              {statuses.map((s) => (
-                <button
-                  key={s.status}
-                  type="button"
-                  className={active === s.status ? "is-selected" : ""}
-                  aria-pressed={active === s.status}
-                  onPointerEnter={() => setActive(s.status)}
-                  onFocus={() => setActive(s.status)}
-                  onClick={() => setActive(s.status)}
-                >
-                  <i
-                    style={{ background: colors[s.status] || colors.UNKNOWN }}
-                  />
-                  <span>{labels[s.status] || s.status}</span>
-                  <strong>{s.orders}</strong>
-                </button>
-              ))}
-            </div>
-          </div>
+          <InfographicRadial
+            label="Distribuição de pedidos por situação do pagamento"
+            total={total}
+            items={statuses.map((s) => ({
+              label: labels[s.status] || s.status,
+              value: Number(s.orders),
+              color: colors[s.status] || colors.UNKNOWN,
+              detail: `${money(s.order_value)} em pedidos`,
+            }))}
+            format={(value) =>
+              value === null ? "—" : value.toLocaleString("pt-BR")
+            }
+            selected={
+              active === null
+                ? null
+                : statuses.findIndex((s) => s.status === active)
+            }
+            onSelect={(index) =>
+              setActive(index === null ? null : statuses[index].status)
+            }
+          />
           <p className="finance-chart-caption">
             {selected
               ? `${labels[selected.status] || selected.status}: ${money(selected.order_value)} em pedidos; ${money(selected.received)} recebido e ${money(selected.refunded)} estornado.`
-              : "Passe pelo círculo ou pela legenda para conferir os valores."}
+              : "Selecione um anel na legenda para conferir os valores."}
           </p>
         </section>
       </div>

@@ -22,7 +22,6 @@ import { salesLink } from "../../lib/admin/sales-links";
 import DateRangePicker from "./DateRangePicker";
 import PitterSpinner from "./PitterSpinner";
 import FinanceOverview from "./FinanceOverview";
-import InteractiveColumns from "./InteractiveColumns";
 import { RevenueChart, numberValue } from "./AnalyticsCharts";
 import {
   reportCategories,
@@ -128,7 +127,6 @@ export default function AnalyticsDashboard({
     if (url.href !== window.location.href)
       window.history.replaceState(null, "", url);
   }, [days, range]);
-  const [homeChart, setHomeChart] = useState("line");
   const heading = useRef<HTMLHeadingElement>(null);
   const params = new URLSearchParams({
     days,
@@ -364,47 +362,13 @@ export default function AnalyticsDashboard({
                       Passe pelo gráfico para descobrir o valor de cada dia.
                     </p>
                   </div>
-                  <div
-                    className="pitter-chart-switch"
-                    role="group"
-                    aria-label="Visualização das vendas"
-                  >
-                    <button
-                      aria-pressed={homeChart === "line"}
-                      onClick={() => setHomeChart("line")}
-                    >
-                      Evolução
-                    </button>
-                    <button
-                      aria-pressed={homeChart === "depth"}
-                      onClick={() => setHomeChart("depth")}
-                    >
-                      Colunas 3D
-                    </button>
-                  </div>
                 </header>
-                {homeChart === "depth" ? (
-                  <InteractiveColumns
-                    table={data.trend}
-                    metric={{
-                      key: "total_sales",
-                      label: "Vendas registradas (Shopify)",
-                      format: "money",
-                    }}
-                    series
-                    format={(v) => {
-                      const n = numberValue(v);
-                      return n === null ? "—" : money(n);
-                    }}
-                  />
-                ) : (
-                  <RevenueChart
-                    table={data.trend}
-                    currency={data.currency}
-                    money={(v) => (v === null ? "—" : money(v))}
-                    showTable={false}
-                  />
-                )}
+                <RevenueChart
+                  table={data.trend}
+                  currency={data.currency}
+                  money={(v) => (v === null ? "—" : money(v))}
+                  showTable={false}
+                />
                 <button
                   className="analytics-expand"
                   onClick={() => setReportId("sales-time")}

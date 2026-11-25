@@ -5,12 +5,7 @@ import { Download, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { csvCell } from "../../lib/admin/csv";
 import { reportById, type ReportColumn } from "../../lib/admin/shopify-reports";
 import type { readShopifyReport } from "../../server/sales/reports";
-import {
-  RevenueChart,
-  SessionJourney,
-  numberValue,
-  shortDate,
-} from "./AnalyticsCharts";
+import { SessionJourney, numberValue, shortDate } from "./AnalyticsCharts";
 import InteractiveColumns from "./InteractiveColumns";
 import PitterSpinner from "./PitterSpinner";
 
@@ -48,7 +43,6 @@ export default function ShopifyReportDetail({
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(0);
   const [sort, setSort] = useState<{ key: string; descending: boolean }>();
-  const [chartMode, setChartMode] = useState("line");
   const [data, setData] = useState<Data | null>(null),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(true),
@@ -150,12 +144,6 @@ export default function ShopifyReportDetail({
   }
   const aggregate = data?.totals?.rows[0],
     previous = data?.previousTotals?.rows[0];
-  const max = Math.max(
-    1,
-    ...(data?.table.rows || []).map((r) =>
-      Math.abs(numberValue(r[selected.key]) || 0),
-    ),
-  );
   return (
     <section
       className="admin-panel analytics-panel shopify-report-detail"
@@ -249,35 +237,9 @@ export default function ShopifyReportDetail({
             <>
               {!compact && (
                 <>
-                  <div className="shopify-chart-toolbar">
-                    <span>
-                      Visualizando: <strong>{selected.label}</strong>
-                    </span>
-                    {report.id !== "conversion-funnel" && (
-                      <div
-                        className="pitter-chart-switch"
-                        role="group"
-                        aria-label="Estilo do gráfico"
-                      >
-                        <button
-                          onClick={() => setChartMode("depth")}
-                          aria-pressed={chartMode === "depth"}
-                        >
-                          Colunas 3D
-                        </button>
-                        <button
-                          onClick={() => setChartMode("line")}
-                          aria-pressed={chartMode === "line"}
-                        >
-                          {report.series ? "Evolução" : "Barras"}
-                        </button>
-                      </div>
-                    )}
-                  </div>
                   {report.id === "conversion-funnel" ? (
                     <SessionJourney table={data.table} />
-                  ) : chartMode === "depth" &&
-                    (report.series || report.dimensions?.length) ? (
+                  ) : report.series || report.dimensions?.length ? (
                     <InteractiveColumns
                       table={data.table}
                       metric={selected}
@@ -285,57 +247,6 @@ export default function ShopifyReportDetail({
                       series={report.series}
                       format={(v) => format(v)}
                     />
-                  ) : report.series ? (
-                    <RevenueChart
-                      table={data.table}
-                      money={(v) => format(v)}
-                      currency={data.currency}
-                      showTable={false}
-                      metricKey={selected.key}
-                      metricLabel={selected.label}
-                      axisLabel={
-                        selected.format === "money"
-                          ? `Valores em ${data.currency}`
-                          : selected.label
-                      }
-                    />
-                  ) : report.dimensions?.length ? (
-                    <ol className="analytics-ranking shopify-report-bars">
-                      {data.table.rows.slice(0, 10).map((row, i) => {
-                        const label = report
-                            .dimensions!.map((d) =>
-                              String(row[d.key] ?? "Não informado"),
-                            )
-                            .join(" · "),
-                          n = numberValue(row[selected.key]);
-                        return (
-                          <li key={i}>
-                            <span className="analytics-rank-number">
-                              {i + 1}
-                            </span>
-                            <div>
-                              <div className="analytics-rank-caption">
-                                <span title={label}>{label}</span>
-                                <strong>{format(n)}</strong>
-                              </div>
-                              <div
-                                className="analytics-bar-track"
-                                aria-hidden="true"
-                              >
-                                <span
-                                  className={
-                                    n !== null && n < 0 ? "is-negative" : ""
-                                  }
-                                  style={{
-                                    width: `${(Math.abs(n || 0) / max) * 100}%`,
-                                  }}
-                                />
-                              </div>
-                            </div>
-                          </li>
-                        );
-                      })}
-                    </ol>
                   ) : (
                     <p className="analytics-session-note">
                       Selecione um indicador acima e confira o detalhamento na
