@@ -12,8 +12,7 @@ import { salesConfig, salesReady } from "../../server/sales/config";
 import { readCommercialOverview } from "../../server/sales/repository";
 import { salesPageLink } from "../../lib/admin/sales-links";
 import { number, dateTime } from "./Primitives";
-import CommercialTrend from "./CommercialTrend";
-import SalesActivity from "./SalesActivity";
+import BentoPerformance from "./BentoPerformance";
 import {
   shiftDate,
   todayDate,
@@ -224,52 +223,29 @@ export default function CommercialOverview({
         ))}
       </div>
 
-      <div
-        className="workspace-performance-grid content-performance-grid"
-        id="workspace-performance"
-      >
-        <section className="workspace-trend-card">
-          <div className="workspace-chart-eyebrow">
-            <span>
-              <i /> PERFORMANCE
-            </span>
-            <Link href={salesHref}>
-              Explorar vendas <ArrowRight size={14} />
+      {data ? (
+        <BentoPerformance
+          key={`${range.start}-${range.end}`}
+          sales={data.sales}
+        />
+      ) : (
+        <section
+          className="admin-panel"
+          aria-label="Desempenho comercial em bento"
+        >
+          <div className="workspace-chart-empty">
+            <ChartNoAxesCombined size={38} />
+            <h2>Seu desempenho começa aqui</h2>
+            <p>
+              Sincronize os pedidos para acompanhar a evolução das vendas com
+              dados reais.
+            </p>
+            <Link href="/gestor/sincronizacoes/">
+              Conferir sincronização <ArrowRight size={15} />
             </Link>
           </div>
-          {data ? (
-            <CommercialTrend
-              key={`${range.start}-${range.end}`}
-              sales={data.sales}
-              previousDaily={data.previousDaily}
-            />
-          ) : (
-            <div className="workspace-chart-empty">
-              <ChartNoAxesCombined size={38} />
-              <h2>Seu desempenho começa aqui</h2>
-              <p>
-                Sincronize os pedidos para acompanhar a evolução das vendas com
-                dados reais.
-              </p>
-              <Link href="/gestor/sincronizacoes/">
-                Conferir sincronização <ArrowRight size={15} />
-              </Link>
-            </div>
-          )}
-          <p className="workspace-chart-footnote">
-            Recebimentos e reembolsos pela data de processamento do pedido ·
-            Horário de Brasília
-          </p>
         </section>
-        {data ? (
-          <SalesActivity sales={data.sales} />
-        ) : (
-          <section className="admin-panel content-calendar-empty">
-            <h2>Calendário de vendas</h2>
-            <p>Os pedidos por dia aparecem após a sincronização.</p>
-          </section>
-        )}
-      </div>
+      )}
     </section>
   );
 }

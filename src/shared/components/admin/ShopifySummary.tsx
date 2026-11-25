@@ -3,24 +3,21 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   ArrowUpRight,
-  Wallet,
-  CircleDollarSign,
   ShoppingBag,
-  TrendingUp,
-  Undo2,
+  ReceiptText,
   PackageCheck,
   Clock3,
   ShieldCheck,
-  ChevronRight,
+  Wallet,
 } from "lucide-react";
-import SalesTrendChart, { salesTrendPoints } from "./SalesTrendChart";
 import AdminSelect from "./AdminSelect";
-import FinancialFlowChart from "./FinancialFlowChart";
+import BentoRevenueChart from "./BentoRevenueChart";
+import BentoComposition from "./BentoComposition";
+import BentoActivity from "./BentoActivity";
 import { summaryDailyRows } from "../../lib/admin/sales-summary";
 import { salesPageLink } from "../../lib/admin/sales-links";
 import type { readSales } from "../../server/sales/repository";
-import "../../styles/admin/shopify-summary.css";
-
+import "../../styles/admin/bento-summary.css";
 type Data = Awaited<ReturnType<typeof readSales>>;
 const number = (value: string | number) =>
   Number(value).toLocaleString("pt-BR");
@@ -38,7 +35,6 @@ export default function ShopifySummary({
   loading: boolean;
 }) {
   const [selectedCurrency, setCurrency] = useState("BRL");
-  const [metric, setMetric] = useState<"received" | "net">("received");
   const total =
     data.totals.find((row) => row.currency === selectedCurrency) ??
     data.totals[0];
@@ -56,60 +52,29 @@ export default function ShopifySummary({
     completedAt: data.state?.completed_at,
     importing: !!data.state?.until_at,
   });
-  const receipts = (metric?: string) =>
-    salesPageLink("/gestor/vendas/recebimentos/", params, {
-      status: "",
-      fulfillment: "",
-      ...(metric ? { metric } : {}),
-    });
-  const orders = (overrides: Record<string, string>) =>
-    salesPageLink("/gestor/vendas/", params, {
-      status: "",
-      fulfillment: "",
-      ...overrides,
-    });
+  const receipts = salesPageLink("/gestor/vendas/recebimentos/", params, {
+    status: "",
+    fulfillment: "",
+  });
   const refunds = salesPageLink("/gestor/vendas/reembolsos/", params, {
     status: "",
     fulfillment: "",
   });
-  const kpis = [
-    {
-      label: "Recebido confirmado",
-      value: money(total.received),
-      detail: "Inclui frete e impostos",
-      href: receipts(),
-      icon: CircleDollarSign,
-      tone: "received",
-    },
-    {
-      label: "Pedidos pagos",
-      value: number(total.paid),
-      detail: `${money(total.paid_value)} · não cancelados`,
-      href: orders({ status: "PAID_ACTIVE" }),
-      icon: ShoppingBag,
-      tone: "paid",
-    },
-    {
-      label: "Ticket médio",
-      value: money(total.ticket),
-      detail: "Média dos pedidos pagos não cancelados",
-      href: orders({ status: "PAID_ACTIVE" }),
-      icon: TrendingUp,
-      tone: "ticket",
-    },
-  ];
+  const orders = (status: string) =>
+    salesPageLink("/gestor/vendas/", params, { status, fulfillment: "" });
+  const paidRate =
+    Number(total.orders) > 0 ? Number(total.paid) / Number(total.orders) : null;
   return (
     <section
-      className="shopify-summary summary-patterns"
+      className="bento-summary"
       aria-label="Resumo comercial da Shopify"
       aria-busy={loading}
     >
-      <div className="shopify-summary-context">
-        <div>
-          <span className="summary-source-dot" />
-          Shopify <span>·</span> {number(total.orders)} pedidos na seleção{" "}
-          <span>·</span> {currency}
-        </div>
+      <div className="bento-context">
+        <span>
+          <i />
+          Shopify · {number(total.orders)} pedidos na seleção · {currency}
+        </span>
         {data.totals.length > 1 && (
           <AdminSelect
             label="Moeda dos indicadores"
@@ -122,85 +87,102 @@ export default function ShopifySummary({
           />
         )}
       </div>
-      <FinancialFlowChart
-        received={total.received}
-        refunded={total.refunded}
-        net={total.net}
-        currency={currency}
-        receiptsHref={receipts()}
-        netHref={receipts("net")}
-        refundsHref={refunds}
-      />
-      <div className="summary-kpis">
-        {kpis.map(({ label, value, detail, href, icon: Icon, tone }) => (
-          <Link
-            className={`summary-kpi summary-kpi--${tone}`}
-            href={href}
-            key={tone}
-          >
-            <div>
-              <span className="summary-kpi-icon">
-                <Icon size={18} />
-              </span>
-              <ArrowUpRight size={16} aria-hidden="true" />
-            </div>
-            <span>{label}</span>
-            <strong>{value}</strong>
-            <small>{detail}</small>
-          </Link>
-        ))}
-      </div>
-      <div className="summary-analysis-grid">
-        <section
-          className="summary-chart-card"
-          aria-label="Evolução financeira dos pedidos"
+      <div className="bento-board">
+        <BentoRevenueChart
+          key={currency}
+          rows={rows}
+          received={total.received}
+          net={total.net}
+          currency={currency}
+        />
+        <BentoComposition
+          received={total.received}
+          refunded={total.refunded}
+          net={total.net}
+          currency={currency}
+          href={receipts}
+        />
+        <Link
+          className="bento-tile bento-kpi bento-paid"
+          href={orders("PAID_ACTIVE")}
         >
-          <SalesTrendChart
-            key={currency}
-            title="Evolução financeira"
-            label={
-              metric === "received"
-                ? "Recebido por data do pedido"
-                : "Líquido por data do pedido"
-            }
-            total={money(total[metric])}
-            rows={salesTrendPoints(rows, metric)}
-            format={money}
-            height={248}
-            combined
-            controls={
-              <div
-                className="summary-metric-toggle"
-                role="group"
-                aria-label="Indicador da evolução"
-              >
-                <button
-                  type="button"
-                  aria-pressed={metric === "received"}
-                  onClick={() => setMetric("received")}
-                >
-                  Recebido
-                </button>
-                <button
-                  type="button"
-                  aria-pressed={metric === "net"}
-                  onClick={() => setMetric("net")}
-                >
-                  Líquido
-                </button>
-              </div>
-            }
-          />
-        </section>
-        <section className="summary-reconciliation">
           <header>
-            <span className="summary-section-icon">
-              <Wallet size={18} />
-            </span>
+            <ShoppingBag size={17} />
+            <ArrowUpRight size={16} />
+          </header>
+          <span>Pedidos pagos</span>
+          <strong>{number(total.paid)}</strong>
+          <div className="bento-paid-track" aria-hidden="true">
+            <i style={{ width: `${(paidRate ?? 0) * 100}%` }} />
+          </div>
+          <small>
+            {paidRate === null
+              ? "Sem pedidos na seleção"
+              : `${new Intl.NumberFormat("pt-BR", { style: "percent", maximumFractionDigits: 1 }).format(paidRate)} dos pedidos · não cancelados`}
+          </small>
+        </Link>
+        <Link
+          className="bento-tile bento-kpi bento-ticket"
+          href={orders("PAID_ACTIVE")}
+        >
+          <header>
+            <ReceiptText size={17} />
+            <ArrowUpRight size={16} />
+          </header>
+          <span>Ticket médio</span>
+          <strong>{money(total.ticket)}</strong>
+          <small>Média dos pedidos pagos não cancelados</small>
+        </Link>
+        <section
+          className="bento-tile bento-queue"
+          aria-label="Pendências dos pedidos"
+        >
+          <header>
             <div>
-              <h2>Conferência financeira</h2>
-              <p>Valores dos pedidos selecionados</p>
+              <span className="bento-eyebrow">OPERAÇÃO</span>
+              <h2>Próximas ações</h2>
             </div>
+            <PackageCheck size={18} />
+          </header>
+          <div>
+            <Link
+              href={salesPageLink("/gestor/vendas/atendimento/", params, {
+                status: "",
+                fulfillment: "AWAITING",
+              })}
+            >
+              <span>
+                <PackageCheck size={14} />
+                Atendimento em aberto
+              </span>
+              <strong>{number(total.awaiting)}</strong>
+              <ArrowUpRight size={14} />
+            </Link>
+            <Link href={orders("OPEN_BALANCE")}>
+              <span>
+                <Clock3 size={14} />
+                Aguardando pagamento
+              </span>
+              <strong>{number(total.pending)}</strong>
+              <ArrowUpRight size={14} />
+            </Link>
+          </div>
+        </section>
+        <BentoActivity
+          key={`activity-${currency}`}
+          rows={rows}
+          currency={currency}
+        />
+        <section
+          className="bento-tile bento-balance"
+          aria-label="Balanço financeiro"
+        >
+          <header>
+            <div>
+              <span className="bento-eyebrow">CONFERÊNCIA</span>
+              <h2>Do recebido ao líquido</h2>
+            </div>
+            <Wallet size={18} />
           </header>
           <dl>
             <div>
@@ -208,119 +190,100 @@ export default function ShopifySummary({
               <dd>{money(total.received)}</dd>
             </div>
             <div>
-              <dt>Reembolsado</dt>
+              <dt>− Reembolsado</dt>
               <dd>{money(total.refunded)}</dd>
             </div>
-            <div className="summary-net-line">
-              <dt>Líquido</dt>
+            <div>
+              <dt>= Líquido</dt>
               <dd>{money(total.net)}</dd>
             </div>
           </dl>
-          <Link href={refunds} className="summary-refund-link">
-            <span>
-              <Undo2 size={16} />
-              {number(total.refunded_orders)} pedidos com reembolso
-            </span>
-            <ChevronRight size={15} />
-          </Link>
-          <Link className="summary-primary-link" href={receipts()}>
+          <Link href={receipts}>
             Abrir financeiro <ArrowUpRight size={15} />
           </Link>
-          <p>
-            Valores agrupados pela data do pedido; não representam o fechamento
-            do caixa por data de pagamento.
-          </p>
+          <Link href={refunds} className="bento-refunds-link">
+            {number(total.refunded_orders)} pedidos com reembolso{" "}
+            <ArrowUpRight size={13} />
+          </Link>
+        </section>
+        <section className="bento-tile bento-statuses">
+          <header>
+            <div>
+              <span className="bento-eyebrow">SITUAÇÕES DOS PEDIDOS</span>
+              <h2>Conferir exceções</h2>
+            </div>
+            <span>Valores dos pedidos, sem somar situações</span>
+          </header>
+          <div>
+            {[
+              {
+                label: "Saldo não pago",
+                count: total.pending,
+                value: total.outstanding,
+                status: "OPEN_BALANCE",
+              },
+              {
+                label: "Expirados",
+                count: total.expired,
+                value: total.expired_value,
+                status: "EXPIRED",
+              },
+              {
+                label: "Anulados",
+                count: total.voided,
+                value: total.voided_value,
+                status: "VOIDED",
+              },
+              {
+                label: "Cancelados",
+                count: total.cancelled,
+                value: total.cancelled_value,
+                status: "CANCELLED",
+              },
+            ].map((item) => (
+              <Link href={orders(item.status)} key={item.status}>
+                <span>
+                  {item.label}
+                  <ArrowUpRight size={13} />
+                </span>
+                <strong>{money(item.value)}</strong>
+                <small>
+                  {number(item.count)} pedidos
+                  {item.status === "OPEN_BALANCE" &&
+                  Number(total.outstanding_estimated)
+                    ? " · parte calculada"
+                    : ""}
+                </small>
+              </Link>
+            ))}
+          </div>
         </section>
       </div>
-      <section className="summary-operations">
-        <header>
-          <div>
-            <span>ACOMPANHAR A OPERAÇÃO</span>
-            <h2>O que precisa de atenção</h2>
-          </div>
-          <Link href={salesPageLink("/gestor/vendas/", params)}>
-            Ver pedidos <ArrowUpRight size={15} />
-          </Link>
-        </header>
-        <div className="summary-operation-grid">
-          {[
-            {
-              label: "Aguardando pagamento",
-              value: total.pending,
-              detail: `${money(total.outstanding)} de saldo não pago${Number(total.outstanding_estimated) ? " · parte calculada" : ""}`,
-              href: orders({ status: "OPEN_BALANCE" }),
-              icon: Clock3,
-              tone: "amber",
-            },
-            {
-              label: "Atendimento em aberto",
-              value: total.awaiting,
-              detail: "Pedidos pagos com atendimento pendente",
-              href: salesPageLink("/gestor/vendas/atendimento/", params, {
-                status: "",
-                fulfillment: "AWAITING",
-              }),
-              icon: PackageCheck,
-              tone: "teal",
-            },
-            {
-              label: "Expirados",
-              value: total.expired,
-              detail: `${money(total.expired_value)} em valor dos pedidos`,
-              href: orders({ status: "EXPIRED" }),
-              icon: Clock3,
-              tone: "neutral",
-            },
-            {
-              label: "Cancelados",
-              value: total.cancelled,
-              detail: `${money(total.cancelled_value)} em valor dos pedidos`,
-              href: orders({ status: "CANCELLED" }),
-              icon: Undo2,
-              tone: "rose",
-            },
-          ].map(({ label, value, detail, href, icon: Icon, tone }) => (
-            <Link
-              key={label}
-              href={href}
-              className={`summary-operation summary-operation--${tone}`}
-            >
-              <div>
-                <Icon size={17} />
-                <ArrowUpRight size={14} />
-              </div>
-              <strong>{number(value)}</strong>
-              <span>{label}</span>
-              <small>{detail}</small>
-            </Link>
-          ))}
-        </div>
-        <details className="summary-accounting-note">
-          <summary>Entenda as situações e os valores</summary>
-          <p>
-            As situações podem se sobrepor: cancelamento é independente do
-            pagamento. Não some esses quadros. Expirados, cancelados e anulados
-            mostram valores dos pedidos, não dinheiro recebido. Há{" "}
-            {number(total.voided)} pedidos anulados ({money(total.voided_value)}
-            );{" "}
-            <Link href={orders({ status: "VOIDED" })}>consultar anulados</Link>.
-            Os reembolsos são acumulados dos pedidos selecionados e podem ter
-            ocorrido depois do período. Pedidos de teste são excluídos.
-          </p>
-        </details>
-      </section>
+      <details className="bento-definitions">
+        <summary>Como interpretar os indicadores</summary>
+        <p>
+          Os valores são agrupados pela data do pedido e incluem frete e
+          impostos. O líquido é recebido menos reembolsado, sem deduzir custos:
+          não é lucro nem fechamento do caixa por data de pagamento. Reembolsos
+          podem ter ocorrido após o período. Cancelamento é independente do
+          pagamento; as situações podem se sobrepor. Dias sem cobertura não são
+          tratados como zero. Pedidos de teste são excluídos.
+          {total.outstanding_estimated !== "0"
+            ? " Parte do saldo não pago foi calculada por ausência do valor oficial da Shopify."
+            : ""}
+        </p>
+      </details>
       {Number(total.inconsistent) > 0 && (
         <p className="admin-data-notice" role="status">
           Há {number(total.inconsistent)} pedidos com divergência nos campos
-          financeiros da Shopify. O líquido usa recebido menos reembolsado;
-          sincronize para conferir.
+          financeiros da Shopify. Sincronize para conferir.
         </p>
       )}
-      <footer className="summary-sync-state">
+      <footer className="bento-sync">
         <span>
-          <ShieldCheck size={15} />
+          <ShieldCheck size={14} />
           {data.state?.completed_at
-            ? `Conferência da importação: ${new Date(data.state.completed_at).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}`
+            ? `Conferência: ${new Date(data.state.completed_at).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })}`
             : "Importação inicial ainda não concluída"}
         </span>
         <span>{number(data.pending)} eventos na fila de sincronização</span>
