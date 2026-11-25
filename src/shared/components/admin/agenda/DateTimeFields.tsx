@@ -36,6 +36,7 @@ export function AgendaDateField({
       }}
       onKeyDown={(event) => {
         if (open && event.key === "Escape") {
+          event.preventDefault();
           event.stopPropagation();
           close();
         }

@@ -1,26 +1,34 @@
 "use client";
-import OccasionChip from "./OccasionChip";
-import { occasionTheme } from "../../../lib/agenda/occasion-theme";
-import type { Occasion } from "../../../lib/agenda/occasions";
-import OccasionEditor, { occasionLabels } from "./OccasionEditor";
 import { useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
   Plus,
   CalendarDays,
-  Video,
+  List,
+  Clock3,
+  CalendarCheck2,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import {
   monthDays,
   monthShift,
-  localTime,
   overlapsDay,
+  selectedCalendarDay,
+  appointmentsInMonth,
 } from "../../../lib/agenda/calendar";
 import { todayDate } from "../../../lib/admin/date-range";
 import type { Appointment, Supplier } from "../../../lib/agenda/types";
-import AppointmentEditor from "./AppointmentEditor";
+import type { Occasion } from "../../../lib/agenda/occasions";
 import type { Save } from "./shared";
+import AppointmentEditor from "./AppointmentEditor";
+import OccasionEditor from "./OccasionEditor";
+import CalendarMonth from "./CalendarMonth";
+import CalendarDayPanel from "./CalendarDayPanel";
+import CalendarScheduleList from "./CalendarScheduleList";
+import CalendarEditorDialog from "./CalendarEditorDialog";
+import PitterSpinner from "../PitterSpinner";
 export default function MeetingCalendar({
   month,
   onMonth,
@@ -29,327 +37,364 @@ export default function MeetingCalendar({
   suppliers,
   save,
   busy,
+  loading = false,
+  available = true,
 }: {
   month: string;
-  onMonth: (m: string) => void;
+  onMonth: (month: string) => void;
   appointments: Appointment[];
   dates: Occasion[];
   suppliers: Supplier[];
   save: Save;
   busy: boolean;
+  loading?: boolean;
+  available?: boolean;
 }) {
   const today = todayDate();
-  const [day, setDay] = useState(
-    month === today.slice(0, 7) ? today : `${month}-01`,
-  );
+  const [selection, setSelection] = useState(today);
+  const day = selectedCalendarDay(month, selection, today);
+  const [view, setView] = useState<"month" | "list">("month");
   const [editor, setEditor] = useState<Appointment | "new" | null>(null);
   const [dateEditor, setDateEditor] = useState<Occasion | "new" | null>(null);
   const [showHidden, setShowHidden] = useState(false);
-  const visibleDates = dates.filter((date) => showHidden || !date.hidden);
-  const dayDates = visibleDates.filter((date) => date.event_date === day);
+  const disabled = busy || loading || !available;
   const days = monthDays(month);
-  const events = appointments.filter((a) => a.status !== "cancelled");
-  const dayEvents = appointments.filter((a) =>
-    overlapsDay(a.starts_at, a.ends_at, day),
+  const visibleDates = dates.filter((item) => showHidden || !item.hidden);
+  const events = appointments.filter((item) => item.status !== "cancelled");
+  const monthly = appointmentsInMonth(month, events);
+  const monthlyDates = visibleDates.filter((item) =>
+    item.event_date.startsWith(month),
   );
+  const dayDates = visibleDates.filter((item) => item.event_date === day);
+  const dayEvents = appointments
+    .filter((item) => overlapsDay(item.starts_at, item.ends_at, day))
+    .sort((a, b) => Date.parse(a.starts_at) - Date.parse(b.starts_at));
+  const nextDates = monthlyDates
+    .filter((item) => item.event_date > day)
+    .sort(
+      (a, b) =>
+        a.event_date.localeCompare(b.event_date) ||
+        a.title.localeCompare(b.title, "pt-BR"),
+    )
+    .slice(0, 3);
+  const monthLabel = new Intl.DateTimeFormat("pt-BR", {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  }).format(new Date(`${month}-01T12:00:00Z`));
+  function closeEditors() {
+    setEditor(null);
+    setDateEditor(null);
+  }
+  function selectDay(value: string) {
+    setSelection(value);
+    closeEditors();
+    if (!value.startsWith(month)) onMonth(value.slice(0, 7));
+  }
+  function navigate(next: string) {
+    setSelection(selectedCalendarDay(next, "", today));
+    closeEditors();
+    onMonth(next);
+  }
+  function create(value: string) {
+    selectDay(value);
+    setEditor("new");
+  }
+  function editAppointment(item: Appointment, value: string) {
+    selectDay(value);
+    setEditor(item);
+  }
+  function editOccasion(item: Occasion) {
+    selectDay(item.event_date);
+    setDateEditor(item);
+  }
   return (
-    <>
-      <section className="admin-panel agenda-calendar-panel">
-        <header>
-          <div>
-            <span className="admin-eyebrow">
-              ORGANIZE AS PRÓXIMAS CONVERSAS
+    <section
+      className="agenda-premium"
+      aria-label="Agenda e datas importantes"
+      aria-busy={loading}
+    >
+      <header className="agenda-premium-heading">
+        <div>
+          <span className="agenda-premium-overline">
+            <span className="agenda-premium-heading-icon">
+              <CalendarDays size={16} />
             </span>
-            <h2>
-              <CalendarDays size={20} /> Agenda e datas importantes
-            </h2>
-          </div>
-          <button
-            className="admin-button"
-            onClick={() => {
-              setDateEditor(null);
-              setEditor("new");
-              if (!day.startsWith(month)) setDay(`${month}-01`);
-            }}
-          >
-            <Plus size={16} /> Agendar
-          </button>
-        </header>
-        <div className="agenda-calendar-toolbar">
+            PLANEJAMENTO DA EQUIPE
+          </span>
+          <h2>Seu tempo, bem organizado.</h2>
+          <p>Compromissos, fornecedores e datas importantes em um só lugar.</p>
+        </div>
+        <div className="agenda-premium-summary" aria-label="Resumo do mês">
           <div>
-            <button
-              aria-label="Mês anterior"
-              className="agenda-icon-button"
-              onClick={() => {
-                onMonth(monthShift(month, -1));
-                setEditor(null);
-                setDateEditor(null);
-              }}
-            >
-              <ChevronLeft size={19} />
-            </button>
-            <h3>
-              {new Intl.DateTimeFormat("pt-BR", {
-                month: "long",
-                year: "numeric",
-                timeZone: "UTC",
-              }).format(new Date(`${month}-01T12:00:00Z`))}
-            </h3>
-            <button
-              aria-label="Próximo mês"
-              className="agenda-icon-button"
-              onClick={() => {
-                onMonth(monthShift(month, 1));
-                setEditor(null);
-                setDateEditor(null);
-              }}
-            >
-              <ChevronRight size={19} />
-            </button>
+            <Clock3 size={16} />
+            <strong>
+              {loading || !available
+                ? "—"
+                : monthly.filter((item) => item.status === "scheduled").length}
+            </strong>
+            <span>agendados</span>
           </div>
-          <button
-            className="admin-text-link"
-            onClick={() => {
-              onMonth(today.slice(0, 7));
-              setDay(today);
-              setEditor(null);
-              setDateEditor(null);
-            }}
-          >
-            Hoje
-          </button>
-          <span>Clique no dia para agendar · horário de Brasília</span>
-        </div>
-        <div className="agenda-calendar-legend">
-          <span>
-            <i className="holiday" /> Feriados
-          </span>
-          <span>
-            <i className="commercial" /> Datas comerciais
-          </span>
-          <span>
-            <i className="observance" /> Comemorativas e referências
-          </span>
-          <button
-            type="button"
-            className="admin-text-link"
-            onClick={() => {
-              setEditor(null);
-              setDateEditor("new");
-            }}
-          >
-            + Adicionar data
-          </button>
-          <label className="agenda-checkbox">
-            <input
-              type="checkbox"
-              checked={showHidden}
-              onChange={(event) => setShowHidden(event.target.checked)}
-            />{" "}
-            Ver ocultas
-          </label>
-        </div>
-        <div className="agenda-calendar-scroll">
-          <div className="agenda-weekdays">
-            {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map((d) => (
-              <span key={d}>{d}</span>
-            ))}
+          <div>
+            <CalendarCheck2 size={16} />
+            <strong>
+              {loading || !available
+                ? "—"
+                : monthly.filter((item) => item.status === "completed").length}
+            </strong>
+            <span>concluídos</span>
           </div>
-          <div className="agenda-month-grid">
-            {days.map((date) => {
-              const rows = events.filter((a) =>
-                overlapsDay(a.starts_at, a.ends_at, date),
-              );
-              return (
-                <div
-                  key={date}
-                  className={`agenda-day ${date.startsWith(month) ? "" : "is-other"} ${day === date ? "is-selected" : ""}`}
-                >
-                  <button
-                    className={`agenda-day-number ${date === today ? "is-today" : ""}`}
-                    aria-label={`Agendar em ${date.split("-").reverse().join("/")}. ${rows.length} compromissos.`}
-                    onClick={() => {
-                      setDay(date);
-                      setDateEditor(null);
-                      setEditor("new");
-                    }}
-                  >
-                    {Number(date.slice(-2))}
-                    <Plus size={12} />
-                  </button>
-                  {visibleDates
-                    .filter((item) => item.event_date === date)
-                    .slice(0, 2)
-                    .map((item) => (
-                      <OccasionChip
-                        key={item.id}
-                        item={item}
-                        onEdit={() => {
-                          setDay(date);
-                          setEditor(null);
-                          setDateEditor(item);
-                        }}
-                      />
-                    ))}
-                  {rows.slice(0, 2).map((a) => (
-                    <button
-                      key={a.id}
-                      className={`agenda-event ${a.status}`}
-                      onClick={() => {
-                        setDay(date);
-                        setDateEditor(null);
-                        setEditor(a);
-                      }}
-                      title={a.title}
-                    >
-                      <span>{localTime(a.starts_at)}</span>
-                      {a.title}
-                    </button>
-                  ))}
-                  {(rows.length > 2 ||
-                    visibleDates.filter((item) => item.event_date === date)
-                      .length > 2) && (
-                    <button
-                      className="agenda-more"
-                      onClick={() => {
-                        setDay(date);
-                        setEditor(null);
-                        setDateEditor(null);
-                      }}
-                    >
-                      Ver informações do dia
-                    </button>
-                  )}
-                </div>
-              );
-            })}
+          <div>
+            <CalendarDays size={16} />
+            <strong>{loading || !available ? "—" : monthlyDates.length}</strong>
+            <span>datas importantes</span>
           </div>
         </div>
-      </section>
-      <div className="agenda-detail-layout">
-        <section className="admin-panel">
-          <header>
-            <h2>{day.split("-").reverse().join("/")}</h2>
-            <span className="admin-subtle">
-              {dayEvents.length} compromissos · {dayDates.length} datas
-            </span>
-          </header>
-          {!dayEvents.length && !dayDates.length && (
-            <div className="agenda-empty">
-              Dia livre para novas conversas.
-              <button
-                className="admin-text-link"
-                onClick={() => {
-                  setDateEditor(null);
-                  setEditor("new");
-                }}
-              >
-                Agendar neste dia →
-              </button>
-            </div>
-          )}
-          {dayDates.map((item) => (
-            <div className="agenda-date-detail" key={item.id}>
-              <span className={`agenda-occasion-label ${item.kind}`}>
-                {occasionLabels[item.kind]}
-                {item.revision > 0 ? " · Planejamento personalizado" : ""}
-              </span>
-              <button
-                type="button"
-                className="agenda-date-title"
-                onClick={() => {
-                  setEditor(null);
-                  setDateEditor(item);
-                }}
-              >
-                <span className="agenda-date-character" aria-hidden="true">
-                  {occasionTheme(item).symbol}
-                </span>{" "}
-                {item.title}
-              </button>
-              <p>
-                {item.notes ||
-                  "Adicione informações e próximos passos para esta data."}
-              </p>
-              <button
-                type="button"
-                className="admin-text-link"
-                onClick={() => {
-                  setEditor(null);
-                  setDateEditor(item);
-                }}
-              >
-                Editar planejamento
-              </button>
-            </div>
-          ))}
-          {dayEvents.map((a) => (
-            <div className="agenda-day-row" key={a.id}>
-              <button
-                onClick={() => {
-                  setDateEditor(null);
-                  setEditor(a);
-                }}
-              >
-                <strong>
-                  {localTime(a.starts_at)} – {localTime(a.ends_at)}
-                </strong>
-                <span>{a.title}</span>
-                <small>
-                  {suppliers.find((s) => s.id === a.supplier_id)?.name ||
-                    "Sem fornecedor"}{" "}
-                  ·{" "}
-                  {a.status === "scheduled"
-                    ? "Agendado"
-                    : a.status === "completed"
-                      ? "Concluído"
-                      : "Cancelado"}
-                </small>
-              </button>
-              {a.video_url && (
-                <a
+      </header>
+      <div className="agenda-premium-layout">
+        <section
+          className="agenda-premium-canvas"
+          aria-label="Calendário da equipe"
+        >
+          <div className="agenda-premium-toolbar">
+            <div className="agenda-premium-month-nav">
+              <h3 aria-live="polite">{monthLabel}</h3>
+              <div>
+                <button
+                  type="button"
+                  aria-label="Mês anterior"
                   className="agenda-icon-button"
-                  href={`/gestor/reunioes/${a.id}/`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={`Abrir reunião: ${a.title}`}
+                  disabled={busy}
+                  onClick={() => navigate(monthShift(month, -1))}
                 >
-                  <Video size={18} />
-                </a>
-              )}
+                  <ChevronLeft size={17} />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Próximo mês"
+                  className="agenda-icon-button"
+                  disabled={busy}
+                  onClick={() => navigate(monthShift(month, 1))}
+                >
+                  <ChevronRight size={17} />
+                </button>
+                <button
+                  type="button"
+                  className="agenda-premium-today"
+                  disabled={busy}
+                  onClick={() => {
+                    selectDay(today);
+                    onMonth(today.slice(0, 7));
+                  }}
+                >
+                  Hoje
+                </button>
+              </div>
             </div>
-          ))}
+            <div className="agenda-premium-toolbar-actions">
+              <div
+                className="agenda-premium-view"
+                role="group"
+                aria-label="Visualização do calendário"
+              >
+                <button
+                  type="button"
+                  aria-pressed={view === "month"}
+                  onClick={() => setView("month")}
+                >
+                  <CalendarDays size={15} />
+                  Mês
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={view === "list"}
+                  onClick={() => setView("list")}
+                >
+                  <List size={16} />
+                  Lista
+                </button>
+              </div>
+              <button
+                type="button"
+                className="agenda-premium-primary"
+                disabled={disabled}
+                onClick={() => create(day)}
+              >
+                <Plus size={17} />
+                Novo compromisso
+              </button>
+            </div>
+          </div>
+          <div className="agenda-premium-filterline">
+            <div
+              className="agenda-premium-legend"
+              aria-label="Tipos de eventos"
+            >
+              <span>
+                <i className="meeting" />
+                Compromissos
+              </span>
+              <span>
+                <i className="holiday" />
+                Feriados
+              </span>
+              <span>
+                <i className="commercial" />
+                Comerciais
+              </span>
+              <span>
+                <i className="observance" />
+                Outras datas
+              </span>
+            </div>
+            <div className="agenda-premium-options">
+              <button
+                type="button"
+                disabled={disabled}
+                onClick={() => {
+                  closeEditors();
+                  setDateEditor("new");
+                }}
+              >
+                <Plus size={14} />
+                Nova data
+              </button>
+              <button
+                type="button"
+                aria-pressed={showHidden}
+                disabled={disabled}
+                onClick={() => setShowHidden(!showHidden)}
+                title={
+                  showHidden
+                    ? "Ocultar datas marcadas como ocultas"
+                    : "Mostrar datas marcadas como ocultas"
+                }
+              >
+                {showHidden ? <Eye size={14} /> : <EyeOff size={14} />}Ocultas
+              </button>
+            </div>
+          </div>
+          <div className="agenda-premium-content">
+            {available &&
+              (view === "month" ? (
+                <CalendarMonth
+                  days={days}
+                  month={month}
+                  day={day}
+                  today={today}
+                  events={events}
+                  dates={visibleDates}
+                  disabled={disabled}
+                  onSelect={selectDay}
+                  onCreate={create}
+                  onAppointment={editAppointment}
+                  onOccasion={editOccasion}
+                />
+              ) : (
+                <CalendarScheduleList
+                  days={days}
+                  month={month}
+                  events={events}
+                  dates={visibleDates}
+                  busy={disabled}
+                  onAppointment={editAppointment}
+                  onOccasion={editOccasion}
+                  onCreate={create}
+                />
+              ))}
+            {(loading || !available) && (
+              <div className="agenda-premium-loading" role="status">
+                {loading ? (
+                  <PitterSpinner label="Atualizando seu calendário…" />
+                ) : (
+                  <p>
+                    Este mês está indisponível. Use Atualizar para tentar
+                    novamente.
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+          <footer className="agenda-premium-footer">
+            <span>
+              <Clock3 size={13} />
+              Horário de Brasília
+            </span>
+            <span>Selecione um dia para ver a programação.</span>
+          </footer>
         </section>
-        {dateEditor && (
-          <OccasionEditor
-            key={
-              dateEditor === "new"
-                ? `new-date-${day}`
-                : `${dateEditor.id}-${dateEditor.revision}`
-            }
-            occasion={dateEditor === "new" ? undefined : dateEditor}
+        {!loading && available ? (
+          <CalendarDayPanel
             day={day}
-            save={save}
-            busy={busy}
-            onClose={() => setDateEditor(null)}
-          />
-        )}
-        {editor && (
-          <AppointmentEditor
-            key={
-              editor === "new"
-                ? `new-${day}`
-                : `${editor.id}-${editor.revision}`
-            }
-            appointment={editor === "new" ? undefined : editor}
-            day={day}
+            today={today}
+            appointments={dayEvents}
+            dates={dayDates}
             suppliers={suppliers}
-            save={save}
             busy={busy}
-            onClose={() => setEditor(null)}
+            onCreate={() => create(day)}
+            onAppointment={(item) => editAppointment(item, day)}
+            onOccasion={editOccasion}
+            onSelect={selectDay}
+            nextDates={nextDates}
           />
+        ) : (
+          <div className="agenda-premium-rail-skeleton" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </div>
         )}
       </div>
-    </>
+      {(editor || dateEditor) && (
+        <CalendarEditorDialog
+          label={
+            dateEditor
+              ? "Planejamento da data"
+              : editor === "new"
+                ? "Novo compromisso"
+                : "Editar compromisso"
+          }
+          busy={busy}
+          onClose={() => {
+            if (!busy) closeEditors();
+          }}
+        >
+          {dateEditor ? (
+            <OccasionEditor
+              key={
+                dateEditor === "new"
+                  ? `date-${day}`
+                  : `${dateEditor.id}-${dateEditor.revision}`
+              }
+              occasion={dateEditor === "new" ? undefined : dateEditor}
+              day={day}
+              save={save}
+              busy={busy}
+              onClose={() => {
+                if (!busy) closeEditors();
+              }}
+            />
+          ) : (
+            <AppointmentEditor
+              key={
+                editor === "new"
+                  ? `new-${day}`
+                  : editor
+                    ? `${editor.id}-${editor.revision}`
+                    : ""
+              }
+              appointment={editor === "new" || !editor ? undefined : editor}
+              day={day}
+              suppliers={suppliers}
+              save={save}
+              busy={busy}
+              onClose={() => {
+                if (!busy) closeEditors();
+              }}
+            />
+          )}
+        </CalendarEditorDialog>
+      )}
+    </section>
   );
 }

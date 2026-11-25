@@ -24,6 +24,7 @@ export default function AgendaWorkspace() {
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [message, setMessage] = useState("");
+  const [loadedMonth, setLoadedMonth] = useState<string | null>(null);
   const generation = useRef(0),
     saving = useRef(false);
   const load = useCallback(
@@ -41,6 +42,7 @@ export default function AgendaWorkspace() {
           throw Error(result.error || "Não foi possível carregar.");
         if (seq === generation.current) {
           setData(result);
+          setLoadedMonth(month);
           setError("");
         }
       } catch (error) {
@@ -142,7 +144,7 @@ export default function AgendaWorkspace() {
           {message}
         </div>
       )}
-      {loading && (
+      {loading && tab !== "agenda" && (
         <div className="agenda-loading">
           <PitterSpinner label="Carregando sua agenda…" />
         </div>
@@ -156,12 +158,14 @@ export default function AgendaWorkspace() {
             informações.
           </p>
         )}
-      {!loading && tab === "agenda" && (
+      {tab === "agenda" && (
         <MeetingCalendar
           month={month}
+          loading={loading}
+          available={loadedMonth === month}
           onMonth={setMonth}
-          appointments={data.appointments}
-          dates={data.dates || []}
+          appointments={loadedMonth === month ? data.appointments : []}
+          dates={loadedMonth === month ? data.dates || [] : []}
           suppliers={data.suppliers}
           save={save}
           busy={busy}
