@@ -31,9 +31,11 @@ export default function SalesStatusSelect({
   return (
     <AdminSelect
       id={id}
-      label="Situação dos pedidos"
+      label="Situação do pagamento"
       value={value}
-      options={options}
+      options={options.filter(
+        (option) => option.value !== "NO_MATCH" || value === "NO_MATCH",
+      )}
       onValueChange={(value) => onChange(value as SalesFilters["status"])}
     />
   );
