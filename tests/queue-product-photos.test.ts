@@ -58,7 +58,8 @@ test("fila recupera fotos apenas da importação ativa e da mesma loja, respeita
     ];
     await fillQueueCatalogPhotos(db, "shop.myshopify.com", rows);
     assert.equal(rows[0].image_url, url("exact"));
-    assert.equal(rows[1].image_url, url("saved"));
+    assert.equal(rows[1].image_url, url("exact"));
+    assert.equal(rows[1].fallback_image_url, url("saved"));
     assert.equal(rows[2].image_url, null);
     assert.equal(rows[3].image_url, url("exact"));
     assert.equal(rows[4].image_url, null);
@@ -89,9 +90,9 @@ test("fila continua funcionando sem tabelas do catálogo e sem itens localizáve
   });
   assert.equal(calls, 0);
 });
-test("consulta ao vivo agrupa somente IDs ausentes, prefere variante e usa a foto principal", async () => {
+test("consulta ao vivo renova URLs preenchidas, agrupa IDs e usa a foto principal", async () => {
   const rows = [
-    photo("variant"),
+    photo("variant", "1", "1", url("stale")),
     photo("parent", "2", "2"),
     photo("gone", "3", "3"),
     photo("saved", "4", "4", url("saved")),
@@ -112,23 +113,25 @@ test("consulta ao vivo agrupa somente IDs ausentes, prefere variante e usa a fot
         "gid://shopify/Product/2",
         "gid://shopify/ProductVariant/3",
         "gid://shopify/Product/3",
+        "gid://shopify/ProductVariant/4",
+        "gid://shopify/Product/4",
       ]);
       return {
         nodes: [
           {
             id: "gid://shopify/ProductVariant/1",
-            image: { url: url("variant") },
+            media: { nodes: [{ image: { url: url("variant") } }] },
             product: {
               id: "gid://shopify/Product/1",
-              featuredImage: { url: url("parent-1") },
+              featuredMedia: { image: { url: url("parent-1") } },
             },
           },
           {
             id: "gid://shopify/ProductVariant/2",
-            image: null,
+            media: { nodes: [] },
             product: {
               id: "gid://shopify/Product/2",
-              featuredImage: { url: url("parent-2") },
+              featuredMedia: { image: { url: url("parent-2") } },
             },
           },
           null,
@@ -137,6 +140,7 @@ test("consulta ao vivo agrupa somente IDs ausentes, prefere variante e usa a fot
     },
   });
   assert.equal(calls, 1);
+  assert.equal(rows[0].fallback_image_url, url("stale"));
   assert.deepEqual(
     rows.map((row) => row.image_url),
     [url("variant"), url("parent-2"), null, url("saved"), url("variant")],
@@ -154,23 +158,29 @@ test("não aplica foto de outro produto, URL insegura ou identidade ausente", as
         nodes: [
           {
             id: "gid://shopify/ProductVariant/1",
-            image: { url: url("wrong") },
+            media: { nodes: [{ image: { url: url("wrong") } }] },
             product: {
               id: "gid://shopify/Product/9",
-              featuredImage: { url: url("wrong-parent") },
+              featuredMedia: { image: { url: url("wrong-parent") } },
             },
           },
           {
             id: "gid://shopify/ProductVariant/2",
-            image: { url: "http://cdn.shopify.com/insecure.png" },
+            media: {
+              nodes: [
+                { image: { url: "http://cdn.shopify.com/insecure.png" } },
+              ],
+            },
             product: {
               id: "gid://shopify/Product/2",
-              featuredImage: { url: "https://external.test/photo.png" },
+              featuredMedia: {
+                image: { url: "https://external.test/photo.png" },
+              },
             },
           },
           {
             id: "gid://shopify/Product/3",
-            featuredImage: { url: url("remaining-product") },
+            featuredMedia: { image: { url: url("remaining-product") } },
           },
         ],
       } as T;
