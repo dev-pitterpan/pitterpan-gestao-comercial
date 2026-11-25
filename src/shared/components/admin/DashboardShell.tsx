@@ -29,6 +29,8 @@ import ProfilePhoto from "./ProfilePhoto";
 import { ContentAccess } from "./ContentCategories";
 import { catalogDocumentClasses } from "../../lib/catalog/document-theme";
 
+import { commercialModule } from "../../lib/admin/commercial-modules";
+
 const roleLabels = {
   admin: "Administrador",
   gerente_compras: "Gerente de Compras",
@@ -64,7 +66,8 @@ export default function DashboardShell({
   const currentModule =
     modules.find((module) => module.id === selected) || activeModule;
   const routine = activeRoutine(modules, pathname, new URLSearchParams(params));
-  const title = routine?.label || "Central de gestão";
+  const title =
+    commercialModule(pathname)?.label || routine?.label || "Central de gestão";
   useEffect(() => {
     // Remove only catalog-specific classes; never erase the Next.js Geist font class.
     for (const element of [document.documentElement, document.body])

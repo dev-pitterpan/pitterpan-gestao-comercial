@@ -5,28 +5,28 @@ import SalesDashboard from "./SalesDashboard";
 export const salesPages = {
   resumo: {
     view: "summary",
-    title: "Resumo Shopify",
+    title: "Visão geral comercial",
     description:
       "Acompanhe os indicadores e abra os detalhes de cada resultado.",
   },
   pedidos: {
     view: "orders",
-    title: "Vendas Shopify",
+    title: "Pedidos",
     description: "Consulte pedidos, itens, pagamentos e entregas.",
   },
   recebimentos: {
     view: "receipts",
-    title: "Recebimentos",
+    title: "Financeiro",
     description: "Veja o recebido e o líquido dos pedidos selecionados.",
   },
   reembolsos: {
     view: "refunds",
-    title: "Estornos e reembolsos",
+    title: "Financeiro",
     description: "Confira valores e pedidos com reembolso total ou parcial.",
   },
   atendimento: {
     view: "operations",
-    title: "Atendimento de pedidos",
+    title: "Pedidos",
     description: "Acompanhe pedidos em preparo, entregas e retiradas.",
   },
   produtos: {
@@ -60,7 +60,10 @@ export default async function SalesWorkspace({
   const input = {
     status,
     fulfillment:
-      value("fulfillment") || (page.view === "operations" ? "AWAITING" : "all"),
+      page.view === "refunds" || page.view === "receipts"
+        ? "all"
+        : value("fulfillment") ||
+          (page.view === "operations" ? "AWAITING" : "all"),
     category: value("category"),
     delivery: value("delivery") || "all",
     start: value("start"),
