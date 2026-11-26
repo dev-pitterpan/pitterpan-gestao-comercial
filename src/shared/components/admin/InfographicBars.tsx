@@ -1,8 +1,7 @@
 "use client";
 import { useLayoutEffect, useRef, useState } from "react";
 import { chartDomain, infographicPalette } from "../../lib/admin/infographic";
-import { peakPolygon } from "../../lib/admin/reference-geometry";
-export default function InfographicPeaks({
+export default function InfographicBars({
   items,
   format,
   offset = 0,
@@ -36,15 +35,15 @@ export default function InfographicPeaks({
       bottom - ((value - low) / (high - low)) * (bottom - top);
   const row = active === null ? null : items[active];
   return (
-    <div className="reference-peaks" ref={host}>
-      <div className="reference-peaks-readout" aria-live="polite">
+    <div className="reference-bars" ref={host}>
+      <div className="reference-bars-readout" aria-live="polite">
         <span>{row?.label ?? "COMPARAÇÃO NA MESMA ESCALA"}</span>
-        <strong>{row ? format(row.value) : "Selecione um pico"}</strong>
+        <strong>{row ? format(row.value) : "Selecione uma coluna"}</strong>
       </div>
       <svg
         viewBox={`0 0 ${width} 222`}
         role="group"
-        aria-label="Comparação em picos triangulares. Use as setas para explorar."
+        aria-label="Comparação em colunas. Use as setas para explorar."
         tabIndex={0}
         onKeyDown={(event) => {
           if (event.key === "Escape") setActive(null);
@@ -83,15 +82,18 @@ export default function InfographicPeaks({
         ))}
         <line x1={left} x2={right} y1={y(0)} y2={y(0)} stroke="#76828e" />
         {items.map((item, index) => {
-          const shape =
-            item.value === null
-              ? ""
-              : peakPolygon(x(index), y(0), y(item.value), step * 0.72);
+          const height =
+            item.value === null ? 0 : Math.abs(y(item.value) - y(0));
+          const barWidth = Math.min(38, step * 0.6);
           return (
             <g key={`${offset + index}-${item.label}`}>
-              {shape ? (
-                <polygon
-                  points={shape}
+              {item.value !== null && height > 0 ? (
+                <rect
+                  x={x(index) - barWidth / 2}
+                  y={Math.min(y(0), y(item.value))}
+                  width={barWidth}
+                  height={height}
+                  rx={Math.min(5, height / 2)}
                   fill={
                     item.value! < 0
                       ? "#c4473d"
@@ -139,10 +141,6 @@ export default function InfographicPeaks({
           );
         })}
       </svg>
-      <p className="infographic-note">
-        Altura e área dos triângulos seguem o valor. A numeração corresponde à
-        legenda abaixo.
-      </p>
     </div>
   );
 }

@@ -1,7 +1,6 @@
 "use client";
 import { useId, useLayoutEffect, useRef, useState } from "react";
-import { ChartColumn, Mountain, Triangle } from "lucide-react";
-import { peakPolygon } from "../../lib/admin/reference-geometry";
+import { ChartColumn, ChartSpline } from "lucide-react";
 import { chartDate, chartDomain } from "../../lib/admin/infographic";
 export type TimelinePoint = { day: string; value: number | null };
 export default function InfographicTimeline({
@@ -9,17 +8,15 @@ export default function InfographicTimeline({
   format,
   label,
   previous,
-  initial = "peaks",
   coral = false,
 }: {
   rows: TimelinePoint[];
   format: (value: number | null) => string;
   label: string;
   previous?: (number | null)[];
-  initial?: "columns" | "area" | "peaks";
   coral?: boolean;
 }) {
-  const [mode, setMode] = useState(initial),
+  const [mode, setMode] = useState<"area" | "columns">("area"),
     [active, setActive] = useState<number | null>(null),
     [compare, setCompare] = useState(false),
     [width, setWidth] = useState(600);
@@ -58,15 +55,27 @@ export default function InfographicTimeline({
     undefined,
   );
   const reading = chosen ?? peak;
-  const paths = (points: (number | null)[]) => {
-    const segments: { index: number; value: number }[][] = [];
-    points.forEach((value, index) => {
+  const series = (values: (number | null)[]) => {
+    const segments: { x: number; y: number }[][] = [];
+    values.forEach((value, index) => {
       if (value === null) return;
-      if (index === 0 || points[index - 1] === null) segments.push([]);
-      segments.at(-1)!.push({ index, value });
+      if (index === 0 || values[index - 1] === null) segments.push([]);
+      segments.at(-1)!.push({ x: x(index), y: y(value) });
     });
     return segments;
   };
+  // Horizontal tangents keep the curve within each pair of real values.
+  const curve = (segment: { x: number; y: number }[]) =>
+    segment
+      .map((point, index) => {
+        if (index === 0) return `M${point.x},${point.y}`;
+        const prior = segment[index - 1];
+        const middle = (prior.x + point.x) / 2;
+        return `C${middle},${prior.y} ${middle},${point.y} ${point.x},${point.y}`;
+      })
+      .join(" ");
+  const baseline = y(0);
+  const color = coral ? "#c8495b" : "#315bd7";
   const ticks = [
     ...new Set(
       Array.from({ length: width < 400 ? 3 : 5 }, (_, i) =>
@@ -87,27 +96,19 @@ export default function InfographicTimeline({
         >
           <button
             type="button"
-            aria-pressed={mode === "peaks"}
-            onClick={() => setMode("peaks")}
+            aria-pressed={mode === "area"}
+            onClick={() => setMode("area")}
           >
-            <Triangle size={14} />
-            Picos
+            <ChartSpline size={15} aria-hidden="true" />
+            Área
           </button>
           <button
             type="button"
             aria-pressed={mode === "columns"}
             onClick={() => setMode("columns")}
           >
-            <ChartColumn size={14} />
+            <ChartColumn size={15} aria-hidden="true" />
             Colunas
-          </button>
-          <button
-            type="button"
-            aria-pressed={mode === "area"}
-            onClick={() => setMode("area")}
-          >
-            <Mountain size={14} />
-            Área
           </button>
         </div>
       </div>
@@ -195,11 +196,14 @@ export default function InfographicTimeline({
           >
             <defs>
               <linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
-                <stop stopColor={coral ? "#c4473d" : "#6999bd"} />
+                <stop
+                  stopColor={color}
+                  stopOpacity={mode === "area" ? ".20" : ".95"}
+                />
                 <stop
                   offset="1"
-                  stopColor={coral ? "#3f3a42" : "#286da8"}
-                  stopOpacity=".32"
+                  stopColor={color}
+                  stopOpacity={mode === "area" ? ".04" : ".60"}
                 />
               </linearGradient>
             </defs>
@@ -227,108 +231,74 @@ export default function InfographicTimeline({
               y2={y(0)}
               className="infographic-zero"
             />
-            {mode === "peaks"
-              ? rows.map((row, index) => {
-                  const shape =
-                    row.value === null
-                      ? ""
-                      : peakPolygon(x(index), y(0), y(row.value), step * 0.82);
-                  return shape ? (
-                    <polygon
-                      key={index}
-                      points={shape}
-                      fill={
-                        row.value! < 0 || coral
-                          ? "#c4473d"
-                          : index % 3 === 0
-                            ? "#6999bd"
-                            : "#286da8"
-                      }
-                      opacity={active === null || active === index ? 1 : 0.35}
-                    />
-                  ) : (
-                    <circle
-                      key={index}
-                      cx={x(index)}
-                      cy={y(0)}
-                      r={row.value === null ? 2 : 0}
-                      fill="#76828e"
+            {mode === "columns"
+              ? rows.map(({ value }, i) => {
+                  if (value === null || value === 0) return null;
+                  const height = Math.abs(y(value) - baseline);
+                  const barWidth = Math.min(24, step * 0.57);
+                  return (
+                    <rect
+                      key={i}
+                      x={x(i) - barWidth / 2}
+                      width={barWidth}
+                      y={Math.min(baseline, y(value))}
+                      height={height}
+                      rx={Math.min(5, height / 2)}
+                      fill={value < 0 ? "#c8495b" : `url(#${id})`}
+                      opacity={active === null || active === i ? 1 : 0.55}
                     />
                   );
                 })
-              : mode === "columns"
-                ? rows.map((r, i) =>
-                    r.value === null ? (
-                      <circle
-                        key={i}
-                        cx={x(i)}
-                        cy={y(0) - 4}
-                        r="2"
-                        fill="#76828e"
+              : series(rows.map((row) => row.value)).map((segment, i) => {
+                  const first = segment[0];
+                  const last = segment.at(-1)!;
+                  const line = curve(segment);
+                  return segment.length === 1 ? (
+                    <circle
+                      key={i}
+                      cx={first.x}
+                      cy={first.y}
+                      r="4"
+                      fill={color}
+                    />
+                  ) : (
+                    <g key={i}>
+                      <path
+                        d={`${line} L${last.x},${baseline} L${first.x},${baseline} Z`}
+                        fill={`url(#${id})`}
                       />
-                    ) : (
-                      <g key={i}>
-                        <rect
-                          x={x(i) - Math.min(20, step * 0.6) / 2}
-                          width={Math.min(20, step * 0.6)}
-                          y={Math.min(y(0), y(r.value))}
-                          height={Math.abs(y(r.value) - y(0))}
-                          rx="0"
-                          fill={r.value < 0 ? "#c4473d" : `url(#${id})`}
-                          opacity={active === null || active === i ? 1 : 0.45}
-                        />
-                        {r.value !== 0 && (
-                          <circle
-                            cx={x(i)}
-                            cy={y(r.value)}
-                            r={active === i ? 4 : 2}
-                            fill={r.value < 0 || coral ? "#c4473d" : "#a1ceeb"}
-                          />
-                        )}
-                      </g>
-                    ),
-                  )
-                : paths(rows.map((r) => r.value)).map((s, i) => {
-                    const line = s
-                      .map(
-                        (p, j) => `${j ? "L" : "M"}${x(p.index)},${y(p.value)}`,
-                      )
-                      .join(" ");
-                    return (
-                      <g key={i}>
-                        <path
-                          d={`${line} L${x(s.at(-1)!.index)},${y(0)} L${x(s[0].index)},${y(0)} Z`}
-                          fill={coral ? "#c4473d" : "#286da8"}
-                          opacity=".75"
-                        />
-                        <path
-                          d={line}
-                          fill="none"
-                          stroke={coral ? "#c4473d" : "#a1ceeb"}
-                          strokeWidth="2"
-                        />
-                        {s.length === 1 && (
-                          <circle
-                            cx={x(s[0].index)}
-                            cy={y(s[0].value)}
-                            r="3"
-                            fill="#a1ceeb"
-                          />
-                        )}
-                      </g>
-                    );
-                  })}
+                      <path
+                        d={line}
+                        fill="none"
+                        stroke={color}
+                        strokeWidth="2.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                    </g>
+                  );
+                })}
             {comparison &&
-              paths(comparison).map((s, i) => (
-                <polyline
-                  key={i}
-                  points={s.map((p) => `${x(p.index)},${y(p.value)}`).join(" ")}
-                  fill="none"
-                  stroke="#c0c8ce"
-                  strokeWidth="1.5"
-                  strokeDasharray="4 5"
-                />
-              ))}
+              series(comparison).map((segment, i) =>
+                segment.length === 1 ? (
+                  <circle
+                    key={i}
+                    cx={segment[0].x}
+                    cy={segment[0].y}
+                    r="3"
+                    fill="#657a9e"
+                  />
+                ) : (
+                  <path
+                    key={i}
+                    d={curve(segment)}
+                    fill="none"
+                    stroke="#657a9e"
+                    strokeWidth="1.5"
+                    strokeDasharray="4 5"
+                  />
+                ),
+              )}
             {ticks.map((i) => (
               <text
                 key={i}
@@ -356,26 +326,10 @@ export default function InfographicTimeline({
                     cx={x(active)}
                     cy={y(chosen.value)}
                     r="5"
-                    fill="#c4473d"
-                    stroke="#0a0c12"
+                    fill={color}
+                    stroke="#fff"
                     strokeWidth="2"
                   />
-                )}
-                {chosen.value !== null && (
-                  <g
-                    aria-hidden="true"
-                    transform={`translate(${Math.max(left, Math.min(right - 64, x(active) - 32))},${Math.max(1, Math.min(bottom - 25, y(chosen.value) - 29))})`}
-                  >
-                    <rect width="64" height="21" fill="#edf0f3" />
-                    <text
-                      x="32"
-                      y="15"
-                      textAnchor="middle"
-                      className="reference-callout"
-                    >
-                      {axis.format(chosen.value)}
-                    </text>
-                  </g>
                 )}
               </g>
             )}
@@ -388,8 +342,7 @@ export default function InfographicTimeline({
       </div>
       {rows.some((row) => row.value === null) && (
         <p className="infographic-note">
-          Marcadores cinza e lacunas indicam dados ausentes; não representam
-          zero.
+          Lacunas indicam datas com dados indisponíveis.
         </p>
       )}
     </div>

@@ -30,7 +30,10 @@ import { shiftDate, todayDate } from "../../lib/admin/date-range";
 import type { SalesFilters } from "../../server/sales/filters";
 import DateRangePicker from "./DateRangePicker";
 import type { readSales } from "../../server/sales/repository";
-type Data = Awaited<ReturnType<typeof readSales>>;
+import type { readShippingAddresses } from "../../server/sales/fulfillment-details";
+type Data = Awaited<ReturnType<typeof readSales>> & {
+  shippingAddresses?: Awaited<ReturnType<typeof readShippingAddresses>>;
+};
 const count = (n: string | number) =>
   new Intl.NumberFormat("pt-BR").format(Number(n));
 const money = (value: string, currency: string) =>
@@ -48,6 +51,31 @@ const status: Record<string, string> = {
   EXPIRED: "Expirado",
   UNKNOWN: "Não informado",
 };
+function DeliveryAddress({
+  pickup,
+  address,
+}: {
+  pickup: boolean;
+  address?: NonNullable<Data["shippingAddresses"]>[string];
+}) {
+  if (pickup) return <small>Retirada na loja</small>;
+  if (address?.status === "available")
+    return (
+      <address>
+        {address.lines.map((line, index) => (
+          <span key={index}>{line}</span>
+        ))}
+      </address>
+    );
+  return (
+    <small>
+      {address?.status === "missing"
+        ? "Sem endereço registrado"
+        : "Endereço indisponível"}
+    </small>
+  );
+}
+
 export default function SalesDashboard({
   title,
   description,
@@ -187,6 +215,7 @@ export default function SalesDashboard({
           days: String(days),
           ranking: "0",
           daily: finance || showSummary ? "1" : "0",
+          addresses: view === "orders" ? "1" : "0",
           start: filters.start || "",
           end: filters.end || "",
           status: filters.status,
@@ -228,7 +257,7 @@ export default function SalesDashboard({
           setLoading(false);
       }
     },
-    [days, filters, finance, showSummary],
+    [days, filters, finance, showSummary, view],
   );
   useEffect(() => {
     if (productsOnly) {
@@ -270,6 +299,7 @@ export default function SalesDashboard({
     try {
       const params = new URLSearchParams({
         view: "orders",
+        addresses: view === "orders" ? "1" : "0",
         days: String(days),
         start: filters.start || "",
         end: filters.end || "",
@@ -289,7 +319,10 @@ export default function SalesDashboard({
         throw new Error(
           body.error || "Não foi possível abrir esta página de pedidos.",
         );
-      const page = body as Pick<Data, "orders" | "hasMore" | "nextCursor">;
+      const page = body as Pick<
+        Data,
+        "orders" | "hasMore" | "nextCursor" | "shippingAddresses"
+      >;
       setData((current) => (current ? { ...current, ...page } : current));
       setPageCursors(cursors);
       paged.current = cursors.length > 1;
@@ -616,6 +649,7 @@ export default function SalesDashboard({
                       <th>Cliente</th>
                       <th>Situação</th>
                       {!finance && <th>Entrega escolhida</th>}
+                      {!finance && <th>Endereço de entrega</th>}
                       {!finance && <th>Total do pedido</th>}
                       <th>Recebido</th>
                       <th>Estornado</th>
@@ -625,7 +659,7 @@ export default function SalesDashboard({
                   <tbody>
                     {!data.orders.length && (
                       <tr>
-                        <td colSpan={finance ? 7 : 9}>
+                        <td colSpan={finance ? 7 : 10}>
                           Nenhum pedido importado corresponde aos filtros
                           escolhidos.
                         </td>
@@ -711,6 +745,12 @@ export default function SalesDashboard({
                                   </small>
                                 </>
                               )}
+                            </td>
+                            <td className="order-address-cell">
+                              <DeliveryAddress
+                                pickup={o.delivery_kind === "PICKUP"}
+                                address={data.shippingAddresses?.[o.id]}
+                              />
                             </td>
                             <td>
                               {money(o.total, o.currency)}

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import {
   readFulfillmentDetails,
   readShippingAddress,
+  readShippingAddresses,
 } from "../src/shared/server/sales/fulfillment-details.ts";
 const info = (more = false, cursor: string | null = null) => ({
   hasNextPage: more,
@@ -337,4 +338,32 @@ test("endereço ausente e falha de acesso produzem estados distintos", async () 
     ),
     { status: "unavailable" },
   );
+});
+
+test("endereços da página são consultados em lote e associados ao ID do pedido", async () => {
+  const ids = ["1108", "1109", "1110"].map((id) => `gid://shopify/Order/${id}`);
+  const addresses = await readShippingAddresses(
+    {
+      async query<T>(query: string, variables?: Record<string, unknown>) {
+        assert.match(query, /nodes\(ids:\$ids\)/);
+        assert.deepEqual(variables, { ids });
+        return {
+          nodes: [
+            null,
+            { id: ids[1], shippingAddress: null },
+            {
+              id: ids[0],
+              shippingAddress: { city: " Joinville ", provinceCode: "SC" },
+            },
+            { id: "gid://shopify/Order/9999", shippingAddress: null },
+          ],
+        } as T;
+      },
+    },
+    ids,
+  );
+  assert.deepEqual(addresses, {
+    [ids[0]]: { status: "available", lines: ["Joinville – SC"] },
+    [ids[1]]: { status: "missing" },
+  });
 });

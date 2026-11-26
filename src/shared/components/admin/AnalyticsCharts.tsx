@@ -36,7 +36,6 @@ export function RevenueChart({
         }))}
         label={axisLabel ?? `${metricLabel} · ${currency}`}
         format={money}
-        initial="peaks"
         previous={comparison?.values}
       />
       {comparison && (

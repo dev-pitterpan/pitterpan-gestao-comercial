@@ -69,3 +69,20 @@
     height: 38px;
   }
 }
+
+.admin-app .order-address-cell {
+  min-width: 190px;
+  max-width: 242px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.admin-app .order-address-cell address {
+  display: grid;
+  gap: 3px;
+  font-style: normal;
+}
+
+.admin-app .order-address-cell address span:first-child {
+  font-weight: 600;
+}

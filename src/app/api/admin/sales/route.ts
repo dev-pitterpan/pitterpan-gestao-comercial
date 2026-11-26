@@ -1,6 +1,10 @@
 import { apiSession, sameOrigin } from "@shared/server/auth/session";
 import { database } from "@shared/server/database/client";
-import { salesReady, salesConfig } from "@shared/server/sales/config";
+import {
+  salesReady,
+  salesConfig,
+  salesClient,
+} from "@shared/server/sales/config";
 import {
   salesFilterSchema,
   decodeOrderCursor,
@@ -14,6 +18,7 @@ import {
 } from "@shared/server/sales/repository";
 import { fillQueueLivePhotos } from "@shared/server/sales/product-photos";
 import { cachedShopifyClient } from "@shared/server/shopify/cached-client";
+import { readShippingAddresses } from "@shared/server/sales/fulfillment-details";
 import { syncSalesPage } from "@shared/server/sales/sync";
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -126,6 +131,15 @@ export async function GET(request: Request) {
         db.release();
       }
     })();
+    const addresses =
+      url.searchParams.get("addresses") === "1" && "orders" in data
+        ? readShippingAddresses(
+            salesClient(),
+            data.orders
+              .filter((order) => order.delivery_kind !== "PICKUP")
+              .map((order) => order.id),
+          )
+        : undefined;
     // Optional photo lookup runs after releasing the transaction and cannot block orders on failure.
     if (
       "orderPreviews" in data &&
@@ -148,7 +162,10 @@ export async function GET(request: Request) {
           );
         }
     }
-    return Response.json(data, { headers: { "Cache-Control": "no-store" } });
+    return Response.json(
+      addresses ? { ...data, shippingAddresses: await addresses } : data,
+      { headers: { "Cache-Control": "no-store" } },
+    );
   } catch {
     return unavailable();
   }

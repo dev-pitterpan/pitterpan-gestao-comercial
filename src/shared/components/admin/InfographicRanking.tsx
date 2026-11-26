@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { infographicPalette as chartPalette } from "../../lib/admin/infographic";
 import { distribution, chartDomain } from "../../lib/admin/infographic";
 import InfographicRadial from "./InfographicRadial";
-import InfographicPeaks from "./InfographicPeaks";
+import InfographicBars from "./InfographicBars";
 export type RankingItem = {
   label: string;
   value: number | null;
@@ -48,7 +48,7 @@ export default function InfographicRanking({
               aria-pressed={!isShare}
               onClick={() => setMode("comparison")}
             >
-              Picos
+              Colunas
             </button>
             <button
               type="button"
@@ -77,14 +77,14 @@ export default function InfographicRanking({
         />
       ) : (
         <div>
-          <InfographicPeaks
+          <InfographicBars
             key={start}
             items={rows}
             format={format}
             offset={start}
             domain={chartDomain(items.map((item) => item.value))}
           />
-          <ol className="reference-peak-legend" start={start + 1}>
+          <ol className="reference-bar-legend" start={start + 1}>
             {rows.map((item, i) => (
               <li key={`${start + i}-${item.label}`}>
                 <span className="infographic-rank-index">
