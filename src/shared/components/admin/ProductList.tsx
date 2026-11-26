@@ -33,24 +33,30 @@ export function ProductFilters({
     new URLSearchParams({ ...filters, format: "csv" });
   return (
     <div className="admin-filter-bar">
-      <input
-        className="admin-filter-input"
-        name="category"
-        maxLength={200}
-        defaultValue={query.category}
-        placeholder="Buscar categoria"
-        aria-label="Filtrar categoria"
-      />
-      <input
-        className="admin-filter-input"
-        name="vendor"
-        maxLength={200}
-        defaultValue={query.vendor}
-        placeholder="Buscar marca"
-        aria-label="Filtrar marca"
-      />
+      <label className="workspace-filter-label">
+        Categoria
+        <input
+          className="admin-filter-input"
+          name="category"
+          maxLength={200}
+          defaultValue={query.category}
+          placeholder="Buscar categoria"
+          aria-label="Filtrar categoria"
+        />
+      </label>
+      <label className="workspace-filter-label">
+        Marca
+        <input
+          className="admin-filter-input"
+          name="vendor"
+          maxLength={200}
+          defaultValue={query.vendor}
+          placeholder="Buscar marca"
+          aria-label="Filtrar marca"
+        />
+      </label>
       {query.offers === "1" && <input type="hidden" name="offers" value="1" />}
-      <label className="admin-sr-only" htmlFor="stock-filter">
+      <label className="workspace-filter-label" htmlFor="stock-filter">
         Situação de estoque
       </label>
       <AdminSelect
@@ -68,9 +74,6 @@ export function ProductFilters({
           { value: "unknown", label: "Não informado" },
         ]}
       />
-      <button type="submit" className="admin-button admin-button-primary">
-        Aplicar agora
-      </button>
       {canExport && (
         <a className="admin-button" href={exportHref} download>
           <Download size={16} /> Exportar resultados filtrados

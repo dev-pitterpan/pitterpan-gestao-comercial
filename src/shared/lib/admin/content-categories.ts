@@ -45,20 +45,9 @@ export function contentCategories(
   const items = modules
     .flatMap((module) => module.items)
     .filter((item) => !item.planned);
-  const catalogPaths = [
-    "/gestor/produtos/",
-    "/gestor/ofertas/",
-    "/gestor/produtos-vendidos/",
-    "/gestor/estoque/",
-    "/gestor/catalogos/",
-    "/gestor/catalogos/imagens/",
-    "/gestor/alteracoes/",
-  ];
   const customerPaths = ["/gestor/clientes/", "/gestor/mapa/"];
   let candidates: Routine[] = [];
-  if (catalogPaths.includes(pathname))
-    candidates = items.filter((item) => catalogPaths.includes(item.href));
-  else if (commercialModule(pathname)) {
+  if (commercialModule(pathname)) {
     const group = commercialModule(pathname)!;
     candidates = items.filter((item) =>
       group.paths.some((path) => path === item.href),
@@ -80,14 +69,6 @@ export function contentCategories(
         .find((module) => module.id === "analytics")
         ?.items.filter((item) => item.href.startsWith("/gestor/analises/")) ||
       [];
-  else if (
-    [
-      "/gestor/usuarios/",
-      "/gestor/configuracoes/",
-      "/gestor/sincronizacoes/",
-    ].includes(pathname)
-  )
-    candidates = modules.find((module) => module.id === "system")?.items || [];
   return candidates.map((item) => {
     const active = routineActive(item, pathname, source);
     const [path, query] = item.href.split("?");

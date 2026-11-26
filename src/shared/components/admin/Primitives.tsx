@@ -2,6 +2,7 @@ import Link from "next/link";
 import ContentCategories from "./ContentCategories";
 import RoutineIdentifier from "./RoutineIdentifier";
 import FilterDisclosure from "./FilterDisclosure";
+import HeaderControls from "./HeaderControls";
 import {
   ArrowUpRight,
   Database,
@@ -46,7 +47,7 @@ export function PageHeading({
               (compactFilters ? (
                 <FilterDisclosure>{filters}</FilterDisclosure>
               ) : (
-                filters
+                <HeaderControls>{filters}</HeaderControls>
               ))}
             {action}
           </div>

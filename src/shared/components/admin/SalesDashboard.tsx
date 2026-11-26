@@ -1,4 +1,5 @@
 "use client";
+import FilterDisclosure from "./FilterDisclosure";
 import { PageHeading } from "./Primitives";
 import SalesFilterPanel from "./SalesFilterPanel";
 import ShopifySummary from "./ShopifySummary";
@@ -425,11 +426,16 @@ export default function SalesDashboard({
           </div>
         }
       />
-      {(!showSummary ||
-        filters.status !== "all" ||
-        filters.category ||
-        (filters.delivery && filters.delivery !== "all") ||
-        (filters.fulfillment && filters.fulfillment !== "all")) && (
+      <FilterDisclosure
+        activeCount={
+          [
+            !finance && filters.status !== "all",
+            !!filters.category,
+            !!filters.delivery && filters.delivery !== "all",
+            !finance && !!filters.fulfillment && filters.fulfillment !== "all",
+          ].filter(Boolean).length
+        }
+      >
         <SalesFilterPanel
           filters={filters}
           categoryDraft={categoryDraft}
@@ -441,7 +447,7 @@ export default function SalesDashboard({
             setFilters((old) => ({ ...old, ...patch }));
           }}
         />
-      )}
+      </FilterDisclosure>
       {finance && (
         <details className="sales-methodology">
           <summary>Como os valores são calculados</summary>

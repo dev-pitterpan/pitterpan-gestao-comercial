@@ -17,7 +17,7 @@ Escolha ou troque a foto pelo avatar da barra lateral, em Configurações ou em 
 
 ## 2. Mapa das telas
 
-No painel do administrador e do gerente, os títulos e os filtros de consulta ficam logo abaixo da barra global. A data da Visão geral controla os indicadores de vendas. A metodologia de Recebimentos e Reembolsos fica disponível em “Como os valores são calculados”.
+No painel do administrador e do gerente, a barra global reúne o período ou a busca da rotina e o botão “Filtros”, com contador dos critérios adicionais ativos. Esse botão abre um painel lateral acessível por teclado; os campos permanecem associados ao formulário GET original, preservando busca, paginação e exportação. Produtos mantém uma única busca por nome ou SKU na lista. As abas que duplicavam rotinas de Catálogo e Sistema foram removidas; as opções internas dos módulos comerciais e análises permanecem. O ícone de sair fica na base da barra azul de áreas, com o mesmo encerramento de sessão. A data da Visão geral controla os indicadores de vendas. A metodologia de Recebimentos e Reembolsos fica disponível em “Como os valores são calculados”.
 
 | Menu ou tela           | Rota                                                               | O que faz e de onde vêm os dados                                                                                                                                                                                     |
 | ---------------------- | ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -370,3 +370,7 @@ A lista de pedidos recentes, recebimentos e reembolsos passa a apresentar uma co
 `OrderProductPreview.tsx` apresenta as miniaturas e títulos. `order-media.css` adapta a coluna a telas estreitas com a rolagem da tabela já existente. `DeliveryMark.tsx` diferencia os veículos por cores: Sedex amarelo/azul, PAC azul, Jadlog vermelho e motoboy coral com caixa dourada; a loja de retirada tem toldo dourado. As cores se restringem às ilustrações; rótulos e classificação de entrega são preservados.
 
 O teste das miniaturas verifica limite de três, total original dos itens, seleção somente dos pedidos solicitados, fallback histórico e isolamento entre lojas mesmo com IDs iguais. Validação: 144 testes unitários, tipos, formatação, build e rotas HTTP passaram. A prévia verifica miniaturas, fallback de imagem e largura de 390 px sem transbordamento horizontal da página.
+
+### Organização das consultas · 26/11/2026
+
+Filtros adicionais deixam de ocupar cartões acima do conteúdo. O painel lateral mantém os resultados enquanto ajusta os critérios e fecha por Escape, pelo botão de fechar, pelo fundo ou por “Ver resultados”. O foco retorna ao botão de abertura. Datas e buscas independentes ficam diretamente na barra global; filtros dentro de formulários movem somente seu botão, preservando o envio dos campos. Em telas menores, os controles do cabeçalho passam à linha seguinte.

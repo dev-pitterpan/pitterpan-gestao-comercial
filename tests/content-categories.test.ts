@@ -66,34 +66,31 @@ test("categorias comerciais preservam o período e não transportam status finan
     0,
   );
 });
-test("categorias de catálogo e sistema respeitam o perfil e não incluem funções futuras", () => {
-  const service = contentCategories(
-    "/gestor/produtos/",
-    new URLSearchParams({ q: "bolo", vendor: "BWB", page: "8" }),
-    "atendimento",
-  );
-  assert.ok(service.some((item) => item.href.startsWith("/gestor/ofertas/")));
-  assert.ok(service.some((item) => item.href.startsWith("/gestor/estoque/")));
-  assert.ok(
-    service.every(
-      (item) =>
-        !item.href.startsWith("/gestor/catalogos/imagens/") &&
-        !item.href.startsWith("/gestor/produtos-vendidos/") &&
-        !item.planned,
-    ),
-  );
-  assert.equal(service.filter((item) => item.active).length, 1);
-  const system = contentCategories(
-    "/gestor/sincronizacoes/",
-    new URLSearchParams(),
-    "atendimento",
-  );
-  assert.ok(system.every((item) => item.href === "/gestor/sincronizacoes/"));
-  assert.equal(
-    contentCategories("/gestor/minha-conta/", new URLSearchParams(), "admin")
-      .length,
-    0,
-  );
+test("catálogo e sistema usam a sidebar sem duplicar rotinas no conteúdo", () => {
+  for (const role of ["admin", "gestor", "atendimento"] as const) {
+    for (const path of [
+      "/gestor/produtos/",
+      "/gestor/ofertas/",
+      "/gestor/catalogos/",
+      "/gestor/catalogos/imagens/",
+      "/gestor/estoque/",
+      "/gestor/alteracoes/",
+      "/gestor/sincronizacoes/",
+      "/gestor/usuarios/",
+      "/gestor/configuracoes/",
+      "/gestor/minha-conta/",
+    ]) {
+      assert.deepEqual(
+        contentCategories(
+          path,
+          new URLSearchParams({ q: "bolo", vendor: "BWB", page: "8" }),
+          role,
+        ),
+        [],
+        `${role}: ${path}`,
+      );
+    }
+  }
 });
 test("análises mantêm uma única categoria selecionada para cada relatório ou visão", () => {
   for (const query of [

@@ -1,6 +1,6 @@
 "use client";
 import Link, { useLinkStatus } from "next/link";
-import { useId } from "react";
+import { useId, type ReactNode } from "react";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
@@ -125,7 +125,9 @@ export function WorkspaceRail({
   expanded,
   onSelect,
   close,
+  footer,
 }: {
+  footer?: ReactNode;
   modules: Workspace[];
   selected: string;
   expanded: boolean;
@@ -163,7 +165,7 @@ export function WorkspaceRail({
           );
         })}
       </nav>
-      <span className="workspace-rail-caption">GESTÃO</span>
+      <div className="workspace-rail-footer">{footer}</div>
     </div>
   );
 }

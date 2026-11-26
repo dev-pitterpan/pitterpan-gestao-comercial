@@ -178,7 +178,7 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
         }
         if (path === "/gestor/vendas/resumo/") {
           assert.match(html, /<h1>Visão geral comercial<\/h1>/);
-          assert.doesNotMatch(html, /id="sales-status"/);
+          assert.match(html, /<dialog[^>]+class="workspace-filter-dialog"/);
           assert.doesNotMatch(html, /aria-label="Opções do módulo"/);
         }
         if (path === "/gestor/mapa/") {
@@ -192,6 +192,25 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
           assert.match(html, /class="delivery-map-canvas"/);
           assert.doesNotMatch(html, /Mapa de cidades/);
           assert.doesNotMatch(html, /Mapa pontilhado do Brasil/);
+        }
+        if (
+          [
+            "/gestor/produtos/",
+            "/gestor/ofertas/",
+            "/gestor/catalogos/",
+          ].includes(path)
+        ) {
+          assert.doesNotMatch(html, /aria-label="Categorias desta área"/);
+          assert.match(html, /id="workspace-routine-controls"/);
+          assert.equal(
+            (html.match(/aria-label="Sair da conta"/g) || []).length,
+            1,
+          );
+        }
+        if (path === "/gestor/produtos/") {
+          assert.match(html, /<dialog[^>]+class="workspace-filter-dialog"/);
+          assert.equal((html.match(/name="q"/g) || []).length, 1);
+          assert.doesNotMatch(html, /Refine a seleção|Filtros da consulta/);
         }
         if (path === "/gestor/clientes/") {
           assert.match(html, /<h1>Ranking de clientes<\/h1>/);
