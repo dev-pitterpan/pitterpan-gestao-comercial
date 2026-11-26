@@ -40,7 +40,7 @@ export default function AutoFilterForm({
     for (const field of Array.from(form.current?.elements || [])) {
       if (
         field instanceof HTMLInputElement &&
-        field.type !== "hidden" &&
+        ["text", "search"].includes(field.type) &&
         field !== document.activeElement &&
         field.name
       ) {

@@ -24,6 +24,8 @@ export default function CustomerRankingFilters({
       <DateRangePicker value={range} onChange={(value) => apply(value, sort)} />
       <AdminSelect
         label="Ordenar clientes"
+        triggerLabel="Ordenação"
+        neutralValue="value"
         value={sort}
         options={[
           { value: "value", label: "Maior valor líquido" },

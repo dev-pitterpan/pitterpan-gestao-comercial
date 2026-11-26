@@ -23,14 +23,17 @@ export default function SalesStatusSelect({
   id,
   value,
   onChange,
+  triggerLabel,
 }: {
   id: string;
+  triggerLabel?: string;
   value: SalesFilters["status"];
   onChange: (status: SalesFilters["status"]) => void;
 }) {
   return (
     <AdminSelect
       id={id}
+      triggerLabel={triggerLabel}
       label="Situação do pagamento"
       value={value}
       options={options.filter(

@@ -2,6 +2,7 @@ import Link from "next/link";
 import ContentCategories from "./ContentCategories";
 import RoutineIdentifier from "./RoutineIdentifier";
 import FilterDisclosure from "./FilterDisclosure";
+import WorkspaceQueryControls from "./WorkspaceQueryControls";
 import {
   ArrowUpRight,
   Database,
@@ -48,15 +49,7 @@ export function PageHeading({
         (compactFilters ? (
           <FilterDisclosure>{filters}</FilterDisclosure>
         ) : (
-          <div
-            className="routine-query"
-            role="group"
-            aria-label="Consulta da rotina"
-          >
-            <div className="routine-query-row">
-              <div className="routine-query-primary">{filters}</div>
-            </div>
-          </div>
+          <WorkspaceQueryControls>{filters}</WorkspaceQueryControls>
         ))}
       <ContentCategories action={navigationAction} />
     </>

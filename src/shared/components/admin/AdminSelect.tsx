@@ -16,6 +16,8 @@ export default function AdminSelect({
   name,
   id,
   disabled = false,
+  triggerLabel,
+  neutralValue = "all",
 }: {
   value: string;
   onValueChange: (value: string) => void;
@@ -24,6 +26,8 @@ export default function AdminSelect({
   name?: string;
   id?: string;
   disabled?: boolean;
+  triggerLabel?: string;
+  neutralValue?: string;
 }) {
   const listId = useId();
   const root = useRef<HTMLDivElement>(null);
@@ -69,6 +73,14 @@ export default function AdminSelect({
         ref={trigger}
         disabled={disabled}
         id={id}
+        title={
+          triggerLabel
+            ? `${label}: ${options[selected]?.label || value}`
+            : undefined
+        }
+        data-filter-active={
+          triggerLabel && value && value !== neutralValue ? "true" : undefined
+        }
         type="button"
         className="admin-select-trigger"
         role="combobox"
@@ -111,9 +123,17 @@ export default function AdminSelect({
             options[selected]?.icon ? "admin-select-option-label" : undefined
           }
         >
-          {options[selected]?.icon}
-          {options[selected]?.label || label}
+          {!triggerLabel && options[selected]?.icon}
+          {triggerLabel || options[selected]?.label || label}
         </span>
+        {triggerLabel && value && value !== neutralValue && (
+          <b
+            className="header-filter-count"
+            aria-label={`Critério ativo: ${options[selected]?.label || value}`}
+          >
+            1
+          </b>
+        )}
         <ChevronDown size={15} aria-hidden="true" />
       </button>
       {open && !disabled && (
