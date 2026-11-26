@@ -220,8 +220,27 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
           assert.match(html, /Ordenar clientes/);
         }
         if (path === "/gestor/") {
-          assert.match(html, /href="http:\/\/127\.0\.0\.1:3000\/"/);
+          assert.doesNotMatch(html, /class="workspace-header-actions"/);
           assert.doesNotMatch(html, /href="\/gestor\/versoes\/"/);
+        }
+        if (
+          [
+            "/gestor/vendas/",
+            "/gestor/vendas/atendimento/",
+            "/gestor/vendas/recebimentos/",
+          ].includes(path)
+        ) {
+          assert.doesNotMatch(html, /class="routine-query-toggle"/);
+          assert.doesNotMatch(html, /class="workspace-header-actions"/);
+          assert.match(html, /query-filters-compact/);
+          assert.match(
+            html,
+            /aria-label="Filtros de vendas".*?class="content-navigation-row".*?<nav[^>]*aria-label="Opções do módulo".*?<\/nav>.*?class="content-navigation-action".*?class="admin-date-range"/s,
+          );
+          assert.doesNotMatch(
+            html,
+            /Escolha uma opção\. Os resultados atualizam automaticamente\./,
+          );
         }
         if (path === "/gestor/vendas/") {
           assert.match(html, /aria-label="Opções do módulo"/);

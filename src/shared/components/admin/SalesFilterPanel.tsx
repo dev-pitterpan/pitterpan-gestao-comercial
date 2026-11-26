@@ -24,12 +24,14 @@ export default function SalesFilterPanel({
   onChange,
   finance,
   deliveries,
+  compact = false,
 }: {
   filters: SalesFilters;
   categoryDraft: string;
   onCategoryChange: (value: string) => void;
   onChange: (value: Partial<SalesFilters>) => void;
   finance: boolean;
+  compact?: boolean;
   deliveries?: { kind: string; orders: string }[];
 }) {
   const active = [
@@ -67,11 +69,18 @@ export default function SalesFilterPanel({
   }
 
   return (
-    <section className="query-filters" aria-label="Filtros de vendas">
-      <div className="query-filters-heading">
-        <strong>Filtrar pedidos</strong>
-        <span>Escolha uma opção. Os resultados atualizam automaticamente.</span>
-      </div>
+    <section
+      className={`query-filters${compact ? " query-filters-compact" : ""}`}
+      aria-label="Filtros de vendas"
+    >
+      {!compact && (
+        <div className="query-filters-heading">
+          <strong>Filtrar pedidos</strong>
+          <span>
+            Escolha uma opção. Os resultados atualizam automaticamente.
+          </span>
+        </div>
+      )}
       <div
         className={`query-filters-grid${finance ? " query-filters-finance" : ""}`}
       >
@@ -145,41 +154,43 @@ export default function SalesFilterPanel({
           />
         </div>
       </div>
-      <div className="query-filters-summary">
-        <div className="query-filter-chips" aria-label="Critérios aplicados">
-          {active.length ? (
-            active.map((item) => (
-              <button
-                key={item.key}
-                type="button"
-                onClick={() => clear(item.key)}
-                aria-label={`Remover ${item.label}`}
-              >
-                {item.label}
-                <X size={12} />
-              </button>
-            ))
-          ) : (
-            <span>Sem filtros adicionais · período mantido</span>
+      {(!compact || active.length > 0 || categoryDraft) && (
+        <div className="query-filters-summary">
+          <div className="query-filter-chips" aria-label="Critérios aplicados">
+            {active.length ? (
+              active.map((item) => (
+                <button
+                  key={item.key}
+                  type="button"
+                  onClick={() => clear(item.key)}
+                  aria-label={`Remover ${item.label}`}
+                >
+                  {item.label}
+                  <X size={12} />
+                </button>
+              ))
+            ) : (
+              <span>Sem filtros adicionais · período mantido</span>
+            )}
+          </div>
+          {(active.length > 0 || categoryDraft) && (
+            <button
+              className="query-filters-clear"
+              type="button"
+              onClick={() => {
+                onCategoryChange("");
+                onChange({
+                  category: "",
+                  delivery: "all",
+                  ...(!finance ? { status: "all", fulfillment: "all" } : {}),
+                });
+              }}
+            >
+              Limpar filtros
+            </button>
           )}
         </div>
-        {(active.length > 0 || categoryDraft) && (
-          <button
-            className="query-filters-clear"
-            type="button"
-            onClick={() => {
-              onCategoryChange("");
-              onChange({
-                category: "",
-                delivery: "all",
-                ...(!finance ? { status: "all", fulfillment: "all" } : {}),
-              });
-            }}
-          >
-            Limpar filtros
-          </button>
-        )}
-      </div>
+      )}
     </section>
   );
 }

@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useContext } from "react";
+import { createContext, useContext, type ReactNode } from "react";
 import Link, { useLinkStatus } from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { ArrowUpRight, LoaderCircle } from "lucide-react";
@@ -17,7 +17,7 @@ function Pending() {
     />
   ) : null;
 }
-export default function ContentCategories() {
+export default function ContentCategories({ action }: { action?: ReactNode }) {
   const role = useContext(ContentAccess),
     pathname = usePathname() || "",
     params = useSearchParams();
@@ -27,29 +27,37 @@ export default function ContentCategories() {
     new URLSearchParams(params),
     role,
   );
-  if (categories.length < 2) return null;
-  return (
-    <nav
-      className="content-categories"
-      aria-label={
-        commercialModule(pathname)
-          ? "Opções do módulo"
-          : "Categorias desta área"
-      }
-    >
-      {categories.map((item) => (
-        <Link
-          key={item.href}
-          href={item.href}
-          title={`Rotina ${item.code} · ${item.label}`}
-          aria-current={item.active ? "page" : undefined}
-          scroll={false}
-        >
-          <span>{item.label}</span>
-          <Pending />
-          {item.active && <ArrowUpRight size={13} aria-hidden="true" />}
-        </Link>
-      ))}
-    </nav>
+  const navigation =
+    categories.length < 2 ? null : (
+      <nav
+        className="content-categories"
+        aria-label={
+          commercialModule(pathname)
+            ? "Opções do módulo"
+            : "Categorias desta área"
+        }
+      >
+        {categories.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            title={`Rotina ${item.code} · ${item.label}`}
+            aria-current={item.active ? "page" : undefined}
+            scroll={false}
+          >
+            <span>{item.label}</span>
+            <Pending />
+            {item.active && <ArrowUpRight size={13} aria-hidden="true" />}
+          </Link>
+        ))}
+      </nav>
+    );
+  return action ? (
+    <div className="content-navigation-row">
+      {navigation}
+      <div className="content-navigation-action">{action}</div>
+    </div>
+  ) : (
+    navigation
   );
 }
