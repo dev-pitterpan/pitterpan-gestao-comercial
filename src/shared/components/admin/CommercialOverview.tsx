@@ -75,7 +75,7 @@ export default function CommercialOverview({
         {
           label: "Recebido após reembolsos",
           icon: Wallet,
-          tone: "green",
+          tone: "hero",
           value:
             data.sales.totals
               .map((row) =>
@@ -174,7 +174,7 @@ export default function CommercialOverview({
               {
                 label: "Recebido após reembolsos",
                 icon: Wallet,
-                tone: "green",
+                tone: "hero",
                 value: "—",
                 href: salesHref,
                 hint: "Aguardando sincronização",

@@ -8,8 +8,28 @@ import {
 } from "react";
 import { Pause, Play } from "lucide-react";
 
-const MotionContext = createContext(true);
-export const usePartyMotion = () => useContext(MotionContext);
+const MotionContext = createContext({ motion: true, toggle: () => {} });
+export const usePartyMotion = () => useContext(MotionContext).motion;
+
+export function PartyMotionControl() {
+  const { motion, toggle } = useContext(MotionContext);
+  return (
+    <button
+      className="party-motion-control"
+      type="button"
+      onClick={toggle}
+      aria-pressed={!motion}
+      aria-label={
+        motion
+          ? "Desativar animações decorativas do painel"
+          : "Ativar animações decorativas do painel"
+      }
+    >
+      {motion ? <Pause size={14} /> : <Play size={14} />}
+      <span>Efeitos {motion ? "ativos" : "pausados"}</span>
+    </button>
+  );
+}
 
 /** A single preference controls the decorative layer; it never wraps business handlers. */
 export default function PartyExperience({
@@ -39,29 +59,12 @@ export default function PartyExperience({
     });
   }
   return (
-    <MotionContext.Provider value={motion}>
+    <MotionContext.Provider value={{ motion, toggle }}>
       <div
         className={`admin-app ${className}`}
         data-party-motion={motion ? "on" : "off"}
       >
         {children}
-        <button
-          className="party-motion-control"
-          type="button"
-          onClick={toggle}
-          aria-pressed={!motion}
-          aria-label={
-            motion
-              ? "Desativar animações decorativas do painel"
-              : "Ativar animações decorativas do painel"
-          }
-          title={
-            motion ? "Pausar efeitos decorativos" : "Ativar efeitos decorativos"
-          }
-        >
-          {motion ? <Pause size={14} /> : <Play size={14} />}
-          <span>Efeitos {motion ? "ativos" : "pausados"}</span>
-        </button>
       </div>
     </MotionContext.Provider>
   );

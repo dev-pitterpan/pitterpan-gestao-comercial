@@ -2254,20 +2254,15 @@
 }
 
 .party-motion-control {
-  position: fixed;
-  right: 18px;
-  bottom: 12px;
-  z-index: 15;
-  display: flex;
+  display: inline-flex;
   gap: 6px;
   align-items: center;
-  min-height: 36px;
-  padding: 7px 11px;
-  border: 1px solid #d7e0ef;
-  border-radius: 20px;
-  color: #023661;
-  background: #fffffff2;
-  box-shadow: 0 3px 14px #02366112;
+  min-height: 30px;
+  padding: 5px 8px;
+  border: 1px solid var(--admin-line);
+  border-radius: 8px;
+  color: var(--admin-blue);
+  background: #fff;
   cursor: pointer;
   font: inherit;
   font-size: 10px;
@@ -2303,9 +2298,7 @@
 }
 @media (max-width: 700px) {
   .party-motion-control {
-    bottom: 8px;
-    right: 8px;
-    min-height: 44px;
+    min-height: 40px;
   }
   .party-motion-control span {
     display: none;

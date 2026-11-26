@@ -1,22 +1,4 @@
 /* Content system: only the working canvas changes. Sidebar geometry and styling stay in workspace.css. */
-.admin-app.workspace-shell .workspace-main {
-  --admin-blue: #76828e;
-  --admin-blue-soft: #f6f6f6;
-  --admin-teal: #023661;
-  --admin-teal-soft: #f0f0f0;
-  --admin-green: #023661;
-  --admin-green-soft: #f0f0f0;
-  --admin-coral: #c4473d;
-  --admin-coral-soft: #f8f8f8;
-  --admin-amber: #c4473d;
-  --admin-amber-soft: #f2f2f2;
-  --admin-ink: #023661;
-  --admin-muted: #023661;
-  --admin-line: #ececec;
-  --admin-bg: #fafafa;
-  background: var(--admin-bg);
-  color: var(--admin-ink);
-}
 .admin-app.workspace-shell .workspace-main .admin-content {
   padding: 28px 30px;
   max-width: 1800px;
