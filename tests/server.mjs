@@ -310,6 +310,14 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
       assert.match(filteredSummaryHtml, /aria-label="Filtros de vendas"/);
       assert.match(filteredSummaryHtml, /title="Categoria do produto: baloes"/);
       assert.match(filteredSummaryHtml, /title="Situação do pagamento: Pagos"/);
+      assert.match(
+        filteredSummaryHtml,
+        /class="header-filter-text">Pagamento.*?<strong[^>]*>Pagos<\/strong>/s,
+      );
+      assert.match(
+        filteredSummaryHtml,
+        /class="header-filter-text">Categoria do produto.*?<strong[^>]*>baloes<\/strong>/s,
+      );
       const scopedFinance = await get(
         "/gestor/vendas/recebimentos/?fulfillment=AWAITING&category=baloes",
         { headers: { cookie } },
@@ -373,7 +381,7 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
       const offersPage = await get("/gestor/ofertas/", { headers: { cookie } });
       assert.equal(offersPage.status, 200);
       const offersHtml = await offersPage.text();
-      assert.match(offersHtml, /class="admin-products-orderbar"/);
+      assert.match(offersHtml, /class="admin-products-resultsbar"/);
       assert.match(offersHtml, /aria-label="Ordenar ofertas"/);
       assert.match(
         offersHtml,
@@ -392,6 +400,18 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
       });
       assert.equal(productPage.status, 200);
       const productHtml = await productPage.text();
+      const exportLink = productHtml.match(
+        /class="admin-products-resultsbar".*?href="([^"]+)" download="" title="Exportar resultados filtrados"/s,
+      )?.[1];
+      assert.ok(exportLink);
+      const exportPath = exportLink.replaceAll("&amp;", "&");
+      const exportParams = new URL(exportPath, base).searchParams;
+      assert.equal(exportParams.get("q"), "a");
+      assert.equal(exportParams.get("format"), "csv");
+      assert.equal(exportParams.has("page"), false);
+      const csv = await get(exportPath, { headers: { cookie } });
+      assert.equal(csv.status, 200);
+      assert.match(csv.headers.get("content-type"), /text\/csv/);
       const pager = productHtml.match(
         /<nav class="admin-table-pagination"[^>]*>.*?<\/nav>/s,
       )?.[0];

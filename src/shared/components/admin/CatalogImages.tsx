@@ -134,7 +134,6 @@ export default function CatalogImages() {
             <HeaderFilterGroup
               inline
               label="Produto ou SKU"
-              activeCount={query ? 1 : 0}
               activeValue={query}
             >
               <form

@@ -9,19 +9,18 @@ import useDatePopover from "./useDatePopover";
 export default function HeaderFilterGroup({
   label,
   children,
-  activeCount = 0,
   activeValue,
   width = 340,
   inline = false,
 }: {
   label: string;
   children: ReactNode;
-  activeCount?: number;
   activeValue?: string;
   width?: number;
   inline?: boolean;
 }) {
   const id = useId();
+  const valueId = `${id}-value`;
   const pathname = usePathname();
   const trigger = useRef<HTMLButtonElement>(null);
   const panel = useRef<HTMLDivElement>(null);
@@ -48,16 +47,21 @@ export default function HeaderFilterGroup({
       aria-haspopup="dialog"
       aria-controls={id}
       aria-expanded={open}
-      data-filter-active={activeCount > 0 ? "true" : undefined}
+      aria-label={label}
+      aria-describedby={activeValue ? valueId : undefined}
+      data-filter-active={activeValue ? "true" : undefined}
       title={activeValue ? `${label}: ${activeValue}` : undefined}
       onClick={() => setOpen((value) => !value)}
     >
-      {label}
-      {activeCount > 0 && (
-        <b aria-label={activeValue || `Critérios ativos: ${activeCount}`}>
-          {activeCount}
-        </b>
-      )}
+      <span className="header-filter-text">
+        {label}
+        {activeValue && (
+          <>
+            {": "}
+            <strong id={valueId}>{activeValue}</strong>
+          </>
+        )}
+      </span>
       <ChevronDown size={14} aria-hidden="true" />
     </button>
   );

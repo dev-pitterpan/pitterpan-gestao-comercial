@@ -1,3 +1,4 @@
+import { Download } from "lucide-react";
 import {
   ADMIN_PRODUCT_PAGE_SIZE,
   adminContext,
@@ -35,10 +36,11 @@ export default async function ProductsPage({
       : mode === "offers"
         ? "/gestor/ofertas/"
         : "/gestor/produtos/";
+  const { page: _currentPage, ...filters } = query;
   const pageHref = (page: number) => {
-    const { page: _currentPage, ...filters } = query;
     return `${base}?${new URLSearchParams({ ...filters, page: String(page) })}`;
   };
+  const exportHref = `/api/admin/products/?${new URLSearchParams({ ...filters, format: "csv" })}`;
   const offset = (result.page - 1) * ADMIN_PRODUCT_PAGE_SIZE;
   return (
     <AutoFilterForm action={base} className="admin-products-form">
@@ -58,11 +60,7 @@ export default async function ProductsPage({
               : "Encontre produtos por nome, SKU ou marca e consulte os detalhes da sua seleção."
         }
       />
-      <ProductFilters
-        query={query}
-        canExport={result.products.length > 0}
-        sortable={mode === "offers"}
-      />
+      <ProductFilters query={query} sortable={mode === "offers"} />
       <DataNotice context={context} />
       {mode === "stock" && (
         <div className="admin-mini-stats">
@@ -80,9 +78,28 @@ export default async function ProductsPage({
         </div>
       )}
       <section className="admin-panel admin-product-panel">
-        {mode === "offers" && (
-          <div className="admin-products-orderbar">
-            <span>{number(result.total)} ofertas encontradas</span>
+        {(mode === "offers" || result.products.length > 0) && (
+          <div className="admin-products-resultsbar">
+            <span>
+              {number(result.total)}{" "}
+              {mode === "offers"
+                ? result.total === 1
+                  ? "oferta encontrada"
+                  : "ofertas encontradas"
+                : result.total === 1
+                  ? "produto encontrado"
+                  : "produtos encontrados"}
+            </span>
+            {result.products.length > 0 && (
+              <a
+                className="admin-button"
+                href={exportHref}
+                download
+                title="Exportar resultados filtrados"
+              >
+                <Download size={16} aria-hidden="true" /> Exportar CSV
+              </a>
+            )}
           </div>
         )}
         <ProductList

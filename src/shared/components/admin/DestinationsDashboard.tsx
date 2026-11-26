@@ -273,12 +273,7 @@ export default function DestinationsDashboard() {
               { value: "UNFULFILLED", label: "Atendimento pendente" },
             ]}
           />
-          <HeaderFilterGroup
-            inline
-            label="Buscar destino"
-            activeCount={search ? 1 : 0}
-            activeValue={search}
-          >
+          <HeaderFilterGroup inline label="Buscar destino" activeValue={search}>
             <input
               id="delivery-search"
               type="search"
