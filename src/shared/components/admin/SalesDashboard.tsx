@@ -1,5 +1,4 @@
 "use client";
-import FilterDisclosure from "./FilterDisclosure";
 import { PageHeading } from "./Primitives";
 import SalesFilterPanel from "./SalesFilterPanel";
 import ShopifySummary from "./ShopifySummary";
@@ -397,6 +396,27 @@ export default function SalesDashboard({
         title={title}
         description={description}
         compactFilters={false}
+        activeFilterCount={
+          [
+            !finance && filters.status !== "all",
+            !!filters.category,
+            !!filters.delivery && filters.delivery !== "all",
+            !finance && !!filters.fulfillment && filters.fulfillment !== "all",
+          ].filter(Boolean).length
+        }
+        additionalFilters={
+          <SalesFilterPanel
+            filters={filters}
+            categoryDraft={categoryDraft}
+            onCategoryChange={setCategoryDraft}
+            finance={finance}
+            deliveries={data?.deliveries}
+            onChange={(patch) => {
+              resetList();
+              setFilters((old) => ({ ...old, ...patch }));
+            }}
+          />
+        }
         filters={
           <div className="sales-toolbar">
             <div className="sales-period-field">
@@ -420,34 +440,12 @@ export default function SalesDashboard({
                 disabled={syncing}
               >
                 <RefreshCw size={16} className={syncing ? "sales-spin" : ""} />
-                {syncing ? "Sincronizando…" : "Sincronizar pedidos"}
+                {syncing ? "Sincronizando…" : "Atualizar pedidos"}
               </button>
             )}
           </div>
         }
       />
-      <FilterDisclosure
-        activeCount={
-          [
-            !finance && filters.status !== "all",
-            !!filters.category,
-            !!filters.delivery && filters.delivery !== "all",
-            !finance && !!filters.fulfillment && filters.fulfillment !== "all",
-          ].filter(Boolean).length
-        }
-      >
-        <SalesFilterPanel
-          filters={filters}
-          categoryDraft={categoryDraft}
-          onCategoryChange={setCategoryDraft}
-          finance={finance}
-          deliveries={data?.deliveries}
-          onChange={(patch) => {
-            resetList();
-            setFilters((old) => ({ ...old, ...patch }));
-          }}
-        />
-      </FilterDisclosure>
       {finance && (
         <details className="sales-methodology">
           <summary>Como os valores são calculados</summary>
@@ -666,13 +664,11 @@ export default function SalesDashboard({
                               )}
                             </time>
                           </small>
-                          {finance && (
-                            <OrderFulfillmentDetails
-                              id={o.id}
-                              name={o.name}
-                              storedStatus={o.fulfillment_status}
-                            />
-                          )}
+                          <OrderFulfillmentDetails
+                            id={o.id}
+                            name={o.name}
+                            storedStatus={o.fulfillment_status}
+                          />
                         </td>
                         <td className="order-products-cell">
                           <OrderProductPreview
@@ -714,11 +710,6 @@ export default function SalesDashboard({
                                 {fulfillmentLabels[o.fulfillment_status] ||
                                   o.fulfillment_status}
                               </small>
-                              <OrderFulfillmentDetails
-                                id={o.id}
-                                name={o.name}
-                                storedStatus={o.fulfillment_status}
-                              />
                             </td>
                             <td>
                               {money(o.total, o.currency)}

@@ -241,19 +241,15 @@ export default function DashboardShell({
               </strong>
             </div>
           </div>
-          <div
-            className="workspace-routine-controls"
-            id="workspace-routine-controls"
-          />
           <div className="workspace-header-actions">
             {allowed(user.role, operationalRoles) && (
               <Link
                 className="workspace-sync-link"
                 href="/gestor/sincronizacoes/"
-                title="Sincronizações"
+                title="Central de sincronizações"
+                aria-label="Central de sincronizações"
               >
                 <RefreshCw size={16} />
-                <span>Sincronizar</span>
               </Link>
             )}
             <Link

@@ -56,24 +56,24 @@ export function ProductFilters({
         />
       </label>
       {query.offers === "1" && <input type="hidden" name="offers" value="1" />}
-      <label className="workspace-filter-label" htmlFor="stock-filter">
-        Situação de estoque
-      </label>
-      <AdminSelect
-        id="stock-filter"
-        name="stock"
-        value={stock}
-        label="Situação de estoque"
-        onValueChange={(value) => setStock(value as AdminQuery["stock"])}
-        options={[
-          { value: "all", label: "Todo o estoque" },
-          { value: "low", label: "Estoque baixo" },
-          { value: "above", label: "Acima do estoque baixo" },
-          { value: "high", label: "Estoque alto" },
-          { value: "out", label: "Sem estoque" },
-          { value: "unknown", label: "Não informado" },
-        ]}
-      />
+      <div className="workspace-filter-label">
+        <label htmlFor="stock-filter">Situação de estoque</label>
+        <AdminSelect
+          id="stock-filter"
+          name="stock"
+          value={stock}
+          label="Situação de estoque"
+          onValueChange={(value) => setStock(value as AdminQuery["stock"])}
+          options={[
+            { value: "all", label: "Todo o estoque" },
+            { value: "low", label: "Estoque baixo" },
+            { value: "above", label: "Acima do estoque baixo" },
+            { value: "high", label: "Estoque alto" },
+            { value: "out", label: "Sem estoque" },
+            { value: "unknown", label: "Não informado" },
+          ]}
+        />
+      </div>
       {canExport && (
         <a className="admin-button" href={exportHref} download>
           <Download size={16} /> Exportar resultados filtrados
