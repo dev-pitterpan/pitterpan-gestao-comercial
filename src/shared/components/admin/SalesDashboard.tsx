@@ -22,6 +22,7 @@ import OrderCustomer from "./OrderCustomer";
 import OrderCustomerRefresh from "./OrderCustomerRefresh";
 import ShippingCharge from "./ShippingCharge";
 import DeliveryMark from "./DeliveryMark";
+import OrderProductPreview from "./OrderProductPreview";
 import DragScroll from "./DragScroll";
 import PitterSpinner from "./PitterSpinner";
 import { shiftDate, todayDate } from "../../lib/admin/date-range";
@@ -615,6 +616,7 @@ export default function SalesDashboard({
                   <thead>
                     <tr>
                       <th>Pedido</th>
+                      <th>Produtos</th>
                       <th>Cliente</th>
                       <th>Situação</th>
                       {!finance && <th>Entrega escolhida</th>}
@@ -627,7 +629,7 @@ export default function SalesDashboard({
                   <tbody>
                     {!data.orders.length && (
                       <tr>
-                        <td colSpan={finance ? 6 : 8}>
+                        <td colSpan={finance ? 7 : 9}>
                           Nenhum pedido importado corresponde aos filtros
                           escolhidos.
                         </td>
@@ -665,6 +667,15 @@ export default function SalesDashboard({
                               storedStatus={o.fulfillment_status}
                             />
                           )}
+                        </td>
+                        <td className="order-products-cell">
+                          <OrderProductPreview
+                            products={data.orderPreviews[o.id]?.products ?? []}
+                            itemCount={
+                              data.orderPreviews[o.id]?.item_count ?? "0"
+                            }
+                            units={data.orderPreviews[o.id]?.units ?? "0"}
+                          />
                         </td>
                         <td>
                           <OrderCustomer order={o} />

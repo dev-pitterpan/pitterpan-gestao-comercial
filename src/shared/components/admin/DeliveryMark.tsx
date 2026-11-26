@@ -13,6 +13,12 @@ export default function DeliveryMark({
   const safe = Object.prototype.hasOwnProperty.call(deliveryLabels, kind)
     ? (kind as DeliveryKind)
     : "UNKNOWN";
+  const truck =
+    safe === "SEDEX"
+      ? { body: "#f5c400", cab: "#1262ab", text: "#023661" }
+      : safe === "PAC"
+        ? { body: "#4b91d1", cab: "#023661", text: "#ffffff" }
+        : { body: "#d84443", cab: "#79252a", text: "#ffffff" };
   return (
     <span
       className={`delivery-mark delivery-mark--${safe.toLowerCase()}`}
@@ -23,7 +29,12 @@ export default function DeliveryMark({
       }
     >
       {safe === "MOTOBOY" ? (
-        <svg viewBox="0 0 64 44" fill="none" aria-hidden="true">
+        <svg
+          viewBox="0 0 64 44"
+          fill="none"
+          style={{ color: "#c4473d" }}
+          aria-hidden="true"
+        >
           <circle cx="13" cy="32" r="9" stroke="currentColor" strokeWidth="4" />
           <circle cx="51" cy="32" r="9" stroke="currentColor" strokeWidth="4" />
           <path
@@ -39,25 +50,22 @@ export default function DeliveryMark({
             width="14"
             height="13"
             rx="3"
-            fill="#76828e"
+            fill="#f4bb42"
             stroke="currentColor"
             strokeWidth="2"
           />
         </svg>
       ) : safe === "SEDEX" || safe === "PAC" || safe === "JADLOG" ? (
         <svg viewBox="0 0 76 44" aria-hidden="true">
-          <path
-            d="M4 8H49V32H4Z"
-            fill={safe === "JADLOG" ? "#dce8f5" : "#76828e"}
-          />
-          <path d="M49 17H61L71 27V33H49Z" fill="#023661" />
+          <path d="M4 8H49V32H4Z" fill={truck.body} />
+          <path d="M49 17H61L71 27V33H49Z" fill={truck.cab} />
           <path d="M53 19H59L65 26H53Z" fill="#f3f3f3" />
           <circle cx="17" cy="34" r="7" fill="#023661" />
           <circle cx="59" cy="34" r="7" fill="#023661" />
           <text
             x="26"
             y="24"
-            fill="#023661"
+            fill={truck.text}
             fontSize="10"
             fontWeight="800"
             textAnchor="middle"
@@ -80,14 +88,14 @@ export default function DeliveryMark({
           />
           <path
             d="M18 12h28l9 14v5a6 6 0 0 1-12 0 5.5 5.5 0 0 1-11 0 5.5 5.5 0 0 1-11 0 6 6 0 0 1-12 0v-5l9-14Z"
-            fill="#aeaeae"
+            fill="#f4bb42"
             stroke="#023661"
             strokeWidth="3"
             strokeLinejoin="round"
           />
           <path
             d="m25 14-4 12v4a5.5 5.5 0 0 0 11 0V14h-7Zm14 0 4 12v4a6 6 0 0 0 12 0v-3l-8-13h-8Z"
-            fill="#e2e2e2"
+            fill="#fff0bf"
           />
           <path d="M9 26h46" stroke="#023661" strokeWidth="2" />
           <rect
@@ -107,7 +115,7 @@ export default function DeliveryMark({
             strokeWidth="2"
             strokeLinejoin="round"
           />
-          <circle cx="41" cy="49" r="1.2" fill="#e2e2e2" />
+          <circle cx="41" cy="49" r="1.2" fill="#fff0bf" />
           <path
             d="M9 56h46"
             stroke="#023661"
@@ -137,7 +145,7 @@ export default function DeliveryMark({
         <svg viewBox="0 0 48 40" fill="none" aria-hidden="true">
           <path
             d="m8 13 16-8 16 8v15l-16 8-16-8V13Z"
-            fill="#dedede"
+            fill="#fce8bf"
             stroke="#c4473d"
             strokeWidth="2.6"
             strokeLinejoin="round"
@@ -157,7 +165,7 @@ export default function DeliveryMark({
             width="30"
             height="28"
             rx="8"
-            fill="#f3f3f3"
+            fill="#deedf9"
             stroke="#023661"
             strokeWidth="2.4"
           />

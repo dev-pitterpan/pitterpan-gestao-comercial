@@ -12,6 +12,8 @@ import {
   readSales,
   readSoldProducts,
 } from "@shared/server/sales/repository";
+import { fillQueueLivePhotos } from "@shared/server/sales/product-photos";
+import { cachedShopifyClient } from "@shared/server/shopify/cached-client";
 import { syncSalesPage } from "@shared/server/sales/sync";
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -69,59 +71,84 @@ export async function GET(request: Request) {
   }
   try {
     const db = await database().connect();
-    try {
-      await db.query("BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY");
-      const data =
-        url.searchParams.get("view") === "operations"
-          ? await readSalesOperations(
-              db,
-              salesConfig().SHOPIFY_SALES_STORE_DOMAIN,
-              days,
-              parsed.data,
-            )
-          : url.searchParams.get("view") === "sold-products"
-            ? await readSoldProducts(
+    const data = await (async () => {
+      try {
+        await db.query("BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY");
+        const data =
+          url.searchParams.get("view") === "operations"
+            ? await readSalesOperations(
                 db,
                 salesConfig().SHOPIFY_SALES_STORE_DOMAIN,
                 days,
                 parsed.data,
-                productPage,
-                productSearch,
               )
-            : url.searchParams.get("view") === "finance"
-              ? await readSalesFinance(
+            : url.searchParams.get("view") === "sold-products"
+              ? await readSoldProducts(
                   db,
                   salesConfig().SHOPIFY_SALES_STORE_DOMAIN,
                   days,
                   parsed.data,
+                  productPage,
+                  productSearch,
                 )
-              : url.searchParams.get("view") === "orders"
-                ? await readSalesOrders(
+              : url.searchParams.get("view") === "finance"
+                ? await readSalesFinance(
                     db,
                     salesConfig().SHOPIFY_SALES_STORE_DOMAIN,
                     days,
                     parsed.data,
-                    orderCursor,
                   )
-                : await readSales(
-                    db,
-                    salesConfig().SHOPIFY_SALES_STORE_DOMAIN,
-                    days,
-                    after,
-                    parsed.data,
-                    {
-                      includeRanking: url.searchParams.get("ranking") !== "0",
-                      includeDaily: url.searchParams.get("daily") === "1",
-                    },
-                  );
-      await db.query("COMMIT");
-      return Response.json(data, { headers: { "Cache-Control": "no-store" } });
-    } catch (error) {
-      await db.query("ROLLBACK");
-      throw error;
-    } finally {
-      db.release();
+                : url.searchParams.get("view") === "orders"
+                  ? await readSalesOrders(
+                      db,
+                      salesConfig().SHOPIFY_SALES_STORE_DOMAIN,
+                      days,
+                      parsed.data,
+                      orderCursor,
+                    )
+                  : await readSales(
+                      db,
+                      salesConfig().SHOPIFY_SALES_STORE_DOMAIN,
+                      days,
+                      after,
+                      parsed.data,
+                      {
+                        includeRanking: url.searchParams.get("ranking") !== "0",
+                        includeDaily: url.searchParams.get("daily") === "1",
+                      },
+                    );
+        await db.query("COMMIT");
+        return data;
+      } catch (error) {
+        await db.query("ROLLBACK");
+        throw error;
+      } finally {
+        db.release();
+      }
+    })();
+    // Optional photo lookup runs after releasing the transaction and cannot block orders on failure.
+    if (
+      "orderPreviews" in data &&
+      process.env.CATALOG_DATA_SOURCE === "shopify" &&
+      process.env.SHOPIFY_STORE_DOMAIN ===
+        salesConfig().SHOPIFY_SALES_STORE_DOMAIN
+    ) {
+      const missing = Object.values(data.orderPreviews)
+        .flatMap((order) => order.products)
+        .filter((product) => !product.image_url);
+      if (missing.length)
+        try {
+          await fillQueueLivePhotos(
+            missing,
+            cachedShopifyClient({ timeoutMs: 2500 }),
+          );
+        } catch {
+          console.warn(
+            "Fotos dos pedidos: exibindo imagens importadas disponíveis.",
+          );
+        }
     }
+    return Response.json(data, { headers: { "Cache-Control": "no-store" } });
   } catch {
     return unavailable();
   }
