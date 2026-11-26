@@ -7,7 +7,7 @@ import {
 import { DataNotice, PageHeading, number } from "./Primitives";
 import AutoFilterForm from "./AutoFilterForm";
 import TablePagination from "./TablePagination";
-import ProductList, { ProductFilters, ProductOrder } from "./ProductList";
+import ProductList, { ProductFilters } from "./ProductList";
 import "./product-order.css";
 export default async function ProductsPage({
   searchParams,
@@ -58,7 +58,11 @@ export default async function ProductsPage({
               : "Encontre produtos por nome, SKU ou marca e consulte os detalhes da sua seleção."
         }
       />
-      <ProductFilters query={query} canExport={result.products.length > 0} />
+      <ProductFilters
+        query={query}
+        canExport={result.products.length > 0}
+        sortable={mode === "offers"}
+      />
       <DataNotice context={context} />
       {mode === "stock" && (
         <div className="admin-mini-stats">
@@ -79,7 +83,6 @@ export default async function ProductsPage({
         {mode === "offers" && (
           <div className="admin-products-orderbar">
             <span>{number(result.total)} ofertas encontradas</span>
-            <ProductOrder sort={query.sort} />
           </div>
         )}
         <ProductList

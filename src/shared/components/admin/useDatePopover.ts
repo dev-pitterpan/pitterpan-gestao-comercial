@@ -7,6 +7,7 @@ export default function useDatePopover(
   trigger: RefObject<HTMLButtonElement | null>,
   panelRef: RefObject<HTMLDivElement | null>,
   maxWidth: number,
+  maxHeight = Number.POSITIVE_INFINITY,
 ) {
   useLayoutEffect(() => {
     const panel = panelRef.current;
@@ -23,7 +24,9 @@ export default function useDatePopover(
       const viewportTop = viewport?.offsetTop ?? 0;
       const viewportWidth = viewport?.width ?? window.innerWidth;
       const viewportHeight = viewport?.height ?? window.innerHeight;
-      const main = button.closest("main")?.getBoundingClientRect();
+      const main = button
+        .closest(".workspace-main, main")
+        ?.getBoundingClientRect();
       const leftEdge =
         Math.max(
           viewportLeft,
@@ -34,7 +37,7 @@ export default function useDatePopover(
       const bottomEdge = viewportTop + viewportHeight - inset;
       const width = Math.min(maxWidth, Math.max(0, rightEdge - leftEdge));
       panel.style.width = `${width}px`;
-      panel.style.maxHeight = `${Math.max(0, bottomEdge - topEdge)}px`;
+      panel.style.maxHeight = `${Math.max(0, Math.min(maxHeight, bottomEdge - topEdge))}px`;
       const height = panel.offsetHeight;
       const below = rect.bottom + gap;
       const above = rect.top - gap - height;
@@ -58,5 +61,5 @@ export default function useDatePopover(
       viewport?.removeEventListener("scroll", place);
       panel.hidePopover?.();
     };
-  }, [open, panelRef, trigger, maxWidth]);
+  }, [open, panelRef, trigger, maxWidth, maxHeight]);
 }

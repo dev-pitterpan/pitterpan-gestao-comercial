@@ -172,7 +172,6 @@ export default function AnalyticsDashboard({
         eyebrow="Análises Shopify"
         title={title}
         description={description}
-        compactFilters={false}
         filters={
           <div className="insights-filters">
             <DateRangePicker

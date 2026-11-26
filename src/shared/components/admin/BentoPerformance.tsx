@@ -8,13 +8,14 @@ import BentoComposition from "./BentoComposition";
 import BentoActivity from "./BentoActivity";
 import { summaryDailyRows } from "../../lib/admin/sales-summary";
 import { salesPageLink } from "../../lib/admin/sales-links";
-import type { readSalesFinance } from "../../server/sales/repository";
+import type { readCommercialOverview } from "../../server/sales/repository";
 import "../../styles/admin/bento-summary.css";
 export default function BentoPerformance({
-  sales,
+  data,
 }: {
-  sales: Awaited<ReturnType<typeof readSalesFinance>>;
+  data: Awaited<ReturnType<typeof readCommercialOverview>>;
 }) {
+  const { sales, previousDaily, previousWindow, ranking } = data;
   const [selected, setCurrency] = useState("BRL");
   const total =
     sales.totals.find((row) => row.currency === selected) ?? sales.totals[0];
@@ -29,27 +30,37 @@ export default function BentoPerformance({
       </section>
     );
   const currency = total.currency;
-  const money = (value: string) =>
-    new Intl.NumberFormat("pt-BR", { style: "currency", currency }).format(
-      Number(value),
-    );
-  const rows = summaryDailyRows({
-    daily: sales.daily,
+  const normalized = {
     currency,
-    ...sales.window,
     completedAt: sales.state?.completed_at,
     importing: !!sales.state?.until_at,
+  };
+  const rows = summaryDailyRows({
+    ...normalized,
+    ...sales.window,
+    daily: sales.daily,
   });
+  const previous = previousDaily
+    ? summaryDailyRows({
+        ...normalized,
+        ...previousWindow,
+        daily: previousDaily,
+      })
+    : undefined;
+  const largest = Math.max(
+    1,
+    ...ranking.map((product) => Number(product.units)),
+  );
+  const count = new Intl.NumberFormat("pt-BR");
   const params = new URLSearchParams(sales.window);
   const receipts = salesPageLink("/gestor/vendas/recebimentos/", params);
   return (
     <section
-      className="bento-summary reference-sheet"
+      className="bento-summary overview-performance"
       aria-label="Desempenho comercial em bento"
       id="workspace-performance"
     >
       <div className="bento-context">
-        <span>Desempenho da Shopify · {currency}</span>
         {sales.totals.length > 1 && (
           <AdminSelect
             label="Moeda do desempenho"
@@ -66,6 +77,7 @@ export default function BentoPerformance({
         <BentoRevenueChart
           key={currency}
           rows={rows}
+          previous={previous}
           currency={currency}
           received={total.received}
           net={total.net}
@@ -76,42 +88,42 @@ export default function BentoPerformance({
           refunded={total.refunded}
           net={total.net}
           href={receipts}
+          variant="bar"
         />
+        <section className="bento-tile overview-product-ranking">
+          <header>
+            <h2>Produtos mais vendidos</h2>
+            <Link href={salesPageLink("/gestor/produtos-vendidos/", params)}>
+              Ver ranking <ArrowUpRight size={15} />
+            </Link>
+          </header>
+          {ranking.length ? (
+            <ol>
+              {ranking.map((product) => (
+                <li key={product.id}>
+                  <div>
+                    <span>{product.title}</span>
+                    <strong>{count.format(Number(product.units))} un.</strong>
+                  </div>
+                  <span className="overview-ranking-track" aria-hidden="true">
+                    <i
+                      style={{
+                        width: `${(100 * Number(product.units)) / largest}%`,
+                      }}
+                    />
+                  </span>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p>Sem produtos vendidos no período.</p>
+          )}
+        </section>
         <BentoActivity
           key={`calendar-${currency}`}
           rows={rows}
           currency={currency}
         />
-        <section className="bento-tile bento-balance">
-          <header>
-            <div>
-              <span className="bento-eyebrow">CONFERÊNCIA</span>
-              <h2>Resultado dos pedidos</h2>
-            </div>
-            <ArrowUpRight size={17} />
-          </header>
-          <dl>
-            <div>
-              <dt>Recebido</dt>
-              <dd>{money(total.received)}</dd>
-            </div>
-            <div>
-              <dt>− Reembolsado</dt>
-              <dd>{money(total.refunded)}</dd>
-            </div>
-            <div>
-              <dt>= Líquido</dt>
-              <dd>{money(total.net)}</dd>
-            </div>
-          </dl>
-          <Link href={salesPageLink("/gestor/vendas/resumo/", params)}>
-            Explorar resumo comercial <ArrowUpRight size={15} />
-          </Link>
-          <p className="bento-balance-note">
-            Data dos pedidos · Brasília. O líquido não deduz custos e não
-            representa lucro.
-          </p>
-        </section>
       </div>
     </section>
   );

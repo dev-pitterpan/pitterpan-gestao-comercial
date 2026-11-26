@@ -10,12 +10,14 @@ export default function HeaderFilterGroup({
   label,
   children,
   activeCount = 0,
+  activeValue,
   width = 340,
   inline = false,
 }: {
   label: string;
   children: ReactNode;
   activeCount?: number;
+  activeValue?: string;
   width?: number;
   inline?: boolean;
 }) {
@@ -28,7 +30,7 @@ export default function HeaderFilterGroup({
   useDatePopover(open, trigger, panel, width);
   useEffect(() => {
     if (!inline) setTarget(document.getElementById("workspace-header-query"));
-  }, [inline]);
+  }, [inline, pathname]);
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
@@ -46,11 +48,15 @@ export default function HeaderFilterGroup({
       aria-haspopup="dialog"
       aria-controls={id}
       aria-expanded={open}
+      data-filter-active={activeCount > 0 ? "true" : undefined}
+      title={activeValue ? `${label}: ${activeValue}` : undefined}
       onClick={() => setOpen((value) => !value)}
     >
       {label}
       {activeCount > 0 && (
-        <b aria-label={`Critérios ativos: ${activeCount}`}>{activeCount}</b>
+        <b aria-label={activeValue || `Critérios ativos: ${activeCount}`}>
+          {activeCount}
+        </b>
       )}
       <ChevronDown size={14} aria-hidden="true" />
     </button>
@@ -67,6 +73,10 @@ export default function HeaderFilterGroup({
         className="header-filter-popover"
         onToggle={(event) => {
           if (!event.currentTarget.matches(":popover-open")) setOpen(false);
+        }}
+        onSubmit={() => {
+          setOpen(false);
+          trigger.current?.focus();
         }}
         onChange={(event) => {
           if (

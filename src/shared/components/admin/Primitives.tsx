@@ -1,7 +1,6 @@
 import Link from "next/link";
 import ContentCategories from "./ContentCategories";
 import RoutineIdentifier from "./RoutineIdentifier";
-import FilterDisclosure from "./FilterDisclosure";
 import WorkspaceQueryControls from "./WorkspaceQueryControls";
 import {
   ArrowUpRight,
@@ -21,7 +20,6 @@ export function PageHeading({
   description,
   action,
   filters,
-  compactFilters = true,
   navigationAction,
 }: {
   eyebrow?: string;
@@ -29,7 +27,6 @@ export function PageHeading({
   description?: string;
   action?: React.ReactNode;
   filters?: React.ReactNode;
-  compactFilters?: boolean;
   navigationAction?: React.ReactNode;
 }) {
   return (
@@ -45,12 +42,7 @@ export function PageHeading({
         </div>
         {action && <div className="admin-page-heading-controls">{action}</div>}
       </header>
-      {filters &&
-        (compactFilters ? (
-          <FilterDisclosure>{filters}</FilterDisclosure>
-        ) : (
-          <WorkspaceQueryControls>{filters}</WorkspaceQueryControls>
-        ))}
+      {filters && <WorkspaceQueryControls>{filters}</WorkspaceQueryControls>}
       <ContentCategories action={navigationAction} />
     </>
   );

@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { Check, ChevronDown } from "lucide-react";
+import useDatePopover from "./useDatePopover";
 import { useAutoFilter } from "./AutoFilterForm";
 type Option = {
   value: string;
@@ -32,8 +33,11 @@ export default function AdminSelect({
   const listId = useId();
   const root = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
+  const menu = useRef<HTMLDivElement>(null);
+  const headerMenu = Boolean(triggerLabel);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
+  useDatePopover(open && headerMenu && !disabled, trigger, menu, 320, 320);
   const autoFilter = useAutoFilter();
   const selected = options.findIndex((option) => option.value === value);
   useEffect(() => {
@@ -78,6 +82,7 @@ export default function AdminSelect({
             ? `${label}: ${options[selected]?.label || value}`
             : undefined
         }
+        data-header-filter={headerMenu || undefined}
         data-filter-active={
           triggerLabel && value && value !== neutralValue ? "true" : undefined
         }
@@ -138,7 +143,13 @@ export default function AdminSelect({
       </button>
       {open && !disabled && (
         <div
-          className="admin-select-menu"
+          ref={menu}
+          className={`admin-select-menu${headerMenu ? " header-select-menu" : ""}`}
+          popover={headerMenu ? "auto" : undefined}
+          onToggle={(event) => {
+            if (headerMenu && !event.currentTarget.matches(":popover-open"))
+              setOpen(false);
+          }}
           role="listbox"
           id={listId}
           aria-label={label}

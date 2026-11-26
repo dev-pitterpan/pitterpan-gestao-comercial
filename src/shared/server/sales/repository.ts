@@ -590,6 +590,7 @@ export async function readCommercialOverview(
   return {
     sales,
     previousDaily,
+    previousWindow: { start: previousStart, end: previousEnd },
     ranking: top.map(({ id, title, units }) => ({
       id,
       title,

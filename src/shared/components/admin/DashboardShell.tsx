@@ -223,7 +223,11 @@ export default function DashboardShell({
               </strong>
             </div>
           </div>
-          <div id="workspace-header-query" className="workspace-header-query" />
+          <div
+            key={pathname}
+            id="workspace-header-query"
+            className="workspace-header-query"
+          />
         </header>
         {error && (
           <p className="workspace-error" role="alert">

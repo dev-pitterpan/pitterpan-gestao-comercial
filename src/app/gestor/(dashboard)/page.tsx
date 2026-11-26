@@ -60,38 +60,35 @@ export default async function Overview({
   const active = overviewSections.find((item) => item.id === section)!;
   return (
     <div className={`workspace-overview content-overview--${section}`}>
-      <PageHeading
-        eyebrow="SEU CENTRO DE OPERAÇÃO"
-        title="Visão geral"
-        description={`Olá, ${user.name.split(" ")[0]}. Escolha uma área para acompanhar sua operação.`}
-        compactFilters={false}
-        filters={
-          section === "desempenho" && canViewSales ? (
+      <PageHeading title="Visão geral" />
+      <div className="content-navigation-row">
+        <nav
+          className="content-categories content-overview-categories"
+          aria-label="Seções da visão geral"
+        >
+          {overviewSections
+            .filter((item) => canViewSales || item.id === "catalogo")
+            .map((item) => {
+              const Icon = icons[item.icon];
+              return (
+                <Link
+                  key={item.id}
+                  href={overviewHref(item.id, source)}
+                  aria-current={section === item.id ? "page" : undefined}
+                  scroll={false}
+                >
+                  <Icon size={17} />
+                  {item.label}
+                </Link>
+              );
+            })}
+        </nav>
+        {section === "desempenho" && canViewSales && (
+          <div className="content-navigation-action">
             <CommercialPeriod range={range} />
-          ) : undefined
-        }
-      />
-      <nav
-        className="content-categories content-overview-categories"
-        aria-label="Seções da visão geral"
-      >
-        {overviewSections
-          .filter((item) => canViewSales || item.id === "catalogo")
-          .map((item) => {
-            const Icon = icons[item.icon];
-            return (
-              <Link
-                key={item.id}
-                href={overviewHref(item.id, source)}
-                aria-current={section === item.id ? "page" : undefined}
-                scroll={false}
-              >
-                <Icon size={17} />
-                {item.label}
-              </Link>
-            );
-          })}
-      </nav>
+          </div>
+        )}
+      </div>
       <section className="content-category-view" aria-label={active.label}>
         {section === "catalogo" && context ? (
           <>

@@ -234,7 +234,10 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
           assert.match(html, /id="workspace-header-query"/);
           assert.match(html, /class="workspace-query-fallback"/);
           assert.doesNotMatch(html, /class="workspace-header-actions"/);
-          assert.match(html, /query-filters-compact/);
+          assert.match(
+            html,
+            /class="workspace-query-group" aria-label="Filtros de vendas"/,
+          );
           assert.match(
             html,
             /aria-label="Filtros de vendas".*?class="content-navigation-row".*?<nav[^>]*aria-label="Opções do módulo".*?<\/nav>.*?class="content-navigation-action".*?class="admin-date-range"/s,
@@ -305,16 +308,16 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
       assert.equal(filteredSummary.status, 200);
       const filteredSummaryHtml = await filteredSummary.text();
       assert.match(filteredSummaryHtml, /aria-label="Filtros de vendas"/);
-      assert.match(filteredSummaryHtml, /Remover Categoria: baloes/);
-      assert.match(filteredSummaryHtml, /Remover Pagamento: Pago/);
+      assert.match(filteredSummaryHtml, /title="Categoria do produto: baloes"/);
+      assert.match(filteredSummaryHtml, /title="Situação do pagamento: Pagos"/);
       const scopedFinance = await get(
         "/gestor/vendas/recebimentos/?fulfillment=AWAITING&category=baloes",
         { headers: { cookie } },
       );
       assert.equal(scopedFinance.status, 200);
       const scopedFinanceHtml = await scopedFinance.text();
-      assert.match(scopedFinanceHtml, /Remover Categoria: baloes/);
-      assert.doesNotMatch(scopedFinanceHtml, /Remover Atendimento:/);
+      assert.match(scopedFinanceHtml, /title="Categoria do produto: baloes"/);
+      assert.doesNotMatch(scopedFinanceHtml, /id="sales-fulfillment"/);
       for (const section of ["desempenho", "catalogo", "prioridades"]) {
         const response = await get(`/gestor/?secao=${section}`, {
           headers: { cookie },
@@ -372,14 +375,17 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
       const offersHtml = await offersPage.text();
       assert.match(offersHtml, /class="admin-products-orderbar"/);
       assert.match(offersHtml, /aria-label="Ordenar ofertas"/);
-      assert.match(offersHtml, /name="sort" value="updated_desc"/);
-      assert.equal((offersHtml.match(/name="sort"/g) || []).length, 1);
+      assert.match(
+        offersHtml,
+        /<input(?=[^>]*checked="")(?=[^>]*name="sort")(?=[^>]*value="updated_desc")[^>]*>/,
+      );
+      assert.equal((offersHtml.match(/name="sort"/g) || []).length, 3);
       const alphabeticalOffers = await get("/gestor/ofertas/?sort=name_asc", {
         headers: { cookie },
       });
       assert.match(
         await alphabeticalOffers.text(),
-        /name="sort" value="name_asc"/,
+        /<input(?=[^>]*checked="")(?=[^>]*name="sort")(?=[^>]*value="name_asc")[^>]*>/,
       );
       const productPage = await get("/gestor/produtos/?q=a&page=2", {
         headers: { cookie },
