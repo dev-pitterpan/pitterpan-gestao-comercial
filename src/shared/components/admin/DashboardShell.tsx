@@ -166,6 +166,18 @@ export default function DashboardShell({
           expanded={expanded}
           onSelect={selectModule}
           close={() => setOpen(false)}
+          footer={
+            <button
+              className="workspace-logout"
+              type="button"
+              onClick={logout}
+              disabled={leaving}
+              aria-label="Sair da conta"
+              title="Sair da conta"
+            >
+              <LogOut size={16} />
+            </button>
+          }
         />
         <div className="workspace-menu-container" hidden={!expanded}>
           <button
@@ -229,6 +241,10 @@ export default function DashboardShell({
               </strong>
             </div>
           </div>
+          <div
+            className="workspace-routine-controls"
+            id="workspace-routine-controls"
+          />
           <div className="workspace-header-actions">
             {allowed(user.role, operationalRoles) && (
               <Link
@@ -263,15 +279,6 @@ export default function DashboardShell({
                   {accountLabel} · {roleLabels[user.role]}
                 </small>
               </Link>
-              <button
-                type="button"
-                onClick={logout}
-                disabled={leaving}
-                aria-label="Sair da conta"
-                title="Sair da conta"
-              >
-                <LogOut size={16} />
-              </button>
             </div>
           </div>
         </header>
