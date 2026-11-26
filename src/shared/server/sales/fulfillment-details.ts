@@ -66,8 +66,68 @@ export const preparationOrderQuery = `query PreparationOrder($id:ID!,$after:Stri
 }`;
 export const preparationShipmentQuery = `query PreparationShipment($id:ID!,$after:String){fulfillment(id:$id){id status updatedAt fulfillmentLineItems(first:100,after:$after){nodes{id quantity lineItem{id}} pageInfo{hasNextPage endCursor}}}}`;
 type Client = {
-  query<T>(query: string, variables?: Record<string, unknown>): Promise<T>;
+  query<T>(
+    query: string,
+    variables?: Record<string, unknown>,
+    options?: { timeoutMs?: number },
+  ): Promise<T>;
 };
+const addressField = z.string().trim().nullish();
+const addressResponse = z.object({
+  order: z
+    .object({
+      id: gid("Order"),
+      shippingAddress: z
+        .object({
+          address1: addressField,
+          address2: addressField,
+          city: addressField,
+          provinceCode: addressField,
+          zip: addressField,
+          country: addressField,
+        })
+        .nullable(),
+    })
+    .nullable(),
+});
+type ShippingAddress =
+  | { status: "available"; lines: string[] }
+  | { status: "missing" | "unavailable" };
+
+/** Read the address for the opened order only, independently of item details. */
+export async function readShippingAddress(
+  client: Client,
+  id: string,
+): Promise<ShippingAddress> {
+  gid("Order").parse(id);
+  try {
+    const raw = await client.query<unknown>(
+      `query DeliveryAddress($id:ID!){
+        order(id:$id){id shippingAddress{address1 address2 city provinceCode zip country}}
+      }`,
+      { id },
+      { timeoutMs: 6000 },
+    );
+    const { order } = addressResponse.parse(raw);
+    if (!order || order.id !== id) return { status: "unavailable" };
+    const address = order.shippingAddress;
+    if (!address) return { status: "missing" };
+    const city = [address.city, address.provinceCode]
+      .filter(Boolean)
+      .join(" – ");
+    const lines = [
+      address.address1,
+      address.address2,
+      [city, address.zip].filter(Boolean).join(" · "),
+      address.country,
+    ].filter((value): value is string => Boolean(value));
+    return lines.length
+      ? { status: "available", lines }
+      : { status: "missing" };
+  } catch {
+    return { status: "unavailable" };
+  }
+}
 function version(value: z.infer<typeof order>) {
   return JSON.stringify([
     value.updatedAt,

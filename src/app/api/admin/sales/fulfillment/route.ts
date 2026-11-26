@@ -7,7 +7,10 @@ import {
   salesReady,
 } from "@shared/server/sales/config";
 import { customerNameColumn } from "@shared/server/sales/customers";
-import { readFulfillmentDetails } from "@shared/server/sales/fulfillment-details";
+import {
+  readFulfillmentDetails,
+  readShippingAddress,
+} from "@shared/server/sales/fulfillment-details";
 export const maxDuration = 60;
 const headers = { "Cache-Control": "no-store" };
 export async function GET(request: Request) {
@@ -40,9 +43,13 @@ export async function GET(request: Request) {
         { error: "Pedido não encontrado no histórico sincronizado." },
         { status: 404, headers },
       );
-    const details = await readFulfillmentDetails(salesClient(), id.data);
+    const client = salesClient();
+    const [details, shippingAddress] = await Promise.all([
+      readFulfillmentDetails(client, id.data),
+      readShippingAddress(client, id.data),
+    ]);
     return Response.json(
-      { ...details, customerName: order.customer_name },
+      { ...details, customerName: order.customer_name, shippingAddress },
       { headers },
     );
   } catch {

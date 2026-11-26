@@ -274,6 +274,9 @@ Verificação visual executada em uma prévia isolada com componentes e estilos 
 
 ### Consulta direta de pedidos e destinos — 25/11/2026
 
+Em **Conferir itens**, o endereço de entrega é consultado na Shopify ao abrir o pedido. A rota continua limitada aos perfis autorizados, retorna uma resposta sem cache e preserva a conferência caso o endereço esteja ausente ou indisponível. A lista de Pedidos mostra **Sem envio a atender** quando a Shopify sinaliza que o atendimento não é necessário e nenhuma modalidade de entrega foi registrada.
+
+
 O botão “Refinar consulta” e os assuntos aninhados foram retirados de vendas e do mapa de entregas. `SalesFilterPanel` mostra diretamente Pagamento, Atendimento, Entrega e Categoria, com rótulos permanentes e seleção atual visível. A busca textual duplicada por situação foi removida; o seletor conserva os estados suportados e só mostra o estado legado NO_MATCH quando já selecionado. Recebimentos e reembolsos exibem apenas entrega/categoria, preservando seu escopo financeiro. O período permanece no cabeçalho e não é redefinido por Limpar filtros. Mudanças continuam combinadas, automáticas e reiniciam a paginação; categoria mantém o debounce existente.
 
 Destinos usa a mesma apresentação para país, UF, entrega, atendimento e busca por local. Selecionar UF mantém o vínculo com Brasil; mudar país limpa UF. Chips removem critérios individualmente e Limpar filtros remove apenas os critérios adicionais. O mapa e os endpoints permanecem iguais. `query-filters.css` organiza os controles em quatro, duas ou uma coluna conforme a largura, sem recortar os menus. Sidebar e categorias de navegação não foram alteradas. Sem novas dependências ou migração de banco.

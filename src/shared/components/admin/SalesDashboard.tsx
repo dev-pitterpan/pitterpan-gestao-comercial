@@ -689,19 +689,28 @@ export default function SalesDashboard({
                         {!finance && (
                           <>
                             <td>
-                              <DeliveryMark kind={o.delivery_kind} />
-                              <ShippingCharge order={o} />
-                              {o.delivery_label &&
-                                o.delivery_kind !== "LOCAL" &&
-                                !(
-                                  o.delivery_kind === "PAC" &&
-                                  o.delivery_label.trim().toLowerCase() ===
-                                    "envio normal (pac)"
-                                ) && <small>{o.delivery_label}</small>}
-                              <small>
-                                {fulfillmentLabels[o.fulfillment_status] ||
-                                  o.fulfillment_status}
-                              </small>
+                              {o.delivery_kind === "UNKNOWN" &&
+                              !o.delivery_label &&
+                              o.fulfillment_status ===
+                                "FULFILLMENT_NOT_REQUIRED" ? (
+                                <strong>Sem envio a atender</strong>
+                              ) : (
+                                <>
+                                  <DeliveryMark kind={o.delivery_kind} />
+                                  <ShippingCharge order={o} />
+                                  {o.delivery_label &&
+                                    o.delivery_kind !== "LOCAL" &&
+                                    !(
+                                      o.delivery_kind === "PAC" &&
+                                      o.delivery_label.trim().toLowerCase() ===
+                                        "envio normal (pac)"
+                                    ) && <small>{o.delivery_label}</small>}
+                                  <small>
+                                    {fulfillmentLabels[o.fulfillment_status] ||
+                                      o.fulfillment_status}
+                                  </small>
+                                </>
+                              )}
                             </td>
                             <td>
                               {money(o.total, o.currency)}

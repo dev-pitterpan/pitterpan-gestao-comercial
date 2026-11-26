@@ -748,6 +748,34 @@
   color: #728ba4;
   white-space: normal;
 }
+.fulfillment-dialog-address {
+  padding: 12px 14px;
+  border: 1px solid var(--admin-line);
+  border-radius: 10px;
+  background: var(--brand-surface-alt);
+}
+.fulfillment-dialog-address strong {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--admin-ink);
+}
+.fulfillment-dialog-address svg {
+  flex: none;
+  color: var(--admin-blue);
+}
+.fulfillment-dialog-address address,
+.fulfillment-dialog-address p {
+  margin: 6px 0 0;
+  color: var(--admin-muted);
+  font-size: 12px;
+  font-style: normal;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+.fulfillment-dialog-address address span {
+  display: block;
+}
 .fulfillment-dialog-state {
   padding: 15px;
   margin: 15px 0;
