@@ -52,7 +52,7 @@ A Visão geral reúne os indicadores da Shopify, o gráfico financeiro em granul
 
 A interface administrativa usa superfícies claras, azul-cobalto para navegação e ações, coral e amarelo da marca em destaques e cores semânticas com rótulos nos estados operacionais. A paleta da interface fica em `src/shared/styles/admin/brand.css` e as cores de gráficos legados e do mapa ficam em `src/shared/lib/admin/brand-colors.ts`.
 
-A evolução financeira da Visão geral e do Resumo Shopify usa ECharts com renderizador SVG e somente os módulos de linha, eixos e tooltip. As séries mantêm o agrupamento diário ou semanal e deixam lacunas nos dias sem dados. Na Visão geral, o período anterior pode ser exibido na leitura diária quando há cobertura. O gráfico oferece leitura por ponteiro e teclado. As animações decorativas continuam ajustáveis no rodapé. As APIs, as permissões e a agregação no servidor seguem as regras descritas abaixo.
+A evolução financeira da Visão geral e do Resumo Shopify usa ECharts com renderizador SVG e os módulos de barras, linha, eixos e tooltip. O modo diário usa colunas arredondadas, e o semanal usa uma curva suave que passa pelos valores observados. Os dias sem dados permanecem sem valor. Na Visão geral, o período anterior pode ser exibido na leitura diária quando há cobertura. O gráfico oferece leitura por ponteiro e teclado. As animações decorativas continuam ajustáveis no rodapé. As APIs, as permissões e a agregação no servidor seguem as regras descritas abaixo.
 
 ## 3. Acesso e responsabilidades
 

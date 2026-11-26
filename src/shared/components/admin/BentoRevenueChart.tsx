@@ -106,6 +106,7 @@ export default function BentoRevenueChart({
         points={points}
         previous={comparison}
         currency={currency}
+        period={period}
       />
     </section>
   );
