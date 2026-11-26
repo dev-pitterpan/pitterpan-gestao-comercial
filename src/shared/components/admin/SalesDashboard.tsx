@@ -388,8 +388,6 @@ export default function SalesDashboard({
     <div className="sales-dashboard">
       <WorkspaceQueryControls>
         <SalesFilterPanel
-          categories
-          compact
           filters={filters}
           categoryDraft={categoryDraft}
           onCategoryChange={setCategoryDraft}
@@ -411,7 +409,6 @@ export default function SalesDashboard({
         }
         title={title}
         description={description}
-        compactFilters={false}
         navigationAction={
           <div className="sales-toolbar">
             <div className="sales-period-field">

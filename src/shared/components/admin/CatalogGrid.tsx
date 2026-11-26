@@ -158,7 +158,6 @@ export default function CatalogGrid({
       <PageHeading
         title="Catálogos"
         description="Abra uma coleção ou compartilhe o link com seu cliente."
-        compactFilters={false}
         filters={
           <div className="admin-catalog-toolbar">
             <label className="admin-filter-search">

@@ -1,6 +1,7 @@
 "use client";
 import { PageHeading } from "./Primitives";
 import AdminSelect from "./AdminSelect";
+import HeaderFilterGroup from "./HeaderFilterGroup";
 import DragScroll from "./DragScroll";
 import PitterSpinner from "./PitterSpinner";
 import ProductThumbnail from "./ProductThumbnail";
@@ -129,61 +130,66 @@ export default function CatalogImages() {
         title="Imagens do catálogo"
         description="Confira as fotos recebidas da Shopify e acompanhe a conversão para WebP."
         filters={
-          <form
-            className="admin-settings-form"
-            onSubmit={(event) => {
-              event.preventDefault();
-              setPage(1);
-              setQuery(search.trim());
-            }}
-          >
-            <label>
-              Produto ou SKU{" "}
-              <input
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                maxLength={100}
-              />
-            </label>
-            <div className="catalog-images-filter">
-              <span>Situação</span>
-              <AdminSelect
-                label="Situação"
-                value={status}
-                options={[
-                  { value: "", label: "Todas" },
-                  ...Object.entries(labels).map(([value, label]) => ({
-                    value,
-                    label,
-                  })),
-                ]}
-                onValueChange={(value) => {
+          <>
+            <HeaderFilterGroup
+              inline
+              label="Produto ou SKU"
+              activeCount={query ? 1 : 0}
+              activeValue={query}
+            >
+              <form
+                className="admin-settings-form"
+                onSubmit={(event) => {
+                  event.preventDefault();
                   setPage(1);
-                  setStatus(value);
+                  setQuery(search.trim());
                 }}
-              />
-            </div>
-            <div className="catalog-images-filter">
-              <span>Processamento</span>
-              <AdminSelect
-                label="Processamento"
-                value={period}
-                options={[
-                  { value: "", label: "Todo o período" },
-                  { value: "7", label: "Últimos 7 dias" },
-                  { value: "30", label: "Últimos 30 dias" },
-                  { value: "90", label: "Últimos 90 dias" },
-                ]}
-                onValueChange={(value) => {
-                  setPage(1);
-                  setPeriod(value);
-                }}
-              />
-            </div>
-            <button className="admin-button" type="submit">
-              Buscar
-            </button>
-          </form>
+              >
+                <label>
+                  Produto ou SKU
+                  <input
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    maxLength={100}
+                  />
+                </label>
+                <button className="admin-button" type="submit">
+                  Buscar
+                </button>
+              </form>
+            </HeaderFilterGroup>
+            <AdminSelect
+              label="Situação"
+              triggerLabel="Situação"
+              value={status}
+              options={[
+                { value: "", label: "Todas" },
+                ...Object.entries(labels).map(([value, label]) => ({
+                  value,
+                  label,
+                })),
+              ]}
+              onValueChange={(value) => {
+                setPage(1);
+                setStatus(value);
+              }}
+            />
+            <AdminSelect
+              label="Processamento"
+              triggerLabel="Processamento"
+              value={period}
+              options={[
+                { value: "", label: "Todo o período" },
+                { value: "7", label: "Últimos 7 dias" },
+                { value: "30", label: "Últimos 30 dias" },
+                { value: "90", label: "Últimos 90 dias" },
+              ]}
+              onValueChange={(value) => {
+                setPage(1);
+                setPeriod(value);
+              }}
+            />
+          </>
         }
       />
       <section className="admin-panel" aria-busy={loading || working}>

@@ -133,11 +133,11 @@ export default function CommercialOverview({
     >
       <header className="workspace-commercial-heading">
         <span className="workspace-source-label">
-          <ShoppingCart size={14} /> DESEMPENHO SHOPIFY
+          <ShoppingCart size={14} /> Vendas Shopify
         </span>
         <span className="workspace-sync-label">
           {syncedAt
-            ? `Conferido até ${dateTime(syncedAt)}`
+            ? `Última sincronização ${dateTime(syncedAt)}`
             : "Sincronização ainda sem confirmação"}
         </span>
       </header>
@@ -224,10 +224,7 @@ export default function CommercialOverview({
       </div>
 
       {data ? (
-        <BentoPerformance
-          key={`${range.start}-${range.end}`}
-          sales={data.sales}
-        />
+        <BentoPerformance key={`${range.start}-${range.end}`} data={data} />
       ) : (
         <section
           className="admin-panel"
@@ -235,7 +232,7 @@ export default function CommercialOverview({
         >
           <div className="workspace-chart-empty">
             <ChartNoAxesCombined size={38} />
-            <h2>Seu desempenho começa aqui</h2>
+            <h2>Evolução das vendas indisponível</h2>
             <p>
               Sincronize os pedidos para acompanhar a evolução das vendas com
               dados reais.

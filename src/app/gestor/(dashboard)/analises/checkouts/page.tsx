@@ -117,7 +117,6 @@ export default async function CheckoutsPage({
         eyebrow="Shopify"
         title="Checkouts abandonados"
         description="Acompanhe compras interrompidas e confira os detalhes de cada checkout."
-        compactFilters={false}
         filters={
           <nav aria-label="Período dos checkouts" className={styles.period}>
             <Link

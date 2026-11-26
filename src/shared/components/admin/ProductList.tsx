@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import AdminSelect from "./AdminSelect";
 import HeaderFilterGroup from "./HeaderFilterGroup";
 import WorkspaceQueryControls from "./WorkspaceQueryControls";
 import DragScroll from "./DragScroll";
@@ -23,9 +22,11 @@ export function stockLabel(stock: number | null, low: number, high: number) {
 export function ProductFilters({
   query,
   canExport,
+  sortable,
 }: {
   query: AdminQuery;
   canExport: boolean;
+  sortable: boolean;
 }) {
   const [stock, setStock] = useState(query.stock);
   useEffect(() => setStock(query.stock), [query.stock]);
@@ -35,7 +36,11 @@ export function ProductFilters({
     new URLSearchParams({ ...filters, format: "csv" });
   return (
     <>
-      <HeaderFilterGroup label="Categoria" activeCount={query.category ? 1 : 0}>
+      <HeaderFilterGroup
+        label="Categoria"
+        activeCount={query.category ? 1 : 0}
+        activeValue={query.category}
+      >
         <label className="workspace-filter-label">
           Categoria
           <input
@@ -48,7 +53,11 @@ export function ProductFilters({
           />
         </label>
       </HeaderFilterGroup>
-      <HeaderFilterGroup label="Marca" activeCount={query.vendor ? 1 : 0}>
+      <HeaderFilterGroup
+        label="Marca"
+        activeCount={query.vendor ? 1 : 0}
+        activeValue={query.vendor}
+      >
         <label className="workspace-filter-label">
           Marca
           <input
@@ -85,6 +94,7 @@ export function ProductFilters({
           ))}
         </div>
       </HeaderFilterGroup>
+      {sortable && <ProductOrder sort={query.sort} />}
       {canExport && (
         <WorkspaceQueryControls>
           <a
@@ -101,28 +111,40 @@ export function ProductFilters({
   );
 }
 
-export function ProductOrder({ sort }: { sort: AdminQuery["sort"] }) {
+const orderOptions = [
+  { value: "updated_desc", label: "Mais recentes" },
+  { value: "updated_asc", label: "Mais antigos" },
+  { value: "name_asc", label: "Nome de A a Z" },
+] as const;
+
+function ProductOrder({ sort }: { sort: AdminQuery["sort"] }) {
   const [value, setValue] = useState(sort);
   useEffect(() => setValue(sort), [sort]);
-
   return (
-    <HeaderFilterGroup label="Ordenação">
-      <div className="admin-products-order">
-        <label htmlFor="product-order-filter">Ordenar por</label>
-        <AdminSelect
-          id="product-order-filter"
-          name="sort"
-          value={value}
-          label="Ordenar ofertas"
-          onValueChange={(next) => setValue(next as AdminQuery["sort"])}
-          options={[
-            { value: "updated_desc", label: "Mais recentes" },
-            { value: "updated_asc", label: "Mais antigos" },
-            { value: "name_asc", label: "Nome de A a Z" },
-          ]}
-        />
-        <small>Última atualização do produto na Shopify</small>
+    <HeaderFilterGroup
+      label="Ordenação"
+      activeCount={value === "updated_desc" ? 0 : 1}
+      activeValue={orderOptions.find((option) => option.value === value)?.label}
+    >
+      <div
+        className="header-filter-options"
+        role="group"
+        aria-label="Ordenar ofertas"
+      >
+        {orderOptions.map((option) => (
+          <label key={option.value}>
+            <input
+              type="radio"
+              name="sort"
+              value={option.value}
+              checked={value === option.value}
+              onChange={() => setValue(option.value)}
+            />
+            {option.label}
+          </label>
+        ))}
       </div>
+      <small>Última atualização do produto na Shopify</small>
     </HeaderFilterGroup>
   );
 }

@@ -6,11 +6,9 @@
     .infographic-radial,
     .infographic-funnel
   ) {
-  background-color: #181a1d;
-  background-image: radial-gradient(#090b0e 1px, transparent 1px);
-  background-size: 7px 7px;
-  border: 1px solid #41444b;
-  border-radius: 3px;
+  background: #132d46;
+  border: 1px solid #304b64;
+  border-radius: 14px;
   padding: 18px;
   box-shadow: none;
 }
@@ -313,12 +311,10 @@
 .admin-app.workspace-shell
   .reference-sheet
   :is(.bento-revenue, .bento-composition, .bento-activity, .bento-balance) {
-  background-color: #181a1d;
-  background-image: radial-gradient(#090b0e 1px, transparent 1px);
-  background-size: 7px 7px;
+  background: #132d46;
   color: #e0e4e9;
-  border: 1px solid #41444b;
-  border-radius: 3px;
+  border: 1px solid #304b64;
+  border-radius: 14px;
   padding: 18px;
 }
 .admin-app.workspace-shell

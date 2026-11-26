@@ -5,17 +5,23 @@ import { chartDate } from "../../lib/admin/infographic";
 import InfographicTimeline from "./InfographicTimeline";
 export default function BentoRevenueChart({
   rows,
+  previous,
   received,
   net,
   currency,
 }: {
   rows: BentoDay[];
+  previous?: BentoDay[];
   received: string;
   net: string;
   currency: string;
 }) {
   const [metric, setMetric] = useState<"received" | "net">("received"),
     [period, setPeriod] = useState<"day" | "week">("day");
+  const comparison =
+    period === "day" && previous?.some((row) => row[metric] !== null)
+      ? bentoSeries(previous, metric, "day").map((entry) => entry.value)
+      : undefined;
   const money = (value: number | null) =>
     value === null
       ? "Sem dados completos"
@@ -29,7 +35,7 @@ export default function BentoRevenueChart({
     >
       <header>
         <div>
-          <span className="bento-eyebrow">DESEMPENHO NO PERÍODO</span>
+          <span className="bento-eyebrow">EVOLUÇÃO FINANCEIRA</span>
           <h2>
             {metric === "received" ? "Recebimentos" : "Líquido após reembolsos"}
           </h2>
@@ -93,6 +99,8 @@ export default function BentoRevenueChart({
               : `${chartDate(row.start)} — ${chartDate(row.end)}`,
           value: row.value,
         }))}
+        previous={comparison}
+        initial="area"
         label={metric === "received" ? "Recebido" : "Líquido"}
         format={money}
       />
