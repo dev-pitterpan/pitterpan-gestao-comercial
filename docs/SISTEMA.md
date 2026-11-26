@@ -359,3 +359,14 @@ A segunda revisão segue mais de perto a linguagem visual da referência enviada
 A evolução temporal agora abre em picos triangulares, com opção de colunas e área, mantendo as datas, agrupamento semanal quando disponível e as lacunas desconhecidas. O valor inicial destacado é o maior valor real da série, identificado pela data; a seleção passa a mostrar o dia consultado. O calendário de intensidade conserva seus dados e passa a usar marcadores circulares. A composição bento do Resumo e da Visão Geral usa os novos desenhos. A mudança não cria dados, dependências ou migrações.
 
 Verificação: 143 testes unitários, TypeScript, formatação, build e testes HTTP; prévia desktop e largura de celular de 390 px sem rolagem horizontal, seleção dos setores, paginação, consulta dos picos por teclado, estados sem base e dados ausentes. As figuras de teste usam dados fictícios fora do repositório.
+
+
+### Miniaturas nos pedidos e identificação de entregas — 26/11/2026
+
+A lista de pedidos recentes, recebimentos e reembolsos passa a apresentar uma coluna Produtos com até três fotos por pedido, o primeiro título, quantidade de itens e unidades originais. Pedidos com mais itens mostram +N; o detalhamento completo continua em Conferir itens. Sem itens importados há um aviso, e fotos indisponíveis usam o fallback existente de `ProductThumbnail`.
+
+`order-previews.ts` lê apenas os oito pedidos da página e no máximo três linhas de cada um, com contagens calculadas sobre todos os itens originais. As fotos usam o registro do pedido e o catálogo ativo da mesma loja, por ID exato de variante/produto. A imagem histórica continua como alternativa. O resultado fica em `orderPreviews`, separado dos dados financeiros e da paginação dos pedidos. Uma consulta opcional à Shopify para fotos ausentes ocorre após liberar a conexão do banco, com timeout e fallback; falha de foto não impede abrir a lista. Não há migração ou mudança de pedidos/valores.
+
+`OrderProductPreview.tsx` apresenta as miniaturas e títulos. `order-media.css` adapta a coluna a telas estreitas com a rolagem da tabela já existente. `DeliveryMark.tsx` diferencia os veículos por cores: Sedex amarelo/azul, PAC azul, Jadlog vermelho e motoboy coral com caixa dourada; a loja de retirada tem toldo dourado. As cores se restringem às ilustrações; rótulos e classificação de entrega são preservados.
+
+O teste das miniaturas verifica limite de três, total original dos itens, seleção somente dos pedidos solicitados, fallback histórico e isolamento entre lojas mesmo com IDs iguais. Validação: 144 testes unitários, tipos, formatação, build e rotas HTTP passaram. A prévia verifica miniaturas, fallback de imagem e largura de 390 px sem transbordamento horizontal da página.

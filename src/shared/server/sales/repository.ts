@@ -1,3 +1,4 @@
+import { readOrderPreviews } from "./order-previews.ts";
 import { SALES_PAGE_SIZE } from "../../lib/admin/sales-links.ts";
 import {
   outstandingSql,
@@ -184,10 +185,16 @@ export async function readSalesOrders(
     values,
   );
   const orders = rows.slice(0, SALES_PAGE_SIZE);
+  const previews = await readOrderPreviews(
+    db,
+    store,
+    orders.map((order) => order.id),
+  );
   const last = orders.at(-1);
   const hasMore = rows.length > SALES_PAGE_SIZE;
   return {
     orders,
+    orderPreviews: Object.fromEntries(previews),
     hasMore,
     nextCursor:
       hasMore && last
