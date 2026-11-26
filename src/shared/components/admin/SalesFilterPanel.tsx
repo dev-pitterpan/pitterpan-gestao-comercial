@@ -1,5 +1,6 @@
 "use client";
 import { X } from "lucide-react";
+import HeaderFilterGroup from "./HeaderFilterGroup";
 import type { SalesFilters } from "../../server/sales/filters";
 import {
   fulfillmentFilters,
@@ -25,6 +26,7 @@ export default function SalesFilterPanel({
   finance,
   deliveries,
   compact = false,
+  categories = false,
 }: {
   filters: SalesFilters;
   categoryDraft: string;
@@ -32,6 +34,7 @@ export default function SalesFilterPanel({
   onChange: (value: Partial<SalesFilters>) => void;
   finance: boolean;
   compact?: boolean;
+  categories?: boolean;
   deliveries?: { kind: string; orders: string }[];
 }) {
   const active = [
@@ -70,7 +73,7 @@ export default function SalesFilterPanel({
 
   return (
     <section
-      className={`query-filters${compact ? " query-filters-compact" : ""}`}
+      className={`query-filters${compact ? " query-filters-compact" : ""}${categories ? " query-filters-categories" : ""}`}
       aria-label="Filtros de vendas"
     >
       {!compact && (
@@ -90,6 +93,7 @@ export default function SalesFilterPanel({
               <label htmlFor="sales-status">Pagamento</label>
               <SalesStatusSelect
                 id="sales-status"
+                triggerLabel={categories ? "Pagamento" : undefined}
                 value={filters.status}
                 onChange={(status) => onChange({ status })}
               />
@@ -98,6 +102,7 @@ export default function SalesFilterPanel({
               <label htmlFor="sales-fulfillment">Atendimento</label>
               <AdminSelect
                 id="sales-fulfillment"
+                triggerLabel={categories ? "Atendimento" : undefined}
                 label="Situação do atendimento"
                 value={filters.fulfillment || "all"}
                 options={fulfillmentFilters.map((value) => ({
@@ -115,6 +120,7 @@ export default function SalesFilterPanel({
           <label htmlFor="sales-delivery-filter">Entrega</label>
           <AdminSelect
             id="sales-delivery-filter"
+            triggerLabel={categories ? "Entrega" : undefined}
             label="Modalidade de entrega"
             value={filters.delivery || "all"}
             onValueChange={(value) =>
@@ -143,15 +149,37 @@ export default function SalesFilterPanel({
           />
         </div>
         <div>
-          <label htmlFor="sales-category">Categoria do produto</label>
-          <input
-            id="sales-category"
-            type="search"
-            maxLength={200}
-            value={categoryDraft}
-            onChange={(event) => onCategoryChange(event.target.value)}
-            placeholder="Ex.: balões, confeitaria…"
-          />
+          {categories ? (
+            <HeaderFilterGroup
+              inline
+              label="Categoria"
+              activeCount={filters.category ? 1 : 0}
+            >
+              {" "}
+              <label htmlFor="sales-category">Categoria do produto</label>
+              <input
+                id="sales-category"
+                type="search"
+                maxLength={200}
+                value={categoryDraft}
+                onChange={(event) => onCategoryChange(event.target.value)}
+                placeholder="Ex.: balões, confeitaria…"
+              />
+            </HeaderFilterGroup>
+          ) : (
+            <>
+              {" "}
+              <label htmlFor="sales-category">Categoria do produto</label>
+              <input
+                id="sales-category"
+                type="search"
+                maxLength={200}
+                value={categoryDraft}
+                onChange={(event) => onCategoryChange(event.target.value)}
+                placeholder="Ex.: balões, confeitaria…"
+              />
+            </>
+          )}
         </div>
       </div>
       {(!compact || active.length > 0 || categoryDraft) && (

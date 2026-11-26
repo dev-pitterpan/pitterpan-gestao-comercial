@@ -178,7 +178,7 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
         }
         if (path === "/gestor/vendas/resumo/") {
           assert.match(html, /<h1>Visão geral comercial<\/h1>/);
-          assert.match(html, /class="routine-query"/);
+          assert.match(html, /class="workspace-query-fallback"/);
           assert.doesNotMatch(html, /aria-label="Opções do módulo"/);
         }
         if (path === "/gestor/mapa/") {
@@ -211,7 +211,7 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
           );
         }
         if (path === "/gestor/produtos/") {
-          assert.match(html, /class="routine-query"/);
+          assert.match(html, /class="header-filter-category"/);
           assert.equal((html.match(/name="q"/g) || []).length, 1);
           assert.doesNotMatch(html, /Refine a seleção|Filtros da consulta/);
         }
@@ -231,6 +231,8 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
           ].includes(path)
         ) {
           assert.doesNotMatch(html, /class="routine-query-toggle"/);
+          assert.match(html, /id="workspace-header-query"/);
+          assert.match(html, /class="workspace-query-fallback"/);
           assert.doesNotMatch(html, /class="workspace-header-actions"/);
           assert.match(html, /query-filters-compact/);
           assert.match(
@@ -265,7 +267,7 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
         if (path === "/gestor/vendas/recebimentos/") {
           assert.match(
             html,
-            /<header class="admin-page-heading">.*?<h1>Financeiro<\/h1>.*?<\/header>.*?class="routine-query".*?Período dos pedidos/s,
+            /workspace-query-fallback.*?<h1>Financeiro<\/h1>.*?content-navigation-action.*?Período dos pedidos/s,
           );
           assert.match(html, /id="sales-delivery-filter"/);
           assert.match(html, /id="sales-category"/);
@@ -274,12 +276,12 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
         if (path === "/gestor/analises/")
           assert.match(
             html,
-            /<header class="admin-page-heading">.*?<h1>Visão geral da loja<\/h1>.*?<\/header>.*?class="routine-query".*?class="admin-date-range"/s,
+            /<header class="admin-page-heading">.*?<h1>Visão geral da loja<\/h1>.*?<\/header>.*?class="workspace-query-fallback".*?class="admin-date-range"/s,
           );
         if (path === "/gestor/produtos/") {
           assert.match(
             html,
-            /<header class="admin-page-heading">.*?<h1>Produtos<\/h1>.*?<\/header>.*?class="routine-query".*?Filtrar categoria.*?Filtrar marca/s,
+            /<header class="admin-page-heading">.*?<h1>Produtos<\/h1>.*?<\/header>.*?class="header-filter-category".*?Filtrar categoria.*?Filtrar marca/s,
           );
           assert.match(
             html,

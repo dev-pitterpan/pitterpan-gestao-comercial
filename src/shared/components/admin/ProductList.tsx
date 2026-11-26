@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import AdminSelect from "./AdminSelect";
+import HeaderFilterGroup from "./HeaderFilterGroup";
+import WorkspaceQueryControls from "./WorkspaceQueryControls";
 import DragScroll from "./DragScroll";
 import { Download, Search, ArrowUpRight, Package } from "lucide-react";
 import type { AdminProduct, AdminQuery } from "../../server/admin/repository";
@@ -32,54 +34,70 @@ export function ProductFilters({
     "/api/admin/products/?" +
     new URLSearchParams({ ...filters, format: "csv" });
   return (
-    <div className="admin-filter-bar">
-      <label className="workspace-filter-label">
-        Categoria
-        <input
-          className="admin-filter-input"
-          name="category"
-          maxLength={200}
-          defaultValue={query.category}
-          placeholder="Buscar categoria"
-          aria-label="Filtrar categoria"
-        />
-      </label>
-      <label className="workspace-filter-label">
-        Marca
-        <input
-          className="admin-filter-input"
-          name="vendor"
-          maxLength={200}
-          defaultValue={query.vendor}
-          placeholder="Buscar marca"
-          aria-label="Filtrar marca"
-        />
-      </label>
+    <>
+      <HeaderFilterGroup label="Categoria" activeCount={query.category ? 1 : 0}>
+        <label className="workspace-filter-label">
+          Categoria
+          <input
+            className="admin-filter-input"
+            name="category"
+            maxLength={200}
+            defaultValue={query.category}
+            placeholder="Buscar categoria"
+            aria-label="Filtrar categoria"
+          />
+        </label>
+      </HeaderFilterGroup>
+      <HeaderFilterGroup label="Marca" activeCount={query.vendor ? 1 : 0}>
+        <label className="workspace-filter-label">
+          Marca
+          <input
+            className="admin-filter-input"
+            name="vendor"
+            maxLength={200}
+            defaultValue={query.vendor}
+            placeholder="Buscar marca"
+            aria-label="Filtrar marca"
+          />
+        </label>
+      </HeaderFilterGroup>
       {query.offers === "1" && <input type="hidden" name="offers" value="1" />}
-      <div className="workspace-filter-label">
-        <label htmlFor="stock-filter">Situação de estoque</label>
-        <AdminSelect
-          id="stock-filter"
-          name="stock"
-          value={stock}
-          label="Situação de estoque"
-          onValueChange={(value) => setStock(value as AdminQuery["stock"])}
-          options={[
+      <HeaderFilterGroup label="Estoque" activeCount={stock !== "all" ? 1 : 0}>
+        <div className="header-filter-options">
+          {[
             { value: "all", label: "Todo o estoque" },
             { value: "low", label: "Estoque baixo" },
             { value: "above", label: "Acima do estoque baixo" },
             { value: "high", label: "Estoque alto" },
             { value: "out", label: "Sem estoque" },
             { value: "unknown", label: "Não informado" },
-          ]}
-        />
-      </div>
+          ].map((option) => (
+            <label key={option.value}>
+              <input
+                type="radio"
+                name="stock"
+                value={option.value}
+                checked={stock === option.value}
+                onChange={() => setStock(option.value as AdminQuery["stock"])}
+              />
+              <span>{option.label}</span>
+            </label>
+          ))}
+        </div>
+      </HeaderFilterGroup>
       {canExport && (
-        <a className="admin-button" href={exportHref} download>
-          <Download size={16} /> Exportar resultados filtrados
-        </a>
+        <WorkspaceQueryControls>
+          <a
+            className="admin-button"
+            href={exportHref}
+            download
+            title="Exportar resultados filtrados"
+          >
+            <Download size={16} /> Exportar
+          </a>
+        </WorkspaceQueryControls>
       )}
-    </div>
+    </>
   );
 }
 
@@ -88,22 +106,24 @@ export function ProductOrder({ sort }: { sort: AdminQuery["sort"] }) {
   useEffect(() => setValue(sort), [sort]);
 
   return (
-    <div className="admin-products-order">
-      <label htmlFor="product-order-filter">Ordenar por</label>
-      <AdminSelect
-        id="product-order-filter"
-        name="sort"
-        value={value}
-        label="Ordenar ofertas"
-        onValueChange={(next) => setValue(next as AdminQuery["sort"])}
-        options={[
-          { value: "updated_desc", label: "Mais recentes" },
-          { value: "updated_asc", label: "Mais antigos" },
-          { value: "name_asc", label: "Nome de A a Z" },
-        ]}
-      />
-      <small>Última atualização do produto na Shopify</small>
-    </div>
+    <HeaderFilterGroup label="Ordenação">
+      <div className="admin-products-order">
+        <label htmlFor="product-order-filter">Ordenar por</label>
+        <AdminSelect
+          id="product-order-filter"
+          name="sort"
+          value={value}
+          label="Ordenar ofertas"
+          onValueChange={(next) => setValue(next as AdminQuery["sort"])}
+          options={[
+            { value: "updated_desc", label: "Mais recentes" },
+            { value: "updated_asc", label: "Mais antigos" },
+            { value: "name_asc", label: "Nome de A a Z" },
+          ]}
+        />
+        <small>Última atualização do produto na Shopify</small>
+      </div>
+    </HeaderFilterGroup>
   );
 }
 

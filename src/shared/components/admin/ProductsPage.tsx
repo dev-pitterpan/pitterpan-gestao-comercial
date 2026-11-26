@@ -57,13 +57,8 @@ export default async function ProductsPage({
               ? "Variantes com preço menor que o preço anterior cadastrado. Vigência e regras finais são confirmadas na loja."
               : "Encontre produtos por nome, SKU ou marca e consulte os detalhes da sua seleção."
         }
-        filters={
-          <ProductFilters
-            query={query}
-            canExport={result.products.length > 0}
-          />
-        }
       />
+      <ProductFilters query={query} canExport={result.products.length > 0} />
       <DataNotice context={context} />
       {mode === "stock" && (
         <div className="admin-mini-stats">

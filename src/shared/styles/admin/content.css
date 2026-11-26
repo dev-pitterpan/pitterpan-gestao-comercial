@@ -812,3 +812,257 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Commercial filters occupy the free right-hand side of the system header. */
+.workspace-header-query:empty {
+  display: none;
+}
+.workspace-header-query {
+  flex: 1;
+  min-width: 0;
+  max-width: 1000px;
+  margin-left: auto;
+}
+.workspace-header-query .query-filters-compact {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+}
+.workspace-header-query .query-filters-grid {
+  flex: 1;
+  min-width: 0;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.workspace-header-query .query-filters-finance {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.workspace-header-query .query-filters-grid label {
+  font-size: 11px;
+  margin-bottom: 5px;
+}
+.workspace-header-query .query-filters-grid :is(input, .admin-select-trigger) {
+  min-height: 36px;
+  height: 36px;
+  font-size: 12px;
+}
+.workspace-header-query .query-filter-chips {
+  display: none;
+}
+.workspace-header-query .query-filters-summary {
+  flex-shrink: 0;
+  border: 0;
+  margin: 0;
+  padding: 0 0 8px;
+}
+.workspace-header-query .query-filters-clear {
+  white-space: nowrap;
+  font-size: 11px;
+}
+.admin-app .workspace-header:has(.workspace-header-query:not(:empty)) {
+  gap: 24px;
+}
+@media (max-width: 1100px) {
+  .admin-app .workspace-header:has(.workspace-header-query:not(:empty)) {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .workspace-header-query {
+    flex-basis: 100%;
+    max-width: none;
+  }
+}
+@media (max-width: 600px) {
+  .workspace-header-query .query-filters-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .workspace-header-query .query-filters-compact {
+    flex-wrap: wrap;
+  }
+  .workspace-header-query .query-filters-grid {
+    flex-basis: 100%;
+  }
+  .workspace-header-query .query-filters-summary {
+    margin-left: auto;
+    padding: 0;
+  }
+  .admin-app .workspace-header:has(.workspace-header-query:not(:empty)) {
+    position: relative;
+  }
+}
+
+/* Category menus in the global header; option panels never displace the content. */
+.workspace-header-query {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.workspace-header-query .query-filters-categories {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.workspace-header-query .query-filters-categories .query-filters-grid {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.query-filters-categories .query-filters-grid > div > label {
+  display: none;
+}
+.admin-app .header-filter-category,
+.admin-app .query-filters-categories .admin-select-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: auto;
+  min-height: 36px;
+  padding: 8px 11px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: #023661;
+  font-size: 12px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.admin-app .header-filter-category:hover,
+.admin-app .query-filters-categories .admin-select-trigger:hover {
+  background: #f0f4f8;
+}
+.admin-app .header-filter-category[aria-expanded="true"],
+.admin-app
+  .query-filters-categories
+  .admin-select-trigger[aria-expanded="true"],
+.admin-app
+  .query-filters-categories
+  .admin-select-trigger[data-filter-active="true"] {
+  background: #edf3f9;
+  border-color: #c6d8e8;
+}
+.header-filter-category b,
+.header-filter-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: #023661;
+  color: white;
+  font-size: 10px;
+}
+.header-filter-category:focus-visible {
+  outline: 3px solid #91b5d5;
+  outline-offset: 2px;
+}
+.workspace-header-query .query-filters-categories .admin-select-menu {
+  left: auto;
+  right: 0;
+  width: 280px;
+  max-width: calc(100vw - 24px);
+}
+.workspace-header-query .query-filters-categories .query-filters-summary {
+  padding: 0;
+}
+.header-filter-popover {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  max-height: calc(100dvh - 24px);
+  max-width: calc(100vw - 24px);
+  padding: 18px;
+  overflow: auto;
+  border: 1px solid #dce5ee;
+  border-radius: 12px;
+  background: white;
+  color: #023661;
+  box-shadow: 0 14px 45px #0a0c1226;
+  font-size: 13px;
+}
+.header-filter-title {
+  display: block;
+  margin-bottom: 14px;
+  font-size: 14px;
+}
+.header-filter-popover
+  :is(.admin-filter-input, input[type="search"], input[type="text"]) {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+}
+.header-filter-popover .admin-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+}
+.header-filter-options {
+  display: grid;
+  gap: 4px;
+}
+.header-filter-options label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+.header-filter-options label:has(input:checked) {
+  background: #edf3f9;
+}
+.header-filter-options input {
+  accent-color: #023661;
+}
+.header-filter-popover .sales-toolbar {
+  flex-wrap: wrap;
+}
+@media (max-width: 600px) {
+  .workspace-header-query {
+    justify-content: flex-start;
+  }
+  .workspace-header-query .query-filters-categories .query-filters-grid {
+    flex-wrap: wrap;
+  }
+  .workspace-header-query .query-filters-categories {
+    flex-wrap: wrap;
+  }
+  .workspace-header-query .query-filters-categories .query-filters-summary {
+    margin-left: 0;
+  }
+}
+.header-filter-popover .query-filters {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.header-filter-popover .query-filters-heading {
+  display: none;
+}
+.header-filter-popover .query-filters-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.workspace-header-query > .sales-toolbar,
+.workspace-header-query .insights-filters,
+.workspace-header-query .admin-catalog-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+}
+@media (max-width: 480px) {
+  .header-filter-popover .query-filters-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

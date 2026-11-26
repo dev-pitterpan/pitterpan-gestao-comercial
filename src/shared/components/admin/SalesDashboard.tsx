@@ -1,4 +1,5 @@
 "use client";
+import WorkspaceQueryControls from "./WorkspaceQueryControls";
 import { PageHeading } from "./Primitives";
 import SalesFilterPanel from "./SalesFilterPanel";
 import ShopifySummary from "./ShopifySummary";
@@ -385,6 +386,21 @@ export default function SalesDashboard({
         : "Recebido confirmado";
   return (
     <div className="sales-dashboard">
+      <WorkspaceQueryControls>
+        <SalesFilterPanel
+          categories
+          compact
+          filters={filters}
+          categoryDraft={categoryDraft}
+          onCategoryChange={setCategoryDraft}
+          finance={finance}
+          deliveries={data?.deliveries}
+          onChange={(patch) => {
+            resetList();
+            setFilters((old) => ({ ...old, ...patch }));
+          }}
+        />
+      </WorkspaceQueryControls>
       <PageHeading
         eyebrow={
           finance
@@ -396,20 +412,6 @@ export default function SalesDashboard({
         title={title}
         description={description}
         compactFilters={false}
-        filters={
-          <SalesFilterPanel
-            compact
-            filters={filters}
-            categoryDraft={categoryDraft}
-            onCategoryChange={setCategoryDraft}
-            finance={finance}
-            deliveries={data?.deliveries}
-            onChange={(patch) => {
-              resetList();
-              setFilters((old) => ({ ...old, ...patch }));
-            }}
-          />
-        }
         navigationAction={
           <div className="sales-toolbar">
             <div className="sales-period-field">
