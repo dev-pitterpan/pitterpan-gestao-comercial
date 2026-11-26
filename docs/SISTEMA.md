@@ -48,6 +48,12 @@ A Visão geral reúne os indicadores da Shopify, o gráfico financeiro em granul
 | Equipe                 | `/gestor/usuarios/`                                                | Gestão das contas da equipe e perfis. Acesso Admin.                                                                                                                                                                  |
 | Configurações          | `/gestor/configuracoes/`                                           | Limites de estoque e informações de acesso e integração. Acesso Admin.                                                                                                                                               |
 
+### Endereços na lista de pedidos e gráficos de evolução — 26/11/2026
+
+A coluna **Endereço de entrega** fica ao lado de **Entrega escolhida**. A rota autenticada consulta os dados postais da página em lote na Shopify, inclusive ao navegar entre páginas. O endereço completo não é gravado na base da gestão. A coluna distingue retirada, endereço ausente e falha de consulta.
+
+Recebimentos, estornos e relatórios de evolução que usavam a visualização triangular adotam a área suave em fundo claro, com a opção de colunas arredondadas. A curva percorre os valores originais, respeita lacunas e mantém a comparação histórica quando disponível. Comparações por categoria usam colunas arredondadas no modo comparativo.
+
 ### Identidade e gráficos financeiros
 
 A interface administrativa usa superfícies claras, azul-cobalto para navegação e ações, coral e amarelo da marca em destaques e cores semânticas com rótulos nos estados operacionais. A paleta da interface fica em `src/shared/styles/admin/brand.css` e as cores de gráficos legados e do mapa ficam em `src/shared/lib/admin/brand-colors.ts`.

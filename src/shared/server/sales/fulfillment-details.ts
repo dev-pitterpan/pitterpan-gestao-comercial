@@ -73,26 +73,65 @@ type Client = {
   ): Promise<T>;
 };
 const addressField = z.string().trim().nullish();
-const addressResponse = z.object({
-  order: z
+const addressFields =
+  "id shippingAddress{address1 address2 city provinceCode zip country}";
+const addressOrder = z.object({
+  id: gid("Order"),
+  shippingAddress: z
     .object({
-      id: gid("Order"),
-      shippingAddress: z
-        .object({
-          address1: addressField,
-          address2: addressField,
-          city: addressField,
-          provinceCode: addressField,
-          zip: addressField,
-          country: addressField,
-        })
-        .nullable(),
+      address1: addressField,
+      address2: addressField,
+      city: addressField,
+      provinceCode: addressField,
+      zip: addressField,
+      country: addressField,
     })
     .nullable(),
 });
 type ShippingAddress =
   | { status: "available"; lines: string[] }
   | { status: "missing" | "unavailable" };
+
+function formatShippingAddress(
+  order: z.infer<typeof addressOrder>,
+): ShippingAddress {
+  const address = order.shippingAddress;
+  if (!address) return { status: "missing" };
+  const city = [address.city, address.provinceCode].filter(Boolean).join(" – ");
+  const lines = [
+    address.address1,
+    address.address2,
+    [city, address.zip].filter(Boolean).join(" · "),
+    address.country,
+  ].filter((value): value is string => Boolean(value));
+  return lines.length ? { status: "available", lines } : { status: "missing" };
+}
+
+/** Look up the current page in a single read, without storing customer addresses. */
+export async function readShippingAddresses(
+  client: Client,
+  ids: string[],
+): Promise<Record<string, ShippingAddress>> {
+  if (!ids.length) return {};
+  try {
+    const { nodes } = await client.query<{ nodes: unknown[] }>(
+      `query DeliveryAddresses($ids:[ID!]!){
+        nodes(ids:$ids){... on Order{${addressFields}}}
+      }`,
+      { ids: z.array(gid("Order")).parse(ids) },
+      { timeoutMs: 6000 },
+    );
+    const addresses: Record<string, ShippingAddress> = {};
+    for (const node of nodes) {
+      const parsed = addressOrder.safeParse(node);
+      if (parsed.success && ids.includes(parsed.data.id))
+        addresses[parsed.data.id] = formatShippingAddress(parsed.data);
+    }
+    return addresses;
+  } catch {
+    return {};
+  }
+}
 
 /** Read the address for the opened order only, independently of item details. */
 export async function readShippingAddress(
@@ -101,29 +140,15 @@ export async function readShippingAddress(
 ): Promise<ShippingAddress> {
   gid("Order").parse(id);
   try {
-    const raw = await client.query<unknown>(
-      `query DeliveryAddress($id:ID!){
-        order(id:$id){id shippingAddress{address1 address2 city provinceCode zip country}}
-      }`,
+    const raw = await client.query<{ order: unknown }>(
+      `query DeliveryAddress($id:ID!){order(id:$id){${addressFields}}}`,
       { id },
       { timeoutMs: 6000 },
     );
-    const { order } = addressResponse.parse(raw);
-    if (!order || order.id !== id) return { status: "unavailable" };
-    const address = order.shippingAddress;
-    if (!address) return { status: "missing" };
-    const city = [address.city, address.provinceCode]
-      .filter(Boolean)
-      .join(" – ");
-    const lines = [
-      address.address1,
-      address.address2,
-      [city, address.zip].filter(Boolean).join(" · "),
-      address.country,
-    ].filter((value): value is string => Boolean(value));
-    return lines.length
-      ? { status: "available", lines }
-      : { status: "missing" };
+    const order = addressOrder.parse(raw.order);
+    return order.id === id
+      ? formatShippingAddress(order)
+      : { status: "unavailable" };
   } catch {
     return { status: "unavailable" };
   }

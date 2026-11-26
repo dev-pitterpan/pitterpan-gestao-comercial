@@ -222,10 +222,10 @@
   background: none;
   grid-template-columns: minmax(0, 1fr);
 }
-.reference-peaks {
+.reference-bars {
   min-width: 0;
 }
-.reference-peaks-readout {
+.reference-bars-readout {
   display: flex;
   align-items: baseline;
   gap: 12px;
@@ -234,23 +234,23 @@
   color: #b9c1c9;
   font-size: 12px;
 }
-.reference-peaks-readout strong {
+.reference-bars-readout strong {
   font-size: 15px;
   color: #f5f6f8;
   font-weight: 600;
   text-align: right;
 }
-.reference-peaks > svg {
+.reference-bars > svg {
   display: block;
   width: 100%;
   height: auto;
   max-height: 240px;
 }
-.reference-peaks > svg text {
+.reference-bars > svg text {
   fill: #b9c1c9;
   font-size: 12px;
 }
-.reference-peak-legend {
+.reference-bar-legend {
   padding: 12px 0 0;
   margin: 14px 0 0;
   list-style: none;
@@ -259,26 +259,26 @@
   gap: 14px 16px;
   border-top: 1px solid #41444b;
 }
-.reference-peak-legend li {
+.reference-bar-legend li {
   display: grid;
   grid-template-columns: 24px minmax(0, 1fr);
   gap: 8px;
 }
-.reference-peak-legend .infographic-rank-index {
+.reference-bar-legend .infographic-rank-index {
   border: 0;
   border-radius: 0;
   width: 24px;
   height: 20px;
   border-bottom: 2px solid #6999bd;
 }
-.reference-peak-legend .infographic-rank-title {
+.reference-bar-legend .infographic-rank-title {
   display: grid;
   gap: 5px;
   margin-bottom: 3px;
   font-size: 12px;
   line-height: 1.5;
 }
-.reference-peak-legend small {
+.reference-bar-legend small {
   color: #b0b8c1;
   font-size: 11px;
 }
@@ -340,18 +340,18 @@
   .admin-app.workspace-shell .reference-radial .infographic-orbit-legend {
     grid-template-columns: minmax(0, 1fr);
   }
-  .reference-peak-legend {
+  .reference-bar-legend {
     grid-template-columns: minmax(0, 1fr);
   }
   .reference-radial-figure {
     max-width: 290px;
   }
-  .reference-peaks-readout {
+  .reference-bars-readout {
     display: grid;
     gap: 5px;
     padding-bottom: 8px;
   }
-  .reference-peaks-readout strong {
+  .reference-bars-readout strong {
     text-align: left;
   }
 }
@@ -423,4 +423,87 @@
 .reference-journey :focus-visible {
   outline: 2px solid #a1ceeb;
   outline-offset: 3px;
+}
+
+.admin-app.workspace-shell .reference-timeline {
+  background: linear-gradient(160deg, #fff 45%, #f5f8ff);
+  border-color: var(--brand-line);
+  color: var(--brand-ink);
+  border-radius: 18px;
+  padding: clamp(12px, 2.2vw, 22px);
+}
+
+.admin-app.workspace-shell .reference-timeline .infographic-tools {
+  border-color: var(--brand-line);
+}
+
+.admin-app.workspace-shell
+  .reference-timeline
+  :is(
+    .infographic-kicker,
+    .infographic-readout > span,
+    .infographic-readout > small,
+    .infographic-compare,
+    .infographic-empty,
+    .infographic-note
+  ) {
+  color: var(--brand-muted);
+}
+.admin-app.workspace-shell .reference-timeline .infographic-readout > strong {
+  color: var(--brand-ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-app.workspace-shell .reference-timeline .infographic-switch {
+  background: #f2f5fb;
+  border: 1px solid var(--brand-line);
+  border-radius: 10px;
+  padding: 3px;
+  gap: 3px;
+}
+.admin-app.workspace-shell .reference-timeline .infographic-switch button {
+  border-radius: 7px;
+  color: var(--brand-muted);
+}
+.admin-app.workspace-shell
+  .reference-timeline
+  .infographic-switch
+  button[aria-pressed="true"] {
+  background: #fff;
+  color: #244bc0;
+  box-shadow: 0 1px 4px #142b5320;
+}
+
+.admin-app.workspace-shell .reference-timeline .infographic-plot svg text {
+  fill: var(--brand-muted);
+}
+.admin-app.workspace-shell .reference-timeline .infographic-grid {
+  stroke: var(--brand-line);
+  stroke-dasharray: 2 5;
+}
+.admin-app.workspace-shell .reference-timeline .infographic-zero {
+  stroke: #aabbd6;
+}
+
+.admin-app.workspace-shell
+  .infographic-finance-tile:has(> .reference-timeline) {
+  background: #fff;
+  border: 1px solid var(--brand-line);
+  border-radius: 20px;
+  padding: clamp(12px, 2vw, 18px);
+}
+.admin-app.workspace-shell
+  .infographic-finance-tile:has(> .reference-timeline)
+  > header {
+  padding: 0 0 14px;
+  border: 0;
+}
+.admin-app.workspace-shell
+  .infographic-finance-tile:has(> .reference-timeline)
+  > header
+  :is(h2, strong, .infographic-kicker) {
+  color: var(--brand-ink);
+}
+.admin-app.workspace-shell .infographic-finance-tile > .reference-timeline {
+  border: 1px solid var(--brand-line);
 }
