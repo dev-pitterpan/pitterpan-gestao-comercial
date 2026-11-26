@@ -308,7 +308,10 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
       assert.equal(filteredSummary.status, 200);
       const filteredSummaryHtml = await filteredSummary.text();
       assert.match(filteredSummaryHtml, /aria-label="Filtros de vendas"/);
-      assert.match(filteredSummaryHtml, /title="Categoria do produto: baloes"/);
+      assert.match(
+        filteredSummaryHtml,
+        /<input(?=[^>]*id="sales-category")(?=[^>]*type="search")(?=[^>]*value="baloes")[^>]*>/,
+      );
       assert.match(filteredSummaryHtml, /title="Situação do pagamento: Pagos"/);
       const scopedFinance = await get(
         "/gestor/vendas/recebimentos/?fulfillment=AWAITING&category=baloes",
@@ -316,7 +319,10 @@ for (const [application, port] of [["gestao-comercial", "3189"]]) {
       );
       assert.equal(scopedFinance.status, 200);
       const scopedFinanceHtml = await scopedFinance.text();
-      assert.match(scopedFinanceHtml, /title="Categoria do produto: baloes"/);
+      assert.match(
+        scopedFinanceHtml,
+        /<input(?=[^>]*id="sales-category")(?=[^>]*type="search")(?=[^>]*value="baloes")[^>]*>/,
+      );
       assert.doesNotMatch(scopedFinanceHtml, /id="sales-fulfillment"/);
       for (const section of ["desempenho", "catalogo", "prioridades"]) {
         const response = await get(`/gestor/?secao=${section}`, {
