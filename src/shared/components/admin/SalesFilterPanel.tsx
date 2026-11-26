@@ -1,6 +1,5 @@
 "use client";
-import { X } from "lucide-react";
-import HeaderFilterGroup from "./HeaderFilterGroup";
+import { Search, X } from "lucide-react";
 import type { SalesFilters } from "../../server/sales/filters";
 import {
   fulfillmentFilters,
@@ -91,25 +90,18 @@ export default function SalesFilterPanel({
           })),
         ]}
       />
-      <HeaderFilterGroup
-        inline
-        label="Categoria do produto"
-        activeCount={filters.category ? 1 : 0}
-        activeValue={filters.category}
-      >
-        <label htmlFor="sales-category" className="admin-sr-only">
-          Categoria do produto
-        </label>
+      <label className="sales-category-filter" htmlFor="sales-category">
+        <Search size={15} aria-hidden="true" />
+        <span className="admin-sr-only">Buscar categoria do produto</span>
         <input
           id="sales-category"
           type="search"
-          className="admin-filter-input"
           maxLength={200}
           value={categoryDraft}
           onChange={(event) => onCategoryChange(event.target.value)}
-          placeholder="Ex.: balões, confeitaria…"
+          placeholder="Buscar categoria do produto"
         />
-      </HeaderFilterGroup>
+      </label>
       {hasFilters && (
         <button
           className="header-query-clear"
