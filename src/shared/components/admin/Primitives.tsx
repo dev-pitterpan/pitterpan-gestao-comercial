@@ -2,7 +2,6 @@ import Link from "next/link";
 import ContentCategories from "./ContentCategories";
 import RoutineIdentifier from "./RoutineIdentifier";
 import FilterDisclosure from "./FilterDisclosure";
-import HeaderControls from "./HeaderControls";
 import {
   ArrowUpRight,
   Database,
@@ -22,6 +21,8 @@ export function PageHeading({
   action,
   filters,
   compactFilters = true,
+  additionalFilters,
+  activeFilterCount,
 }: {
   eyebrow?: string;
   title: string;
@@ -29,6 +30,8 @@ export function PageHeading({
   action?: React.ReactNode;
   filters?: React.ReactNode;
   compactFilters?: boolean;
+  additionalFilters?: React.ReactNode;
+  activeFilterCount?: number;
 }) {
   return (
     <>
@@ -41,18 +44,26 @@ export function PageHeading({
           </div>
           {description && <p>{description}</p>}
         </div>
-        {(filters || action) && (
-          <div className="admin-page-heading-controls">
-            {filters &&
-              (compactFilters ? (
-                <FilterDisclosure>{filters}</FilterDisclosure>
-              ) : (
-                <HeaderControls>{filters}</HeaderControls>
-              ))}
-            {action}
-          </div>
-        )}
+        {action && <div className="admin-page-heading-controls">{action}</div>}
       </header>
+      {filters &&
+        (compactFilters ? (
+          <FilterDisclosure>{filters}</FilterDisclosure>
+        ) : additionalFilters ? (
+          <FilterDisclosure controls={filters} activeCount={activeFilterCount}>
+            {additionalFilters}
+          </FilterDisclosure>
+        ) : (
+          <div
+            className="routine-query"
+            role="group"
+            aria-label="Consulta da rotina"
+          >
+            <div className="routine-query-row">
+              <div className="routine-query-primary">{filters}</div>
+            </div>
+          </div>
+        ))}
       <ContentCategories />
     </>
   );
