@@ -94,7 +94,6 @@ export default function SalesFilterPanel({
       <HeaderFilterGroup
         inline
         label="Categoria do produto"
-        activeCount={filters.category ? 1 : 0}
         activeValue={filters.category}
       >
         <label htmlFor="sales-category" className="admin-sr-only">

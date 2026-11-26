@@ -1,9 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import HeaderFilterGroup from "./HeaderFilterGroup";
-import WorkspaceQueryControls from "./WorkspaceQueryControls";
 import DragScroll from "./DragScroll";
-import { Download, Search, ArrowUpRight, Package } from "lucide-react";
+import { Search, ArrowUpRight, Package } from "lucide-react";
 import type { AdminProduct, AdminQuery } from "../../server/admin/repository";
 import { formatMoney } from "../../lib/money";
 import { cardImage } from "../../lib/catalog/image";
@@ -19,28 +18,27 @@ export function stockLabel(stock: number | null, low: number, high: number) {
           ? { label: "Estoque alto", tone: "green" }
           : { label: "Disponível", tone: "blue" };
 }
+const stockOptions = [
+  { value: "all", label: "Todo o estoque" },
+  { value: "low", label: "Estoque baixo" },
+  { value: "above", label: "Acima do estoque baixo" },
+  { value: "high", label: "Estoque alto" },
+  { value: "out", label: "Sem estoque" },
+  { value: "unknown", label: "Não informado" },
+] as const;
+
 export function ProductFilters({
   query,
-  canExport,
   sortable,
 }: {
   query: AdminQuery;
-  canExport: boolean;
   sortable: boolean;
 }) {
   const [stock, setStock] = useState(query.stock);
   useEffect(() => setStock(query.stock), [query.stock]);
-  const { page: _page, ...filters } = query;
-  const exportHref =
-    "/api/admin/products/?" +
-    new URLSearchParams({ ...filters, format: "csv" });
   return (
     <>
-      <HeaderFilterGroup
-        label="Categoria"
-        activeCount={query.category ? 1 : 0}
-        activeValue={query.category}
-      >
+      <HeaderFilterGroup label="Categoria" activeValue={query.category}>
         <label className="workspace-filter-label">
           Categoria
           <input
@@ -53,11 +51,7 @@ export function ProductFilters({
           />
         </label>
       </HeaderFilterGroup>
-      <HeaderFilterGroup
-        label="Marca"
-        activeCount={query.vendor ? 1 : 0}
-        activeValue={query.vendor}
-      >
+      <HeaderFilterGroup label="Marca" activeValue={query.vendor}>
         <label className="workspace-filter-label">
           Marca
           <input
@@ -71,23 +65,23 @@ export function ProductFilters({
         </label>
       </HeaderFilterGroup>
       {query.offers === "1" && <input type="hidden" name="offers" value="1" />}
-      <HeaderFilterGroup label="Estoque" activeCount={stock !== "all" ? 1 : 0}>
+      <HeaderFilterGroup
+        label="Estoque"
+        activeValue={
+          stock === "all"
+            ? undefined
+            : stockOptions.find((option) => option.value === stock)?.label
+        }
+      >
         <div className="header-filter-options">
-          {[
-            { value: "all", label: "Todo o estoque" },
-            { value: "low", label: "Estoque baixo" },
-            { value: "above", label: "Acima do estoque baixo" },
-            { value: "high", label: "Estoque alto" },
-            { value: "out", label: "Sem estoque" },
-            { value: "unknown", label: "Não informado" },
-          ].map((option) => (
+          {stockOptions.map((option) => (
             <label key={option.value}>
               <input
                 type="radio"
                 name="stock"
                 value={option.value}
                 checked={stock === option.value}
-                onChange={() => setStock(option.value as AdminQuery["stock"])}
+                onChange={() => setStock(option.value)}
               />
               <span>{option.label}</span>
             </label>
@@ -95,18 +89,6 @@ export function ProductFilters({
         </div>
       </HeaderFilterGroup>
       {sortable && <ProductOrder sort={query.sort} />}
-      {canExport && (
-        <WorkspaceQueryControls>
-          <a
-            className="admin-button"
-            href={exportHref}
-            download
-            title="Exportar resultados filtrados"
-          >
-            <Download size={16} /> Exportar
-          </a>
-        </WorkspaceQueryControls>
-      )}
     </>
   );
 }
@@ -123,8 +105,11 @@ function ProductOrder({ sort }: { sort: AdminQuery["sort"] }) {
   return (
     <HeaderFilterGroup
       label="Ordenação"
-      activeCount={value === "updated_desc" ? 0 : 1}
-      activeValue={orderOptions.find((option) => option.value === value)?.label}
+      activeValue={
+        value === "updated_desc"
+          ? undefined
+          : orderOptions.find((option) => option.value === value)?.label
+      }
     >
       <div
         className="header-filter-options"

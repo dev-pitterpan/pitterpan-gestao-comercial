@@ -40,6 +40,11 @@ export default function AdminSelect({
   useDatePopover(open && headerMenu && !disabled, trigger, menu, 320, 320);
   const autoFilter = useAutoFilter();
   const selected = options.findIndex((option) => option.value === value);
+  const option = options[selected];
+  const selectedLabel = option?.label || value;
+  const activeValue =
+    triggerLabel && value !== neutralValue ? selectedLabel : "";
+  const valueId = `${listId}-value`;
   useEffect(() => {
     if (!open) return;
     function dismiss(event: PointerEvent) {
@@ -77,19 +82,14 @@ export default function AdminSelect({
         ref={trigger}
         disabled={disabled}
         id={id}
-        title={
-          triggerLabel
-            ? `${label}: ${options[selected]?.label || value}`
-            : undefined
-        }
+        title={triggerLabel ? `${label}: ${selectedLabel}` : undefined}
         data-header-filter={headerMenu || undefined}
-        data-filter-active={
-          triggerLabel && value && value !== neutralValue ? "true" : undefined
-        }
+        data-filter-active={activeValue ? "true" : undefined}
         type="button"
         className="admin-select-trigger"
         role="combobox"
         aria-label={label}
+        aria-describedby={activeValue ? valueId : undefined}
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={listId}
@@ -123,21 +123,23 @@ export default function AdminSelect({
         }}
         aria-activedescendant={open ? `${listId}-${active}` : undefined}
       >
-        <span
-          className={
-            options[selected]?.icon ? "admin-select-option-label" : undefined
-          }
-        >
-          {!triggerLabel && options[selected]?.icon}
-          {triggerLabel || options[selected]?.label || label}
-        </span>
-        {triggerLabel && value && value !== neutralValue && (
-          <b
-            className="header-filter-count"
-            aria-label={`Critério ativo: ${options[selected]?.label || value}`}
+        {triggerLabel ? (
+          <span className="header-filter-text">
+            {triggerLabel}
+            {activeValue && (
+              <>
+                {": "}
+                <strong id={valueId}>{activeValue}</strong>
+              </>
+            )}
+          </span>
+        ) : (
+          <span
+            className={option?.icon ? "admin-select-option-label" : undefined}
           >
-            1
-          </b>
+            {option?.icon}
+            {option?.label || label}
+          </span>
         )}
         <ChevronDown size={15} aria-hidden="true" />
       </button>
