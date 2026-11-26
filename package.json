@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.104.5",
+    "echarts": "6.1.0",
     "geist": "1.9.2",
     "leaflet": "^1.9.4",
     "lucide-react": "^1.60.0",

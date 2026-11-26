@@ -425,10 +425,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-top: 1px solid #e5ebf0;
+  border-top: 1px solid var(--admin-line);
   gap: 12px;
+  flex-wrap: wrap;
 }
-.workspace-footer > span:last-child {
+.workspace-footer-controls,
+.workspace-footer-controls > span {
   display: flex;
   gap: 6px;
   align-items: center;
@@ -1630,7 +1632,7 @@
   .workspace-publish-note > div {
     min-width: 100%;
   }
-  .workspace-footer > span:last-child {
+  .workspace-footer-controls > span {
     display: none;
   }
 }

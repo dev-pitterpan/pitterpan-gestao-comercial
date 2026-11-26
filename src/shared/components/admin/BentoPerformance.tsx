@@ -88,7 +88,6 @@ export default function BentoPerformance({
           refunded={total.refunded}
           net={total.net}
           href={receipts}
-          variant="bar"
         />
         <section className="bento-tile overview-product-ranking">
           <header>

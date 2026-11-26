@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { bentoSeries, type BentoDay } from "../../lib/admin/bento-series";
 import { chartDate } from "../../lib/admin/infographic";
-import InfographicTimeline from "./InfographicTimeline";
+import FinancialTrend from "./FinancialTrend";
 export default function BentoRevenueChart({
   rows,
   previous,
@@ -18,9 +18,21 @@ export default function BentoRevenueChart({
 }) {
   const [metric, setMetric] = useState<"received" | "net">("received"),
     [period, setPeriod] = useState<"day" | "week">("day");
+  const points = bentoSeries(rows, metric, period).map(
+    ({ start, end, value }) => ({
+      label:
+        start === end
+          ? chartDate(start)
+          : `${chartDate(start)} a ${chartDate(end)}`,
+      value,
+    }),
+  );
   const comparison =
     period === "day" && previous?.some((row) => row[metric] !== null)
-      ? bentoSeries(previous, metric, "day").map((entry) => entry.value)
+      ? bentoSeries(previous, metric, "day").map(({ start, value }) => ({
+          label: chartDate(start),
+          value,
+        }))
       : undefined;
   const money = (value: number | null) =>
     value === null
@@ -30,12 +42,11 @@ export default function BentoRevenueChart({
         );
   return (
     <section
-      className="bento-tile bento-revenue bento-infographic"
+      className="bento-tile bento-revenue bento-financial"
       aria-label="Evolução financeira do período"
     >
       <header>
         <div>
-          <span className="bento-eyebrow">EVOLUÇÃO FINANCEIRA</span>
           <h2>
             {metric === "received" ? "Recebimentos" : "Líquido após reembolsos"}
           </h2>
@@ -90,19 +101,11 @@ export default function BentoRevenueChart({
           ))}
         </div>
       </div>
-      <InfographicTimeline
+      <FinancialTrend
         key={`${metric}-${period}`}
-        rows={bentoSeries(rows, metric, period).map((row) => ({
-          day:
-            row.start === row.end
-              ? row.start
-              : `${chartDate(row.start)} — ${chartDate(row.end)}`,
-          value: row.value,
-        }))}
+        points={points}
         previous={comparison}
-        initial="area"
-        label={metric === "received" ? "Recebido" : "Líquido"}
-        format={money}
+        currency={currency}
       />
     </section>
   );

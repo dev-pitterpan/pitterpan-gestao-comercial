@@ -1,16 +1,27 @@
 /* Management-only identity. Public catalogs and sign-in keep their own themes. */
 .admin-app.workspace-shell {
-  --brand-ink: #0a0c12;
-  --brand-blue: #023661;
-  --brand-blue-raised: #164e7b;
-  --brand-blue-soft: #eaf1f9;
-  --brand-charcoal: #3f3a42;
-  --brand-slate: #76828e;
-  --brand-muted: #596877;
-  --brand-accent: #c4473d;
-  --brand-accent-soft: #f6f6f6;
-  --brand-line: #dfe6ee;
-  --brand-canvas: #f5f7fa;
+  --brand-ink: #14233c;
+  --brand-blue: #2348ad;
+  --brand-blue-raised: #193c9e;
+  --brand-blue-soft: #eaf0ff;
+  --brand-midnight: #11234d;
+  --brand-muted: #52617a;
+  --brand-accent: #b62340;
+  --brand-accent-vivid: #f73a53;
+  --brand-accent-soft: #fff0f3;
+  --brand-yellow: #ffd45d;
+  --brand-gold-ink: #865300;
+  --brand-gold-soft: #fff4d6;
+  --brand-success: #11664e;
+  --brand-success-soft: #e4f7ef;
+  --brand-line: #dfe6f2;
+  --brand-canvas: #f3f6fc;
+  --brand-surface: #fff;
+  --brand-surface-alt: #f7f9fe;
+  --brand-focus: #335bd7;
+  --brand-series: #315bd7;
+  --brand-series-prior: #946112;
+  --brand-shadow: 0 2px 4px #142b5810, 0 12px 24px #142b5805;
 }
 .admin-app.workspace-shell,
 .admin-app.workspace-shell .workspace-main {
@@ -18,12 +29,12 @@
   --admin-muted: var(--brand-muted);
   --admin-blue: var(--brand-blue);
   --admin-blue-soft: var(--brand-blue-soft);
-  --admin-teal: #286da8;
-  --admin-teal-soft: #edf3fa;
-  --admin-green: #023661;
-  --admin-green-soft: #f2f2f2;
-  --admin-amber: #c4473d;
-  --admin-amber-soft: #f3f3f3;
+  --admin-teal: var(--brand-blue);
+  --admin-teal-soft: var(--brand-blue-soft);
+  --admin-green: var(--brand-success);
+  --admin-green-soft: var(--brand-success-soft);
+  --admin-amber: var(--brand-gold-ink);
+  --admin-amber-soft: var(--brand-gold-soft);
   --admin-coral: var(--brand-accent);
   --admin-coral-soft: var(--brand-accent-soft);
   --admin-line: var(--brand-line);
@@ -32,27 +43,27 @@
   color: var(--brand-ink);
 }
 .admin-app.workspace-shell .workspace-rail {
-  background: linear-gradient(180deg, #023661, #072640);
-  color: #ccdaea;
+  background: linear-gradient(175deg, #203e99, var(--brand-midnight) 68%);
+  color: #e5ebfd;
 }
 .admin-app.workspace-shell .workspace-rail nav button.is-selected {
-  background: #e2edfa;
+  background: var(--brand-surface);
   color: var(--brand-blue);
   box-shadow: 0 3px 14px #00000016;
 }
 .admin-app.workspace-shell .workspace-active-dot {
-  background: var(--brand-accent);
+  background: var(--brand-accent-vivid);
 }
 .admin-app.workspace-shell .workspace-routine.is-active {
-  background: #eaf1f9;
-  border-color: #d7e4f2;
+  background: var(--brand-blue-soft);
+  border-color: #cfdbfb;
   color: var(--brand-blue) !important;
 }
 .admin-app.workspace-shell .workspace-routine.is-active > svg {
   color: var(--brand-blue);
 }
 .admin-app.workspace-shell .workspace-catalog-link {
-  background: #f0f5fb;
+  background: var(--brand-surface-alt);
   border-color: #dce6f2;
   color: var(--brand-blue) !important;
 }
@@ -68,11 +79,11 @@
   color: var(--brand-ink);
 }
 .admin-app.workspace-shell .workspace-main .admin-eyebrow {
-  color: #526e8c;
+  color: var(--brand-muted);
 }
 .admin-app.workspace-shell .content-categories {
-  background: #edf1f7;
-  border-color: #e0e6ef;
+  background: var(--brand-blue-soft);
+  border-color: var(--brand-line);
 }
 .admin-app.workspace-shell .content-categories > a[aria-current="page"] {
   color: var(--brand-blue);
@@ -83,7 +94,7 @@
 .admin-app.workspace-shell
   .content-overview-categories
   > a[aria-current="page"] {
-  border-bottom-color: var(--brand-accent);
+  border-bottom-color: var(--brand-accent-vivid);
 }
 .admin-app.workspace-shell .admin-button-primary {
   background: var(--brand-blue);
@@ -96,7 +107,7 @@
 }
 .admin-app.workspace-shell
   :is(button, a, input, select, textarea, summary):focus-visible {
-  outline-color: #4e91ca;
+  outline-color: var(--brand-focus);
 }
 .admin-app.workspace-shell .workspace-main .workspace-metric--green,
 .admin-app.workspace-shell .workspace-main .workspace-metric--teal {
@@ -112,10 +123,10 @@
   .workspace-chart-type
   button[aria-pressed="true"] {
   color: var(--brand-blue);
-  background: #eaf1f9;
+  background: var(--brand-blue-soft);
 }
 .admin-app.workspace-shell .workspace-main .sales-trend {
-  --trend-color: #286da8;
+  --trend-color: var(--brand-series);
 }
 .admin-app.workspace-shell .workspace-main .sales-trend--refunds {
   --trend-color: var(--brand-accent);
@@ -134,7 +145,7 @@
 }
 .admin-app.workspace-shell .agenda-premium-heading-icon {
   color: var(--brand-blue);
-  background: #eaf1f9;
+  background: var(--brand-blue-soft);
 }
 .admin-app.workspace-shell .agenda-premium-primary {
   background: var(--brand-blue);
@@ -166,7 +177,7 @@
 }
 .admin-app.workspace-shell .delivery-content-tabs button[aria-current="page"] {
   color: var(--brand-blue);
-  border-bottom-color: var(--brand-accent);
+  border-bottom-color: var(--brand-accent-vivid);
 }
 .admin-app.workspace-shell .delivery-world-card,
 .admin-app.workspace-shell .delivery-world-card .delivery-map-canvas {
@@ -196,25 +207,129 @@
   background: var(--brand-accent);
 }
 
-/* Legacy tone names describe business states, never separate color palettes. */
-.admin-app.workspace-shell :is(.blue, .green, .violet) {
-  color: #023661 !important;
+/* Status colors pair readable text with restrained backgrounds. */
+.admin-app.workspace-shell :is(.blue, .violet) {
+  color: var(--brand-blue) !important;
 }
-.admin-app.workspace-shell :is(.rose, .amber, .admin-form-error) {
-  color: #c4473d !important;
+.admin-app.workspace-shell .green {
+  color: var(--brand-success) !important;
+}
+.admin-app.workspace-shell :is(.rose, .admin-form-error) {
+  color: var(--brand-accent) !important;
+}
+.admin-app.workspace-shell .amber {
+  color: var(--brand-gold-ink) !important;
 }
 .admin-app.workspace-shell .neutral {
-  color: #76828e !important;
+  color: var(--brand-muted) !important;
+}
+.admin-app.workspace-shell :is(.admin-badge, .admin-stat-icon).green {
+  background: var(--brand-success-soft);
+}
+.admin-app.workspace-shell :is(.admin-badge, .admin-stat-icon).rose {
+  background: var(--brand-accent-soft);
+}
+.admin-app.workspace-shell :is(.admin-badge, .admin-stat-icon).amber {
+  background: var(--brand-gold-soft);
 }
 .admin-app.workspace-shell
+  :is(.admin-badge, .admin-stat-icon):is(.blue, .violet) {
+  background: var(--brand-blue-soft);
+}
+
+.admin-app.workspace-shell .workspace-header {
+  background: var(--brand-surface);
+  border-color: var(--brand-line);
+}
+
+.admin-app.workspace-shell .workspace-header-location strong,
+.admin-app.workspace-shell .workspace-context h2 {
+  color: var(--brand-ink);
+  font-weight: 650;
+}
+
+.admin-app.workspace-shell
   :is(
-    .admin-badge.rose,
-    .admin-badge.green,
-    .admin-stat-icon.violet,
-    .admin-stat-icon.rose,
-    .admin-stat-icon.amber,
-    .admin-stat-icon.green
+    .workspace-context p,
+    .workspace-overline,
+    .workspace-routine-section h3,
+    .workspace-header-location > div > span
   ) {
-  background: #f4f5f7;
-  border-color: #dfe6ee;
+  color: var(--brand-muted);
+}
+
+.admin-app.workspace-shell .workspace-routine-search {
+  background: var(--brand-surface-alt);
+  border-color: var(--brand-line);
+}
+
+.admin-app.workspace-shell .workspace-main .admin-page-heading p {
+  font-size: 13px;
+}
+
+.admin-app.workspace-shell .workspace-main .admin-panel {
+  border-radius: 16px;
+  box-shadow: var(--brand-shadow);
+}
+
+.admin-app.workspace-shell .workspace-main .admin-button {
+  border-color: var(--brand-line);
+  color: var(--brand-blue);
+  font-size: 12px;
+}
+.admin-app.workspace-shell .workspace-main .admin-button-primary {
+  background: var(--brand-blue);
+  border-color: var(--brand-blue);
+  color: white;
+}
+.admin-app.workspace-shell
+  .workspace-main
+  .admin-button-primary:hover:not(:disabled) {
+  background: var(--brand-blue-raised);
+  border-color: var(--brand-blue-raised);
+}
+
+.admin-app.workspace-shell
+  .workspace-main
+  :is(.admin-table, .sales-order-table, .analytics-table)
+  th {
+  background: var(--brand-blue-soft);
+  color: var(--brand-ink);
+  border-color: var(--brand-line);
+  font-size: 11px;
+}
+.admin-app.workspace-shell
+  .workspace-main
+  :is(.admin-table, .sales-order-table, .analytics-table)
+  td {
+  border-color: var(--brand-line);
+}
+.admin-app.workspace-shell
+  .workspace-main
+  :is(.admin-table, .sales-order-table, .analytics-table)
+  tbody
+  tr:hover {
+  background: var(--brand-surface-alt);
+}
+
+.admin-app.workspace-shell .content-navigation-row {
+  background: var(--brand-surface-alt);
+  border-color: var(--brand-line);
+}
+.admin-app.workspace-shell .content-navigation-row .content-categories {
+  background: transparent;
+}
+
+.admin-app.workspace-shell .admin-product-panel .admin-table td strong {
+  color: var(--brand-ink);
+  font-weight: 600;
+}
+
+.admin-app.workspace-shell .admin-product-panel .admin-table td small {
+  color: var(--brand-muted);
+}
+
+.admin-app.workspace-shell .workspace-rail nav button:focus-visible {
+  outline-color: var(--brand-yellow);
+  outline-offset: -2px;
 }

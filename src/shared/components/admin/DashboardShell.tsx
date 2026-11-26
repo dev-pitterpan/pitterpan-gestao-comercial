@@ -17,7 +17,7 @@ import {
   activeRoutine,
 } from "../../lib/admin/workspace-navigation";
 import { WorkspaceMenu, WorkspaceRail } from "./WorkspaceNavigation";
-import PartyExperience from "./PartyExperience";
+import PartyExperience, { PartyMotionControl } from "./PartyExperience";
 import { ContentAccess } from "./ContentCategories";
 import { catalogDocumentClasses } from "../../lib/catalog/document-theme";
 
@@ -241,9 +241,12 @@ export default function DashboardShell({
         </main>
         <footer className="workspace-footer">
           <span>Pitter Pan Festas · Gestão Comercial</span>
-          <span>
-            <ShieldCheck size={13} /> Área da equipe
-          </span>
+          <div className="workspace-footer-controls">
+            <span>
+              <ShieldCheck size={13} /> Área da equipe
+            </span>
+            <PartyMotionControl />
+          </div>
         </footer>
       </div>
     </PartyExperience>

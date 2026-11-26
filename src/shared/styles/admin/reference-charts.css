@@ -6,8 +6,8 @@
     .infographic-radial,
     .infographic-funnel
   ) {
-  background: #132d46;
-  border: 1px solid #304b64;
+  background: var(--brand-midnight);
+  border: 1px solid #35518b;
   border-radius: 14px;
   padding: 18px;
   box-shadow: none;
@@ -304,134 +304,6 @@
 .admin-app.workspace-shell .infographic-finance-tile > .infographic-timeline {
   border: 0;
 }
-.admin-app.workspace-shell .reference-sheet .bento-board {
-  gap: 12px;
-  align-items: start;
-}
-.admin-app.workspace-shell
-  .reference-sheet
-  :is(.bento-revenue, .bento-composition, .bento-activity, .bento-balance) {
-  background: #132d46;
-  color: #e0e4e9;
-  border: 1px solid #304b64;
-  border-radius: 14px;
-  padding: 18px;
-}
-.admin-app.workspace-shell
-  .reference-sheet
-  :is(.bento-revenue, .bento-composition, .bento-activity, .bento-balance)
-  h2 {
-  color: #f1f3f5;
-  font-size: 15px;
-}
-.admin-app.workspace-shell
-  .reference-sheet
-  :is(.bento-revenue, .bento-composition, .bento-activity, .bento-balance)
-  .bento-eyebrow {
-  color: #b0b8c1;
-  font-size: 11px;
-}
-.admin-app.workspace-shell
-  .reference-sheet
-  .bento-revenue
-  > .infographic-timeline,
-.admin-app.workspace-shell
-  .reference-sheet
-  .bento-composition
-  > .reference-radial {
-  background: none;
-  border: 0;
-  padding: 0;
-}
-.admin-app.workspace-shell
-  .reference-sheet
-  .bento-composition
-  > .reference-radial {
-  margin-top: 14px;
-}
-.admin-app.workspace-shell .reference-sheet .bento-revenue-total {
-  margin-bottom: 14px;
-}
-.admin-app.workspace-shell .reference-sheet .bento-revenue-total strong {
-  font-size: 30px;
-}
-.admin-app.workspace-shell .reference-sheet .bento-revenue-total span {
-  color: #b0b8c1;
-}
-.admin-app.workspace-shell .reference-sheet .bento-chart-toolbar {
-  margin-bottom: 10px;
-}
-.admin-app.workspace-shell .reference-sheet .bento-segments {
-  border-radius: 0;
-}
-.admin-app.workspace-shell .reference-sheet .bento-segments button {
-  border-radius: 0;
-}
-.admin-app.workspace-shell .reference-sheet .bento-activity > p,
-.admin-app.workspace-shell .reference-sheet .bento-composition > p {
-  color: #b0b8c1;
-  font-size: 12px;
-  line-height: 1.6;
-}
-.admin-app.workspace-shell .reference-sheet .bento-tag {
-  background: #3f3a42;
-  color: #dfe5eb;
-  border-radius: 0;
-}
-.admin-app.workspace-shell .reference-sheet .bento-weekday {
-  color: #b0b8c1;
-  font-size: 11px;
-}
-.admin-app.workspace-shell .reference-sheet .bento-calendar {
-  gap: 8px;
-}
-.admin-app.workspace-shell .reference-sheet .bento-calendar button {
-  aspect-ratio: 1;
-  min-height: 28px;
-  max-height: 42px;
-  justify-self: center;
-  width: min(100%, 42px);
-  border-radius: 50%;
-  font-size: 12px;
-}
-.admin-app.workspace-shell
-  .reference-sheet
-  .bento-calendar
-  button[data-level="0"] {
-  background: #30343a;
-  color: #b0b8c1;
-}
-.admin-app.workspace-shell
-  .reference-sheet
-  .bento-calendar
-  button[data-level="-1"] {
-  background: transparent;
-  border-color: #76828e;
-  color: #b0b8c1;
-}
-.admin-app.workspace-shell
-  .reference-sheet
-  .bento-calendar
-  button[aria-pressed="true"] {
-  outline: 2px solid #eef1f4;
-  outline-offset: 2px;
-}
-.admin-app.workspace-shell .reference-sheet .bento-activity footer {
-  color: #b0b8c1;
-  font-size: 12px;
-}
-.admin-app.workspace-shell .reference-sheet .bento-balance dt,
-.admin-app.workspace-shell .reference-sheet .bento-balance dd,
-.admin-app.workspace-shell .reference-sheet .bento-balance a {
-  color: #e0e4e9;
-}
-.admin-app.workspace-shell .reference-sheet .bento-balance dl > div:last-child {
-  background: #02366199;
-  border-color: #6999bd;
-}
-.admin-app.workspace-shell .reference-sheet .bento-balance-note {
-  color: #b0b8c1;
-}
 @media (min-width: 1100px) {
   .admin-app.workspace-shell .infographic-ranking > .reference-radial {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -481,11 +353,6 @@
   }
   .reference-peaks-readout strong {
     text-align: left;
-  }
-  .admin-app.workspace-shell
-    .reference-sheet
-    :is(.bento-revenue, .bento-composition, .bento-activity, .bento-balance) {
-    padding: 14px;
   }
 }
 .reference-open {

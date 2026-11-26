@@ -8,7 +8,6 @@ import {
   PackageCheck,
   Clock3,
   ShieldCheck,
-  Wallet,
 } from "lucide-react";
 import AdminSelect from "./AdminSelect";
 import BentoRevenueChart from "./BentoRevenueChart";
@@ -66,7 +65,7 @@ export default function ShopifySummary({
     Number(total.orders) > 0 ? Number(total.paid) / Number(total.orders) : null;
   return (
     <section
-      className="bento-summary reference-sheet"
+      className="bento-summary shopify-performance"
       aria-label="Resumo comercial da Shopify"
       aria-busy={loading}
     >
@@ -101,7 +100,12 @@ export default function ShopifySummary({
           net={total.net}
           currency={currency}
           href={receipts}
-        />
+        >
+          <Link href={refunds} className="bento-refunds-link">
+            {number(total.refunded_orders)} pedidos com reembolso{" "}
+            <ArrowUpRight size={13} />
+          </Link>
+        </BentoComposition>
         <Link
           className="bento-tile bento-kpi bento-paid"
           href={orders("PAID_ACTIVE")}
@@ -173,39 +177,6 @@ export default function ShopifySummary({
           rows={rows}
           currency={currency}
         />
-        <section
-          className="bento-tile bento-balance"
-          aria-label="Balanço financeiro"
-        >
-          <header>
-            <div>
-              <span className="bento-eyebrow">CONFERÊNCIA</span>
-              <h2>Do recebido ao líquido</h2>
-            </div>
-            <Wallet size={18} />
-          </header>
-          <dl>
-            <div>
-              <dt>Recebido</dt>
-              <dd>{money(total.received)}</dd>
-            </div>
-            <div>
-              <dt>− Reembolsado</dt>
-              <dd>{money(total.refunded)}</dd>
-            </div>
-            <div>
-              <dt>= Líquido</dt>
-              <dd>{money(total.net)}</dd>
-            </div>
-          </dl>
-          <Link href={receipts}>
-            Abrir financeiro <ArrowUpRight size={15} />
-          </Link>
-          <Link href={refunds} className="bento-refunds-link">
-            {number(total.refunded_orders)} pedidos com reembolso{" "}
-            <ArrowUpRight size={13} />
-          </Link>
-        </section>
         <section className="bento-tile bento-statuses">
           <header>
             <div>
