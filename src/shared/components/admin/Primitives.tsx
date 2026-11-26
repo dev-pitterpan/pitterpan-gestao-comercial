@@ -21,8 +21,7 @@ export function PageHeading({
   action,
   filters,
   compactFilters = true,
-  additionalFilters,
-  activeFilterCount,
+  navigationAction,
 }: {
   eyebrow?: string;
   title: string;
@@ -30,8 +29,7 @@ export function PageHeading({
   action?: React.ReactNode;
   filters?: React.ReactNode;
   compactFilters?: boolean;
-  additionalFilters?: React.ReactNode;
-  activeFilterCount?: number;
+  navigationAction?: React.ReactNode;
 }) {
   return (
     <>
@@ -49,10 +47,6 @@ export function PageHeading({
       {filters &&
         (compactFilters ? (
           <FilterDisclosure>{filters}</FilterDisclosure>
-        ) : additionalFilters ? (
-          <FilterDisclosure controls={filters} activeCount={activeFilterCount}>
-            {additionalFilters}
-          </FilterDisclosure>
         ) : (
           <div
             className="routine-query"
@@ -64,7 +58,7 @@ export function PageHeading({
             </div>
           </div>
         ))}
-      <ContentCategories />
+      <ContentCategories action={navigationAction} />
     </>
   );
 }

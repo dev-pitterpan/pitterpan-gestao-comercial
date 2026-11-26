@@ -396,16 +396,9 @@ export default function SalesDashboard({
         title={title}
         description={description}
         compactFilters={false}
-        activeFilterCount={
-          [
-            !finance && filters.status !== "all",
-            !!filters.category,
-            !!filters.delivery && filters.delivery !== "all",
-            !finance && !!filters.fulfillment && filters.fulfillment !== "all",
-          ].filter(Boolean).length
-        }
-        additionalFilters={
+        filters={
           <SalesFilterPanel
+            compact
             filters={filters}
             categoryDraft={categoryDraft}
             onCategoryChange={setCategoryDraft}
@@ -417,7 +410,7 @@ export default function SalesDashboard({
             }}
           />
         }
-        filters={
+        navigationAction={
           <div className="sales-toolbar">
             <div className="sales-period-field">
               <span className="sales-period-label">Período dos pedidos</span>

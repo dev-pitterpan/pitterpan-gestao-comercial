@@ -1,23 +1,16 @@
 "use client";
-import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
-  ArrowUpRight,
   ChevronRight,
   LogOut,
   Menu,
   PanelLeftClose,
   PanelLeftOpen,
-  RefreshCw,
   ShieldCheck,
   X,
 } from "lucide-react";
-import {
-  allowed,
-  operationalRoles,
-  type Role,
-} from "../../server/auth/permissions";
+import type { Role } from "../../server/auth/permissions";
 import {
   visibleWorkspaces,
   workspaceForRoute,
@@ -25,27 +18,16 @@ import {
 } from "../../lib/admin/workspace-navigation";
 import { WorkspaceMenu, WorkspaceRail } from "./WorkspaceNavigation";
 import PartyExperience from "./PartyExperience";
-import ProfilePhoto from "./ProfilePhoto";
 import { ContentAccess } from "./ContentCategories";
 import { catalogDocumentClasses } from "../../lib/catalog/document-theme";
 
 import { commercialModule } from "../../lib/admin/commercial-modules";
 
-const roleLabels = {
-  admin: "Administrador",
-  gerente_compras: "Gerente de Compras",
-  gestor: "Gestor",
-  atendimento: "Atendimento",
-};
 export default function DashboardShell({
   children,
   user,
-  accountLabel,
-  catalogUrl,
 }: {
   children: ReactNode;
-  accountLabel: ReactNode;
-  catalogUrl: string;
   user: { name: string; email: string; role: Role };
 }) {
   const pathname = usePathname() || "/gestor/",
@@ -239,42 +221,6 @@ export default function DashboardShell({
                 )}
                 {title}
               </strong>
-            </div>
-          </div>
-          <div className="workspace-header-actions">
-            {allowed(user.role, operationalRoles) && (
-              <Link
-                className="workspace-sync-link"
-                href="/gestor/sincronizacoes/"
-                title="Central de sincronizações"
-                aria-label="Central de sincronizações"
-              >
-                <RefreshCw size={16} />
-              </Link>
-            )}
-            <Link
-              className="workspace-public-link"
-              href={catalogUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Ver catálogo <ArrowUpRight size={15} />
-            </Link>
-            <div className="workspace-profile">
-              <ProfilePhoto key={user.email} name={user.name} />
-              <Link
-                href="/gestor/minha-conta/"
-                title={
-                  typeof accountLabel === "string"
-                    ? accountLabel
-                    : "Minha conta"
-                }
-              >
-                <strong>{user.name.split(" ").slice(0, 2).join(" ")}</strong>
-                <small>
-                  {accountLabel} · {roleLabels[user.role]}
-                </small>
-              </Link>
             </div>
           </div>
         </header>
