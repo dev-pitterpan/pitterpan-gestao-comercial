@@ -549,7 +549,7 @@
   background: var(--brand-surface);
   color: var(--brand-ink);
   border: 1px solid var(--brand-line);
-  border-radius: 16px;
+  border-radius: 18px;
   box-shadow: var(--brand-shadow);
 }
 .admin-app.workspace-shell .bento-summary .bento-financial h2 {
@@ -601,14 +601,21 @@
   color: var(--brand-blue);
 }
 .financial-trend {
+  --financial-prior-fill: #d9b777;
   min-width: 0;
 }
 .financial-trend-plot {
   width: 100%;
-  height: clamp(220px, 22vw, 300px);
+  height: clamp(225px, 21vw, 290px);
 }
 .financial-trend-interactive {
-  border-radius: 8px;
+  border: 1px solid var(--brand-line);
+  border-radius: 12px;
+  background: linear-gradient(
+    180deg,
+    var(--brand-surface-alt),
+    var(--brand-surface) 85%
+  );
 }
 .financial-trend-interactive:focus-visible {
   outline: 2px solid var(--brand-focus);
@@ -619,7 +626,7 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 6px 16px;
-  margin: 0 0 4px;
+  margin: 0 0 10px;
 }
 .financial-trend-legend :is(span, label) {
   display: inline-flex;
@@ -635,13 +642,23 @@
   width: 16px;
   border-top: 2px solid var(--brand-series);
 }
-.financial-trend-legend label i {
-  border-top: 2px dashed var(--brand-series-prior);
+.financial-trend[data-period="day"] .financial-trend-legend i {
+  width: 8px;
+  height: 11px;
+  border: 0;
+  border-radius: 3px 3px 1px 1px;
+  background: var(--brand-series);
+}
+.financial-trend[data-period="day"] .financial-trend-legend label i {
+  background: var(--financial-prior-fill);
+}
+.financial-trend-legend label:has(input:not(:checked)) i {
+  opacity: 0.5;
 }
 .financial-trend-reading,
 .financial-trend-empty {
   color: var(--brand-muted);
-  margin: 4px 0 0;
+  margin: 7px 0 0;
   min-height: 1.4em;
   font-size: 12px;
   line-height: 1.5;
