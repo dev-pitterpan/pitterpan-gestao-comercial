@@ -11,6 +11,7 @@ import type { CSSProperties, PointerEvent, ReactNode } from "react";
 import { createPortal } from "react-dom";
 import {
   ClipboardList,
+  MapPin,
   MoveDiagonal,
   PanelLeft,
   PanelRight,
@@ -22,12 +23,16 @@ import {
   fulfillmentLabels,
   fulfillmentDescriptions,
 } from "../../lib/admin/fulfillment";
-import type { readFulfillmentDetails } from "../../server/sales/fulfillment-details";
+import type {
+  readFulfillmentDetails,
+  readShippingAddress,
+} from "../../server/sales/fulfillment-details";
 import ProductThumbnail from "./ProductThumbnail";
 import DragScroll from "./DragScroll";
 import PitterSpinner from "./PitterSpinner";
 type Data = Awaited<ReturnType<typeof readFulfillmentDetails>> & {
   customerName: string;
+  shippingAddress?: Awaited<ReturnType<typeof readShippingAddress>>;
 };
 const money = ({ amount, currencyCode }: Data["payment"]["received"]) =>
   new Intl.NumberFormat("pt-BR", {
@@ -428,6 +433,27 @@ function FulfillmentWindow({
                       "Confira os registros de atendimento por produto."}
                 </p>
               </div>
+              <section
+                className="fulfillment-dialog-address"
+                aria-label="Endereço de entrega"
+              >
+                <strong>
+                  <MapPin size={16} aria-hidden="true" /> Endereço de entrega
+                </strong>
+                {data.shippingAddress?.status === "available" ? (
+                  <address>
+                    {data.shippingAddress.lines.map((line, index) => (
+                      <span key={index}>{line}</span>
+                    ))}
+                  </address>
+                ) : (
+                  <p>
+                    {data.shippingAddress?.status === "missing"
+                      ? "Nenhum endereço de entrega registrado na Shopify."
+                      : "Endereço indisponível nesta consulta."}
+                  </p>
+                )}
+              </section>
               <div className="fulfillment-dialog-totals">
                 {(
                   [

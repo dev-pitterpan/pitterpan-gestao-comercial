@@ -1,6 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFulfillmentDetails } from "../src/shared/server/sales/fulfillment-details.ts";
+import {
+  readFulfillmentDetails,
+  readShippingAddress,
+} from "../src/shared/server/sales/fulfillment-details.ts";
 const info = (more = false, cursor: string | null = null) => ({
   hasNextPage: more,
   endCursor: cursor,
@@ -268,5 +271,70 @@ test("detalhes sem atendimento não estimam quantidades atendidas e respeitam in
         0,
       ),
     /tempo/,
+  );
+});
+
+test("endereço de entrega é limitado aos campos postais do pedido consultado", async () => {
+  const id = "gid://shopify/Order/1108";
+  const result = await readShippingAddress(
+    {
+      async query<T>(query: string, variables?: Record<string, unknown>) {
+        assert.match(
+          query,
+          /shippingAddress\{address1 address2 city provinceCode zip country\}/,
+        );
+        assert.deepEqual(variables, { id });
+        return {
+          order: {
+            id,
+            shippingAddress: {
+              address1: " Rua de Teste, 10 ",
+              address2: "Sala 2",
+              city: "Joinville",
+              provinceCode: "SC",
+              zip: "00000-000",
+              country: "Brasil",
+              phone: "remover",
+            },
+          },
+        } as T;
+      },
+    },
+    id,
+  );
+  assert.deepEqual(result, {
+    status: "available",
+    lines: [
+      "Rua de Teste, 10",
+      "Sala 2",
+      "Joinville – SC · 00000-000",
+      "Brasil",
+    ],
+  });
+});
+
+test("endereço ausente e falha de acesso produzem estados distintos", async () => {
+  const id = "gid://shopify/Order/1108";
+  assert.deepEqual(
+    await readShippingAddress(
+      {
+        async query<T>() {
+          return { order: { id, shippingAddress: null } } as T;
+        },
+      },
+      id,
+    ),
+    { status: "missing" },
+  );
+  assert.deepEqual(
+    await readShippingAddress(
+      {
+        async query() {
+          throw new Error("Access denied");
+        },
+      },
+      id,
+    ),
+    { status: "unavailable" },
   );
 });
