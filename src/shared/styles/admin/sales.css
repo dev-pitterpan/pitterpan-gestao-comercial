@@ -1267,29 +1267,31 @@
 .admin-app .sales-orders-panel .admin-table tbody td {
   padding-block: 12px;
 }
-.sales-orders-panel tr[data-refunded] {
+.sales-orders-panel tr:is([data-refunded], [data-refund-attempt]) {
   --order-row-accent: var(--brand-gold-ink);
   --order-row-tone: var(--brand-gold-soft);
 }
-.sales-orders-panel tr[data-cancelled] {
+.sales-orders-panel tr:is([data-cancelled], [data-refund-attempt="failed"]) {
   --order-row-accent: var(--brand-accent);
   --order-row-tone: var(--brand-accent-soft);
 }
 .admin-app
   .sales-orders-panel
   .admin-table
-  tr:is([data-refunded], [data-cancelled])
+  tr:is([data-refunded], [data-cancelled], [data-refund-attempt])
   td {
   background: color-mix(in srgb, var(--order-row-tone) 38%, white);
 }
 .admin-app
   .sales-orders-panel
   .admin-table
-  tr:is([data-refunded], [data-cancelled]):hover
+  tr:is([data-refunded], [data-cancelled], [data-refund-attempt]):hover
   td {
   background: color-mix(in srgb, var(--order-row-tone) 68%, white);
 }
-.sales-orders-panel tr:is([data-refunded], [data-cancelled]) td:first-child {
+.sales-orders-panel
+  tr:is([data-refunded], [data-cancelled], [data-refund-attempt])
+  td:first-child {
   box-shadow: inset 3px 0 var(--order-row-accent);
 }
 .sales-order-status {

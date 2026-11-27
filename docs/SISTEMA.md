@@ -56,6 +56,8 @@ O ícone de Motoboy usa azul-cobalto na moto, azul-marinho nas rodas e amarelo n
 
 Pedidos cancelados têm faixa coral e o selo **Cancelado**. Reembolsos com valor registrado têm selo dourado de **Reembolso total** ou **Reembolso parcial** e valor em destaque na coluna **Estornado**. Os dois selos podem aparecer juntos. Se um pedido cancelado recebeu pagamento e ainda tem estorno zero, a tabela exibe **Sem estorno registrado**.
 
+Pedidos e Recebimentos também consultam em lote a última tentativa de reembolso na Shopify para os pedidos pagos da página. Tentativas com falha ou pendentes têm selo próprio e não são somadas ao valor estornado. Uma tentativa concluída substitui o aviso anterior.
+
 
 Recebimentos, estornos e relatórios de evolução que usavam a visualização triangular adotam a área suave em fundo claro, com a opção de colunas arredondadas. A curva percorre os valores originais, respeita lacunas e mantém a comparação histórica quando disponível. Comparações por categoria usam colunas arredondadas no modo comparativo.
 
