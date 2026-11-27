@@ -54,6 +54,9 @@ A coluna **Endereço de entrega** fica ao lado de **Entrega escolhida**. A rota 
 
 O ícone de Motoboy usa azul-cobalto na moto, azul-marinho nas rodas e amarelo na caixa de entrega.
 
+Pedidos cancelados têm faixa coral e o selo **Cancelado**. Reembolsos com valor registrado têm selo dourado de **Reembolso total** ou **Reembolso parcial** e valor em destaque na coluna **Estornado**. Os dois selos podem aparecer juntos. Se um pedido cancelado recebeu pagamento e ainda tem estorno zero, a tabela exibe **Sem estorno registrado**.
+
+
 Recebimentos, estornos e relatórios de evolução que usavam a visualização triangular adotam a área suave em fundo claro, com a opção de colunas arredondadas. A curva percorre os valores originais, respeita lacunas e mantém a comparação histórica quando disponível. Comparações por categoria usam colunas arredondadas no modo comparativo.
 
 ### Identidade e gráficos financeiros
