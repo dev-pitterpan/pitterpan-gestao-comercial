@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   readFulfillmentDetails,
+  readRefundAttempts,
   readShippingAddress,
   readShippingAddresses,
 } from "../src/shared/server/sales/fulfillment-details.ts";
@@ -366,4 +367,45 @@ test("endereços da página são consultados em lote e associados ao ID do pedid
     [ids[0]]: { status: "available", lines: ["Joinville – SC"] },
     [ids[1]]: { status: "missing" },
   });
+});
+
+test("avisa sobre a tentativa de reembolso mais recente por pedido", async () => {
+  const ids = ["1108", "1109", "1110", "1111"].map(
+    (id) => `gid://shopify/Order/${id}`,
+  );
+  const tx = (status: string, day: number, kind = "REFUND") => ({
+    kind,
+    status,
+    processedAt: `2026-11-${day}T18:03:34Z`,
+  });
+  const attempts = await readRefundAttempts(
+    {
+      async query<T>(query: string, variables?: Record<string, unknown>) {
+        assert.match(
+          query,
+          /transactions\(first:50\)\{kind status processedAt\}/,
+        );
+        assert.deepEqual(variables, { ids });
+        return {
+          nodes: [
+            {
+              id: ids[0],
+              transactions: [tx("SUCCESS", 27, "SALE"), tx("FAILURE", 26)],
+            },
+            {
+              id: ids[1],
+              transactions: [tx("SUCCESS", 27), tx("FAILURE", 26)],
+            },
+            {
+              id: ids[2],
+              transactions: [tx("ERROR", 26), tx("AWAITING_RESPONSE", 27)],
+            },
+            { id: ids[3], transactions: [tx("FAILURE", 27, "SALE")] },
+          ],
+        } as T;
+      },
+    },
+    ids,
+  );
+  assert.deepEqual(attempts, { [ids[0]]: "failed", [ids[2]]: "pending" });
 });

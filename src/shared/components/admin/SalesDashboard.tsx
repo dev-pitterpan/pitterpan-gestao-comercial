@@ -21,6 +21,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowUpRight,
   CircleX,
+  TriangleAlert,
+  Clock3,
   Package,
   RefreshCw,
   RotateCcw,
@@ -37,8 +39,12 @@ import { shiftDate, todayDate } from "../../lib/admin/date-range";
 import type { SalesFilters } from "../../server/sales/filters";
 import DateRangePicker from "./DateRangePicker";
 import type { readSales } from "../../server/sales/repository";
-import type { readShippingAddresses } from "../../server/sales/fulfillment-details";
+import type {
+  readRefundAttempts,
+  readShippingAddresses,
+} from "../../server/sales/fulfillment-details";
 type Data = Awaited<ReturnType<typeof readSales>> & {
+  refundAttempts?: Awaited<ReturnType<typeof readRefundAttempts>>;
   shippingAddresses?: Awaited<ReturnType<typeof readShippingAddresses>>;
 };
 const count = (n: string | number) =>
@@ -223,6 +229,7 @@ export default function SalesDashboard({
           ranking: "0",
           daily: finance || showSummary ? "1" : "0",
           addresses: view === "orders" ? "1" : "0",
+          refundAttempts: view === "orders" || finance ? "1" : "0",
           start: filters.start || "",
           end: filters.end || "",
           status: filters.status,
@@ -307,6 +314,7 @@ export default function SalesDashboard({
       const params = new URLSearchParams({
         view: "orders",
         addresses: view === "orders" ? "1" : "0",
+        refundAttempts: view === "orders" || finance ? "1" : "0",
         days: String(days),
         start: filters.start || "",
         end: filters.end || "",
@@ -328,7 +336,11 @@ export default function SalesDashboard({
         );
       const page = body as Pick<
         Data,
-        "orders" | "hasMore" | "nextCursor" | "shippingAddresses"
+        | "orders"
+        | "hasMore"
+        | "nextCursor"
+        | "shippingAddresses"
+        | "refundAttempts"
       >;
       setData((current) => (current ? { ...current, ...page } : current));
       setPageCursors(cursors);
@@ -676,6 +688,7 @@ export default function SalesDashboard({
                       const cancelled = Boolean(o.cancelled_at);
                       const received = Number(o.received);
                       const refunded = Number(o.refunded);
+                      const refundAttempt = data.refundAttempts?.[o.id];
                       const refundLabel =
                         refunded >= received
                           ? "Reembolso total"
@@ -686,6 +699,7 @@ export default function SalesDashboard({
                           key={o.id}
                           data-cancelled={cancelled || undefined}
                           data-refunded={refunded > 0 || undefined}
+                          data-refund-attempt={refundAttempt}
                         >
                           <td>
                             <strong>{o.name}</strong>
@@ -753,6 +767,18 @@ export default function SalesDashboard({
                                     o.financial_status}
                                 </span>
                               )}
+                              {refundAttempt === "failed" && (
+                                <span className="admin-badge rose">
+                                  <TriangleAlert size={13} aria-hidden="true" />
+                                  Falha no reembolso
+                                </span>
+                              )}
+                              {refundAttempt === "pending" && (
+                                <span className="admin-badge amber">
+                                  <Clock3 size={13} aria-hidden="true" />
+                                  Reembolso pendente
+                                </span>
+                              )}
                             </div>
                           </td>
                           {!finance && (
@@ -812,7 +838,8 @@ export default function SalesDashboard({
                             ) : (
                               <>
                                 {money(o.refunded, o.currency)}
-                                {cancelled && received > 0 && (
+                                {(refundAttempt === "failed" ||
+                                  (cancelled && received > 0)) && (
                                   <small className="sales-refund-note">
                                     Sem estorno registrado
                                   </small>

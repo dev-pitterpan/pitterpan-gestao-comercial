@@ -18,7 +18,10 @@ import {
 } from "@shared/server/sales/repository";
 import { fillQueueLivePhotos } from "@shared/server/sales/product-photos";
 import { cachedShopifyClient } from "@shared/server/shopify/cached-client";
-import { readShippingAddresses } from "@shared/server/sales/fulfillment-details";
+import {
+  readRefundAttempts,
+  readShippingAddresses,
+} from "@shared/server/sales/fulfillment-details";
 import { syncSalesPage } from "@shared/server/sales/sync";
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -140,6 +143,15 @@ export async function GET(request: Request) {
               .map((order) => order.id),
           )
         : undefined;
+    const refundAttempts =
+      url.searchParams.get("refundAttempts") === "1" && "orders" in data
+        ? readRefundAttempts(
+            salesClient(),
+            data.orders
+              .filter((order) => Number(order.received) > 0)
+              .map((order) => order.id),
+          )
+        : undefined;
     // Optional photo lookup runs after releasing the transaction and cannot block orders on failure.
     if (
       "orderPreviews" in data &&
@@ -163,7 +175,11 @@ export async function GET(request: Request) {
         }
     }
     return Response.json(
-      addresses ? { ...data, shippingAddresses: await addresses } : data,
+      {
+        ...data,
+        shippingAddresses: await addresses,
+        refundAttempts: await refundAttempts,
+      },
       { headers: { "Cache-Control": "no-store" } },
     );
   } catch {

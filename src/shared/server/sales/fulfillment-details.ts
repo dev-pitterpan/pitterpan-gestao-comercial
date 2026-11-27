@@ -72,6 +72,62 @@ type Client = {
     options?: { timeoutMs?: number },
   ): Promise<T>;
 };
+function refundAttemptStatus(transaction: { kind: string; status: string }) {
+  if (transaction.kind !== "REFUND") return;
+  if (["FAILURE", "ERROR"].includes(transaction.status)) return "failed";
+  if (["PENDING", "AWAITING_RESPONSE"].includes(transaction.status))
+    return "pending";
+}
+type RefundAttempt = NonNullable<ReturnType<typeof refundAttemptStatus>>;
+const refundOrder = z.object({
+  id: gid("Order"),
+  transactions: z
+    .array(
+      z.object({
+        kind: z.string(),
+        status: z.string(),
+        processedAt: z.iso.datetime({ offset: true }).nullable(),
+      }),
+    )
+    .max(50),
+});
+
+/** Read the outcome of the latest refund attempt for each order on this page. */
+export async function readRefundAttempts(client: Client, ids: string[]) {
+  const attempts: Record<string, RefundAttempt> = {};
+  if (!ids.length) return attempts;
+  try {
+    const { nodes } = await client.query<{ nodes: unknown[] }>(
+      `query OrderRefundAttempts($ids:[ID!]!){
+        nodes(ids:$ids){... on Order{id transactions(first:50){kind status processedAt}}}
+      }`,
+      { ids: z.array(gid("Order")).parse(ids) },
+      { timeoutMs: 6000 },
+    );
+    for (const node of nodes) {
+      const parsed = refundOrder.safeParse(node);
+      if (!parsed.success || !ids.includes(parsed.data.id)) continue;
+      const refunds = parsed.data.transactions.filter(
+        (transaction) => transaction.kind === "REFUND",
+      );
+      if (
+        refunds.length > 1 &&
+        refunds.some((transaction) => !transaction.processedAt)
+      )
+        continue;
+      const latest = refunds.sort(
+        (a, b) =>
+          Date.parse(b.processedAt ?? "") - Date.parse(a.processedAt ?? ""),
+      )[0];
+      const attempt = latest && refundAttemptStatus(latest);
+      if (attempt) attempts[parsed.data.id] = attempt;
+    }
+    return attempts;
+  } catch {
+    return {};
+  }
+}
+
 const addressField = z.string().trim().nullish();
 const addressFields =
   "id shippingAddress{address1 address2 city provinceCode zip country}";
@@ -325,14 +381,10 @@ export async function readFulfillmentDetails(
       refunded: first.totalRefundedSet.shopMoney,
       net: first.netPaymentSet.shopMoney,
       failedRefund: first.transactions.some(
-        (transaction) =>
-          transaction.kind === "REFUND" &&
-          ["FAILURE", "ERROR"].includes(transaction.status),
+        (transaction) => refundAttemptStatus(transaction) === "failed",
       ),
       pendingRefund: first.transactions.some(
-        (transaction) =>
-          transaction.kind === "REFUND" &&
-          ["PENDING", "AWAITING_RESPONSE"].includes(transaction.status),
+        (transaction) => refundAttemptStatus(transaction) === "pending",
       ),
     },
     checkedAt: new Date().toISOString(),
