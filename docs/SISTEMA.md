@@ -52,6 +52,8 @@ A Visão geral reúne os indicadores da Shopify, o gráfico financeiro em granul
 
 A coluna **Endereço de entrega** fica ao lado de **Entrega escolhida**. A rota autenticada consulta os dados postais da página em lote na Shopify, inclusive ao navegar entre páginas. O endereço completo não é gravado na base da gestão. A coluna distingue retirada, endereço ausente e falha de consulta.
 
+O ícone de Motoboy usa azul-cobalto na moto, azul-marinho nas rodas e amarelo na caixa de entrega.
+
 Recebimentos, estornos e relatórios de evolução que usavam a visualização triangular adotam a área suave em fundo claro, com a opção de colunas arredondadas. A curva percorre os valores originais, respeita lacunas e mantém a comparação histórica quando disponível. Comparações por categoria usam colunas arredondadas no modo comparativo.
 
 ### Identidade e gráficos financeiros
