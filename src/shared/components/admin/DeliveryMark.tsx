@@ -32,11 +32,11 @@ export default function DeliveryMark({
         <svg
           viewBox="0 0 64 44"
           fill="none"
-          style={{ color: "#c4473d" }}
+          style={{ color: "#315bd7" }}
           aria-hidden="true"
         >
-          <circle cx="13" cy="32" r="9" stroke="currentColor" strokeWidth="4" />
-          <circle cx="51" cy="32" r="9" stroke="currentColor" strokeWidth="4" />
+          <circle cx="13" cy="32" r="9" stroke="#11234d" strokeWidth="4" />
+          <circle cx="51" cy="32" r="9" stroke="#11234d" strokeWidth="4" />
           <path
             d="M14 30L25 17H40L48 30M24 19L30 31H40M38 10H45L51 31M21 12H31M26 18V12"
             stroke="currentColor"
