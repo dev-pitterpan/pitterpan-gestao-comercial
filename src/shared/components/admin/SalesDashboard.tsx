@@ -18,7 +18,14 @@ import OrderFulfillmentDetails from "./OrderFulfillmentDetails";
 import SalesOperations from "./SalesOperations";
 import SoldProductsHistory from "./SoldProductsHistory";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowUpRight, Package, RefreshCw, ShoppingCart } from "lucide-react";
+import {
+  ArrowUpRight,
+  CircleX,
+  Package,
+  RefreshCw,
+  RotateCcw,
+  ShoppingCart,
+} from "lucide-react";
 import OrderCustomer from "./OrderCustomer";
 import OrderCustomerRefresh from "./OrderCustomerRefresh";
 import ShippingCharge from "./ShippingCharge";
@@ -665,109 +672,158 @@ export default function SalesDashboard({
                         </td>
                       </tr>
                     )}
-                    {data.orders.map((o) => (
-                      <tr key={o.id}>
-                        <td>
-                          <strong>{o.name}</strong>
-                          <small>
-                            <time
-                              dateTime={new Date(o.processed_at).toISOString()}
-                              title="Horário do pedido registrado na Shopify · Brasília"
-                            >
-                              {new Date(o.processed_at).toLocaleDateString(
-                                "pt-BR",
-                                { timeZone: "America/Sao_Paulo" },
-                              )}
-                              <br />
-                              {new Date(o.processed_at).toLocaleTimeString(
-                                "pt-BR",
-                                {
-                                  timeZone: "America/Sao_Paulo",
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                  hour12: false,
-                                },
-                              )}
-                            </time>
-                          </small>
-                          <OrderFulfillmentDetails
-                            id={o.id}
-                            name={o.name}
-                            storedStatus={o.fulfillment_status}
-                          />
-                        </td>
-                        <td className="order-products-cell">
-                          <OrderProductPreview
-                            products={data.orderPreviews[o.id]?.products ?? []}
-                            itemCount={
-                              data.orderPreviews[o.id]?.item_count ?? "0"
-                            }
-                            units={data.orderPreviews[o.id]?.units ?? "0"}
-                          />
-                        </td>
-                        <td>
-                          <OrderCustomer order={o} />
-                        </td>
-                        <td>
-                          <span
-                            className={`admin-badge ${o.cancelled_at ? "rose" : o.financial_status === "PAID" ? "green" : "blue"}`}
-                          >
-                            {status[o.financial_status] || o.financial_status}
-                          </span>
-                          {o.cancelled_at && (
-                            <small className="admin-badge rose">
-                              Pedido cancelado
+                    {data.orders.map((o) => {
+                      const cancelled = Boolean(o.cancelled_at);
+                      const received = Number(o.received);
+                      const refunded = Number(o.refunded);
+                      const refundLabel =
+                        refunded >= received
+                          ? "Reembolso total"
+                          : "Reembolso parcial";
+
+                      return (
+                        <tr
+                          key={o.id}
+                          data-cancelled={cancelled || undefined}
+                          data-refunded={refunded > 0 || undefined}
+                        >
+                          <td>
+                            <strong>{o.name}</strong>
+                            <small>
+                              <time
+                                dateTime={new Date(
+                                  o.processed_at,
+                                ).toISOString()}
+                                title="Horário do pedido registrado na Shopify · Brasília"
+                              >
+                                {new Date(o.processed_at).toLocaleDateString(
+                                  "pt-BR",
+                                  { timeZone: "America/Sao_Paulo" },
+                                )}
+                                <br />
+                                {new Date(o.processed_at).toLocaleTimeString(
+                                  "pt-BR",
+                                  {
+                                    timeZone: "America/Sao_Paulo",
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    hour12: false,
+                                  },
+                                )}
+                              </time>
                             </small>
-                          )}
-                        </td>
-                        {!finance && (
-                          <>
-                            <td>
-                              {o.delivery_kind === "UNKNOWN" &&
-                              !o.delivery_label &&
-                              o.fulfillment_status ===
-                                "FULFILLMENT_NOT_REQUIRED" ? (
-                                <strong>Sem envio a atender</strong>
-                              ) : (
-                                <>
-                                  <DeliveryMark kind={o.delivery_kind} />
-                                  <ShippingCharge order={o} />
-                                  {o.delivery_label &&
-                                    o.delivery_kind !== "LOCAL" &&
-                                    !(
-                                      o.delivery_kind === "PAC" &&
-                                      o.delivery_label.trim().toLowerCase() ===
-                                        "envio normal (pac)"
-                                    ) && <small>{o.delivery_label}</small>}
-                                  <small>
-                                    {fulfillmentLabels[o.fulfillment_status] ||
-                                      o.fulfillment_status}
-                                  </small>
-                                </>
+                            <OrderFulfillmentDetails
+                              id={o.id}
+                              name={o.name}
+                              storedStatus={o.fulfillment_status}
+                            />
+                          </td>
+                          <td className="order-products-cell">
+                            <OrderProductPreview
+                              products={
+                                data.orderPreviews[o.id]?.products ?? []
+                              }
+                              itemCount={
+                                data.orderPreviews[o.id]?.item_count ?? "0"
+                              }
+                              units={data.orderPreviews[o.id]?.units ?? "0"}
+                            />
+                          </td>
+                          <td>
+                            <OrderCustomer order={o} />
+                          </td>
+                          <td>
+                            <div className="sales-order-status">
+                              {cancelled && (
+                                <span className="admin-badge rose">
+                                  <CircleX size={13} aria-hidden="true" />
+                                  Cancelado
+                                </span>
                               )}
-                            </td>
-                            <td className="order-address-cell">
-                              <DeliveryAddress
-                                pickup={o.delivery_kind === "PICKUP"}
-                                address={data.shippingAddresses?.[o.id]}
-                              />
-                            </td>
-                            <td>
-                              {money(o.total, o.currency)}
-                              {o.current_total != null &&
-                                Number(o.current_total) !== Number(o.total) && (
-                                  <small className="sales-current-total">
-                                    Atual: {money(o.current_total, o.currency)}
+                              {refunded > 0 ? (
+                                <span className="admin-badge amber">
+                                  <RotateCcw size={13} aria-hidden="true" />
+                                  {refundLabel}
+                                </span>
+                              ) : (
+                                <span
+                                  className={`admin-badge ${o.financial_status === "PAID" ? "green" : "blue"}`}
+                                >
+                                  {status[o.financial_status] ||
+                                    o.financial_status}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          {!finance && (
+                            <>
+                              <td>
+                                {o.delivery_kind === "UNKNOWN" &&
+                                !o.delivery_label &&
+                                o.fulfillment_status ===
+                                  "FULFILLMENT_NOT_REQUIRED" ? (
+                                  <strong>Sem envio a atender</strong>
+                                ) : (
+                                  <>
+                                    <DeliveryMark kind={o.delivery_kind} />
+                                    <ShippingCharge order={o} />
+                                    {o.delivery_label &&
+                                      o.delivery_kind !== "LOCAL" &&
+                                      !(
+                                        o.delivery_kind === "PAC" &&
+                                        o.delivery_label
+                                          .trim()
+                                          .toLowerCase() ===
+                                          "envio normal (pac)"
+                                      ) && <small>{o.delivery_label}</small>}
+                                    <small>
+                                      {fulfillmentLabels[
+                                        o.fulfillment_status
+                                      ] || o.fulfillment_status}
+                                    </small>
+                                  </>
+                                )}
+                              </td>
+                              <td className="order-address-cell">
+                                <DeliveryAddress
+                                  pickup={o.delivery_kind === "PICKUP"}
+                                  address={data.shippingAddresses?.[o.id]}
+                                />
+                              </td>
+                              <td>
+                                {money(o.total, o.currency)}
+                                {o.current_total != null &&
+                                  Number(o.current_total) !==
+                                    Number(o.total) && (
+                                    <small className="sales-current-total">
+                                      Atual:{" "}
+                                      {money(o.current_total, o.currency)}
+                                    </small>
+                                  )}
+                              </td>
+                            </>
+                          )}
+                          <td>{money(o.received, o.currency)}</td>
+                          <td>
+                            {refunded > 0 ? (
+                              <span className="sales-refund-value">
+                                {money(o.refunded, o.currency)}
+                              </span>
+                            ) : (
+                              <>
+                                {money(o.refunded, o.currency)}
+                                {cancelled && received > 0 && (
+                                  <small className="sales-refund-note">
+                                    Sem estorno registrado
                                   </small>
                                 )}
-                            </td>
-                          </>
-                        )}
-                        <td>{money(o.received, o.currency)}</td>
-                        <td>{money(o.refunded, o.currency)}</td>
-                        <td>{money(o.net, o.currency)}</td>
-                      </tr>
-                    ))}
+                              </>
+                            )}
+                          </td>
+                          <td>{money(o.net, o.currency)}</td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </DragScroll>
